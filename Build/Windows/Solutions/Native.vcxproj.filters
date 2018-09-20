@@ -1,0 +1,308 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="3rdparty">
+      <UniqueIdentifier>{5729556f-fc3c-46fc-a226-eabcd9dd3655}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rdparty\clm">
+      <UniqueIdentifier>{1b98cdfc-7062-4d35-b95e-a74096934d74}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rdparty\easyloggingpp">
+      <UniqueIdentifier>{87ccbb9a-075d-4dac-9f34-18e30dcf4c9c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Framework">
+      <UniqueIdentifier>{9b8d82ac-f4d8-4120-adf7-1d834d1bee80}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules">
+      <UniqueIdentifier>{926ea5f1-463d-413a-b529-e685aad42774}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules\Visualizer">
+      <UniqueIdentifier>{57142741-5390-41de-94bf-5d0a35cbec25}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules\FaceDetection">
+      <UniqueIdentifier>{919e078b-85ca-456b-bcc5-f2b368d55941}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules\ImageQueue">
+      <UniqueIdentifier>{8c0101b1-f2e2-4155-ba80-246f9b4baacf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Messages">
+      <UniqueIdentifier>{eedfea9b-73f8-4a00-a842-04d88ebeff76}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules\UserProcessor">
+      <UniqueIdentifier>{09f80b2a-209d-442a-9ad1-cb4c1f376815}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules\UserManager">
+      <UniqueIdentifier>{33d93459-9a07-4aeb-8bce-1cfc5c1b1f4e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common">
+      <UniqueIdentifier>{0f17e88e-e59f-4a16-9ca5-9e9e47ed5811}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="User">
+      <UniqueIdentifier>{662a8d87-f7b2-4ddc-8cae-59ae2de751d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules\UserProcessor\ShapeModel">
+      <UniqueIdentifier>{9f63a73c-0bda-4db5-80b7-cfbd2bb26589}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules\UserProcessor\HeadPose">
+      <UniqueIdentifier>{f44a0c4e-a9e5-4f43-b8f5-d2f7bb3522ce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules\UserProcessor\ShapeNorm">
+      <UniqueIdentifier>{df6e3ea0-3892-400e-b64e-efdf250856f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules\UserHistory">
+      <UniqueIdentifier>{5e55172a-b12e-4394-a440-91caac080729}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\IO.cc">
+      <Filter>3rdparty\clm</Filter>
+    </ClCompile>
+    <ClCompile Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\Patch.cc">
+      <Filter>3rdparty\clm</Filter>
+    </ClCompile>
+    <ClCompile Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\PDM.cc">
+      <Filter>3rdparty\clm</Filter>
+    </ClCompile>
+    <ClCompile Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\FCheck.cc">
+      <Filter>3rdparty\clm</Filter>
+    </ClCompile>
+    <ClCompile Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\FDet.cc">
+      <Filter>3rdparty\clm</Filter>
+    </ClCompile>
+    <ClCompile Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\PAW.cc">
+      <Filter>3rdparty\clm</Filter>
+    </ClCompile>
+    <ClCompile Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\easyloggingpp\easyloggingpp.cpp">
+      <Filter>3rdparty\easyloggingpp</Filter>
+    </ClCompile>
+    <ClCompile Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\CLM.cc">
+      <Filter>3rdparty\clm</Filter>
+    </ClCompile>
+    <ClCompile Include="$(SolutionDir)..\..\..\Coding\Native\FaceApp.cpp" />
+    <ClCompile Include="$(SolutionDir)..\..\..\Coding\Native\Framework\Thread.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="$(SolutionDir)..\..\..\Coding\Native\Framework\Util.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Coding\Native\Framework\Exception.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Coding\Native\Framework\UtilOCV.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Coding\Native\Framework\UtilString.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Coding\Native\Framework\Module.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Coding\Native\Framework\Message.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="$(SolutionDir)..\..\..\Coding\Native\Framework\Profiler.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="$(SolutionDir)..\..\..\Coding\Native\Framework\Stopwatch.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Coding\Native\Messages\ImageMessage.cpp">
+      <Filter>Messages</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Coding\Native\Messages\RoiMessage.cpp">
+      <Filter>Messages</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Coding\Native\Messages\ActiveUsersMessage.cpp">
+      <Filter>Messages</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Coding\Native\Framework\VideoWriter.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Coding\Native\Modules\FaceDetection\FaceDetection.cpp">
+      <Filter>Modules\FaceDetection</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Coding\Native\Modules\ImageQueue\ImageQueue.cpp">
+      <Filter>Modules\ImageQueue</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Coding\Native\Modules\Visualizer\Visualizer.cpp">
+      <Filter>Modules\Visualizer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Coding\Native\Modules\UserManager\UserManager.cpp">
+      <Filter>Modules\UserManager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Coding\Native\Modules\UserProcessor\UserProcessor.cpp">
+      <Filter>Modules\UserProcessor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Coding\Native\Common\Configuration.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Coding\Native\User\User.cpp">
+      <Filter>User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Coding\Native\Modules\UserProcessor\ShapeModel\ClmWrapper.cpp">
+      <Filter>Modules\UserProcessor\ShapeModel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Coding\Native\Modules\UserProcessor\ShapeModel\ShapeModel.cpp">
+      <Filter>Modules\UserProcessor\ShapeModel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Coding\Native\Common\ShapeUtil.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Coding\Native\Common\PoseUtil.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Coding\Native\Modules\UserProcessor\ShapeNorm\ShapeNormDispatcher.cpp">
+      <Filter>Modules\UserProcessor\ShapeNorm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Coding\Native\Modules\UserProcessor\HeadPose\PoseEstimationDispatcher.cpp">
+      <Filter>Modules\UserProcessor\HeadPose</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Coding\Native\Modules\UserProcessor\ShapeModel\ShapeModelDispatcher.cpp">
+      <Filter>Modules\UserProcessor\ShapeModel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Coding\Native\Modules\UserHistory\UserHistory.cpp">
+      <Filter>Modules\UserHistory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Coding\Native\Messages\UserEntriesMessage.cpp">
+      <Filter>Messages</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Coding\Native\User\UserData.cpp">
+      <Filter>User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Coding\Native\Framework\FlowGraph.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\CLM.h">
+      <Filter>3rdparty\clm</Filter>
+    </ClInclude>
+    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\IO.h">
+      <Filter>3rdparty\clm</Filter>
+    </ClInclude>
+    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\Patch.h">
+      <Filter>3rdparty\clm</Filter>
+    </ClInclude>
+    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\PDM.h">
+      <Filter>3rdparty\clm</Filter>
+    </ClInclude>
+    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\FCheck.h">
+      <Filter>3rdparty\clm</Filter>
+    </ClInclude>
+    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\FDet.h">
+      <Filter>3rdparty\clm</Filter>
+    </ClInclude>
+    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\PAW.h">
+      <Filter>3rdparty\clm</Filter>
+    </ClInclude>
+    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\easyloggingpp\easyloggingpp.h">
+      <Filter>3rdparty\easyloggingpp</Filter>
+    </ClInclude>
+    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\FaceApp.h" />
+    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\Framework\Thread.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\Framework\Util.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Coding\Native\Framework\Exception.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Coding\Native\Framework\UtilOCV.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Coding\Native\Framework\UtilString.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Coding\Native\Framework\Module.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Coding\Native\Framework\Message.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\Framework\Event.hpp">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\Framework\MessageQueue.hpp">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\Framework\Profiler.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\Framework\Stopwatch.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Coding\Native\Messages\ImageMessage.h">
+      <Filter>Messages</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Coding\Native\Messages\RoiMessage.h">
+      <Filter>Messages</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Coding\Native\Messages\ActiveUsersMessage.h">
+      <Filter>Messages</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Coding\Native\Framework\VideoWriter.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Coding\Native\Modules\FaceDetection\FaceDetection.h">
+      <Filter>Modules\FaceDetection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Coding\Native\Modules\ImageQueue\ImageQueue.h">
+      <Filter>Modules\ImageQueue</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Coding\Native\Modules\Visualizer\Visualizer.h">
+      <Filter>Modules\Visualizer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Coding\Native\Modules\UserManager\UserManager.h">
+      <Filter>Modules\UserManager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Coding\Native\Modules\UserProcessor\UserProcessor.h">
+      <Filter>Modules\UserProcessor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Coding\Native\Common\Configuration.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Coding\Native\User\User.h">
+      <Filter>User</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Coding\Native\User\UserDispatcher.hpp">
+      <Filter>User</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Coding\Native\Modules\UserProcessor\ShapeModel\ClmWrapper.h">
+      <Filter>Modules\UserProcessor\ShapeModel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Coding\Native\Modules\UserProcessor\ShapeModel\ShapeModel.h">
+      <Filter>Modules\UserProcessor\ShapeModel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Coding\Native\Common\ShapeUtil.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Coding\Native\Common\PoseUtil.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Coding\Native\Modules\UserProcessor\ShapeNorm\ShapeNormDispatcher.h">
+      <Filter>Modules\UserProcessor\ShapeNorm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Coding\Native\Modules\UserProcessor\HeadPose\PoseEstimationDispatcher.h">
+      <Filter>Modules\UserProcessor\HeadPose</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Coding\Native\Modules\UserProcessor\ShapeModel\ShapeModelDispatcher.h">
+      <Filter>Modules\UserProcessor\ShapeModel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Coding\Native\Modules\UserHistory\UserHistory.h">
+      <Filter>Modules\UserHistory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Coding\Native\Messages\UserEntriesMessage.h">
+      <Filter>Messages</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Coding\Native\User\UserData.h">
+      <Filter>User</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Coding\Native\Framework\Functional.hpp">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Coding\Native\Framework\FlowGraph.hpp">
+      <Filter>Framework</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

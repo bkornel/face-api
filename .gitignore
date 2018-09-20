@@ -1,0 +1,17 @@
+Build/Android/jni/
+Build/Android/libs/
+Build/Android/obj/
+Build/Windows/Bin/Debug/
+Build/Windows/Bin/Release/
+Build/Windows/Bin/x64/
+Build/Windows/Solutions/CodeGraphData/
+Coding/AppWindows/logs/myeasylog.log
+*.db
+*.db-shm
+*.db-wal
+*.ipch
+*.opensdf
+*.sdf
+*.suo
+*.opendb
+*.avi

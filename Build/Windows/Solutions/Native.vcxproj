@@ -1,0 +1,256 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\CLM.cc" />
+    <ClCompile Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\FCheck.cc" />
+    <ClCompile Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\FDet.cc" />
+    <ClCompile Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\IO.cc" />
+    <ClCompile Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\Patch.cc" />
+    <ClCompile Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\PAW.cc" />
+    <ClCompile Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\PDM.cc" />
+    <ClCompile Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\easyloggingpp\easyloggingpp.cpp" />
+    <ClCompile Include="$(SolutionDir)..\..\..\Coding\Native\Framework\Profiler.cpp" />
+    <ClCompile Include="$(SolutionDir)..\..\..\Coding\Native\Framework\Util.cpp" />
+    <ClCompile Include="$(SolutionDir)..\..\..\Coding\Native\Framework\Stopwatch.cpp" />
+    <ClCompile Include="$(SolutionDir)..\..\..\Coding\Native\Framework\Thread.cpp" />
+    <ClCompile Include="..\..\..\Coding\Native\Common\Configuration.cpp" />
+    <ClCompile Include="..\..\..\Coding\Native\Common\PoseUtil.cpp" />
+    <ClCompile Include="..\..\..\Coding\Native\Common\ShapeUtil.cpp" />
+    <ClCompile Include="..\..\..\Coding\Native\Framework\FlowGraph.cpp" />
+    <ClCompile Include="..\..\..\Coding\Native\Framework\VideoWriter.cpp" />
+    <ClCompile Include="$(SolutionDir)..\..\..\Coding\Native\FaceApp.cpp" />
+    <ClCompile Include="..\..\..\Coding\Native\Framework\Exception.cpp" />
+    <ClCompile Include="..\..\..\Coding\Native\Framework\Message.cpp" />
+    <ClCompile Include="..\..\..\Coding\Native\Framework\Module.cpp" />
+    <ClCompile Include="..\..\..\Coding\Native\Framework\UtilOCV.cpp" />
+    <ClCompile Include="..\..\..\Coding\Native\Framework\UtilString.cpp" />
+    <ClCompile Include="..\..\..\Coding\Native\Messages\ActiveUsersMessage.cpp" />
+    <ClCompile Include="..\..\..\Coding\Native\Messages\ImageMessage.cpp" />
+    <ClCompile Include="..\..\..\Coding\Native\Messages\RoiMessage.cpp" />
+    <ClCompile Include="..\..\..\Coding\Native\Messages\UserEntriesMessage.cpp" />
+    <ClCompile Include="..\..\..\Coding\Native\Modules\FaceDetection\FaceDetection.cpp" />
+    <ClCompile Include="..\..\..\Coding\Native\Modules\ImageQueue\ImageQueue.cpp" />
+    <ClCompile Include="..\..\..\Coding\Native\Modules\UserHistory\UserHistory.cpp" />
+    <ClCompile Include="..\..\..\Coding\Native\Modules\UserManager\UserManager.cpp" />
+    <ClCompile Include="..\..\..\Coding\Native\Modules\UserProcessor\HeadPose\PoseEstimationDispatcher.cpp" />
+    <ClCompile Include="..\..\..\Coding\Native\Modules\UserProcessor\ShapeModel\ClmWrapper.cpp" />
+    <ClCompile Include="..\..\..\Coding\Native\Modules\UserProcessor\ShapeModel\ShapeModel.cpp" />
+    <ClCompile Include="..\..\..\Coding\Native\Modules\UserProcessor\ShapeModel\ShapeModelDispatcher.cpp" />
+    <ClCompile Include="..\..\..\Coding\Native\Modules\UserProcessor\ShapeNorm\ShapeNormDispatcher.cpp" />
+    <ClCompile Include="..\..\..\Coding\Native\Modules\UserProcessor\UserProcessor.cpp" />
+    <ClCompile Include="..\..\..\Coding\Native\Modules\Visualizer\Visualizer.cpp" />
+    <ClCompile Include="..\..\..\Coding\Native\User\User.cpp" />
+    <ClCompile Include="..\..\..\Coding\Native\User\UserData.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\CLM.h" />
+    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\FCheck.h" />
+    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\FDet.h" />
+    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\IO.h" />
+    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\Patch.h" />
+    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\PAW.h" />
+    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\PDM.h" />
+    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\easyloggingpp\easyloggingpp.h" />
+    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\Framework\Profiler.h" />
+    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\Framework\Util.h" />
+    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\Framework\Event.hpp" />
+    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\Framework\MessageQueue.hpp" />
+    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\Framework\Stopwatch.h" />
+    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\Framework\Thread.h" />
+    <ClInclude Include="..\..\..\Coding\Native\Common\Configuration.h" />
+    <ClInclude Include="..\..\..\Coding\Native\Common\PoseUtil.h" />
+    <ClInclude Include="..\..\..\Coding\Native\Common\ShapeUtil.h" />
+    <ClInclude Include="..\..\..\Coding\Native\Framework\FlowGraph.hpp" />
+    <ClInclude Include="..\..\..\Coding\Native\Framework\Functional.hpp" />
+    <ClInclude Include="..\..\..\Coding\Native\Framework\VideoWriter.h" />
+    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\FaceApp.h" />
+    <ClInclude Include="..\..\..\Coding\Native\Framework\Exception.h" />
+    <ClInclude Include="..\..\..\Coding\Native\Framework\Message.h" />
+    <ClInclude Include="..\..\..\Coding\Native\Framework\Module.h" />
+    <ClInclude Include="..\..\..\Coding\Native\Framework\UtilOCV.h" />
+    <ClInclude Include="..\..\..\Coding\Native\Framework\UtilString.h" />
+    <ClInclude Include="..\..\..\Coding\Native\Messages\ActiveUsersMessage.h" />
+    <ClInclude Include="..\..\..\Coding\Native\Messages\ImageMessage.h" />
+    <ClInclude Include="..\..\..\Coding\Native\Messages\RoiMessage.h" />
+    <ClInclude Include="..\..\..\Coding\Native\Messages\UserEntriesMessage.h" />
+    <ClInclude Include="..\..\..\Coding\Native\Modules\FaceDetection\FaceDetection.h" />
+    <ClInclude Include="..\..\..\Coding\Native\Modules\ImageQueue\ImageQueue.h" />
+    <ClInclude Include="..\..\..\Coding\Native\Modules\UserHistory\UserHistory.h" />
+    <ClInclude Include="..\..\..\Coding\Native\Modules\UserManager\UserManager.h" />
+    <ClInclude Include="..\..\..\Coding\Native\Modules\UserProcessor\HeadPose\PoseEstimationDispatcher.h" />
+    <ClInclude Include="..\..\..\Coding\Native\Modules\UserProcessor\ShapeModel\ClmWrapper.h" />
+    <ClInclude Include="..\..\..\Coding\Native\Modules\UserProcessor\ShapeModel\ShapeModel.h" />
+    <ClInclude Include="..\..\..\Coding\Native\Modules\UserProcessor\ShapeModel\ShapeModelDispatcher.h" />
+    <ClInclude Include="..\..\..\Coding\Native\Modules\UserProcessor\ShapeNorm\ShapeNormDispatcher.h" />
+    <ClInclude Include="..\..\..\Coding\Native\Modules\UserProcessor\UserProcessor.h" />
+    <ClInclude Include="..\..\..\Coding\Native\Modules\Visualizer\Visualizer.h" />
+    <ClInclude Include="..\..\..\Coding\Native\User\User.h" />
+    <ClInclude Include="..\..\..\Coding\Native\User\UserData.h" />
+    <ClInclude Include="..\..\..\Coding\Native\User\UserDispatcher.hpp" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{3416DE23-C794-4DD7-B3CA-5BFAF7649D6D}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>Native</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)..\Bin\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)..\Bin\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)..\Bin\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)..\Bin\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;ELPP_THREAD_SAFE;ELPP_FORCE_USE_STD_THREAD;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\Coding\Native;$(ProjectDir)..\..\..\Coding\Native\3rdparty;$(ProjectDir)..\..\..\..\3rdparty\grt-0.2.5\windows\include;$(ProjectDir)..\..\..\..\3rdParty\opencv-3.4.1\windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <OpenMPSupport>true</OpenMPSupport>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\opencv-3.0.0-beta\x64\vc12\lib;$(ProjectDir)..\..\poco-1.6.0\x64\vc12\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opencv_core300d.lib;opencv_features2d300d.lib;opencv_highgui300d.lib;opencv_imgcodecs300d.lib;opencv_imgproc300d.lib;opencv_videoio300d.lib;PocoFoundationd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;ELPP_THREAD_SAFE;ELPP_FORCE_USE_STD_THREAD;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\Coding\Native;$(ProjectDir)..\..\..\Coding\Native\3rdparty;$(ProjectDir)..\..\..\..\3rdparty\grt-0.2.5\windows\include;$(ProjectDir)..\..\..\..\3rdParty\opencv-3.4.1\windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OpenMPSupport>true</OpenMPSupport>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\opencv-3.0.0-beta\x64\vc12\lib;$(ProjectDir)..\..\poco-1.6.0\x64\vc12\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opencv_core300.lib;opencv_features2d300.lib;opencv_highgui300.lib;opencv_imgcodecs300.lib;opencv_imgproc300.lib;opencv_videoio300.lib;PocoFoundation.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
