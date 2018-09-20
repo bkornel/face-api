@@ -9,6 +9,9 @@ The code of AL is written in C++ and completely shared between the particular pl
 A detailed description can be read in this paper [4]:<br>
 https://www.researchgate.net/publication/312411829_Face_recognition_on_mobile_platforms
 
+You can view the results on the video below:<br>
+[![Face API](http://img.youtube.com/vi/iS4eDf775GI/0.jpg)](https://www.youtube.com/watch?v=iS4eDf775GI "Face API")
+
 # Prerequsities
 
 The Windows (Visual Studio 2017) and Android based pre-built libraries can be downloaded from the following repository: https://github.com/bkornel/3rdparty<br>
