@@ -43,8 +43,6 @@ The final application is still not pushed to the repository (under development),
 
 ---
 
-> [1]	K. Bertok and A. Fazekas, “Recognizing Human Activities Based on Head Movement Trajectories,” in Proc. of IEEE International Conference on CogInfoCom 2014, pp. 273 278, 2014.<br>
-> [2]	K. Bertok and A. Fazekas, “Gesture Recognition - Control of a Computer with Natural Head Movements,” in Proc. of GRAPP/IVAPP 2012, pp. 527 530, 2012.<br>
-> [3]	K. Bertok, L. Sajo and A. Fazekas, “A robust head pose estimation method based on POSIT algorithm,” Argumentum, vol. 7, pp. 348 356, 2011.
-> [4] K. Bertok and A. Fazekas, “Face Recognition on Mobile Platforms,” In Proceedings of IEEE International Conference on CogInfoCom 2016, pp. 3743, 2016.
-
+> [1]	K. Bertok and A. Fazekas, "Facial gesture recognition and its applications," In Gesture recognition: performance, applications and features, Nova Science Publishers, New York, pp. 1-30, 2018.<br>
+> [2]	K. Bertok and A. Fazekas, "Face recognition on mobile platforms," In Proceedings of the 7th IEEE International Conference on Cognitive Infocommunications: CogInfoCom 2016, pp. 37-43, 2016.<br>
+> [3]	K. Bertok and A. Fazekas, "Recognizing complex head movements," In Australian Journal of Intelligent Information Processing Systems, vol. 14, pp. 3-17, 2016.
