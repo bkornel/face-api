@@ -1,12 +1,12 @@
 # Introduction
 
-This cross-platform face API is about adapting image processing algorithms to mobile platforms in order to achieve gesture based control in the future. The control scheme is purely depend on the user’s face, so here I focus on the adaption of my existing face recognition solutions (face detection and tracking, facial feature extraction, head pose estimation and head movement detection, see in [1], [2] and [3]) to mobile platforms (especially Android). 
+This cross-platform face API is about adapting image processing algorithms to mobile platforms in order to achieve gesture based control in the future. The control scheme is purely depend on the user’s face, so here I focus on the adaption of my existing face recognition solutions (face detection and tracking, facial feature extraction, head pose estimation and head movement detection, see in [1], [2] and [3]) to mobile platforms (especially to Android). 
 
 An appropriate system architecture is introduced, where the user interface (UI) is entirely divided from the computer vision algorithms (hereinafter the application logic or shortly AL).
 
-The code of AL is written in C++ and completely shared between the particular platforms. Only a thin-layer of platform-specific code are used for transferring data from/to the UI. This platform-specific code is a JNI bridge in case of our mobile platform.
+The code of AL is written in C++ and completely shared between the particular platforms. Only a thin-layer of platform-specific code are used for transferring data from/to the UI. This platform-specific code is a JNI bridge in case of the Android platform.
 
-A detailed description can be read in this paper [4]:<br>
+A detailed description can be read in this paper [2]:<br>
 https://www.researchgate.net/publication/312411829_Face_recognition_on_mobile_platforms
 
 You can view the results on the video below:<br>
