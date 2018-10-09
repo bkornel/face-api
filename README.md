@@ -41,7 +41,7 @@ Install Android NDK if you have not done it yet from https://developer.android.c
 
 The final application is still not pushed to the repository (under development), but the AL can be built via NDK. In order to build the AL, you should call `_build.bat` in [Build/Android](https://github.com/bkornel/face-api/tree/master/Build/Android).
 
----
+# References
 
 > [1]	K. Bertok and A. Fazekas, "Facial gesture recognition and its applications," In Gesture recognition: performance, applications and features, Nova Science Publishers, New York, pp. 1-30, 2018.<br>
 > [2]	K. Bertok and A. Fazekas, "Face recognition on mobile platforms," In Proceedings of the 7th IEEE International Conference on Cognitive Infocommunications: CogInfoCom 2016, pp. 37-43, 2016.<br>
