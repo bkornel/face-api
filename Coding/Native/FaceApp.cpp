@@ -26,7 +26,7 @@ namespace face
 	FaceApp::FaceApp() :
 		fw::Module("FaceApp"),
 		mExecutor(fw::getInlineExecutor()),
-		mOutputQueue("OutputQueue", 30.0F, 5, 100)
+		mOutputQueue("OutputQueue", 100.0F, 1, 0LL)
 	{
 		START_EASYLOGGINGPP(0, static_cast<char**>(nullptr));
 	}
