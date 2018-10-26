@@ -35,11 +35,11 @@ LOCAL_SRC_FILES += $(foreach dir, $(NATIVE_DIRS), $(wildcard $(dir)/*.cc))
 LOCAL_SRC_FILES += $(foreach dir, $(NATIVE_DIRS), $(wildcard $(dir)/*.c))
 
 # Collect headers
-LOCAL_C_INCLUDES := 									\
-	$(NATIVE_DIRS)										\
-	$(OPENCV_HEADERS)/include							\
-	$(OPENCV_HEADERS)/include/opencv					\
-	$(OPENCV_HEADERS)/include/opencv2
+LOCAL_C_INCLUDES := 								\
+	$(NATIVE_DIRS)									\
+	$(OPENCV_HEADERS)								\
+	$(OPENCV_HEADERS)/opencv						\
+	$(OPENCV_HEADERS)/opencv2
 
 # Build native shared library
 LOCAL_MODULE := face_native

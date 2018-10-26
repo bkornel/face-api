@@ -3,19 +3,12 @@
 set outDir=..\Bin\Release
 set to3rdParty=..\..\..\..\3rdparty
 
-set grtBinDir=%to3rdParty%\grt-0.2.5\Windows\x64\vc15\bin
-set opencvBinDir=%to3rdParty%\opencv-3.4.1\Windows\x64\vc15\bin
+set opencvBinDir=%to3rdParty%\opencv-3.4.3\Windows\x64\vc15\bin
 set pocoBinDir=%to3rdParty%\poco-1.8.1\Windows\x64\vc15\bin
 set testingDir=..\..\..\Testing
 
-set grtFiles=(grt)
-set opencvFiles=(opencv_calib3d341 opencv_core341 opencv_features2d341 opencv_ffmpeg341_64 opencv_flann341 opencv_highgui341 opencv_imgcodecs341 opencv_imgproc341 opencv_objdetect341 opencv_ml341 opencv_videoio341)
+set opencvFiles=(opencv_calib3d343 opencv_core343 opencv_features2d343 opencv_ffmpeg343_64 opencv_flann343 opencv_highgui343 opencv_imgcodecs343 opencv_imgproc343 opencv_objdetect343 opencv_ml343 opencv_videoio343)
 set pocoFiles=(PocoFoundation PocoUtil PocoXML PocoJSON)
-
-for %%i in %grtFiles% do (
-	xcopy %grtBinDir%\%%i.dll %outDir%  /D /Y
-	xcopy %grtBinDir%\%%i.pdb %outDir%  /D /Y
-)
 
 for %%i in %pocoFiles% do (
 	xcopy %pocoBinDir%\%%i.dll %outDir%  /D /Y

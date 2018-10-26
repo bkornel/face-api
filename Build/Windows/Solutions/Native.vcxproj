@@ -192,7 +192,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;ELPP_THREAD_SAFE;ELPP_FORCE_USE_STD_THREAD;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\Coding\Native;$(ProjectDir)..\..\..\Coding\Native\3rdparty;$(ProjectDir)..\..\..\..\3rdparty\grt-0.2.5\windows\include;$(ProjectDir)..\..\..\..\3rdParty\opencv-3.4.1\windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\Coding\Native;$(ProjectDir)..\..\..\Coding\Native\3rdparty;$(ProjectDir)..\..\..\..\3rdParty\opencv-3.4.3\windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
@@ -234,7 +234,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;ELPP_THREAD_SAFE;ELPP_FORCE_USE_STD_THREAD;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\Coding\Native;$(ProjectDir)..\..\..\Coding\Native\3rdparty;$(ProjectDir)..\..\..\..\3rdparty\grt-0.2.5\windows\include;$(ProjectDir)..\..\..\..\3rdParty\opencv-3.4.1\windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\Coding\Native;$(ProjectDir)..\..\..\Coding\Native\3rdparty;$(ProjectDir)..\..\..\..\3rdParty\opencv-3.4.3\windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
