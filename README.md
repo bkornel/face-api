@@ -21,7 +21,7 @@ The directory structure should be the following:
 ```
 [path_to_somewhere]
 |- 3rdparty
-|-- opencv-3.4.1
+|-- opencv-3.4.3
 |-- ...
 |- face-api
 |-- Build
