@@ -12,18 +12,16 @@ namespace fw
 	{
 		std::string generate_log_stamp()
 		{
-			char buffer[100];
-
-#if defined(WIN32)
+			char buffer[100] = { 0 };
 			time_t rawtime = std::time(nullptr);
-			struct tm timeinfo;
 
-			localtime_s(&timeinfo, &rawtime);
-			std::strftime(buffer, 100, "%Y_%m_%d-%H_%M_%S", &timeinfo);
-#elif defined(__ANDROID__)
-			time_t rawtime = std::time(nullptr);
+#if defined(__ANDROID__)
 			struct tm* timeinfo = localtime(&rawtime);
 			std::strftime(buffer, 100, "%Y_%m_%d-%H_%M_%S", timeinfo);
+#else
+			struct tm timeinfo = { 0 };
+			localtime_s(&timeinfo, &rawtime);
+			std::strftime(buffer, 100, "%Y_%m_%d-%H_%M_%S", &timeinfo);
 #endif
 
 			return std::string(buffer);

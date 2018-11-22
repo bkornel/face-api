@@ -51,11 +51,7 @@ namespace face
 			}
 		}
 
-#if WIN32
-		long long runtimeMs = std::llabs(fw::get_current_time() - iImage->GetTimestamp());
-#else
-		long long runtimeMs = llabs(fw::get_current_time() - iImage->GetTimestamp());
-#endif
+		const long long runtimeMs = std::llabs(fw::get_current_time() - iImage->GetTimestamp());
 
 		DrawGeneral(runtimeMs, iImage->GetFrameId(), mResultImage);
 

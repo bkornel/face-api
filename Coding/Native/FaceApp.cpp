@@ -26,7 +26,7 @@ namespace face
 	FaceApp::FaceApp() :
 		fw::Module("FaceApp"),
 		mExecutor(fw::getInlineExecutor()),
-		mOutputQueue("OutputQueue", 100.0F, 1, 0LL)
+		mOutputQueue("OutputQueue", 100.0F, 10)
 	{
 		START_EASYLOGGINGPP(0, static_cast<char**>(nullptr));
 	}
@@ -212,7 +212,7 @@ namespace face
 				auto outputMessage = std::make_shared<ImageMessage>(
 					mVisualizer->GetResultImage(), 
 					GetLastFrameId(), 
-					GetLastTimestamp()
+					fw::get_current_time()
 				);
 				mOutputQueue.Push(outputMessage);
 			}

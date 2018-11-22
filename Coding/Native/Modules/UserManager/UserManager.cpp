@@ -36,7 +36,7 @@ namespace face
 		}
 
 		mRemoveSW.Start();
-		
+
 		return fw::ErrorCode::OK;
 	}
 
@@ -75,14 +75,14 @@ namespace face
 	{
 		for (const auto& user : mUsers)
 		{
-			const bool inactivate = 
+			const bool inactivate =
 				// Must be active
 				user->IsActive() &&
 				// Minimal resolution
 				((user->GetFaceRect().width < mMinFaceSize.width) ||
 				(user->GetFaceRect().height < mMinFaceSize.height) ||
-				// Detected a long time ago
-				(mTimestamp - user->GetLastDetectionTs()) > mUserAwaySec * 1000.0F);
+					// Detected a long time ago
+					(mTimestamp - user->GetLastDetectionTs()) > mUserAwaySec * 1000.0F);
 
 			if (inactivate)
 				user->SetStatus(User::Status::Inactive);
@@ -230,11 +230,7 @@ namespace face
 		{
 			if (!user->IsActive())
 			{
-#if WIN32
 				const long long diff = std::llabs(fw::get_current_time() - user->GetLastUpdateTs());
-#else
-				const long long diff = abs(fw::get_current_time() - user->GetLastUpdateTs());
-#endif
 				if (iForceToDelete || (diff > mUserAwaySec * 1000.0F))
 					userIDs.push_back(user->GetUserId());
 			}

@@ -32,22 +32,22 @@ namespace fw
 		using MessageTuple = std::tuple<First, Rest...>;
 
 	public:
-		explicit MessageQueue(const std::string& name) :
-			MessageQueue(name, MAX_SAMPLING_RATE_FPS, MAX_BOUND, -1)
+		explicit MessageQueue(const std::string& iName) :
+			MessageQueue(iName, MAX_SAMPLING_RATE_FPS, MAX_BOUND, -1LL)
 		{
 		}
 
-		MessageQueue(const std::string& name, float samplingFPS, int bound) :
-			MessageQueue(name, samplingFPS, bound, -1)
+		MessageQueue(const std::string& iName, float iSamplingFPS, int iBound) :
+			MessageQueue(iName, iSamplingFPS, iBound, -1LL)
 		{
 		}
 
-		MessageQueue(const std::string& name, float samplingFPS, int bound, long long thresholdMs) :
-			mName(name)
+		MessageQueue(const std::string& iName, float iSamplingFPS, int iBound, long long iThresholdMs) :
+			mName(iName)
 		{
-			SetBound(bound);
-			SetSamplingFPS(samplingFPS);
-			SetTimestampFiltering(thresholdMs);
+			SetBound(iBound);
+			SetSamplingFPS(iSamplingFPS);
+			SetTimestampFiltering(iThresholdMs);
 		}
 
 		~MessageQueue()
@@ -55,10 +55,10 @@ namespace fw
 			Clear();
 		}
 
-		ErrorCode Push(const MessageTuple& messageTuple)
+		ErrorCode Push(const MessageTuple& iMessageTuple)
 		{
 			ErrorCode retCode = ErrorCode::OK;
-			while ((retCode = TryPush(messageTuple)) == ErrorCode::OutOfResources)
+			while ((retCode = TryPush(iMessageTuple)) == ErrorCode::OutOfResources)
 			{
 				std::this_thread::sleep_for(std::chrono::milliseconds(1));
 			}
@@ -66,26 +66,26 @@ namespace fw
 			return retCode;
 		}
 
-		ErrorCode Push(const First& first, const Rest&... args)
+		ErrorCode Push(const First& iFirst, const Rest&... iArgs)
 		{
-			return Push(std::make_tuple(first, args...));
+			return Push(std::make_tuple(iFirst, iArgs...));
 		}
 
-		ErrorCode TryPush(const MessageTuple& messageTuple)
+		ErrorCode TryPush(const MessageTuple& iMessageTuple)
 		{
 			int queueSize = GetSize();
-			return queueSize >= mBound ? ErrorCode::OutOfResources : InternalPush(messageTuple);
+			return queueSize >= mBound ? ErrorCode::OutOfResources : InternalPush(iMessageTuple);
 		}
 
-		ErrorCode TryPush(const First& first, const Rest&... args)
+		ErrorCode TryPush(const First& iFirst, const Rest&... iArgs)
 		{
-			return TryPush(std::make_tuple(first, args...));
+			return TryPush(std::make_tuple(iFirst, iArgs...));
 		}
 
-		ErrorCode Pop(MessageTuple& outDestination)
+		ErrorCode Pop(MessageTuple& oDestination)
 		{
 			ErrorCode retCode = ErrorCode::OK;
-			while ((retCode = TryPop(outDestination)) == ErrorCode::NotFound)
+			while ((retCode = TryPop(oDestination)) == ErrorCode::NotFound)
 			{
 				std::this_thread::sleep_for(std::chrono::milliseconds(1));
 			}
@@ -93,9 +93,9 @@ namespace fw
 			return retCode;
 		}
 
-		ErrorCode TryPop(MessageTuple& outDestination)
+		ErrorCode TryPop(MessageTuple& oDestination)
 		{
-			ErrorCode retCode = TryFront(outDestination);
+			ErrorCode retCode = TryFront(oDestination);
 
 			if (retCode == ErrorCode::OK)
 			{
@@ -105,10 +105,10 @@ namespace fw
 			return retCode;
 		}
 
-		ErrorCode Front(MessageTuple& outDestination)
+		ErrorCode Front(MessageTuple& oDestination)
 		{
 			ErrorCode retCode = ErrorCode::OK;
-			while ((retCode = TryFront(outDestination)) == ErrorCode::NotFound)
+			while ((retCode = TryFront(oDestination)) == ErrorCode::NotFound)
 			{
 				std::this_thread::sleep_for(std::chrono::milliseconds(1));
 			}
@@ -116,15 +116,15 @@ namespace fw
 			return retCode;
 		}
 
-		ErrorCode TryFront(MessageTuple& outDestination)
+		ErrorCode TryFront(MessageTuple& oDestination)
 		{
 			if (IsEmpty())
 			{
-				outDestination = MessageTuple();
+				oDestination = MessageTuple();
 				return ErrorCode::NotFound;
 			}
 
-			return InternalFront(outDestination);
+			return InternalFront(oDestination);
 		}
 
 		void Clear()
@@ -136,7 +136,7 @@ namespace fw
 				mQueue.pop();
 			}
 
-			mTimestampMs = 0;
+			mTimestampMs = 0LL;
 			mSize = 0;
 		}
 
@@ -150,25 +150,25 @@ namespace fw
 
 		inline bool IsFull() const { return mSize >= mBound; }
 
-		void SetBound(int bound)
+		void SetBound(int iBound)
 		{
-			assert(bound > 0);
+			assert(iBound > 0);
 			std::lock_guard<std::mutex> lock(mMutex);
-			mBound = (std::min)((std::max)(bound, MIN_BOUND), MAX_BOUND);
+			mBound = (std::min)((std::max)(iBound, MIN_BOUND), MAX_BOUND);
 		}
 
-		void SetSamplingFPS(float samplingFPS)
+		void SetSamplingFPS(float iSamplingFPS)
 		{
-			assert(samplingFPS > 0.0F);
+			assert(iSamplingFPS > 0.0F);
 			std::lock_guard<std::mutex> lock(mMutex);
-			mSamplingFPS = (std::min)((std::max)(samplingFPS, MIN_SAMPLING_RATE_FPS), MAX_SAMPLING_RATE_FPS);
+			mSamplingFPS = (std::min)((std::max)(iSamplingFPS, MIN_SAMPLING_RATE_FPS), MAX_SAMPLING_RATE_FPS);
 			mSamplingMs = ConvertFpsToMs(mSamplingFPS);
 		}
 
-		void SetTimestampFiltering(long long thresholdMs)
+		void SetTimestampFiltering(long long iThresholdMs)
 		{
 			std::lock_guard<std::mutex> lock(mMutex);
-			mThresholdMs = thresholdMs;
+			mThresholdMs = iThresholdMs;
 		}
 
 	private:
@@ -178,33 +178,25 @@ namespace fw
 		const static int MAX_BOUND;
 		const static int MIN_BOUND;
 
-		MessageQueue& operator=(const MessageQueue& rhs) = delete;
-		MessageQueue(const MessageQueue& rhs) = delete;
+		MessageQueue& operator=(const MessageQueue& iOther) = delete;
+		MessageQueue(const MessageQueue& iOther) = delete;
 
-		ErrorCode InternalPush(const MessageTuple& messageTuple)
+		ErrorCode InternalPush(const MessageTuple& iMessageTuple)
 		{
-			if (mThresholdMs > 0)
+			if (mThresholdMs > 0LL)
 				InternalFiltering();
 
 			std::lock_guard<std::mutex> lock(mMutex);
 
 			if (mQueue.size() >= mBound) return ErrorCode::OutOfResources;
 
-			// Mintavételezési frekvencia
 			const long long currentTimestampMs = fw::get_current_time();
 
-#if WIN32
 			if (std::llabs(currentTimestampMs - mTimestampMs) <= mSamplingMs)
 				return ErrorCode::BadData;
-#else
-			if (abs(currentTimestampMs - mTimestampMs) <= mSamplingMs)
-				return ErrorCode::BadData;
-#endif
 
-			// Új üzenet beszúrása
 			mTimestampMs = currentTimestampMs;
-
-			mQueue.push(std::make_pair(mTimestampMs, messageTuple));
+			mQueue.push(std::make_pair(mTimestampMs, iMessageTuple));
 			mSize++;
 
 			assert(mSize == static_cast<int>(mQueue.size()));
@@ -212,27 +204,27 @@ namespace fw
 			return ErrorCode::OK;
 		}
 
-		ErrorCode InternalFront(MessageTuple& outDestination)
+		ErrorCode InternalFront(MessageTuple& oDestination)
 		{
-			if (mThresholdMs > 0)
+			if (mThresholdMs > 0LL)
 				InternalFiltering();
 
 			std::lock_guard<std::mutex> lock(mMutex);
 
 			if (mQueue.empty())
 			{
-				outDestination = MessageTuple();
+				oDestination = MessageTuple();
 				return ErrorCode::NotFound;
 			}
 
-			outDestination = mQueue.front().second;
+			oDestination = mQueue.front().second;
 
 			return ErrorCode::OK;
 		}
 
 		ErrorCode InternalPop()
 		{
-			if (mThresholdMs > 0)
+			if (mThresholdMs > 0LL)
 				InternalFiltering();
 
 			std::lock_guard<std::mutex> lock(mMutex);
@@ -252,7 +244,7 @@ namespace fw
 
 		void InternalFiltering()
 		{
-			assert(mThresholdMs > 0);
+			assert(mThresholdMs > 0LL);
 
 			const long long currentTimestampMs = fw::get_current_time();
 
@@ -260,41 +252,33 @@ namespace fw
 			{
 				std::lock_guard<std::mutex> lock(mMutex);
 
-				int startSize = mSize;
+				//int startSize = mSize;
 
 				while (!mQueue.empty())
 				{
 					const long long createTimestampMs = mQueue.front().first;
 
-#if WIN32
 					if (std::llabs(currentTimestampMs - createTimestampMs) <= mThresholdMs)
 						break;
-#else
-					if (abs(currentTimestampMs - createTimestampMs) <= mThresholdMs)
-						break;
-#endif
 
 					mQueue.pop();
 					mSize--;
 
 					assert(mSize == static_cast<int>(mQueue.size()));
 				}
+
+				//if (startSize != mSize)
+				//{
+				//	LOG(WARNING) << "Number of frames dropped from " << mName << ": " << std::abs(startSize - mSize);
+				//}
 			}
 		}
 
-		inline long long ConvertFpsToMs(float fps) const
+		inline long long ConvertFpsToMs(float iFPS) const
 		{
-			assert(fps > 0.0F);
-			return static_cast<long long>((1.0F / fps) * 1000.0F);
+			assert(iFPS > 0.0F);
+			return static_cast<long long>((1.0F / iFPS) * 1000.0F);
 		}
-
-		//inline long long GetTimestampMs() const
-		//{
-		//	std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-		//		std::chrono::system_clock::now().time_since_epoch());
-		//
-		//	return ms.count();
-		//}
 
 		std::mutex mMutex;
 		std::queue<std::pair<long long, MessageTuple>> mQueue;
@@ -305,10 +289,10 @@ namespace fw
 		int mBound = MAX_BOUND;
 
 		float mSamplingFPS = MAX_SAMPLING_RATE_FPS;
-		long long mSamplingMs = 1;
+		long long mSamplingMs = 1LL;
 
-		long long mTimestampMs = 0;
-		long long mThresholdMs = -1;
+		long long mTimestampMs = 0LL;
+		long long mThresholdMs = -1LL;
 	};
 
 	template<typename First, typename... Rest>
