@@ -1,6 +1,6 @@
 #include <opencv2/highgui/highgui.hpp>
 
-#include "FaceApp.h"
+#include "FaceApi.h"
 #include "Framework/Profiler.h"
 #include "Framework/Functional.hpp"
 
@@ -15,28 +15,28 @@ INITIALIZE_EASYLOGGINGPP
 
 namespace face
 {
-	std::recursive_mutex FaceApp::sAppMutex;
+	std::recursive_mutex FaceApi::sAppMutex;
 
-	FaceApp& FaceApp::GetInstance()
+	FaceApi& FaceApi::GetInstance()
 	{
-		static FaceApp sInstance;
+		static FaceApi sInstance;
 		return sInstance;
 	}
 
-	FaceApp::FaceApp() :
-		fw::Module("FaceApp"),
+	FaceApi::FaceApi() :
+		fw::Module("FaceApi"),
 		mExecutor(fw::getInlineExecutor()),
 		mOutputQueue("OutputQueue", 100.0F, 10)
 	{
 		START_EASYLOGGINGPP(0, static_cast<char**>(nullptr));
 	}
 
-	FaceApp::~FaceApp()
+	FaceApi::~FaceApi()
 	{
 		DeInitialize();
 	}
 
-	fw::ErrorCode FaceApp::InitializeInternal(const cv::FileNode& /*iSettingsNode*/)
+	fw::ErrorCode FaceApi::InitializeInternal(const cv::FileNode& /*iSettingsNode*/)
 	{
 		fw::ErrorCode result = fw::ErrorCode::OK;
 
@@ -58,7 +58,7 @@ namespace face
 		return fw::ErrorCode::OK;
 	}
 
-	fw::ErrorCode FaceApp::DeInitializeInternal()
+	fw::ErrorCode FaceApi::DeInitializeInternal()
 	{
 		for (auto& module : mModules)
 		{
@@ -71,14 +71,14 @@ namespace face
 		return fw::ErrorCode::OK;
 	}
 
-	void FaceApp::Clear()
+	void FaceApi::Clear()
 	{
 		std::lock_guard<std::recursive_mutex> lock(sAppMutex);
 		for (auto& module : mModules)
 			module->Clear();
 	}
 
-	fw::ErrorCode FaceApp::CreateModules()
+	fw::ErrorCode FaceApi::CreateModules()
 	{
 		if (!mImageQueue)		mModules.push_back(mImageQueue		= new ImageQueue());
 		if (!mFaceDetection)	mModules.push_back(mFaceDetection	= new FaceDetection());
@@ -98,7 +98,7 @@ namespace face
 		return fw::ErrorCode::OK;
 	}
 
-	fw::ErrorCode FaceApp::CreateConnections()
+	fw::ErrorCode FaceApi::CreateConnections()
 	{
 		// This the first node in the execution
 		mFirstNode.port = fw::connect(
@@ -143,7 +143,7 @@ namespace face
 		return fw::ErrorCode::OK;
 	}
 
-	fw::ErrorCode FaceApp::PushCameraFrame(const cv::Mat& iFrame)
+	fw::ErrorCode FaceApi::PushCameraFrame(const cv::Mat& iFrame)
 	{
 		if (!iFrame.empty() && iFrame.size() != mImageQueue->GetImageSize())
 		{
@@ -167,7 +167,7 @@ namespace face
 		return mImageQueue->Push(iFrame);
 	}
 
-	fw::ErrorCode FaceApp::GetResultImage(cv::Mat& oResultImage)
+	fw::ErrorCode FaceApi::GetResultImage(cv::Mat& oResultImage)
 	{
 		std::tuple<ImageMessage::Shared> framePool;
 		const fw::ErrorCode code = mOutputQueue.TryPop(framePool);
@@ -183,7 +183,7 @@ namespace face
 		return code;
 	}
 
-	fw::ErrorCode FaceApp::ThreadProcedure()
+	fw::ErrorCode FaceApi::ThreadProcedure()
 	{
 		while (!GetThreadStopSignal())
 		{
@@ -227,7 +227,7 @@ namespace face
 		return fw::ErrorCode::OK;
 	}
 
-	void FaceApp::SetRunDetectionFlag(bool iForce /*= false*/)
+	void FaceApi::SetRunDetectionFlag(bool iForce /*= false*/)
 	{
 		if (!mFaceDetection || !mUserManager) return;
 

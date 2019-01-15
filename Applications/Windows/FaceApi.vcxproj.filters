@@ -54,248 +54,248 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\IO.cc">
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\IO.cc">
       <Filter>3rdparty\clm</Filter>
     </ClCompile>
-    <ClCompile Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\Patch.cc">
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\Patch.cc">
       <Filter>3rdparty\clm</Filter>
     </ClCompile>
-    <ClCompile Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\PDM.cc">
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\PDM.cc">
       <Filter>3rdparty\clm</Filter>
     </ClCompile>
-    <ClCompile Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\FCheck.cc">
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\FCheck.cc">
       <Filter>3rdparty\clm</Filter>
     </ClCompile>
-    <ClCompile Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\PAW.cc">
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\PAW.cc">
       <Filter>3rdparty\clm</Filter>
     </ClCompile>
-    <ClCompile Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\easyloggingpp\easyloggingpp.cpp">
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\3rdparty\easyloggingpp\easyloggingpp.cpp">
       <Filter>3rdparty\easyloggingpp</Filter>
     </ClCompile>
-    <ClCompile Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\CLM.cc">
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\CLM.cc">
       <Filter>3rdparty\clm</Filter>
     </ClCompile>
-    <ClCompile Include="$(SolutionDir)..\..\..\Coding\Native\FaceApp.cpp" />
-    <ClCompile Include="$(SolutionDir)..\..\..\Coding\Native\Framework\Thread.cpp">
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\FaceApi.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Thread.cpp">
       <Filter>Framework</Filter>
     </ClCompile>
-    <ClCompile Include="$(SolutionDir)..\..\..\Coding\Native\Framework\Util.cpp">
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Util.cpp">
       <Filter>Framework</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Coding\Native\Framework\Exception.cpp">
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Exception.cpp">
       <Filter>Framework</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Coding\Native\Framework\UtilOCV.cpp">
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\UtilOCV.cpp">
       <Filter>Framework</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Coding\Native\Framework\UtilString.cpp">
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\UtilString.cpp">
       <Filter>Framework</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Coding\Native\Framework\Module.cpp">
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Module.cpp">
       <Filter>Framework</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Coding\Native\Framework\Message.cpp">
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Message.cpp">
       <Filter>Framework</Filter>
     </ClCompile>
-    <ClCompile Include="$(SolutionDir)..\..\..\Coding\Native\Framework\Profiler.cpp">
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Profiler.cpp">
       <Filter>Framework</Filter>
     </ClCompile>
-    <ClCompile Include="$(SolutionDir)..\..\..\Coding\Native\Framework\Stopwatch.cpp">
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Stopwatch.cpp">
       <Filter>Framework</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Coding\Native\Messages\ImageMessage.cpp">
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Messages\ImageMessage.cpp">
       <Filter>Messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Coding\Native\Messages\RoiMessage.cpp">
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Messages\RoiMessage.cpp">
       <Filter>Messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Coding\Native\Messages\ActiveUsersMessage.cpp">
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Messages\ActiveUsersMessage.cpp">
       <Filter>Messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Coding\Native\Framework\VideoWriter.cpp">
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\VideoWriter.cpp">
       <Filter>Framework</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Coding\Native\Modules\FaceDetection\FaceDetection.cpp">
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\FaceDetection\FaceDetection.cpp">
       <Filter>Modules\FaceDetection</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Coding\Native\Modules\ImageQueue\ImageQueue.cpp">
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ImageQueue\ImageQueue.cpp">
       <Filter>Modules\ImageQueue</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Coding\Native\Modules\Visualizer\Visualizer.cpp">
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\Visualizer\Visualizer.cpp">
       <Filter>Modules\Visualizer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Coding\Native\Modules\UserManager\UserManager.cpp">
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserManager\UserManager.cpp">
       <Filter>Modules\UserManager</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Coding\Native\Modules\UserProcessor\UserProcessor.cpp">
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\UserProcessor.cpp">
       <Filter>Modules\UserProcessor</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Coding\Native\Common\Configuration.cpp">
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Common\Configuration.cpp">
       <Filter>Common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Coding\Native\User\User.cpp">
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\User\User.cpp">
       <Filter>User</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Coding\Native\Modules\UserProcessor\ShapeModel\ClmWrapper.cpp">
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\ShapeModel\ClmWrapper.cpp">
       <Filter>Modules\UserProcessor\ShapeModel</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Coding\Native\Modules\UserProcessor\ShapeModel\ShapeModel.cpp">
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\ShapeModel\ShapeModel.cpp">
       <Filter>Modules\UserProcessor\ShapeModel</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Coding\Native\Common\ShapeUtil.cpp">
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Common\ShapeUtil.cpp">
       <Filter>Common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Coding\Native\Common\PoseUtil.cpp">
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Common\PoseUtil.cpp">
       <Filter>Common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Coding\Native\Modules\UserProcessor\ShapeNorm\ShapeNormDispatcher.cpp">
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\ShapeNorm\ShapeNormDispatcher.cpp">
       <Filter>Modules\UserProcessor\ShapeNorm</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Coding\Native\Modules\UserProcessor\HeadPose\PoseEstimationDispatcher.cpp">
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\HeadPose\PoseEstimationDispatcher.cpp">
       <Filter>Modules\UserProcessor\HeadPose</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Coding\Native\Modules\UserProcessor\ShapeModel\ShapeModelDispatcher.cpp">
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\ShapeModel\ShapeModelDispatcher.cpp">
       <Filter>Modules\UserProcessor\ShapeModel</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Coding\Native\Modules\UserHistory\UserHistory.cpp">
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserHistory\UserHistory.cpp">
       <Filter>Modules\UserHistory</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Coding\Native\Messages\UserEntriesMessage.cpp">
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Messages\UserEntriesMessage.cpp">
       <Filter>Messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Coding\Native\User\UserData.cpp">
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\User\UserData.cpp">
       <Filter>User</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Coding\Native\Framework\FlowGraph.cpp">
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\FlowGraph.cpp">
       <Filter>Framework</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\CLM.h">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\CLM.h">
       <Filter>3rdparty\clm</Filter>
     </ClInclude>
-    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\IO.h">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\IO.h">
       <Filter>3rdparty\clm</Filter>
     </ClInclude>
-    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\Patch.h">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\Patch.h">
       <Filter>3rdparty\clm</Filter>
     </ClInclude>
-    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\PDM.h">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\PDM.h">
       <Filter>3rdparty\clm</Filter>
     </ClInclude>
-    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\FCheck.h">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\FCheck.h">
       <Filter>3rdparty\clm</Filter>
     </ClInclude>
-    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\PAW.h">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\PAW.h">
       <Filter>3rdparty\clm</Filter>
     </ClInclude>
-    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\easyloggingpp\easyloggingpp.h">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\3rdparty\easyloggingpp\easyloggingpp.h">
       <Filter>3rdparty\easyloggingpp</Filter>
     </ClInclude>
-    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\FaceApp.h" />
-    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\Framework\Thread.h">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\FaceApi.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Thread.h">
       <Filter>Framework</Filter>
     </ClInclude>
-    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\Framework\Util.h">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Util.h">
       <Filter>Framework</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Coding\Native\Framework\Exception.h">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Exception.h">
       <Filter>Framework</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Coding\Native\Framework\UtilOCV.h">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\UtilOCV.h">
       <Filter>Framework</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Coding\Native\Framework\UtilString.h">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\UtilString.h">
       <Filter>Framework</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Coding\Native\Framework\Module.h">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Module.h">
       <Filter>Framework</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Coding\Native\Framework\Message.h">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Message.h">
       <Filter>Framework</Filter>
     </ClInclude>
-    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\Framework\Event.hpp">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Event.hpp">
       <Filter>Framework</Filter>
     </ClInclude>
-    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\Framework\MessageQueue.hpp">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\MessageQueue.hpp">
       <Filter>Framework</Filter>
     </ClInclude>
-    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\Framework\Profiler.h">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Profiler.h">
       <Filter>Framework</Filter>
     </ClInclude>
-    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\Framework\Stopwatch.h">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Stopwatch.h">
       <Filter>Framework</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Coding\Native\Messages\ImageMessage.h">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\ImageMessage.h">
       <Filter>Messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Coding\Native\Messages\RoiMessage.h">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\RoiMessage.h">
       <Filter>Messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Coding\Native\Messages\ActiveUsersMessage.h">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\ActiveUsersMessage.h">
       <Filter>Messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Coding\Native\Framework\VideoWriter.h">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\VideoWriter.h">
       <Filter>Framework</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Coding\Native\Modules\FaceDetection\FaceDetection.h">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\FaceDetection\FaceDetection.h">
       <Filter>Modules\FaceDetection</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Coding\Native\Modules\ImageQueue\ImageQueue.h">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ImageQueue\ImageQueue.h">
       <Filter>Modules\ImageQueue</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Coding\Native\Modules\Visualizer\Visualizer.h">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\Visualizer\Visualizer.h">
       <Filter>Modules\Visualizer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Coding\Native\Modules\UserManager\UserManager.h">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\UserManager\UserManager.h">
       <Filter>Modules\UserManager</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Coding\Native\Modules\UserProcessor\UserProcessor.h">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\UserProcessor.h">
       <Filter>Modules\UserProcessor</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Coding\Native\Common\Configuration.h">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Common\Configuration.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Coding\Native\User\User.h">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\User\User.h">
       <Filter>User</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Coding\Native\User\UserDispatcher.hpp">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\User\UserDispatcher.hpp">
       <Filter>User</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Coding\Native\Modules\UserProcessor\ShapeModel\ClmWrapper.h">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\ShapeModel\ClmWrapper.h">
       <Filter>Modules\UserProcessor\ShapeModel</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Coding\Native\Modules\UserProcessor\ShapeModel\ShapeModel.h">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\ShapeModel\ShapeModel.h">
       <Filter>Modules\UserProcessor\ShapeModel</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Coding\Native\Common\ShapeUtil.h">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Common\ShapeUtil.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Coding\Native\Common\PoseUtil.h">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Common\PoseUtil.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Coding\Native\Modules\UserProcessor\ShapeNorm\ShapeNormDispatcher.h">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\ShapeNorm\ShapeNormDispatcher.h">
       <Filter>Modules\UserProcessor\ShapeNorm</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Coding\Native\Modules\UserProcessor\HeadPose\PoseEstimationDispatcher.h">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\HeadPose\PoseEstimationDispatcher.h">
       <Filter>Modules\UserProcessor\HeadPose</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Coding\Native\Modules\UserProcessor\ShapeModel\ShapeModelDispatcher.h">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\ShapeModel\ShapeModelDispatcher.h">
       <Filter>Modules\UserProcessor\ShapeModel</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Coding\Native\Modules\UserHistory\UserHistory.h">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\UserHistory\UserHistory.h">
       <Filter>Modules\UserHistory</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Coding\Native\Messages\UserEntriesMessage.h">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\UserEntriesMessage.h">
       <Filter>Messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Coding\Native\User\UserData.h">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\User\UserData.h">
       <Filter>User</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Coding\Native\Framework\Functional.hpp">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Functional.hpp">
       <Filter>Framework</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Coding\Native\Framework\FlowGraph.hpp">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\FlowGraph.hpp">
       <Filter>Framework</Filter>
     </ClInclude>
   </ItemGroup>

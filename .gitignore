@@ -1,11 +1,9 @@
-Build/Android/jni/
-Build/Android/libs/
-Build/Android/obj/
-Build/Windows/Bin/Debug/
-Build/Windows/Bin/Release/
-Build/Windows/Bin/x64/
-Build/Windows/Solutions/CodeGraphData/
-Coding/AppWindows/logs/myeasylog.log
+Applications/Android/jni/
+Applications/Android/libs/
+Applications/Android/obj/
+Applications/Windows/Bin/Debug/
+Applications/Windows/Bin/Release/
+Applications/Windows/Bin/x64/
 *.db
 *.db-shm
 *.db-wal

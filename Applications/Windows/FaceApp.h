@@ -6,13 +6,13 @@
 
 #include "Framework/VideoWriter.h"
 
-class MainApp :
+class FaceApp :
 	public Poco::Util::Application
 {
 public:
-	MainApp() = default;
+	FaceApp() = default;
 
-	virtual ~MainApp() = default;
+	virtual ~FaceApp() = default;
 
 protected:
 	virtual int main(const std::vector<std::string>& args);
@@ -28,8 +28,8 @@ protected:
 	void printKeys() const;
 
 private:
-	MainApp(const MainApp&) = delete;
-	MainApp& operator=(const MainApp&) = delete;
+	FaceApp(const FaceApp&) = delete;
+	FaceApp& operator=(const FaceApp&) = delete;
 
 	void showResults();
 

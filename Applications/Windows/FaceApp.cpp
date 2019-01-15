@@ -1,11 +1,11 @@
 ﻿#include <opencv2/imgcodecs.hpp>
 
-#include "MainApp.h"
 #include "FaceApp.h"
+#include "FaceApi.h"
 
 #include "Framework/UtilString.h"
 
-void MainApp::initialize(Application& self)
+void FaceApp::initialize(Application& self)
 {
 	static const cv::FileNode sSettingsNode;
 
@@ -18,22 +18,22 @@ void MainApp::initialize(Application& self)
 	path = path.pushDirectory("configurations");
 
 	const std::string& workingDirectory = path.toString();
-	face::FaceApp::GetInstance().SetWorkingDirectory(workingDirectory);
-	face::FaceApp::GetInstance().Initialize(sSettingsNode);
+	face::FaceApi::GetInstance().SetWorkingDirectory(workingDirectory);
+	face::FaceApi::GetInstance().Initialize(sSettingsNode);
 
 	LOG(INFO) << name() << " starting up.";
 	LOG(INFO) << name() << " working directory: " << workingDirectory;
 }
 
-void MainApp::uninitialize()
+void FaceApp::uninitialize()
 {
 	// add your own uninitialization code here
 	LOG(INFO) << name() << " shutting down.";
-	face::FaceApp::GetInstance().DeInitialize();
+	face::FaceApi::GetInstance().DeInitialize();
 	Poco::Util::Application::uninitialize();
 }
 
-int MainApp::main(const std::vector<std::string>& args)
+int FaceApp::main(const std::vector<std::string>& args)
 {
 	printProperties(args);
 
@@ -43,7 +43,7 @@ int MainApp::main(const std::vector<std::string>& args)
 		return Poco::Util::Application::EXIT_USAGE;
 	}
 
-	if (!face::FaceApp::GetInstance().IsInitialized())
+	if (!face::FaceApi::GetInstance().IsInitialized())
 	{
 		LOG(ERROR) << name() << " is not initialized correctly.";
 		return Poco::Util::Application::EXIT_USAGE;
@@ -74,15 +74,15 @@ int MainApp::main(const std::vector<std::string>& args)
 
 	while (capture.isOpened())
 	{
-		if (!face::FaceApp::GetInstance().IsRunning()) break;
+		if (!face::FaceApi::GetInstance().IsRunning()) break;
 
 		capture >> mFrame;
 
 		if (mFrame.empty()) break;
 
-		face::FaceApp::GetInstance().PushCameraFrame(mFrame);
+		face::FaceApi::GetInstance().PushCameraFrame(mFrame);
 
-		if (face::FaceApp::GetInstance().GetResultImage(mResultFrame) == fw::ErrorCode::OK)
+		if (face::FaceApi::GetInstance().GetResultImage(mResultFrame) == fw::ErrorCode::OK)
 		{
 			showResults();
 
@@ -96,7 +96,7 @@ int MainApp::main(const std::vector<std::string>& args)
 	return Poco::Util::Application::EXIT_OK;
 }
 
-void MainApp::showResults()
+void FaceApp::showResults()
 {
 	CV_Assert(!mResultFrame.empty());
 
@@ -106,11 +106,11 @@ void MainApp::showResults()
 	if (keyPressed == 27)
 	{
 		LOG(INFO) << "Exiting from the application";
-		face::FaceApp::GetInstance().StopThread();
+		face::FaceApi::GetInstance().StopThread();
 	}
 	else if (keyPressed == 's')
 	{
-		const std::string& name = "result_frame_" + std::to_string(face::FaceApp::GetInstance().GetLastFrameId()) + ".png";
+		const std::string& name = "result_frame_" + std::to_string(face::FaceApi::GetInstance().GetLastFrameId()) + ".png";
 		const std::string& path = face::Configuration::GetInstance().GetDirectories().output + name;
 		cv::imwrite(path, mResultFrame);
 		LOG(INFO) << "Saving frame to: " << path;
@@ -118,17 +118,17 @@ void MainApp::showResults()
 	else if (keyPressed == 'c')
 	{
 		LOG(INFO) << "Clearing users";
-		face::FaceApp::GetInstance().Clear();
+		face::FaceApi::GetInstance().Clear();
 	}
 	else if (keyPressed == 'v')
 	{
 		LOG(INFO) << "Setting verbose mode ON/OFF";
-		face::FaceApp::GetInstance().OnOffVerbose();
+		face::FaceApi::GetInstance().OnOffVerbose();
 	}
 	else if (keyPressed == 'd')
 	{
 		LOG(INFO) << "Forcing face detection";
-		face::FaceApp::GetInstance().SetRunDetectionFlag(true);
+		face::FaceApi::GetInstance().SetRunDetectionFlag(true);
 	}
 	else if (keyPressed == 'o')
 	{
@@ -137,7 +137,7 @@ void MainApp::showResults()
 	}
 }
 
-void MainApp::printProperties(const std::vector<std::string>& args)
+void FaceApp::printProperties(const std::vector<std::string>& args)
 {
 	LOG(INFO) << "Command line: ";
 	std::ostringstream ostr;
@@ -157,7 +157,7 @@ void MainApp::printProperties(const std::vector<std::string>& args)
 	printProperties("");
 }
 
-void MainApp::printProperties(const std::string& base)
+void FaceApp::printProperties(const std::string& base)
 {
 	Poco::Util::AbstractConfiguration::Keys keys;
 	config().keys(base, keys);
@@ -185,7 +185,7 @@ void MainApp::printProperties(const std::string& base)
 	}
 }
 
-void MainApp::printKeys() const
+void FaceApp::printKeys() const
 {
 	LOG(INFO) << "Registered keys:";
 	LOG(INFO) << " - ESC: escape from the application";

@@ -15,15 +15,15 @@ namespace face
 	class UserProcessor;
 	class Visualizer;
 
-	class FaceApp :
+	class FaceApi :
 		public fw::Module
 	{
 		typedef fw::MessageQueue<ImageMessage::Shared> MessageQueue;
 
 	public:
-		static FaceApp& GetInstance();
+		static FaceApi& GetInstance();
 
-		virtual ~FaceApp();
+		virtual ~FaceApi();
 
 		fw::ErrorCode PushCameraFrame(const cv::Mat& iFrame);
 
@@ -58,11 +58,11 @@ namespace face
 	private:
 		static std::recursive_mutex sAppMutex;		///< The mutex to lock critical sections
 
-		FaceApp();
+		FaceApi();
 
-		FaceApp(const FaceApp& iOther) = delete;
+		FaceApi(const FaceApi& iOther) = delete;
 
-		FaceApp& operator=(const FaceApp& iOther) = delete;
+		FaceApi& operator=(const FaceApi& iOther) = delete;
 
 		fw::ErrorCode InitializeInternal(const cv::FileNode& iSettingsNode) override;
 
