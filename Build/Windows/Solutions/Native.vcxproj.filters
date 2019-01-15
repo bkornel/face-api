@@ -66,9 +66,6 @@
     <ClCompile Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\FCheck.cc">
       <Filter>3rdparty\clm</Filter>
     </ClCompile>
-    <ClCompile Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\FDet.cc">
-      <Filter>3rdparty\clm</Filter>
-    </ClCompile>
     <ClCompile Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\PAW.cc">
       <Filter>3rdparty\clm</Filter>
     </ClCompile>
@@ -187,9 +184,6 @@
       <Filter>3rdparty\clm</Filter>
     </ClInclude>
     <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\FCheck.h">
-      <Filter>3rdparty\clm</Filter>
-    </ClInclude>
-    <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\FDet.h">
       <Filter>3rdparty\clm</Filter>
     </ClInclude>
     <ClInclude Include="$(SolutionDir)..\..\..\Coding\Native\3rdparty\clm\PAW.h">

@@ -18,7 +18,7 @@ namespace fw
 			int fontface = cv::FONT_HERSHEY_SIMPLEX;
 			double scale = 0.35;
 			int thickness = 1;
-			int lineType = CV_AA;
+			int lineType = cv::LINE_AA;
 		};
 
 		template<typename _Tp>
@@ -58,13 +58,13 @@ namespace fw
 					pt1 = it.pos();
 
 					if (++segmentCount % 2 == 1)
-						cv::line(ioFrame, pt1, pt2, iColor, iThickness, CV_AA);
+						cv::line(ioFrame, pt1, pt2, iColor, iThickness, cv::LINE_AA);
 
 					pt2 = pt1;
 				}
 			}
 
-			cv::line(ioFrame, pt1, pt2, iColor, iThickness, CV_AA);
+			cv::line(ioFrame, pt1, pt2, iColor, iThickness, cv::LINE_AA);
 		}
 
 		template<typename _Tp>

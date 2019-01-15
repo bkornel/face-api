@@ -1,5 +1,3 @@
-#include <clm/FDet.h>
-
 #include "Common/Configuration.h"
 #include "Common/ShapeUtil.h"
 #include "Modules/UserProcessor/ShapeModel/ClmWrapper.h"
@@ -56,8 +54,6 @@ namespace face
 			assert(type == FACETRACKER::IO::TRACKER);
 
 			mCLM.Read(infile);
-			FACETRACKER::FDet faceDetector;
-			faceDetector.Read(infile);
 			mFailureCheck.Read(infile);
 
 			FACETRACKER::IO::ReadMat(infile, mReferenceShapeMat2D);

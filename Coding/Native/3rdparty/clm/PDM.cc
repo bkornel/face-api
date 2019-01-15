@@ -345,7 +345,7 @@ void PDM::Read(ifstream &s, bool readType)
 void PDM::Write(ofstream &s)
 {
 	int type = IO::PDM;
-	s.write((char*)(&type), sizeof(int));
+	s << type << " ";
 	IO::WriteMat(s, _V); IO::WriteMat(s, _E); IO::WriteMat(s, _M);
 }
 //===========================================================================

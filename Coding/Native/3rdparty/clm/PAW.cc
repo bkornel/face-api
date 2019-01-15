@@ -165,7 +165,7 @@ void PAW::Crop(const cv::Mat &src, cv::Mat &dst, cv::Mat &s)
 	assert((s.type() == CV_64F) && (s.rows == _src.rows) && (s.cols == 1) &&
 		(src.type() == dst.type()));
 	_dst = s; this->CalcCoeff(); this->WarpRegion(_mapx, _mapy);
-	cv::remap(src, dst, _mapx, _mapy, CV_INTER_LINEAR);
+	cv::remap(src, dst, _mapx, _mapy, cv::INTER_LINEAR);
 }
 //=============================================================================
 void PAW::CalcCoeff()

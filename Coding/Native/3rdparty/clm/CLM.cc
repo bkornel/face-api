@@ -49,6 +49,126 @@
 using namespace FACETRACKER;
 using namespace std;
 
+namespace
+{
+	void get_quadrangle_sub_pix_8u32f(const uchar* iSrc, size_t iSrcStep, const cv::Size& iSrcSize,
+		float* oDst, size_t iDstStep, const cv::Size& iWinSize,
+		const double *iMatrix, int iCn)
+	{
+		int x, y, k;
+		double A11 = iMatrix[0], A12 = iMatrix[1], A13 = iMatrix[2];
+		double A21 = iMatrix[3], A22 = iMatrix[4], A23 = iMatrix[5];
+
+		iSrcStep /= sizeof(iSrc[0]);
+		iDstStep /= sizeof(oDst[0]);
+
+		for (y = 0; y < iWinSize.height; y++, oDst += iDstStep)
+		{
+			double xs = A12 * y + A13;
+			double ys = A22 * y + A23;
+			double xe = A11 * (iWinSize.width - 1) + A12 * y + A13;
+			double ye = A21 * (iWinSize.width - 1) + A22 * y + A23;
+
+			if ((unsigned)(cvFloor(xs) - 1) < (unsigned)(iSrcSize.width - 3) &&
+				(unsigned)(cvFloor(ys) - 1) < (unsigned)(iSrcSize.height - 3) &&
+				(unsigned)(cvFloor(xe) - 1) < (unsigned)(iSrcSize.width - 3) &&
+				(unsigned)(cvFloor(ye) - 1) < (unsigned)(iSrcSize.height - 3))
+			{
+				for (x = 0; x < iWinSize.width; x++)
+				{
+					int ixs = cvFloor(xs);
+					int iys = cvFloor(ys);
+					const uchar *ptr = iSrc + iSrcStep * iys;
+					float a = (float)(xs - ixs), b = (float)(ys - iys), a1 = 1.f - a, b1 = 1.f - b;
+					float w00 = a1 * b1, w01 = a * b1, w10 = a1 * b, w11 = a * b;
+					xs += A11;
+					ys += A21;
+
+					if (iCn == 1)
+					{
+						ptr += ixs;
+						oDst[x] = ptr[0] * w00 + ptr[1] * w01 + ptr[iSrcStep] * w10 + ptr[iSrcStep + 1] * w11;
+					}
+					else if (iCn == 3)
+					{
+						ptr += ixs * 3;
+						float t0 = ptr[0] * w00 + ptr[3] * w01 + ptr[iSrcStep] * w10 + ptr[iSrcStep + 3] * w11;
+						float t1 = ptr[1] * w00 + ptr[4] * w01 + ptr[iSrcStep + 1] * w10 + ptr[iSrcStep + 4] * w11;
+						float t2 = ptr[2] * w00 + ptr[5] * w01 + ptr[iSrcStep + 2] * w10 + ptr[iSrcStep + 5] * w11;
+
+						oDst[x * 3] = t0;
+						oDst[x * 3 + 1] = t1;
+						oDst[x * 3 + 2] = t2;
+					}
+					else
+					{
+						ptr += ixs * iCn;
+						for (k = 0; k < iCn; k++)
+							oDst[x*iCn + k] = ptr[k] * w00 + ptr[k + iCn] * w01 +
+							ptr[iSrcStep + k] * w10 + ptr[iSrcStep + k + iCn] * w11;
+					}
+				}
+			}
+			else
+			{
+				for (x = 0; x < iWinSize.width; x++)
+				{
+					int ixs = cvFloor(xs), iys = cvFloor(ys);
+					float a = (float)(xs - ixs), b = (float)(ys - iys), a1 = 1.f - a, b1 = 1.f - b;
+					float w00 = a1 * b1, w01 = a * b1, w10 = a1 * b, w11 = a * b;
+					const uchar *ptr0, *ptr1;
+					xs += A11; ys += A21;
+
+					if ((unsigned)iys < (unsigned)(iSrcSize.height - 1))
+						ptr0 = iSrc + iSrcStep * iys, ptr1 = ptr0 + iSrcStep;
+					else
+						ptr0 = ptr1 = iSrc + (iys < 0 ? 0 : iSrcSize.height - 1)*iSrcStep;
+
+					if ((unsigned)ixs < (unsigned)(iSrcSize.width - 1))
+					{
+						ptr0 += ixs * iCn; ptr1 += ixs * iCn;
+						for (k = 0; k < iCn; k++)
+							oDst[x*iCn + k] = ptr0[k] * w00 + ptr0[k + iCn] * w01 + ptr1[k] * w10 + ptr1[k + iCn] * w11;
+					}
+					else
+					{
+						ixs = ixs < 0 ? 0 : iSrcSize.width - 1;
+						ptr0 += ixs * iCn; ptr1 += ixs * iCn;
+						for (k = 0; k < iCn; k++)
+							oDst[x*iCn + k] = ptr0[k] * b1 + ptr1[k] * b;
+					}
+				}
+			}
+		}
+	}
+
+	void get_quadrangle_sub_pix(const cv::Mat& iSrc, cv::Mat& oDst, const cv::Mat& iMap)
+	{
+		CV_Assert(iSrc.channels() == oDst.channels());
+
+		cv::Size win_size = oDst.size();
+		double matrix[6] = { 0 };
+		cv::Mat M(2, 3, CV_64F, matrix);
+		iMap.convertTo(M, CV_64F);
+		double dx = (win_size.width - 1)*0.5;
+		double dy = (win_size.height - 1)*0.5;
+		matrix[2] -= matrix[0] * dx + matrix[1] * dy;
+		matrix[5] -= matrix[3] * dx + matrix[4] * dy;
+
+		if (iSrc.depth() == CV_8U && oDst.depth() == CV_32F)
+			get_quadrangle_sub_pix_8u32f(iSrc.ptr(), iSrc.step, iSrc.size(),
+				oDst.ptr<float>(), oDst.step, oDst.size(),
+				matrix, iSrc.channels());
+		else
+		{
+			CV_Assert(iSrc.depth() == oDst.depth());
+			cv::warpAffine(iSrc, oDst, M, oDst.size(),
+				cv::INTER_LINEAR + cv::WARP_INVERSE_MAP,
+				cv::BORDER_REPLICATE);
+		}
+	}
+}
+
 //=============================================================================
 void CalcSimT(cv::Mat &src, cv::Mat &dst,
 	double &a, double &b, double &tx, double &ty)
@@ -73,7 +193,7 @@ void CalcSimT(cv::Mat &src, cv::Mat &dst,
 	}
 	H.db(1, 1) = H.db(0, 0); H.db(1, 2) = H.db(2, 1) = -1.0*(H.db(3, 0) = H.db(0, 3));
 	H.db(1, 3) = H.db(3, 1) = H.db(2, 0) = H.db(0, 2); H.db(2, 2) = H.db(3, 3) = n;
-	cv::solve(H, g, p, CV_CHOLESKY);
+	cv::solve(H, g, p, cv::DECOMP_CHOLESKY);
 	a = p.db(0, 0); b = p.db(1, 0); tx = p.db(2, 0); ty = p.db(3, 0);
 }
 //=============================================================================
@@ -81,7 +201,7 @@ void invSimT(double a1, double b1, double tx1, double ty1,
 	double& a2, double& b2, double& tx2, double& ty2)
 {
 	cv::Mat M = (cv::Mat_<double>(2, 2) << a1, -b1, b1, a1);
-	cv::Mat N = M.inv(CV_SVD); a2 = N.db(0, 0); b2 = N.db(1, 0);
+	cv::Mat N = M.inv(cv::DECOMP_SVD); a2 = N.db(0, 0); b2 = N.db(1, 0);
 	tx2 = -1.0*(N.db(0, 0)*tx1 + N.db(0, 1)*ty1);
 	ty2 = -1.0*(N.db(1, 0)*tx1 + N.db(1, 1)*ty1);
 }
@@ -193,8 +313,7 @@ void CLM::Write(ofstream &s)
 {
 	int type = IO::CLM;
 	int n = _patch.size();
-	s.write((char*)(&type), sizeof(int));
-	s.write((char*)(&n), sizeof(int));
+	s << type << " " << n << " ";
 	_pdm.Write(s);
 	IO::WriteMat(s, _refs);
 	for (int i = 0; i < (int)_cent.size(); i++)IO::WriteMat(s, _cent[i]);
@@ -278,8 +397,7 @@ void CLM::Fit(const cv::Mat& im, vector<int> &wSize,
 				(cv::Mat_<float>(2, 3) << a1, -b1, cshape_.db(i, 0), b1, a1, cshape_.db(i + n, 0));
 			if ((w > wmem_[i].cols) || (h > wmem_[i].rows))wmem_[i].create(h, w, CV_32F);
 			cv::Mat wimg = wmem_[i](cv::Rect(0, 0, w, h));
-			CvMat wimg_o = wimg, sim_o = sim; IplImage im_o = im;
-			cvGetQuadrangleSubPix(&im_o, &wimg_o, &sim_o);
+			get_quadrangle_sub_pix(im, wimg, sim);
 			if (wSize[witer] > pmem_[i].rows)
 				pmem_[i].create(wSize[witer], wSize[witer], CV_64F);
 			prob_[i] = pmem_[i](cv::Rect(0, 0, wSize[witer], wSize[witer]));
@@ -319,8 +437,8 @@ void CLM::Optimize(int idx, int wSize, int nIter,
 		{
 			if (_visi[idx].rows == n && _visi[idx].it(i, 0) == 0)
 			{
-				cv::Mat Jx = J.row(i); Jx = cvScalar(0);
-				cv::Mat Jy = J.row(i + n); Jy = cvScalar(0);
+				cv::Mat Jx = J.row(i); Jx = cv::Scalar::all(0);
+				cv::Mat Jy = J.row(i + n); Jy = cv::Scalar::all(0);
 				ms_.db(i, 0) = 0.0; ms_.db(i + n, 0) = 0.0; continue;
 			}
 			double dx = cshape_.db(i, 0) - bshape_.db(i, 0) + (wSize - 1) / 2;
@@ -348,7 +466,7 @@ void CLM::Optimize(int idx, int wSize, int nIter,
 				H.db(6 + i, 6 + i) += var; g.db(6 + i, 0) -= var * _plocal.db(i, 0);
 			}
 		}
-		u_ = cvScalar(0); cv::solve(H, g, u, CV_CHOLESKY);
+		u_ = cv::Scalar::all(0); cv::solve(H, g, u, cv::DECOMP_CHOLESKY);
 		_pdm.CalcReferenceUpdate(u_, _plocal, _pglobl);
 		if (!rigid)_pdm.Clamp(_plocal, clamp);
 	}

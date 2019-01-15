@@ -5,7 +5,6 @@
 #include <opencv2/core/core.hpp>
 
 #include <clm/CLM.h>
-#include <clm/FDet.h>
 #include <clm/FCheck.h>
 
 #include "Framework/Util.h"

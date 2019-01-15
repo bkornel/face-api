@@ -71,13 +71,13 @@ namespace face
 		for (const auto& c : connections)
 		{
 			cv::Vec3b color((colorMap.at<cv::Vec3b>(c.first, 0) + colorMap.at<cv::Vec3b>(c.second, 0)) / 2);
-			cv::line(oImage, shape2D[c.first], shape2D[c.second], cv::Scalar(color), 2, CV_AA);
+			cv::line(oImage, shape2D[c.first], shape2D[c.second], cv::Scalar(color), 2, cv::LINE_AA);
 		}
 
 		// draw points
 		for (int i = 0; i < shape2D.size(); i++)
 		{
-			cv::drawMarker(oImage, shape2D[i], colorMap.at<cv::Vec3b>(i, 0), cv::MarkerTypes::MARKER_CROSS, 5, 1, CV_AA);
+			cv::drawMarker(oImage, shape2D[i], colorMap.at<cv::Vec3b>(i, 0), cv::MarkerTypes::MARKER_CROSS, 5, 1, cv::LINE_AA);
 		}
 	}
 
@@ -164,8 +164,8 @@ namespace face
 
 		for (size_t i = 0; i < axes2D.size(); i++)
 		{
-			cv::arrowedLine(oImage, axes2D[0] - shiftPt, axes2D[i] - shiftPt, cv::Scalar::all(50), 3, CV_AA, 0, 0.075);
-			cv::arrowedLine(oImage, axes2D[0] - shiftPt, axes2D[i] - shiftPt, mColorsOfAxes[i], 2, CV_AA, 0, 0.075);
+			cv::arrowedLine(oImage, axes2D[0] - shiftPt, axes2D[i] - shiftPt, cv::Scalar::all(50), 3, cv::LINE_AA, 0, 0.075);
+			cv::arrowedLine(oImage, axes2D[0] - shiftPt, axes2D[i] - shiftPt, mColorsOfAxes[i], 2, cv::LINE_AA, 0, 0.075);
 		}
 
 		shiftPt += cv::Point2d(10.0, 10.0);

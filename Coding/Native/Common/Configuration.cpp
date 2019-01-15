@@ -78,7 +78,7 @@ namespace face
 				mOutput.videoFPS = fw::str::convert_to_number<float>(value);
 
 			if (fw::ocv::get_value(outputNode, "videoFourCC", value) && (value.size() == 4))
-				mOutput.videoFourCC = CV_FOURCC(value[0], value[1], value[2], value[3]);
+				mOutput.videoFourCC = cv::VideoWriter::fourcc(value[0], value[1], value[2], value[3]);
 		}
 
 		const cv::FileNode& dirNode = iGeneralNode["directories"];
