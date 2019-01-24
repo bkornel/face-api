@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:background="@color/camera_params_background"
+              style="@style/LinearLayout.ActionsDialog">
+
+    <RelativeLayout style="@style/RelativeLayout.SettingsItem">
+
+        <TextView
+            android:text="@string/preview_sizes_caption"
+            style="@style/TextView.CameraSettingsItemTitle"/>
+
+        <Spinner
+            android:id="@+id/preview_sizes"
+            style="@style/Spinner.CameraParamsItem"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout style="@style/RelativeLayout.SettingsItem">
+
+        <TextView
+            android:text="@string/focus_mode_caption"
+            style="@style/TextView.CameraSettingsItemTitle"/>
+
+        <Spinner
+            android:id="@+id/focus_modes"
+            style="@style/Spinner.CameraParamsItem"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout style="@style/RelativeLayout.SettingsItem">
+
+        <TextView
+            android:text="@string/flash_mode_caption"
+            style="@style/TextView.CameraSettingsItemTitle"/>
+
+        <Spinner
+            android:id="@+id/flash_modes"
+            style="@style/Spinner.CameraParamsItem"/>
+
+    </RelativeLayout>
+
+    <Button
+         android:id="@+id/close"
+         android:text="@string/close_caption"
+         android:textColor="@android:color/white"
+         android:layout_marginTop="@dimen/base_padding"
+         style="@style/Button.ActionDialog"/>
+
+</LinearLayout>

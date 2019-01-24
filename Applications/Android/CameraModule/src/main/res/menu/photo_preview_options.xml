@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+         android:id="@+id/delete"
+         android:showAsAction="ifRoom"
+         android:onClick="deletePhoto"
+         android:title="@string/delete_caption"/>
+
+    <item
+         android:id="@+id/rotate_left"
+         android:showAsAction="ifRoom"
+         android:onClick="rotateLeft"
+         android:title="@string/left_caption"/>
+
+    <item
+         android:id="@+id/rotate_right"
+         android:showAsAction="ifRoom"
+         android:onClick="rotateRight"
+         android:title="@string/right_caption"/>
+
+</menu>

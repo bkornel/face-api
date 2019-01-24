@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.yalantis.cameramodule">
+
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+
+    <uses-feature android:name="android.hardware.camera" android:required="true"/>
+    <uses-feature android:name="android.hardware.camera.autofocus"/>
+
+    <application>
+        <activity
+             android:name="com.yalantis.cameramodule.activity.CameraActivity"
+             android:theme="@style/Theme.TranslucentNavigationBar"
+             android:configChanges="orientation|screenSize|keyboardHidden"
+             android:screenOrientation="portrait"/>
+        <activity
+             android:name="com.yalantis.cameramodule.activity.PhotoPreviewActivity"
+             android:label="@string/photo_preview_caption"
+             android:screenOrientation="portrait"/>
+    </application>
+</manifest>

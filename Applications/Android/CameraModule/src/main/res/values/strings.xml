@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name_caption">FaceApp</string>
+    <string name="delete_caption">Delete</string>
+    <string name="left_caption">Left</string>
+    <string name="right_caption">Right</string>
+    <string name="camera_unavailable_caption">Camera is not available (in use or does not exist).\nPlease close applications, that may use camera.</string>
+    <string name="zoom_changed_caption">Zoom: %1.2fx</string>
+    <string name="settings_caption">Settings</string>
+    <string name="close_caption">Close</string>
+    <string name="focus_mode_caption">Focus mode</string>
+    <string name="flash_mode_caption">Flash mode</string>
+    <string name="preview_sizes_caption">Preview sizes</string>
+    <string name="photo_preview_caption">Photo preview</string>
+    <string name="change_camera_caption">Change camera</string>
+    <string name="take_a_picture_caption">Take a picture</string>
+    <string name="reset_caption">Reset</string>
+</resources>
