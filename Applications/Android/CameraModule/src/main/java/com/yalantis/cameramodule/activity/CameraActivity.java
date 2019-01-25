@@ -30,7 +30,6 @@ public class CameraActivity
         implements PhotoTakenCallback, PhotoSavedListener {
 
     static {
-        //System.loadLibrary("opencv_java3");
         System.loadLibrary("face_native");
     }
 
@@ -140,16 +139,16 @@ public class CameraActivity
     public boolean onKeyDown(int keyCode, @NonNull KeyEvent event) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
-                mCameraFragment.zoomIn();
+                mCameraFragment.onZoomInPressed();
                 return true;
             case KeyEvent.KEYCODE_VOLUME_DOWN:
-                mCameraFragment.zoomOut();
+                mCameraFragment.onZoomOutPressed();
                 return true;
             case KeyEvent.KEYCODE_BACK:
                 onBackPressed();
                 return true;
             case KeyEvent.KEYCODE_CAMERA:
-                mCameraFragment.takePhoto();
+                mCameraFragment.onCapturePressed();
                 return true;
         }
         return false;

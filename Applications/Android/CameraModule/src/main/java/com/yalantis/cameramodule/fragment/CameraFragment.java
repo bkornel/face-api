@@ -26,9 +26,9 @@ import com.yalantis.cameramodule.control.FocusView;
 import com.yalantis.cameramodule.event.EventArgs;
 import com.yalantis.cameramodule.event.FlashModeArgs;
 import com.yalantis.cameramodule.event.FocusModeArgs;
+import com.yalantis.cameramodule.event.FocusedArgs;
 import com.yalantis.cameramodule.event.PictureSizeArgs;
-import com.yalantis.cameramodule.interfaces.FocusCallback;
-import com.yalantis.cameramodule.interfaces.KeyEventsListener;
+import com.yalantis.cameramodule.event.ZoomChangedArgs;
 import com.yalantis.cameramodule.interfaces.PhotoSavedListener;
 import com.yalantis.cameramodule.interfaces.PhotoTakenCallback;
 
@@ -41,7 +41,7 @@ import timber.log.Timber;
 @SuppressWarnings("deprecation")
 public class CameraFragment
         extends com.yalantis.cameramodule.fragment.BaseFragment
-        implements PhotoSavedListener, KeyEventsListener, FocusCallback {
+        implements PhotoSavedListener {
 
 
     private PhotoTakenCallback mPhotoTakenCallback;
@@ -50,10 +50,6 @@ public class CameraFragment
     private int mScreenHeight;
     private int mNavigationBarHeight;
     private int mStatusBarHeight;
-    private List<Integer> mZoomRatios;
-    private int mZoomIndex;
-    private int mMinZoomIndex;
-    private int mMaxZoomIndex;
     private ArrayList<PictureSize> mPreviewSizes = new ArrayList<>();
     private PictureSize mPreviewSize;
     private Camera mCamera;
@@ -75,7 +71,7 @@ public class CameraFragment
                 mPhotoTakenCallback.photoTaken(data.clone(), mDeviceOrientation);
             }
             camera.startPreview();
-            mFocusView.onPictureTaken();
+            mFocusView.resetCameraFocus();
         }
 
     };
@@ -102,9 +98,6 @@ public class CameraFragment
         }
 
         Camera.Parameters parameters = mCamera.getParameters();
-        mZoomRatios = parameters.getZoomRatios();
-        mZoomIndex = mMinZoomIndex = 0;
-        mMaxZoomIndex = parameters.getMaxZoom();
 
         initPreviewSize();
         initScreenParams();
@@ -132,12 +125,12 @@ public class CameraFragment
 
         mCaptureButton = view.findViewById(R.id.capture);
         if (mCaptureButton != null) {
-            mCaptureButton.setOnClickListener(v -> takePhoto());
+            mCaptureButton.setOnClickListener(v -> onCapturePressed());
         }
 
         View cameraChangeBtn = view.findViewById(R.id.camera_change);
         if (cameraChangeBtn != null) {
-            cameraChangeBtn.setOnClickListener(v -> changeCamera());
+            cameraChangeBtn.setOnClickListener(v -> onCameraChangePressed());
         }
 
         View cameraSettingsBtn = view.findViewById(R.id.camera_settings);
@@ -169,17 +162,13 @@ public class CameraFragment
         nativeImageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
         nativeImageView.setAdjustViewBounds(true);
         mCameraPreview = new CameraPreview(mActivity, mCamera, mCameraId, nativeImageView);
-        mFocusView = new FocusView(mActivity, mCamera, focusImageView, this, this);
+        mFocusView = new FocusView(mActivity, mCamera, focusImageView);
         mViewGroup.addView(mCameraPreview);
         mViewGroup.addView(mFocusView);
         mViewGroup.addView(nativeImageView);
         mViewGroup.addView(focusImageView);
 
         setPreviewContainerSize();
-
-        if (mZoomRatioTextView != null) {
-            setZoomRatioText(mZoomIndex);
-        }
 
         if (mControlsLayout != null) {
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
@@ -190,6 +179,9 @@ public class CameraFragment
 
             mControlsLayout.setLayoutParams(params);
         }
+
+        mFocusView.ZoomChanged.addHandler(this::onZoomChanged);
+        mFocusView.Focused.addHandler(this::onFocused);
     }
 
     private Camera getCameraInstance(boolean useFrontCamera) {
@@ -269,10 +261,14 @@ public class CameraFragment
         return 0;
     }
 
-    @Override
-    public void onFocused(Camera camera) {
-        // TODO: should be another callback as the onfocused is called independently from taking picture
-        //camera.takePicture(null, null, mPictureCallback);
+    public void onFocused(Object sender, EventArgs args) {
+        if(!(args instanceof FocusedArgs)) return;
+
+        FocusedArgs arguments = ((FocusedArgs)args);
+
+        if (arguments.getInitiator() == FocusedArgs.Initiator.TAKE_PICTURE) {
+            mCamera.takePicture(null, null, mPictureCallback);
+        }
     }
 
     @Override
@@ -344,24 +340,7 @@ public class CameraFragment
         mFocusView.resetCameraFocus();
     }
 
-    @Override
-    public void zoomIn() {
-        if (++mZoomIndex > mMaxZoomIndex) {
-            mZoomIndex = mMaxZoomIndex;
-        }
-        setZoom(mZoomIndex);
-    }
-
-    @Override
-    public void zoomOut() {
-        if (--mZoomIndex < mMinZoomIndex) {
-            mZoomIndex = mMinZoomIndex;
-        }
-        setZoom(mZoomIndex);
-    }
-
-    @Override
-    public void changeCamera() {
+    public void onCameraChangePressed() {
         mCameraId = (mCameraId == Camera.CameraInfo.CAMERA_FACING_FRONT ? Camera.CameraInfo.CAMERA_FACING_BACK : Camera.CameraInfo.CAMERA_FACING_FRONT);
 
         Configuration.i.setUseFrontCamera(mCameraId == Camera.CameraInfo.CAMERA_FACING_FRONT);
@@ -380,8 +359,7 @@ public class CameraFragment
         initView();
     }
 
-    @Override
-    public void takePhoto() {
+    public void onCapturePressed() {
         mCaptureButton.setEnabled(false);
         mCaptureButton.setVisibility(View.INVISIBLE);
         if (mProgressBar != null) {
@@ -390,17 +368,26 @@ public class CameraFragment
         mFocusView.takePicture();
     }
 
-    private void setZoom(int index) {
+    public void onZoomInPressed() {
+        if (mFocusView != null) mFocusView.zoomIn();
+    }
+
+    public void onZoomOutPressed() {
+        if (mFocusView != null) mFocusView.zoomOut();
+    }
+
+    private void onZoomChanged(Object sender, EventArgs args) {
+        if(!(args instanceof ZoomChangedArgs)) return;
+
+        int index = ((ZoomChangedArgs)args).getIndex();
+        float zoom = ((ZoomChangedArgs)args).getValue() / 100.0f;
+
         Camera.Parameters parameters = mCamera.getParameters();
         parameters.setZoom(index);
         mCamera.setParameters(parameters);
-        setZoomRatioText(index);
-    }
 
-    private void setZoomRatioText(int index) {
         if (mZoomRatioTextView != null) {
-            float value = mZoomRatios.get(index) / 100.0f;
-            mZoomRatioTextView.setText(getString(R.string.zoom_changed_caption, value));
+            mZoomRatioTextView.setText(getString(R.string.zoom_changed_caption, zoom));
         }
     }
 

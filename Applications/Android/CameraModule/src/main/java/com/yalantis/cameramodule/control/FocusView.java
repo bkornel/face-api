@@ -20,17 +20,23 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.yalantis.cameramodule.common.Configuration;
-import com.yalantis.cameramodule.interfaces.FocusCallback;
-import com.yalantis.cameramodule.interfaces.KeyEventsListener;
+import com.yalantis.cameramodule.event.Event;
+import com.yalantis.cameramodule.event.FocusedArgs;
+import com.yalantis.cameramodule.event.IEvent;
+import com.yalantis.cameramodule.event.ZoomChangedArgs;
 import com.yalantis.cameramodule.common.camera.FocusMode;
 
 import java.math.BigDecimal;
 import java.util.Collections;
+import java.util.List;
 
 import timber.log.Timber;
 
 @SuppressWarnings("deprecation")
 public class FocusView extends SurfaceView implements SurfaceHolder.Callback, Camera.AutoFocusCallback {
+
+    public final IEvent<ZoomChangedArgs> ZoomChanged = new Event<>();
+    public final IEvent<FocusedArgs> Focused = new Event<>();
 
     private static final float FOCUS_AREA_SIZE = 75.0f;
     private static final float STROKE_WIDTH = 5.0f;
@@ -39,19 +45,23 @@ public class FocusView extends SurfaceView implements SurfaceHolder.Callback, Ca
 
     private Activity mActivity;
     private Camera mCamera;
-    private KeyEventsListener mKeyEventsListener;
 
     private ImageView mFocusImageView;
     private Canvas mFocusCanvas;
     private Paint mFocusPaint;
+    private FocusedArgs.Initiator mFocusInitiator;
 
-    private FocusCallback mFocusCallback;
     private boolean mFocusing;
     private float mFocusCoeffW;
     private float mFocusCoeffH;
 
-    private float mPrevScaleFactor;
     private Rect mTapArea;
+
+    private List<Integer> mZoomRatios;
+    private int mZoomIndex;
+    private int mMinZoomIndex;
+    private int mMaxZoomIndex;
+    private float mPrevScaleFactor;
 
     public FocusView(Context context) {
         super(context);
@@ -61,14 +71,13 @@ public class FocusView extends SurfaceView implements SurfaceHolder.Callback, Ca
         super(context, attrs);
     }
 
-    public FocusView(Activity activity, Camera camera, ImageView focusImageView, FocusCallback focusCallback, KeyEventsListener keyEventsListener) {
+    public FocusView(Activity activity, Camera camera, ImageView focusImageView) {
         super(activity);
 
         mActivity = activity;
         mCamera = camera;
         mFocusImageView = focusImageView;
-        mFocusCallback = focusCallback;
-        mKeyEventsListener = keyEventsListener;
+        mFocusInitiator = FocusedArgs.Initiator.TOUCH;
 
         // Install a SurfaceHolder.Callback so we get notified when the underlying surface is created and destroyed.
         SurfaceHolder holder = getHolder();
@@ -102,6 +111,12 @@ public class FocusView extends SurfaceView implements SurfaceHolder.Callback, Ca
         mFocusCoeffW = width / FOCUS_AREA_FULL_SIZE;
         mFocusCoeffH = height / FOCUS_AREA_FULL_SIZE;
 
+        // Init zoom
+        Camera.Parameters parameters = mCamera.getParameters();
+        mZoomRatios = parameters.getZoomRatios();
+        mZoomIndex = mMinZoomIndex = 0;
+        mMaxZoomIndex = parameters.getMaxZoom();
+
         setOnTouchListener(new CameraTouchListener());
     }
 
@@ -112,18 +127,18 @@ public class FocusView extends SurfaceView implements SurfaceHolder.Callback, Ca
     }
 
     private void startFocusing() {
-        // mCamera.autoFocus is called only if it has auto focus
-        if (mFocusing || !hasAutoFocus()) return;
-
         mFocusing = true;
         mCamera.autoFocus(this);
     }
 
     public void takePicture() {
+        mFocusInitiator = FocusedArgs.Initiator.TAKE_PICTURE;
+
         if (hasAutoFocus()) {
             startFocusing();
         } else {
-            focused();
+            mFocusing = false;
+            Focused.raise(this, new FocusedArgs(false, mCamera, mFocusInitiator));
         }
     }
 
@@ -152,19 +167,9 @@ public class FocusView extends SurfaceView implements SurfaceHolder.Callback, Ca
     }
 
     @Override
-    public void onAutoFocus(boolean success, Camera camera) {
-        focused();
-    }
-
-    private void focused() {
+    public void onAutoFocus(boolean iSuccess, Camera iCamera) {
         mFocusing = false;
-        if (mFocusCallback != null) {
-            mFocusCallback.onFocused(mCamera);
-        }
-    }
-
-    public void onPictureTaken() {
-        resetCameraFocus();
+        Focused.raise(this, new FocusedArgs(iSuccess, iCamera, mFocusInitiator));
     }
 
     protected void focusOnTouch(MotionEvent event) {
@@ -188,6 +193,7 @@ public class FocusView extends SurfaceView implements SurfaceHolder.Callback, Ca
         }
 
         mCamera.setParameters(parameters);
+        mFocusInitiator = FocusedArgs.Initiator.TAKE_PICTURE;
 
         startFocusing();
     }
@@ -218,16 +224,30 @@ public class FocusView extends SurfaceView implements SurfaceHolder.Callback, Ca
         return Math.round(Math.min(Math.max(value, -1000), 1000));
     }
 
-    private void scale(float scaleFactor) {
+    public void zoomIn() {
+        if (++mZoomIndex > mMaxZoomIndex) {
+            mZoomIndex = mMaxZoomIndex;
+        }
+        ZoomChanged.raise(this, new ZoomChangedArgs(mZoomIndex, mZoomRatios.get(mZoomIndex)));
+    }
+
+    public void zoomOut() {
+        if (--mZoomIndex < mMinZoomIndex) {
+            mZoomIndex = mMinZoomIndex;
+        }
+        ZoomChanged.raise(this, new ZoomChangedArgs(mZoomIndex, mZoomRatios.get(mZoomIndex)));
+    }
+
+    private void zoomByScale(float scaleFactor) {
         scaleFactor = BigDecimal.valueOf(scaleFactor).setScale(ACCURACY, BigDecimal.ROUND_HALF_UP).floatValue();
         if (Float.compare(scaleFactor, 1.0f) == 0 || Float.compare(scaleFactor, mPrevScaleFactor) == 0) {
             return;
         }
         if (scaleFactor > 1f) {
-            mKeyEventsListener.zoomIn();
+            zoomIn();
         }
         if (scaleFactor < 1f) {
-            mKeyEventsListener.zoomOut();
+            zoomOut();
         }
         mPrevScaleFactor = scaleFactor;
     }
@@ -261,7 +281,7 @@ public class FocusView extends SurfaceView implements SurfaceHolder.Callback, Ca
         private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
             @Override
             public boolean onScale(ScaleGestureDetector detector) {
-                scale(detector.getScaleFactor());
+                zoomByScale(detector.getScaleFactor());
                 return true;
             }
         }
@@ -269,7 +289,10 @@ public class FocusView extends SurfaceView implements SurfaceHolder.Callback, Ca
         private class TapListener extends GestureDetector.SimpleOnGestureListener {
             @Override
             public boolean onSingleTapConfirmed(MotionEvent event) {
-                focusOnTouch(event);
+                // mCamera.autoFocus is called only if it has auto focus
+                if (!mFocusing && hasAutoFocus()) {
+                    focusOnTouch(event);
+                }
                 return true;
             }
         }
