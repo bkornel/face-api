@@ -1,7 +1,3 @@
-// https://examples.javacodegeeks.com/core-java/util/observer/java-util-observer-example/
-// https://stackoverflow.com/questions/6270132/create-a-custom-event-in-java
-// https://developer.android.com/guide/components/fragments
-
 package com.yalantis.cameramodule.fragment;
 
 import android.content.res.Resources;
@@ -17,6 +13,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.yalantis.cameramodule.R;
 import com.yalantis.cameramodule.common.Configuration;
@@ -150,7 +147,11 @@ public class CameraFragment
 
         View nativeResetBtn = view.findViewById(R.id.native_reset);
         if (nativeResetBtn != null) {
-            nativeResetBtn.setOnClickListener(v -> NativeReset());
+            nativeResetBtn.setOnClickListener(v -> {
+                Toast toast = Toast.makeText(getActivity().getApplicationContext(), "Clearing users", Toast.LENGTH_SHORT);
+                toast.show();
+                NativeReset();
+            });
         }
 
         settingsFragment.PreviewSizeChanged.addHandler(this::onPreviewSizeChanged);
