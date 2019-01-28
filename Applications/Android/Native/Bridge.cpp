@@ -42,7 +42,7 @@ namespace
 extern "C"
 {
 	JNIEXPORT jint JNICALL 
-	Java_com_yalantis_cameramodule_fragment_CameraFragment_NativeReset(JNIEnv* env, jobject thiz)
+	Java_com_face_fragment_CameraFragment_NativeReset(JNIEnv* env, jobject thiz)
 	{
 		FACE_LOG_JNI("RESET NATIVE SIDE");
 		face::FaceApi::GetInstance().Clear();
@@ -50,7 +50,7 @@ extern "C"
 	}
 	
 	JNIEXPORT jint JNICALL 
-	Java_com_yalantis_cameramodule_activity_CameraActivity_NativeInitialize(JNIEnv* env, jobject thiz, jstring path)
+	Java_com_face_activity_CameraActivity_NativeInitialize(JNIEnv* env, jobject thiz, jstring path)
 	{
 		FACE_LOG_JNI("INITIALIZING NATIVE SIDE");
 
@@ -81,7 +81,7 @@ extern "C"
 	}
 	
 	JNIEXPORT jint JNICALL 
-	Java_com_yalantis_cameramodule_control_CameraPreview_NativeProcess(JNIEnv* env, jobject thiz, jint rotation, jint width, jint height, jbyteArray yuv, jintArray argb)
+	Java_com_face_control_CameraView_NativeProcess(JNIEnv* env, jobject thiz, jint rotation, jint width, jint height, jbyteArray yuv, jintArray argb)
 	{
 		int retVal = 0;
 		

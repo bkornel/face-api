@@ -1,6 +1,6 @@
 LOCAL_PATH := $(call my-dir)
 
-DEPENDENCIES_PATH := $(LOCAL_PATH)/../../../../3rdparty
+DEPENDENCIES_PATH := $(LOCAL_PATH)/../../../../../3rdparty
 
 # OpenCV headers and libraries
 # =======================================================

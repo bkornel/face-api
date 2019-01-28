@@ -3,11 +3,11 @@
     <item android:state_pressed="true">
         <bitmap
             android:src="@drawable/icon_trash"
-            android:alpha="1.0" />
+            android:alpha="0.5" />
     </item>
     <item android:state_pressed="false">
         <bitmap
             android:src="@drawable/icon_trash"
-            android:alpha="0.8" />
+            android:alpha="1.0" />
     </item>
 </selector>

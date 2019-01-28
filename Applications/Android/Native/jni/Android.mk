@@ -4,7 +4,7 @@ include $(LOCAL_PATH)/Dependencies.mk
 
 # Face API headers and sources
 # =======================================================
-NATIVE_PATH := $(LOCAL_PATH)/../../../FaceApi
+NATIVE_PATH := $(LOCAL_PATH)/../../../../FaceApi
 BRIDGE_PATH := $(LOCAL_PATH)/..
 
 NATIVE_DIRS := 										\

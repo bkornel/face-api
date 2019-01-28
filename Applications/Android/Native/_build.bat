@@ -7,6 +7,6 @@ copy Application.mk jni
 cd jni
 call %ANDROID_NDK%\ndk-build.cmd
 
-xcopy ..\libs\armeabi-v7a\libface_native.so ..\CameraModule\src\main\jniLibs\armeabi-v7a\ /D /Y
+xcopy ..\libs\armeabi-v7a\libface_native.so ..\..\CameraModule\src\main\jniLibs\armeabi-v7a\ /D /Y
 
 pause
