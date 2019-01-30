@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ImageFormat;
 import android.graphics.PorterDuff;
 import android.hardware.Camera;
 import android.os.AsyncTask;
@@ -14,6 +15,9 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.ImageView;
 
+import com.face.common.Configuration;
+import com.face.common.camera.PictureSize;
+
 import java.lang.ref.WeakReference;
 
 import timber.log.Timber;
@@ -21,14 +25,16 @@ import timber.log.Timber;
 @SuppressWarnings("deprecation")
 public class CameraView extends SurfaceView implements SurfaceHolder.Callback, Camera.PreviewCallback {
 
+    private static ProcessAsyncTask sNativeTask;
+
     private int mCameraId;
     private Activity mActivity;
     private Camera mCamera;
-    private ProcessAsyncTask mNativeTask;
     private ImageView mNativeImageView;
     private Canvas mNativeCanvas;
     private int mDisplayOrientation;
     private int mImageOrientation;
+
     public CameraView(Context iContext) {
         super(iContext);
     }
@@ -37,13 +43,16 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback, C
         super(iContext, iAttributeSet);
     }
 
-    public CameraView(Activity iActivity, Camera iCamera, int iCameraId, ImageView iImageView) {
+    public CameraView(Activity iActivity, Camera iCamera, int iCameraId) {
         super(iActivity);
 
         mCameraId = iCameraId;
         mActivity = iActivity;
         mCamera = iCamera;
-        mNativeImageView = iImageView;
+
+        mNativeImageView = new ImageView(mActivity);
+        mNativeImageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+        mNativeImageView.setAdjustViewBounds(true);
 
         // Install a SurfaceHolder.Callback so we get notified when the underlying surface is created and destroyed.
         SurfaceHolder holder = getHolder();
@@ -56,6 +65,9 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback, C
     @SuppressWarnings("JniMissingFunction")
     private native int NativeProcess(int iRotation, int iWidth, int iHeight, byte iYUV[], int[] iRGBA);
 
+    @SuppressWarnings("JniMissingFunction")
+    private native int NativeReset();
+
     public void surfaceCreated(SurfaceHolder iHolder) {
         startPreview(iHolder);
     }
@@ -63,8 +75,9 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback, C
     public void surfaceDestroyed(SurfaceHolder iHolder) {
         stopPreview();
 
-        if (mNativeTask != null) {
-            cancel();
+        SurfaceHolder holder = getHolder();
+        if (holder != null) {
+            holder.removeCallback(this);
         }
     }
 
@@ -74,11 +87,29 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback, C
             return;
         }
 
+        if (sNativeTask == null) {
+            sNativeTask = new ProcessAsyncTask();
+            sNativeTask.execute();
+        }
+
+        sNativeTask.setCameraView(this);
+
         Bitmap bitmap = Bitmap.createBitmap(iWidth, iHeight, Bitmap.Config.ARGB_8888);
         mNativeCanvas = new Canvas(bitmap);
         mNativeImageView.setImageBitmap(bitmap);
 
         stopPreview();
+        clearUsers();
+
+        Camera.Parameters parameters = mCamera.getParameters();
+        PictureSize previewSize = Configuration.i.getPreviewSize();
+        if (previewSize != null) {
+            parameters.setPreviewSize(previewSize.getWidth(), previewSize.getHeight());
+            parameters.setPreviewFormat(ImageFormat.NV21);
+        }
+
+        mCamera.setParameters(parameters);
+
         startPreview(iHolder);
     }
 
@@ -104,6 +135,10 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback, C
                 Timber.e(e, "Error stopping preview: " + e.getMessage());
             }
         }
+    }
+
+    public void clearUsers() {
+        NativeReset();
     }
 
     public void setDisplayOrientation() {
@@ -152,66 +187,53 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback, C
             return;
         }
 
-        if (mNativeTask == null) {
-            mNativeTask = new ProcessAsyncTask(this);
-            mNativeTask.execute();
-        }
-
-        if (mNativeTask.getStatus() == AsyncTask.Status.RUNNING) {
+        if (sNativeTask.getStatus() == AsyncTask.Status.RUNNING) {
             Camera.Size size = iCamera.getParameters().getPreviewSize();
-            mNativeTask.setFrame(iBytes, mImageOrientation, size.width, size.height);
+            sNativeTask.setFrame(iBytes, mImageOrientation, size.width, size.height);
         }
     }
 
     public Bitmap getOutputBitmap() {
-        if (mNativeTask != null) {
-            return mNativeTask.getOutputBitmap();
-        }
-        return null;
+        return sNativeTask.getOutputBitmap();
     }
 
-    public void cancel() {
-        if (mNativeTask != null) {
-            mNativeTask.cancel(false);
-
-            try {
-                Thread.sleep(50);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-                Timber.e(e, "InterruptedException in cancel()");
-            }
-        }
+    public ImageView getNativeImageView() {
+        return mNativeImageView;
     }
 
     private static class ProcessAsyncTask extends AsyncTask<Void, Void, Boolean> {
         private static final Object sOutputBitmapLock = new Object();
-        private WeakReference<CameraView> mCameraPreview;
+        private WeakReference<CameraView> mCameraView;
         private volatile boolean mIsInputSet = false;
-        private volatile boolean mIsOutputSet = false;
+        //private volatile boolean mIsOutputSet = false;
         private NativeFrame mNativeFrame = new NativeFrame();
         private Bitmap mOutputBitmap;
-        ProcessAsyncTask(CameraView cameraPreview) {
-            mCameraPreview = new WeakReference<>(cameraPreview);
-        }
 
         public Bitmap getOutputBitmap() {
             synchronized (sOutputBitmapLock) {
-                if (mIsOutputSet) {
-                    return mOutputBitmap.copy(mOutputBitmap.getConfig(), true);
-                }
+                return mOutputBitmap != null ? mOutputBitmap.copy(mOutputBitmap.getConfig(), true) : null;
             }
-            return null;
+        }
+
+        public void setCameraView(CameraView iCameraView) {
+            mCameraView = new WeakReference<>(iCameraView);
         }
 
         protected int NativeCall(int iRotation, int iWidth, int iHeight, byte iYUV[], int[] iRGBA) {
-            CameraView cp = mCameraPreview.get();
+            CameraView cp = mCameraView.get();
             if (cp == null || cp.mActivity.isFinishing()) return -1;
 
             return cp.NativeProcess(iRotation, iWidth, iHeight, iYUV, iRGBA);
         }
 
         protected void setFrame(byte[] iYUV, int iRotation, int iWidth, int iHeight) {
-            if (!isCancelled() && !mIsInputSet) {
+            if (isCancelled() || iYUV == null || iYUV.length != (iWidth * iHeight * 3 / 2)) {
+                //mIsInputSet = mIsOutputSet = false;
+                mIsInputSet = false;
+                return;
+            }
+
+            if (!mIsInputSet) {
                 if (mNativeFrame.YUV == null || mNativeFrame.YUV.length != iYUV.length) {
                     mNativeFrame.YUV = new byte[iYUV.length];
                 }
@@ -225,7 +247,7 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback, C
                 mNativeFrame.width = iWidth;
                 mNativeFrame.height = iHeight;
                 mIsInputSet = true;
-                mIsOutputSet = false;
+                //mIsOutputSet = false;
             }
         }
 
@@ -251,7 +273,7 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback, C
                             }
 
                             mOutputBitmap.setPixels(mNativeFrame.RGBA, 0, argbW, 0, 0, argbW, argbH);
-                            mIsOutputSet = true;
+                            //mIsOutputSet = true;
                         }
                         publishProgress();
                     } else {
@@ -275,9 +297,14 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback, C
 
         @Override
         protected void onProgressUpdate(Void... iProgress) {
-            CameraView cp = mCameraPreview.get();
+            if (mOutputBitmap == null) {
+                return;
+            }
 
-            if (!mIsOutputSet || cp == null || cp.mActivity.isFinishing()) return;
+            CameraView cp = mCameraView.get();
+
+            //if (!mIsOutputSet || cp == null || cp.mActivity.isFinishing()) return;
+            if (cp == null || cp.mActivity.isFinishing()) return;
 
             int ivWidth = cp.mNativeImageView.getWidth();
             int ivHeight = cp.mNativeImageView.getHeight();

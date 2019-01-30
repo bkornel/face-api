@@ -1,7 +1,5 @@
 package com.face.fragment;
 
-import android.content.res.Resources;
-import android.graphics.ImageFormat;
 import android.hardware.Camera;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -10,7 +8,6 @@ import android.view.LayoutInflater;
 import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -49,61 +46,42 @@ public class CameraFragment extends BaseFragment {
     private OrientationEventListener mOrientationEventListener;
     private int mScreenWidth;
     private int mScreenHeight;
-    private int mNavigationBarHeight;
-    private int mStatusBarHeight;
     private ArrayList<PictureSize> mPreviewSizes = new ArrayList<>();
     private PictureSize mPreviewSize;
     private Camera mCamera;
     private CameraView mCameraPreview;
     private FocusView mFocusView;
+    private SettingsFragment mSettingsFragment;
     private ViewGroup mViewGroup;
     private View mCaptureButton;
-    private View mControlsLayout;
+    private View mCameraSettingsButton;
     private ProgressBar mProgressBar;
     private TextView mZoomRatioTextView;
     private int mCameraId;
     private int mDeviceOrientation;
     private SavingPhotoTask mSavingPhotoTask;
-
-    @SuppressWarnings("JniMissingFunction")
-    private native int NativeReset();
+    private boolean mCapturePressed;
 
     @Override
     public void onCreate(Bundle iSavedInstanceState) {
         super.onCreate(iSavedInstanceState);
-        initFragment();
-    }
 
-    private void initFragment() {
+        mCapturePressed = false;
         mCamera = getCameraInstance(Configuration.i.useFrontCamera());
-        if (mCamera == null) {
-            return;
-        }
 
-        Camera.Parameters parameters = mCamera.getParameters();
-
-        initPreviewSize();
-        initScreenParams();
-
-        parameters.setPreviewSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
-        parameters.setPreviewFormat(ImageFormat.NV21);
-
-        List<String> focusModes = parameters.getSupportedFocusModes();
-        if (focusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
-            parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
-        }
-
-        mCamera.setParameters(parameters);
+        initializeFocusMode();
+        initializeFlashMode();
+        initializePreviewSize();
+        initializeScreenParams();
     }
 
     @Override
     public View onCreateView(LayoutInflater iInflater, ViewGroup iContainer, Bundle iSavedInstanceState) {
         View view = iInflater.inflate(R.layout.fragment_camera, iContainer, false);
-        SettingsFragment settingsFragment = SettingsFragment.getInstance();
 
         mViewGroup = view.findViewById(R.id.camera_preview);
         mProgressBar = view.findViewById(R.id.progress);
-        mControlsLayout = view.findViewById(R.id.controls_layout);
+        mCameraSettingsButton = view.findViewById(R.id.camera_settings);
 
         mZoomRatioTextView = view.findViewById(R.id.zoom_ratio);
         if (mZoomRatioTextView != null) {
@@ -120,55 +98,57 @@ public class CameraFragment extends BaseFragment {
             cameraChangeBtn.setOnClickListener(v -> onCameraChangePressed());
         }
 
-        View cameraSettingsBtn = view.findViewById(R.id.camera_settings);
-        if (cameraSettingsBtn != null) {
-            cameraSettingsBtn.setOnClickListener(v -> settingsFragment.show(getFragmentManager()));
-        }
-
         View nativeResetBtn = view.findViewById(R.id.native_reset);
         if (nativeResetBtn != null) {
             nativeResetBtn.setOnClickListener(v -> {
                 Toast toast = Toast.makeText(getActivity().getApplicationContext(), "Clearing users", Toast.LENGTH_SHORT);
                 toast.show();
-                NativeReset();
+
+                if (mCameraPreview != null) {
+                    mCameraPreview.clearUsers();
+                }
             });
         }
 
-        settingsFragment.PreviewSizeChanged.addHandler(this::onPreviewSizeChanged);
-        settingsFragment.FlashModeChanged.addHandler(this::onFlashModeChanged);
-        settingsFragment.FocusModeChanged.addHandler(this::onFocusModeChanged);
-
-        initView();
+        initializeViewGroup();
 
         return view;
     }
 
-    private void initView() {
-        ImageView focusImageView = new ImageView(mActivity);
-        ImageView nativeImageView = new ImageView(mActivity);
-        nativeImageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-        nativeImageView.setAdjustViewBounds(true);
-        mCameraPreview = new CameraView(mActivity, mCamera, mCameraId, nativeImageView);
-        mFocusView = new FocusView(mActivity, mCamera, focusImageView);
-        mViewGroup.addView(mCameraPreview);
-        mViewGroup.addView(mFocusView);
-        mViewGroup.addView(nativeImageView);
-        mViewGroup.addView(focusImageView);
-
-        setPreviewContainerSize();
-
-        if (mControlsLayout != null) {
-            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
-                    RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
-
-            params.topMargin = mStatusBarHeight;
-            params.bottomMargin = mNavigationBarHeight;
-
-            mControlsLayout.setLayoutParams(params);
+    private void initializeViewGroup() {
+        if (mViewGroup != null) {
+            mViewGroup.removeAllViews();
         }
 
+        // Set the camera preview and focus view
+        mCameraPreview = new CameraView(mActivity, mCamera, mCameraId);
+        mFocusView = new FocusView(mActivity, mCamera);
+        mViewGroup.addView(mCameraPreview);
+        mViewGroup.addView(mFocusView);
+        mViewGroup.addView(mCameraPreview.getNativeImageView());
+        mViewGroup.addView(mFocusView.getFocusImageView());
+
+        // Set preview container size
+        Ratio ratio = mPreviewSize.getRatio();
+        mScreenHeight = (mScreenWidth / ratio.h) * ratio.w;
+        mViewGroup.setLayoutParams(new RelativeLayout.LayoutParams(mScreenWidth, mScreenHeight));
+
+        // Setup the settings dialog
+        mSettingsFragment = new SettingsFragment();
+        if (mCameraSettingsButton != null) {
+            mCameraSettingsButton.setOnClickListener(v -> mSettingsFragment.show(getFragmentManager()));
+        }
+
+        // Register event handlers
         mFocusView.ZoomChanged.addHandler(this::onZoomChanged);
         mFocusView.Focused.addHandler(this::onFocused);
+        mSettingsFragment.PreviewSizeChanged.addHandler(this::onPreviewSizeChanged);
+        mSettingsFragment.FlashModeChanged.addHandler(this::onFlashModeChanged);
+        mSettingsFragment.FocusModeChanged.addHandler(this::onFocusModeChanged);
+
+        hideActionBar();
+
+        mFocusView.startFocusing();
     }
 
     private Camera getCameraInstance(boolean iUseFrontCamera) {
@@ -222,38 +202,17 @@ public class CameraFragment extends BaseFragment {
         mOrientationEventListener.enable();
     }
 
-    private void initScreenParams() {
+    private void initializeScreenParams() {
         DisplayMetrics metrics = new DisplayMetrics();
         mActivity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
         mScreenWidth = metrics.widthPixels;
         mScreenHeight = metrics.heightPixels;
-        mNavigationBarHeight = getNavigationBarHeight();
-        mStatusBarHeight = getStatusBarHeight();
-    }
-
-    private int getNavigationBarHeight() {
-        return getPixelSizeByName("navigation_bar_height");
-    }
-
-    private int getStatusBarHeight() {
-        return getPixelSizeByName("status_bar_height");
-    }
-
-    private int getPixelSizeByName(String iName) {
-        Resources resources = getResources();
-        int resourceId = resources.getIdentifier(iName, "dimen", "android");
-        if (resourceId > 0) {
-            return resources.getDimensionPixelSize(resourceId);
-        }
-        return 0;
     }
 
     private void onFocused(Object iSender, EventArgs iArgs) {
         if (!(iArgs instanceof FocusedArgs)) return;
 
-        FocusedArgs arguments = ((FocusedArgs) iArgs);
-
-        if (arguments.getInitiator() == FocusedArgs.Initiator.TAKE_PICTURE) {
+        if (mCapturePressed) {
             try {
                 mSavingPhotoTask = new SavingPhotoTask(mCameraPreview.getOutputBitmap());
                 mSavingPhotoTask.PhotoSaved.addHandler(this::onPhotoSaved);
@@ -261,7 +220,7 @@ public class CameraFragment extends BaseFragment {
             } catch (IllegalStateException ex) {
                 Timber.e(ex.getMessage());
             }
-            mFocusView.resetCameraFocus();
+            mCapturePressed = false;
         }
     }
 
@@ -288,46 +247,21 @@ public class CameraFragment extends BaseFragment {
 
         mPreviewSize = ((PictureSizeArgs) iArgs).getPictureSize();
         Configuration.i.setPreviewSizeId(mPreviewSize.getId());
-
-        if (mCameraPreview != null) {
-            mCameraPreview.cancel();
-            NativeReset();
-        }
-
-        Camera.Parameters parameters = mCamera.getParameters();
-        parameters.setPreviewSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
-        mCamera.setParameters(parameters);
-
-        setPreviewContainerSize();
-
-        if (mViewGroup != null) {
-            mViewGroup.removeAllViews();
-        }
-
-        initView();
+        initializeViewGroup();
     }
 
     private void onFlashModeChanged(Object iSender, EventArgs iArgs) {
         if (!(iArgs instanceof FlashModeArgs)) return;
 
-        FlashMode flashMode = ((FlashModeArgs) iArgs).getFlashMode();
-        Configuration.i.setFlashMode(flashMode);
-
+        String cameraFlashMode = ((FlashModeArgs) iArgs).getCameraFlashMode();
         Camera.Parameters parameters = mCamera.getParameters();
+        List<String> supportedFlashModes = parameters.getSupportedFlashModes();
 
-        switch (flashMode) {
-            case ON:
-                parameters.setFlashMode(Camera.Parameters.FLASH_MODE_ON);
-                break;
-            case OFF:
-                parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
-                break;
-            case AUTO:
-                parameters.setFlashMode(Camera.Parameters.FLASH_MODE_AUTO);
-                break;
+        if (cameraFlashMode != null && supportedFlashModes.contains(cameraFlashMode)) {
+            Configuration.i.setFlashMode(((FlashModeArgs) iArgs).getFlashMode());
+            parameters.setFlashMode(cameraFlashMode);
+            mCamera.setParameters(parameters);
         }
-
-        mCamera.setParameters(parameters);
     }
 
     private void onFocusModeChanged(Object iSender, EventArgs iArgs) {
@@ -337,6 +271,7 @@ public class CameraFragment extends BaseFragment {
 
         Configuration.i.setFocusMode(focusMode);
         mFocusView.resetCameraFocus();
+        mFocusView.startFocusing();
     }
 
     private void onCameraChangePressed() {
@@ -344,32 +279,36 @@ public class CameraFragment extends BaseFragment {
 
         Configuration.i.setUseFrontCamera(mCameraId == Camera.CameraInfo.CAMERA_FACING_FRONT);
 
-        if (mCameraPreview != null) {
-            mCameraPreview.cancel();
-            NativeReset();
-        }
-
         if (mViewGroup != null) {
             mViewGroup.removeAllViews();
         }
 
         if (mCamera != null) {
-            mCameraPreview.getHolder().removeCallback(mCameraPreview);
             mCamera.release();
             mCamera = null;
         }
 
-        initFragment();
-        initView();
+        mCamera = getCameraInstance(Configuration.i.useFrontCamera());
+
+        initializeFocusMode();
+        initializeFlashMode();
+        initializePreviewSize();
+        initializeScreenParams();
+        initializeViewGroup();
     }
 
     public void onCapturePressed() {
-        mCaptureButton.setEnabled(false);
-        mCaptureButton.setVisibility(View.INVISIBLE);
-        if (mProgressBar != null) {
-            mProgressBar.setVisibility(View.VISIBLE);
+        if (!mCapturePressed) {
+            mCaptureButton.setEnabled(false);
+            mCaptureButton.setVisibility(View.INVISIBLE);
+
+            if (mProgressBar != null) {
+                mProgressBar.setVisibility(View.VISIBLE);
+            }
+
+            mCapturePressed = true;
+            mFocusView.startFocusing();
         }
-        mFocusView.takePicture();
     }
 
     public void onZoomInPressed() {
@@ -395,13 +334,32 @@ public class CameraFragment extends BaseFragment {
         }
     }
 
-    private void setPreviewContainerSize() {
-        Ratio ratio = mPreviewSize.getRatio();
-        mScreenHeight = (mScreenWidth / ratio.h) * ratio.w;
-        mViewGroup.setLayoutParams(new RelativeLayout.LayoutParams(mScreenWidth, mScreenHeight));
+    private void initializeFocusMode() {
+        Camera.Parameters parameters = mCamera.getParameters();
+        Configuration.i.setFocusMode(FocusMode.AUTO);
+        Configuration.i.setFocusOnTouchSupported(parameters.getMaxNumFocusAreas() > 0);
+
+        List<String> supportedFocusModes = parameters.getSupportedFocusModes();
+        if (supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
+            parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+            mCamera.setParameters(parameters);
+        }
     }
 
-    private void initPreviewSize() {
+    private void initializeFlashMode() {
+        Camera.Parameters parameters = mCamera.getParameters();
+        List<String> flashModes = parameters.getSupportedFlashModes();
+        Configuration.i.setFlashMode(FlashMode.AUTO);
+        Configuration.i.setFlashSupported(!(flashModes.size() == 0 || (flashModes.size() == 1 && flashModes.get(0).equalsIgnoreCase("off"))));
+
+        List<String> supportedFlashModes = parameters.getSupportedFlashModes();
+        if (supportedFlashModes.contains(Camera.Parameters.FLASH_MODE_AUTO)) {
+            parameters.setFlashMode(Camera.Parameters.FLASH_MODE_AUTO);
+            mCamera.setParameters(parameters);
+        }
+    }
+
+    private void initializePreviewSize() {
         Camera.Parameters parameters = mCamera.getParameters();
         List<Camera.Size> spsizes = parameters.getSupportedPreviewSizes();
         mPreviewSizes.clear();
@@ -449,9 +407,11 @@ public class CameraFragment extends BaseFragment {
     }
 
     private void onPhotoSaved(Object iSender, EventArgs iArgs) {
-        if (!(iArgs instanceof PhotoSavedArgs)) return;
+        if (iArgs != null) {
+            if (!(iArgs instanceof PhotoSavedArgs)) return;
 
-        PhotoSaved.raise(iSender, (PhotoSavedArgs) iArgs);
+            PhotoSaved.raise(iSender, (PhotoSavedArgs) iArgs);
+        }
 
         mCaptureButton.setEnabled(true);
         mCaptureButton.setVisibility(View.VISIBLE);

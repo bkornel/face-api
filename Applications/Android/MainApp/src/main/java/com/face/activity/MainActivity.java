@@ -5,10 +5,9 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.face.common.Configuration;
+import com.face.common.Constants;
 
 public class MainActivity extends Activity {
-    private int mRequestCode = 1;
-
     @Override
     protected void onCreate(Bundle iSavedInstanceState) {
         super.onCreate(iSavedInstanceState);
@@ -16,12 +15,12 @@ public class MainActivity extends Activity {
         Configuration.i.setUseFrontCamera(true);
 
         Intent intent = new Intent(this, CameraActivity.class);
-        startActivityForResult(intent, mRequestCode);
+        startActivityForResult(intent, Constants.CAMERA_ACTIVITY_REQUEST_CODE);
     }
 
     @Override
     protected void onActivityResult(int iRequestCode, int iResultCode, Intent iData) {
-        if(iRequestCode == mRequestCode) {
+        if(iRequestCode == Constants.CAMERA_ACTIVITY_REQUEST_CODE) {
             finish();
         }
     }

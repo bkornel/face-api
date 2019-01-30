@@ -47,7 +47,6 @@ public class FocusView extends SurfaceView implements SurfaceHolder.Callback, Ca
     private ImageView mFocusImageView;
     private Canvas mFocusCanvas;
     private Paint mFocusPaint;
-    private FocusedArgs.Initiator mFocusInitiator;
 
     private boolean mFocusing;
     private float mFocusCoeffW;
@@ -69,13 +68,12 @@ public class FocusView extends SurfaceView implements SurfaceHolder.Callback, Ca
         super(iContext, iAttributeSet);
     }
 
-    public FocusView(Activity iActivity, Camera iCamera, ImageView iFocusImageView) {
+    public FocusView(Activity iActivity, Camera iCamera) {
         super(iActivity);
 
         mActivity = iActivity;
         mCamera = iCamera;
-        mFocusImageView = iFocusImageView;
-        mFocusInitiator = FocusedArgs.Initiator.TOUCH;
+        mFocusImageView = new ImageView(mActivity);
 
         // Install a SurfaceHolder.Callback so we get notified when the underlying surface is created and destroyed.
         SurfaceHolder holder = getHolder();
@@ -103,6 +101,7 @@ public class FocusView extends SurfaceView implements SurfaceHolder.Callback, Ca
         mFocusPaint = new Paint();
         mFocusPaint.setColor(Color.GREEN);
         mFocusPaint.setStrokeWidth(STROKE_WIDTH);
+        mFocusPaint.setStyle(Paint.Style.STROKE);
         mFocusImageView.setImageBitmap(bitmap);
 
         // Init focus coeffs
@@ -118,47 +117,55 @@ public class FocusView extends SurfaceView implements SurfaceHolder.Callback, Ca
         setOnTouchListener(new CameraTouchListener());
     }
 
+    public ImageView getFocusImageView() { return mFocusImageView; }
+
     private boolean hasAutoFocus() {
         if (mCamera == null) return false;
         return mCamera.getParameters().getSupportedFocusModes().contains(Camera.Parameters.FOCUS_MODE_AUTO);
     }
 
-    private void startFocusing() {
+    public void startFocusing() {
         mFocusing = true;
-        mCamera.autoFocus(this);
-    }
-
-    public void takePicture() {
-        mFocusInitiator = FocusedArgs.Initiator.TAKE_PICTURE;
 
         if (hasAutoFocus()) {
-            startFocusing();
-        } else {
-            onAutoFocus(false, mCamera);
+            Camera.Parameters parameters = mCamera.getParameters();
+            if (parameters.getFocusMode() != Camera.Parameters.FOCUS_MODE_AUTO) {
+                parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+                mCamera.setParameters(parameters);
+            }
+
+            try {
+                mCamera.autoFocus(this);
+            } catch (RuntimeException e) {
+                Timber.e(e, "startFocusing");
+            }
+
+            return;
         }
+
+        onAutoFocus(false, mCamera);
     }
 
     public void resetCameraFocus() {
         mFocusing = false;
-        mFocusInitiator = FocusedArgs.Initiator.INVALID;
 
         if (hasAutoFocus()) {
             mCamera.cancelAutoFocus();
+        }
 
-            if (mFocusCanvas != null) {
-                mTapArea = null;
-                mFocusCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-                mFocusImageView.draw(mFocusCanvas);
-                mFocusImageView.invalidate();
+        if (mFocusCanvas != null) {
+            mTapArea = null;
+            mFocusCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+            mFocusImageView.draw(mFocusCanvas);
+            mFocusImageView.invalidate();
 
-                try {
-                    Camera.Parameters parameters = mCamera.getParameters();
-                    parameters.setFocusAreas(null);
-                    parameters.setMeteringAreas(null);
-                    mCamera.setParameters(parameters);
-                } catch (Exception e) {
-                    Timber.e(e, "resetCameraFocus");
-                }
+            try {
+                Camera.Parameters parameters = mCamera.getParameters();
+                parameters.setFocusAreas(null);
+                parameters.setMeteringAreas(null);
+                mCamera.setParameters(parameters);
+            } catch (Exception e) {
+                Timber.e(e, "resetCameraFocus");
             }
         }
     }
@@ -166,11 +173,12 @@ public class FocusView extends SurfaceView implements SurfaceHolder.Callback, Ca
     @Override
     public void onAutoFocus(boolean iSuccess, Camera iCamera) {
         mFocusing = false;
-        Focused.raise(this, new FocusedArgs(iSuccess, iCamera, mFocusInitiator));
+        Focused.raise(this, new FocusedArgs(iSuccess, iCamera));
+        resetCameraFocus();
     }
 
     protected void focusOnTouch(MotionEvent iEvent) {
-        mTapArea = calculateTapArea(iEvent.getX(), iEvent.getY(), 1.0f);
+        mTapArea = calculateTapArea(iEvent.getX(), iEvent.getY(), 3.0f);
 
         mFocusCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
         mFocusCanvas.drawRect(mTapArea, mFocusPaint);
@@ -190,7 +198,6 @@ public class FocusView extends SurfaceView implements SurfaceHolder.Callback, Ca
         }
 
         mCamera.setParameters(parameters);
-        mFocusInitiator = FocusedArgs.Initiator.TOUCH;
 
         startFocusing();
     }

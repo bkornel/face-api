@@ -116,6 +116,9 @@ public class CameraActivity extends BaseActivity {
                     PhotoUtil.deletePhoto(path);
                     break;
             }
+
+            Intent intent = new Intent(this, CameraActivity.class);
+            startActivityForResult(intent, Constants.CAMERA_ACTIVITY_REQUEST_CODE);
         }
     }
 

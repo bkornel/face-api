@@ -42,16 +42,10 @@ namespace
 extern "C"
 {
 	JNIEXPORT jint JNICALL 
-	Java_com_face_fragment_CameraFragment_NativeReset(JNIEnv* env, jobject thiz)
-	{
-		FACE_LOG_JNI("RESET NATIVE SIDE");
-		face::FaceApi::GetInstance().Clear();
-		return 0;
-	}
-	
-	JNIEXPORT jint JNICALL 
 	Java_com_face_activity_CameraActivity_NativeInitialize(JNIEnv* env, jobject thiz, jstring path)
 	{
+		if(!env) return -1;
+
 		FACE_LOG_JNI("INITIALIZING NATIVE SIDE");
 
 		if (!path)
@@ -80,9 +74,19 @@ extern "C"
 		return 0;
 	}
 	
+	JNIEXPORT jint JNICALL
+	Java_com_face_control_CameraView_NativeReset(JNIEnv* env, jobject thiz)
+	{
+		FACE_LOG_JNI("RESET NATIVE SIDE");
+		face::FaceApi::GetInstance().Clear();
+		return 0;
+	}
+	
 	JNIEXPORT jint JNICALL 
 	Java_com_face_control_CameraView_NativeProcess(JNIEnv* env, jobject thiz, jint rotation, jint width, jint height, jbyteArray yuv, jintArray argb)
 	{
+		if(!env) return -1;
+		
 		int retVal = 0;
 		
 		#ifdef FACE_PROFILE
@@ -92,44 +96,54 @@ extern "C"
 		
 		// YUV420sp to BGR conversion
 		jbyte* jni_yuv  = env->GetByteArrayElements(yuv, 0);
-		cv::Mat jni_yuv_mat(height + height/2, width, CV_8UC1, (unsigned char *)jni_yuv);
-
-		cv::Mat bgr;
-		cv::cvtColor(jni_yuv_mat, bgr, cv::COLOR_YUV420sp2BGR, 3);
-		
-		#ifdef FACE_PROFILE
-		FACE_LOG_JNI("[FACE_PROFILE] cvtColor: " << stopwatch.GetElapsedTimeMilliSec(false));
-		stopwatch.Reset();
-		#endif
-		
-		// Rotate image regarding the display orientation
-		fw::ocv::rotate_mat(bgr, bgr, rotation);
-		
-		#ifdef FACE_PROFILE
-		FACE_LOG_JNI("[FACE_PROFILE] rotate_mat: " << stopwatch.GetElapsedTimeMilliSec(false));
-		stopwatch.Reset();
-		#endif
-		
-		if (face::FaceApi::GetInstance().IsRunning()) 
+		if(!jni_yuv || env->ExceptionOccurred())
 		{
-			CV_Assert(!bgr.empty());
-
+			return -1;
+		}
+		
+		cv::Mat bgr;
+		cv::Mat jni_yuv_mat(height + height/2, width, CV_8UC1, (unsigned char *)jni_yuv);
+		if (!jni_yuv_mat.empty())
+		{
+			cv::cvtColor(jni_yuv_mat, bgr, cv::COLOR_YUV420sp2BGR, 3);
+		
+			#ifdef FACE_PROFILE
+			FACE_LOG_JNI("[FACE_PROFILE] cvtColor: " << stopwatch.GetElapsedTimeMilliSec(false));
+			stopwatch.Reset();
+			#endif
+			
+			// Rotate image regarding the display orientation
+			fw::ocv::rotate_mat(bgr, bgr, rotation);
+			
+			#ifdef FACE_PROFILE
+			FACE_LOG_JNI("[FACE_PROFILE] rotate_mat: " << stopwatch.GetElapsedTimeMilliSec(false));
+			stopwatch.Reset();
+			#endif
+		}
+		
+		if (!bgr.empty() && face::FaceApi::GetInstance().IsRunning()) 
+		{
 			face::FaceApi::GetInstance().PushCameraFrame(bgr);
 			
 			cv::Mat resultImage;
 			if(face::FaceApi::GetInstance().GetResultImage(resultImage) == fw::ErrorCode::OK)
-			{
-				CV_Assert(!resultImage.empty());
-				
-				if (bgr.size() == resultImage.size()) 
+			{				
+				if (!resultImage.empty() && bgr.size() == resultImage.size()) 
 				{
 					jint* jni_argb = env->GetIntArrayElements(argb, 0);
-					cv::Mat jni_argb_mat(bgr.rows, bgr.cols, CV_8UC4, (unsigned char *)jni_argb);
+					if(jni_argb && !env->ExceptionOccurred())
+					{			
+						cv::Mat jni_argb_mat(bgr.rows, bgr.cols, CV_8UC4, (unsigned char *)jni_argb);
 
-					cv::cvtColor(resultImage, jni_argb_mat, cv::COLOR_BGR2BGRA, 4);
-					jni_argb_mat = ARGB_2_BGRA(jni_argb_mat);
+						cv::cvtColor(resultImage, jni_argb_mat, cv::COLOR_BGR2BGRA, 4);
+						jni_argb_mat = ARGB_2_BGRA(jni_argb_mat);
 				
-					env->ReleaseIntArrayElements(argb, jni_argb, 0);
+						env->ReleaseIntArrayElements(argb, jni_argb, 0);
+					}
+					else
+					{
+						retVal = -1;
+					}
 				} 
 				else 
 				{

@@ -28,10 +28,10 @@ public class SavingPhotoTask extends AsyncTask<Void, Void, File> {
     private boolean mIsSavingInProgress;
 
     public SavingPhotoTask(Bitmap iBitmap) {
-        mBitmap = iBitmap;
-
         String timeStamp = new SimpleDateFormat(Constants.Time.FORMAT, Locale.getDefault()).format(new Date());
-        mPath = Constants.Directories.OUTPUT + Constants.ImWrite.PREFIX + timeStamp + Constants.ImWrite.POSTFIX;
+
+        mBitmap = iBitmap;
+        mPath = Constants.Directories.GALLERY + Constants.ImWrite.PREFIX + timeStamp + Constants.ImWrite.POSTFIX;
     }
 
     @Override
@@ -73,9 +73,7 @@ public class SavingPhotoTask extends AsyncTask<Void, Void, File> {
     @Override
     protected void onPostExecute(File iFile) {
         super.onPostExecute(iFile);
-        if (iFile != null) {
-            PhotoSaved.raise(this, new PhotoSavedArgs(mPath));
-        }
+        PhotoSaved.raise(this, iFile != null ? new PhotoSavedArgs(mPath) : null);
         mIsSavingInProgress = false;
     }
 
@@ -87,7 +85,7 @@ public class SavingPhotoTask extends AsyncTask<Void, Void, File> {
         }
 
         // Create the storage directory if it doesn't exist
-        File directory = new File(Constants.Directories.OUTPUT);
+        File directory = new File(Constants.Directories.GALLERY);
         if (!directory.exists()) {
             if (!directory.mkdirs()) {
                 Timber.e("Failed to create directory: " + directory.getAbsolutePath());

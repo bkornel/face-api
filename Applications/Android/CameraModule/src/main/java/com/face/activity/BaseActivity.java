@@ -3,6 +3,7 @@ package com.face.activity;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.View;
 
 public abstract class BaseActivity extends Activity {
 
@@ -18,13 +19,18 @@ public abstract class BaseActivity extends Activity {
         return false;
     }
 
-    protected void showActionBar() {
+    public void showActionBar() {
         if (getActionBar() != null) {
             getActionBar().show();
         }
     }
 
-    protected void hideActionBar() {
+    public void hideActionBar() {
+        if (getWindow() != null) {
+            View decorView = getWindow().getDecorView();
+            decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN);
+        }
+
         if (getActionBar() != null) {
             getActionBar().hide();
         }

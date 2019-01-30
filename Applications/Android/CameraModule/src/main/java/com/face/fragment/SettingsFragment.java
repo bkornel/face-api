@@ -40,10 +40,6 @@ public class SettingsFragment extends BaseDialogFragment {
     private PictureSize mPreviewSize;
     private ArrayList<PictureSize> mPreviewSizeList;
 
-    public static SettingsFragment getInstance() {
-        return sInstance;
-    }
-
     @Override
     public void onCreate(Bundle iSavedInstanceState) {
         super.onCreate(iSavedInstanceState);
@@ -59,35 +55,42 @@ public class SettingsFragment extends BaseDialogFragment {
     public View onCreateView(LayoutInflater iInflater, ViewGroup iContainer, Bundle iSavedInstanceState) {
         View view = iInflater.inflate(R.layout.dialog_camera_params, iContainer, false);
 
-        Spinner focusSwitcher = view.findViewById(R.id.focus_modes);
-        focusSwitcher.setAdapter(new ObjectToStringAdapter<>(mActivity, mFocusModes));
-        focusSwitcher.setSelection(mFocusModes.indexOf(mFocusMode));
-        focusSwitcher.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        // ******************** FOCUS ******************** //
+        Spinner focusSpinner = view.findViewById(R.id.focus_modes);
+        focusSpinner.setAdapter(new ObjectToStringAdapter<>(mActivity, mFocusModes));
+        focusSpinner.setSelection(mFocusModes.indexOf(mFocusMode));
 
-            @Override
-            public void onItemSelected(AdapterView<?> iParent, View iView, int iPosition, long iId) {
-                if (mFocusMode == mFocusModes.get(iPosition)) {
-                    return;
+        if (Configuration.i.getFocusOnTouchSupported()) {
+            focusSpinner.setEnabled(true);
+            focusSpinner.setClickable(true);
+            focusSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> iParent, View iView, int iPosition, long iId) {
+                    if (mFocusMode == mFocusModes.get(iPosition)) {
+                        return;
+                    }
+                    mFocusMode = mFocusModes.get(iPosition);
+                    FocusModeChanged.raise(this, new FocusModeArgs(mFocusMode));
                 }
-                mFocusMode = mFocusModes.get(iPosition);
-                FocusModeChanged.raise(this, new FocusModeArgs(mFocusMode));
-            }
 
-            @Override
-            public void onNothingSelected(AdapterView<?> iParent) {
-            }
-        });
+                @Override
+                public void onNothingSelected(AdapterView<?> iParent) {
+                }
+            });
+        } else {
+            focusSpinner.setEnabled(false);
+            focusSpinner.setClickable(false);
+        }
 
-        Spinner flashSwitcher = view.findViewById(R.id.flash_modes);
+        // ******************** FLASH ******************** //
+        Spinner flashSpinner = view.findViewById(R.id.flash_modes);
+        flashSpinner.setAdapter(new ObjectToStringAdapter<>(mActivity, mFlashModes));
+        flashSpinner.setSelection(mFlashModes.indexOf(mFlashMode));
 
-        if (Configuration.i.getFlashModeEnabled()) {
-            flashSwitcher.setEnabled(true);
-            flashSwitcher.setClickable(true);
-            flashSwitcher.setAdapter(new ObjectToStringAdapter<>(mActivity, mFlashModes));
-            flashSwitcher.setSelection(mFlashModes.indexOf(mFlashMode));
-
-            flashSwitcher.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-
+        if (Configuration.i.getFlashSupported()) {
+            flashSpinner.setEnabled(true);
+            flashSpinner.setClickable(true);
+            flashSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> iParent, View iView, int iPosition, long iId) {
                     if (mFlashMode == mFlashModes.get(iPosition)) {
@@ -102,20 +105,16 @@ public class SettingsFragment extends BaseDialogFragment {
                 }
             });
         } else {
-            List<String> disabledFlashModes = new ArrayList<>();
-            disabledFlashModes.add("Off");
-
-            flashSwitcher.setAdapter(new ObjectToStringAdapter<>(mActivity, disabledFlashModes));
-            flashSwitcher.setSelection(0);
-            flashSwitcher.setEnabled(false);
-            flashSwitcher.setClickable(false);
+            flashSpinner.setEnabled(false);
+            flashSpinner.setClickable(false);
         }
 
-        Spinner psSwitcher = view.findViewById(R.id.preview_sizes);
-        psSwitcher.setAdapter(new ObjectToStringAdapter<>(mActivity, mPreviewSizeList));
-        psSwitcher.setSelection(mPreviewSizeList.indexOf(mPreviewSize));
-        psSwitcher.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        // ******************** PREVIEW SIZE ******************** //
+        Spinner previewSizeSpinner = view.findViewById(R.id.preview_sizes);
+        previewSizeSpinner.setAdapter(new ObjectToStringAdapter<>(mActivity, mPreviewSizeList));
+        previewSizeSpinner.setSelection(mPreviewSizeList.indexOf(mPreviewSize));
 
+        previewSizeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> iParent, View iView, int iPosition, long iId) {
                 if (mPreviewSize == mPreviewSizeList.get(iPosition)) {
