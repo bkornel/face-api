@@ -1,45 +1,44 @@
 package com.face.common.camera;
 
 public enum Ratio {
-    R_4x3(0, 4, 3), R_16x9(1, 16, 9);
+    R_4x3(0, 4, 3),
+    R_16x9(1, 16, 9);
 
-    private int id;
+    public int mWidth;
+    public int mHeight;
+    private int mId;
 
-    public int w;
+    Ratio(int iId, int iWidth, int iHeight) {
+        mId = iId;
+        mWidth = iWidth;
+        mHeight = iHeight;
+    }
 
-    public int h;
+    public static Ratio getRatioById(int iId) {
+        for (Ratio ratio : values()) {
+            if (ratio.mId == iId) {
+                return ratio;
+            }
+        }
+        return null;
+    }
 
-    Ratio(int id, int w, int h) {
-        this.id = id;
-        this.w = w;
-        this.h = h;
+    public static Ratio pickRatio(int iWidth, int iHeight) {
+        for (Ratio ratio : values()) {
+            if (iWidth / ratio.mWidth == iHeight / ratio.mHeight) {
+                return ratio;
+            }
+        }
+        return null;
     }
 
     public int getId() {
-        return id;
-    }
-
-    public static Ratio getRatioById(int id) {
-        for (Ratio ratio : values()) {
-            if (ratio.id == id) {
-                return ratio;
-            }
-        }
-        return null;
-    }
-
-    public static Ratio pickRatio(int width, int height) {
-        for (Ratio ratio : values()) {
-            if (width / ratio.w == height / ratio.h) {
-                return ratio;
-            }
-        }
-        return null;
+        return mId;
     }
 
     @Override
     public String toString() {
-        return w + ":" + h;
+        return mWidth + ":" + mHeight;
     }
 
 }

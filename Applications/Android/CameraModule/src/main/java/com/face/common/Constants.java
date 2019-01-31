@@ -9,7 +9,13 @@ import java.io.File;
 public final class Constants {
     public static final String APP_NAME = "FaceApp";
 
-    public static final int CAMERA_ACTIVITY_REQUEST_CODE = 1;
+    public static final int CAMERA_ACTIVITY_REQUEST_CODE = 1111;
+    public static final int PHOTO_ACTIVITY_REQUEST_CODE = 2222;
+    public static final int PHOTO_GENERAL_RESULT_CODE = 3333;
+    public static final int PHOTO_EDITED_RESULT_CODE = 4444;
+    public static final int PHOTO_DELETED_RESULT_CODE = 5555;
+
+    public static final int PERMISSION_CODE = 1234;
 
     public static final class Time {
         public static final String FORMAT = "yyyyMMdd_HHmmss";

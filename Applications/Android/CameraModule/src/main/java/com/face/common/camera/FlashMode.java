@@ -1,32 +1,33 @@
 package com.face.common.camera;
 
 public enum FlashMode {
-    ON(0, "On"), AUTO(1, "Auto"), OFF(2, "Off");
+    ON(0, "On"),
+    AUTO(1, "Auto"),
+    OFF(2, "Off");
 
-    private int id;
+    private int mId;
+    private String mName;
 
-    private String name;
-
-    FlashMode(int id, String name) {
-        this.id = id;
-        this.name = name;
+    FlashMode(int iId, String iName) {
+        mId = iId;
+        mName = iName;
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public static FlashMode getFlashModeById(int id) {
+    public static FlashMode getFlashModeById(int iId) {
         for (FlashMode mode : values()) {
-            if (mode.id == id) {
+            if (mode.mId == iId) {
                 return mode;
             }
         }
         return null;
     }
 
+    public int getId() {
+        return mId;
+    }
+
     @Override
     public String toString() {
-        return name;
+        return mName;
     }
 }

@@ -2,32 +2,32 @@ package com.face.common.camera;
 
 public enum FocusMode {
 
-    AUTO(0, "Auto"), TOUCH(1, "Touch");
+    AUTO(0, "Auto"),
+    TOUCH(1, "Touch");
 
-    private int id;
+    private int mId;
+    private String mName;
 
-    private String name;
-
-    FocusMode(int id, String name) {
-        this.id = id;
-        this.name = name;
+    FocusMode(int iId, String iName) {
+        mId = iId;
+        mName = iName;
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public static FocusMode getFocusModeById(int id) {
+    public static FocusMode getFocusModeById(int iId) {
         for (FocusMode mode : values()) {
-            if (mode.id == id) {
+            if (mode.mId == iId) {
                 return mode;
             }
         }
         return null;
     }
 
+    public int getId() {
+        return mId;
+    }
+
     @Override
     public String toString() {
-        return name;
+        return mName;
     }
 }

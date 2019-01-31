@@ -7,7 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.face.R;
-import com.face.control.PhotoView;
+import com.face.view.PhotoView;
 
 public class PhotoFragment extends BaseFragment {
 
@@ -23,7 +23,7 @@ public class PhotoFragment extends BaseFragment {
 
     @Override
     public View onCreateView(LayoutInflater iInflater, ViewGroup iContainer, Bundle iSavedInstanceState) {
-        return iInflater.inflate(R.layout.fragment_photo_preview, iContainer, false);
+        return iInflater.inflate(R.layout.fragment_photo, iContainer, false);
     }
 
     @Override

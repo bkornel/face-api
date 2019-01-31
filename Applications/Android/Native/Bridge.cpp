@@ -75,7 +75,7 @@ extern "C"
 	}
 	
 	JNIEXPORT jint JNICALL
-	Java_com_face_control_CameraView_NativeReset(JNIEnv* env, jobject thiz)
+	Java_com_face_view_CameraView_NativeReset(JNIEnv* env, jobject thiz)
 	{
 		FACE_LOG_JNI("RESET NATIVE SIDE");
 		face::FaceApi::GetInstance().Clear();
@@ -83,7 +83,7 @@ extern "C"
 	}
 	
 	JNIEXPORT jint JNICALL 
-	Java_com_face_control_CameraView_NativeProcess(JNIEnv* env, jobject thiz, jint rotation, jint width, jint height, jbyteArray yuv, jintArray argb)
+	Java_com_face_view_CameraView_NativeProcess(JNIEnv* env, jobject thiz, jint rotation, jint width, jint height, jbyteArray yuv, jintArray argb)
 	{
 		if(!env) return -1;
 		

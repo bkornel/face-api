@@ -1,1 +1,1 @@
-include ':CameraModule', ':MainApp'
+include ':CameraModule', ':FaceApp'

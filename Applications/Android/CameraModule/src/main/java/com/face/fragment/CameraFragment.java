@@ -19,9 +19,9 @@ import com.face.common.camera.FlashMode;
 import com.face.common.camera.FocusMode;
 import com.face.common.camera.PictureSize;
 import com.face.common.camera.Ratio;
-import com.face.common.image.SavingPhotoTask;
-import com.face.control.CameraView;
-import com.face.control.FocusView;
+import com.face.common.image.SavePhotoTask;
+import com.face.view.CameraView;
+import com.face.view.FocusView;
 import com.face.event.Event;
 import com.face.event.EventArgs;
 import com.face.event.FlashModeArgs;
@@ -59,7 +59,7 @@ public class CameraFragment extends BaseFragment {
     private TextView mZoomRatioTextView;
     private int mCameraId;
     private int mDeviceOrientation;
-    private SavingPhotoTask mSavingPhotoTask;
+    private SavePhotoTask mSavePhotoTask;
     private boolean mCapturePressed;
 
     @Override
@@ -130,7 +130,7 @@ public class CameraFragment extends BaseFragment {
 
         // Set preview container size
         Ratio ratio = mPreviewSize.getRatio();
-        mScreenHeight = (mScreenWidth / ratio.h) * ratio.w;
+        mScreenHeight = (mScreenWidth / ratio.mHeight) * ratio.mWidth;
         mViewGroup.setLayoutParams(new RelativeLayout.LayoutParams(mScreenWidth, mScreenHeight));
 
         // Setup the settings dialog
@@ -214,9 +214,9 @@ public class CameraFragment extends BaseFragment {
 
         if (mCapturePressed) {
             try {
-                mSavingPhotoTask = new SavingPhotoTask(mCameraPreview.getOutputBitmap());
-                mSavingPhotoTask.PhotoSaved.addHandler(this::onPhotoSaved);
-                mSavingPhotoTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                mSavePhotoTask = new SavePhotoTask(mCameraPreview.getOutputBitmap());
+                mSavePhotoTask.PhotoSaved.addHandler(this::onPhotoSaved);
+                mSavePhotoTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             } catch (IllegalStateException ex) {
                 Timber.e(ex.getMessage());
             }
@@ -390,6 +390,7 @@ public class CameraFragment extends BaseFragment {
 
         // Get the initial preview size
         int id = 0;
+        int id_16_9 = -1;
         int mpx = 307200;
 
         for (int i = 1; i < mPreviewSizes.size(); i++) {
@@ -397,10 +398,19 @@ public class CameraFragment extends BaseFragment {
             int ai = mPreviewSizes.get(i).getArea();
 
             if (Math.abs(ai - mpx) < Math.abs(a0 - mpx)) {
+                if (mPreviewSizes.get(i).getRatio() == Ratio.R_16x9) {
+                    id_16_9 = i;
+                }
                 id = i;
-                mPreviewSize = mPreviewSizes.get(i);
             }
         }
+
+        // if there is a 16:9 ratio then prefer that one
+        if (id_16_9 != -1) {
+            id = id_16_9;
+        }
+
+        mPreviewSize = mPreviewSizes.get(id);
 
         Configuration.i.setPreviewSizeId(id);
         Configuration.i.setPreviewSizeList(mPreviewSizes);
@@ -422,7 +432,7 @@ public class CameraFragment extends BaseFragment {
     }
 
     public boolean isSavingInProgress() {
-        return mSavingPhotoTask != null && mSavingPhotoTask.isSavingInProgress();
+        return mSavePhotoTask != null && mSavePhotoTask.isSavingInProgress();
     }
 
     // This affects the pictures returned from JPEG Camera.PictureCallback

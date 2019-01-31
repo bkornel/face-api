@@ -2,6 +2,6 @@
 
 <resources>
     <color name="black_overlay">#66000000</color>
-    <color name="camera_background">#777</color>
-    <color name="camera_params_background">#99000000</color>
+    <color name="background_general">@android:color/background_dark</color>
+    <color name="background_settings">#99000000</color>
 </resources>

@@ -53,7 +53,7 @@ public class SettingsFragment extends BaseDialogFragment {
 
     @Override
     public View onCreateView(LayoutInflater iInflater, ViewGroup iContainer, Bundle iSavedInstanceState) {
-        View view = iInflater.inflate(R.layout.dialog_camera_params, iContainer, false);
+        View view = iInflater.inflate(R.layout.dialog_settings, iContainer, false);
 
         // ******************** FOCUS ******************** //
         Spinner focusSpinner = view.findViewById(R.id.focus_modes);

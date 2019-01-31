@@ -35,18 +35,4 @@ public abstract class BaseActivity extends Activity {
             getActionBar().hide();
         }
     }
-
-    public void showBack() {
-        if (getActionBar() != null) {
-            getActionBar().setDisplayShowHomeEnabled(false);
-            getActionBar().setDisplayHomeAsUpEnabled(true);
-        }
-    }
-
-    public void hideBack() {
-        if (getActionBar() != null) {
-            getActionBar().setDisplayShowHomeEnabled(true);
-            getActionBar().setDisplayHomeAsUpEnabled(false);
-        }
-    }
 }

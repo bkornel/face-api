@@ -14,63 +14,66 @@ import android.text.TextUtils;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.PicassoTools;
 import com.squareup.picasso.Target;
-import com.face.interfaces.StorageCallback;
 
-public enum ImageManager implements StorageCallback {
+public enum ImageManager implements ImageTargetCallback {
     i;
 
-    private Context context;
-    private Picasso picasso;
+    private Context mContext;
+    private Picasso mPicasso;
+    private HashSet<ImageTarget> mTargets;
+    private Map<String, WeakReference<Bitmap>> mBitmaps;
 
-    private HashSet<ManagedTarget> targets;
-    private Map<String, WeakReference<Bitmap>> bitmapMap;
-
-    public void init(Context context) {
-        this.context = context;
-        this.picasso = Picasso.with(context);
-        bitmapMap = new HashMap<>();
-        targets = new HashSet<>();
+    public void init(Context iContext) {
+        mContext = iContext;
+        mPicasso = Picasso.with(iContext);
+        mBitmaps = new HashMap<>();
+        mTargets = new HashSet<>();
     }
 
-    public void loadPhoto(String path, int width, int height, Target target) {
-        File photo = !TextUtils.isEmpty(path) ? new File(path) : null;
-        if (path == null) {
-            target.onBitmapFailed(null);
+    public void load(String iPath, int iWidth, int iHeight, Target iTarget) {
+        if (iPath == null) {
+            iTarget.onBitmapFailed(null);
+            return;
         }
-        Bitmap bitmap = getBitmap(path);
+
+        Bitmap bitmap = getBitmap(iPath);
+
         if (bitmap != null && !bitmap.isRecycled()) {
-            target.onBitmapLoaded(bitmap, Picasso.LoadedFrom.MEMORY);
+            iTarget.onBitmapLoaded(bitmap, Picasso.LoadedFrom.MEMORY);
         } else {
-            ManagedTarget managedTarget = new ManagedTarget(target, path, this);
-            Picasso.with(context)
-                    .load(photo)
+            File file = !TextUtils.isEmpty(iPath) ? new File(iPath) : null;
+            ImageTarget imageTarget = new ImageTarget(iTarget, iPath, this);
+
+            Picasso.with(mContext)
+                    .load(file)
                     .skipMemoryCache()
                     .config(Bitmap.Config.ARGB_8888)
-                    .transform(new ScaleTransformation(width, height))
-                    .into(managedTarget);
+                    .transform(new ScaleTransformation(iWidth, iHeight))
+                    .into(imageTarget);
         }
     }
 
-    public Bitmap rotatePhoto(String path, float angle) {
-        Bitmap bitmap = getBitmap(path);
+    public Bitmap rotate(String iPath, float iAngle) {
+        Bitmap bitmap = getBitmap(iPath);
+
         if (bitmap != null && !bitmap.isRecycled()) {
             Matrix matrix = new Matrix();
-            matrix.postRotate(angle);
+            matrix.postRotate(iAngle);
             bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
         }
-        setBitmap(path, bitmap);
-        new RotatePhotoTask(path, angle).execute();
+
+        setBitmap(iPath, bitmap);
 
         return bitmap;
     }
 
-    private Bitmap getBitmap(String path) {
-        return bitmapMap.get(path) != null ? bitmapMap.get(path).get() : null;
+    private Bitmap getBitmap(String iPath) {
+        return iPath != null && mBitmaps.get(iPath) != null ? mBitmaps.get(iPath).get() : null;
     }
 
     public void clear() {
-        synchronized (bitmapMap) {
-            for (WeakReference<Bitmap> reference : bitmapMap.values()) {
+        synchronized (mBitmaps) {
+            for (WeakReference<Bitmap> reference : mBitmaps.values()) {
                 if (reference != null) {
                     Bitmap bitmap = reference.get();
                     if (bitmap != null && !bitmap.isRecycled()) {
@@ -78,25 +81,25 @@ public enum ImageManager implements StorageCallback {
                     }
                 }
             }
-            bitmapMap.clear();
+            mBitmaps.clear();
         }
 
-        PicassoTools.clearCache(picasso);
+        PicassoTools.clearCache(mPicasso);
     }
 
     @Override
-    public void setBitmap(String path, Bitmap bitmap) {
-        bitmapMap.put(path, new WeakReference<>(bitmap));
+    public void setBitmap(String iPath, Bitmap iBitmap) {
+        mBitmaps.put(iPath, new WeakReference<>(iBitmap));
     }
 
     @Override
-    public void addTarget(ManagedTarget target) {
-        removeTarget(target);
-        targets.add(target);
+    public void addTarget(ImageTarget iTarget) {
+        removeTarget(iTarget);
+        mTargets.add(iTarget);
     }
 
     @Override
-    public void removeTarget(ManagedTarget target) {
-        targets.remove(target);
+    public void removeTarget(ImageTarget iTarget) {
+        mTargets.remove(iTarget);
     }
 }
