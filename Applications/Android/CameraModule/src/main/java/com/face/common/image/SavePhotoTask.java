@@ -1,5 +1,14 @@
 package com.face.common.image;
 
+import android.graphics.Bitmap;
+import android.os.AsyncTask;
+import android.os.Environment;
+
+import com.face.common.Constants;
+import com.face.event.Event;
+import com.face.event.IEvent;
+import com.face.event.PhotoSavedArgs;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -9,15 +18,6 @@ import java.util.Date;
 import java.util.Locale;
 
 import timber.log.Timber;
-
-import android.graphics.Bitmap;
-import android.os.AsyncTask;
-import android.os.Environment;
-
-import com.face.common.Constants;
-import com.face.event.Event;
-import com.face.event.IEvent;
-import com.face.event.PhotoSavedArgs;
 
 public class SavePhotoTask extends AsyncTask<Void, Void, File> {
 
@@ -52,7 +52,7 @@ public class SavePhotoTask extends AsyncTask<Void, Void, File> {
         try {
             stream = new FileOutputStream(photo);
 
-            mBitmap.compress(Bitmap.CompressFormat.JPEG, Constants.ImWrite.QUALITY, stream);
+            mBitmap.compress(Constants.ImWrite.FORMAT, Constants.ImWrite.QUALITY, stream);
             mBitmap.recycle();
 
         } catch (FileNotFoundException e) {
@@ -96,5 +96,7 @@ public class SavePhotoTask extends AsyncTask<Void, Void, File> {
         return new File(mPath);
     }
 
-    public boolean isSavingInProgress() { return mIsSavingInProgress; }
+    public boolean isSavingInProgress() {
+        return mIsSavingInProgress;
+    }
 }

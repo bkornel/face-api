@@ -47,12 +47,15 @@ public class ImageTarget implements Target {
         if (super.equals(iOther)) {
             return true;
         }
+
         if (iOther == null) {
             return false;
         }
+
         if (iOther.getClass() != this.getClass()) {
             return false;
         }
+
         ImageTarget other = (ImageTarget) iOther;
         return other.mPath.equals(mPath);
     }

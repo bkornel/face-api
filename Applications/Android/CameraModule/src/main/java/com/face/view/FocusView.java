@@ -117,7 +117,9 @@ public class FocusView extends SurfaceView implements SurfaceHolder.Callback, Ca
         setOnTouchListener(new CameraTouchListener());
     }
 
-    public ImageView getFocusImageView() { return mFocusImageView; }
+    public ImageView getFocusImageView() {
+        return mFocusImageView;
+    }
 
     private boolean hasAutoFocus() {
         if (mCamera == null) return false;

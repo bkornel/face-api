@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.face.R;
@@ -20,8 +19,6 @@ import com.face.common.camera.FocusMode;
 import com.face.common.camera.PictureSize;
 import com.face.common.camera.Ratio;
 import com.face.common.image.SavePhotoTask;
-import com.face.view.CameraView;
-import com.face.view.FocusView;
 import com.face.event.Event;
 import com.face.event.EventArgs;
 import com.face.event.FlashModeArgs;
@@ -31,6 +28,8 @@ import com.face.event.IEvent;
 import com.face.event.PhotoSavedArgs;
 import com.face.event.PictureSizeArgs;
 import com.face.event.ZoomChangedArgs;
+import com.face.view.CameraView;
+import com.face.view.FocusView;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -56,7 +55,6 @@ public class CameraFragment extends BaseFragment {
     private View mCaptureButton;
     private View mCameraSettingsButton;
     private ProgressBar mProgressBar;
-    private TextView mZoomRatioTextView;
     private int mCameraId;
     private int mDeviceOrientation;
     private SavePhotoTask mSavePhotoTask;
@@ -82,11 +80,6 @@ public class CameraFragment extends BaseFragment {
         mViewGroup = view.findViewById(R.id.camera_preview);
         mProgressBar = view.findViewById(R.id.progress);
         mCameraSettingsButton = view.findViewById(R.id.camera_settings);
-
-        mZoomRatioTextView = view.findViewById(R.id.zoom_ratio);
-        if (mZoomRatioTextView != null) {
-            mZoomRatioTextView.setText(getString(R.string.zoom_changed_caption, 1.0f));
-        }
 
         mCaptureButton = view.findViewById(R.id.capture);
         if (mCaptureButton != null) {
@@ -322,16 +315,9 @@ public class CameraFragment extends BaseFragment {
     private void onZoomChanged(Object iSender, EventArgs iArgs) {
         if (!(iArgs instanceof ZoomChangedArgs)) return;
 
-        int index = ((ZoomChangedArgs) iArgs).getIndex();
-        float zoom = ((ZoomChangedArgs) iArgs).getValue() / 100.0f;
-
         Camera.Parameters parameters = mCamera.getParameters();
-        parameters.setZoom(index);
+        parameters.setZoom(((ZoomChangedArgs) iArgs).getIndex());
         mCamera.setParameters(parameters);
-
-        if (mZoomRatioTextView != null) {
-            mZoomRatioTextView.setText(getString(R.string.zoom_changed_caption, zoom));
-        }
     }
 
     private void initializeFocusMode() {

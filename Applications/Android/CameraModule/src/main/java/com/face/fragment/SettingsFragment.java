@@ -25,8 +25,6 @@ import java.util.List;
 
 public class SettingsFragment extends BaseDialogFragment {
 
-    private static final SettingsFragment sInstance = new SettingsFragment();
-
     public final IEvent<PictureSizeArgs> PreviewSizeChanged = new Event<>();
     public final IEvent<FlashModeArgs> FlashModeChanged = new Event<>();
     public final IEvent<FocusModeArgs> FocusModeChanged = new Event<>();

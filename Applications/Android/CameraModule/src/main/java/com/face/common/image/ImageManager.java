@@ -1,11 +1,5 @@
 package com.face.common.image;
 
-import java.io.File;
-import java.lang.ref.WeakReference;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
@@ -14,6 +8,12 @@ import android.text.TextUtils;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.PicassoTools;
 import com.squareup.picasso.Target;
+
+import java.io.File;
+import java.lang.ref.WeakReference;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 
 public enum ImageManager implements ImageTargetCallback {
     i;

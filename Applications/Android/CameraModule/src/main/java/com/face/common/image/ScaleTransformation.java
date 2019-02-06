@@ -7,37 +7,34 @@ import com.squareup.picasso.Transformation;
 
 public class ScaleTransformation implements Transformation {
 
-    private float width;
-    private float height;
+    private float mWidth;
+    private float mHeight;
 
-    public ScaleTransformation(float width, float height) {
-        this.width = width;
-        this.height = height;
+    public ScaleTransformation(float iWidth, float iHeight) {
+        mWidth = iWidth;
+        mHeight = iHeight;
     }
 
     @Override
-    public Bitmap transform(Bitmap source) {
-        float sWidth = source.getWidth();
-        float sHeight = source.getHeight();
+    public Bitmap transform(Bitmap iSource) {
+        float srcWidth = iSource.getWidth();
+        float srcHeight = iSource.getHeight();
 
-        float xScale;
-        float yScale;
-        if (sWidth < sHeight) {
-            yScale = height / sHeight;
+        float xScale, yScale;
+        if (srcWidth < srcHeight) {
+            yScale = mHeight / srcHeight;
             xScale = yScale;
         } else {
-            xScale = width / sWidth;
+            xScale = mWidth / srcWidth;
             yScale = xScale;
         }
 
         Matrix matrix = new Matrix();
         matrix.postScale(xScale, yScale);
-        Bitmap scaledBitmap = Bitmap.createBitmap(source, 0, 0, (int) sWidth, (int) sHeight, matrix, true);
+        Bitmap scaledBitmap = Bitmap.createBitmap(iSource, 0, 0, (int) srcWidth, (int) srcHeight, matrix, true);
 
-        scaledBitmap.getWidth();
-        scaledBitmap.getHeight();
-        if (scaledBitmap != source) {
-            source.recycle();
+        if (scaledBitmap != iSource) {
+            iSource.recycle();
         }
 
         return scaledBitmap;
@@ -45,7 +42,6 @@ public class ScaleTransformation implements Transformation {
 
     @Override
     public String key() {
-        return "scaleTo" + width + "x" + height;
+        return "ScaleTransformation" + mWidth + "x" + mHeight;
     }
-
 }

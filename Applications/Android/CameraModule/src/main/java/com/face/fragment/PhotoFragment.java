@@ -30,7 +30,7 @@ public class PhotoFragment extends BaseFragment {
     public void onViewCreated(final View iView, Bundle iSavedInstanceState) {
         super.onViewCreated(iView, iSavedInstanceState);
 
-        mPhotoView = iView.findViewById(R.id.photo);
+        mPhotoView = iView.findViewById(R.id.photo_view);
 
         if (mBitmap != null && !mBitmap.isRecycled()) {
             mPhotoView.setImageBitmap(mBitmap);
