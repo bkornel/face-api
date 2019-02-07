@@ -42,7 +42,7 @@ namespace
 extern "C"
 {
 	JNIEXPORT jint JNICALL 
-	Java_com_face_activity_CameraActivity_NativeInitialize(JNIEnv* env, jobject thiz, jstring path)
+	Java_com_face_common_Native_initialize(JNIEnv* env, jobject thiz, jstring path)
 	{
 		if(!env) return -1;
 
@@ -75,7 +75,7 @@ extern "C"
 	}
 	
 	JNIEXPORT jint JNICALL
-	Java_com_face_view_CameraView_NativeReset(JNIEnv* env, jobject thiz)
+	Java_com_face_common_Native_reset(JNIEnv* env, jobject thiz)
 	{
 		FACE_LOG_JNI("RESET NATIVE SIDE");
 		face::FaceApi::GetInstance().Clear();
@@ -83,7 +83,7 @@ extern "C"
 	}
 	
 	JNIEXPORT jint JNICALL 
-	Java_com_face_view_CameraView_NativeProcess(JNIEnv* env, jobject thiz, jint rotation, jint width, jint height, jbyteArray yuv, jintArray argb)
+	Java_com_face_common_Native_process(JNIEnv* env, jobject thiz, jint rotation, jint width, jint height, jbyteArray yuv, jintArray argb)
 	{
 		if(!env) return -1;
 		

@@ -12,6 +12,7 @@ import android.widget.Toast;
 import com.face.R;
 import com.face.common.Assets;
 import com.face.common.Constants;
+import com.face.common.Native;
 import com.face.common.image.PhotoUtil;
 import com.face.event.EventArgs;
 import com.face.event.PhotoSavedArgs;
@@ -30,9 +31,6 @@ public class CameraActivity extends BaseActivity {
     }
 
     private CameraFragment mCameraFragment;
-
-    @SuppressWarnings("JniMissingFunction")
-    private native int NativeInitialize(String iPath);
 
     @Override
     public void onCreate(Bundle iSavedInstanceState) {
@@ -80,7 +78,7 @@ public class CameraActivity extends BaseActivity {
             finish();
         }
 
-        if (NativeInitialize(Constants.Directories.WORKING) != 0) {
+        if (Native.i.initialize(Constants.Directories.WORKING) != 0) {
             Toast.makeText(this, "Native side is not initialized.", Toast.LENGTH_LONG).show();
             finish();
         }
