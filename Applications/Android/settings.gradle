@@ -1,1 +1,2 @@
-include ':CameraModule', ':FaceApp'
+include ':CameraModule', ':FaceApp', ':OpenCV'
+project(':OpenCV').projectDir = new File(settingsDir, '../../../3rdparty/opencv-4.0.1/android')
