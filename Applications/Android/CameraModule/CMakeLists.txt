@@ -1,20 +1,24 @@
-# Sets the minimum version of CMake required to build your native library.
-# This ensures that a certain set of CMake features is available to
-# your build.
+# For more information about using CMake with Android Studio, read the
+# documentation: https://d.android.com/studio/projects/add-native-code.html
 
-cmake_minimum_required(VERSION 3.4.1)
+cmake_minimum_required(VERSION 3.6.0)
 
-# Specifies a library name, specifies whether the library is STATIC or
-# SHARED, and provides relative paths to the source code. You can
-# define multiple libraries by adding multiple add_library() commands,
-# and CMake builds them for you. When you build your app, Gradle
-# automatically packages shared libraries with your APK.
+set(target_name native-lib)
+set(OpenCV_DIR "../../../../3rdparty/opencv-4.0.1/android/src/sdk/native/jni")
 
-add_library( # Specifies the name of the library.
-             native-lib
+find_package(OpenCV REQUIRED)
+find_library(log-lib log)
 
-             # Sets the library as a shared library.
-             SHARED
+set(sources;
+  src/main/cpp/native-lib.cpp;
+)
 
-             # Provides a relative path to your source file(s).
-             src/main/cpp/native-lib.cpp )
+set(libraries;
+  ${log-lib};
+  ${OpenCV_LIBS};
+)
+
+# Gradle automatically packages shared libraries with your APK
+add_library(${target_name} SHARED ${sources})
+
+target_link_libraries(${target_name} ${libraries})
