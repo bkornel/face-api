@@ -27,7 +27,7 @@ import timber.log.Timber;
 public class CameraActivity extends BaseActivity {
 
     static {
-        System.loadLibrary("face_native");
+        System.loadLibrary("FaceNative");
     }
 
     private CameraFragment mCameraFragment;
