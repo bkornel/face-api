@@ -16,6 +16,7 @@ import android.view.SurfaceView;
 import android.widget.ImageView;
 
 import com.face.common.Configuration;
+import com.face.common.Native;
 import com.face.common.camera.PictureSize;
 
 import java.lang.ref.WeakReference;
@@ -61,12 +62,6 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback, C
             holder.setKeepScreenOn(true);
         }
     }
-
-    @SuppressWarnings("JniMissingFunction")
-    private native int NativeProcess(int iRotation, int iWidth, int iHeight, byte iYUV[], int[] iRGBA);
-
-    @SuppressWarnings("JniMissingFunction")
-    private native int NativeReset();
 
     public void surfaceCreated(SurfaceHolder iHolder) {
         startPreview(iHolder);
@@ -138,7 +133,7 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback, C
     }
 
     public void clearUsers() {
-        NativeReset();
+        Native.i.reset();
     }
 
     public void setDisplayOrientation() {
@@ -209,7 +204,6 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback, C
         private static final Object sOutputBitmapLock = new Object();
         private WeakReference<CameraView> mCameraView;
         private volatile boolean mIsInputSet = false;
-        //private volatile boolean mIsOutputSet = false;
         private NativeFrame mNativeFrame = new NativeFrame();
         private Bitmap mOutputBitmap;
 
@@ -227,12 +221,11 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback, C
             CameraView cp = mCameraView.get();
             if (cp == null || cp.mActivity.isFinishing()) return -1;
 
-            return cp.NativeProcess(iRotation, iWidth, iHeight, iYUV, iRGBA);
+            return Native.i.process(iRotation, iWidth, iHeight, iYUV, iRGBA);
         }
 
         protected void setFrame(byte[] iYUV, int iRotation, int iWidth, int iHeight) {
             if (isCancelled() || iYUV == null || iYUV.length != (iWidth * iHeight * 3 / 2)) {
-                //mIsInputSet = mIsOutputSet = false;
                 mIsInputSet = false;
                 return;
             }
@@ -251,7 +244,6 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback, C
                 mNativeFrame.width = iWidth;
                 mNativeFrame.height = iHeight;
                 mIsInputSet = true;
-                //mIsOutputSet = false;
             }
         }
 
@@ -277,7 +269,6 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback, C
                             }
 
                             mOutputBitmap.setPixels(mNativeFrame.RGBA, 0, argbW, 0, 0, argbW, argbH);
-                            //mIsOutputSet = true;
                         }
                         publishProgress();
                     } else {
@@ -307,7 +298,6 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback, C
 
             CameraView cp = mCameraView.get();
 
-            //if (!mIsOutputSet || cp == null || cp.mActivity.isFinishing()) return;
             if (cp == null || cp.mActivity.isFinishing()) return;
 
             int ivWidth = cp.mNativeImageView.getWidth();
