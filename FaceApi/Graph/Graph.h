@@ -14,28 +14,26 @@ namespace face
 	public:
 		explicit Graph(const std::string& iName);
 
-		virtual ~Graph();
+		Graph(const Graph& iOther) = delete;
+
+		virtual ~Graph() = default;
+
+		Graph& operator=(const Graph& iOther) = delete;
 
 		void Clear() override;
 
 	protected:
-		fw::ErrorCode Insert(fw::Module* iModule);
-
 		virtual fw::ErrorCode Connect() = 0;
+
+		fw::ErrorCode DeInitializeInternal() override;
+
+		fw::ErrorCode Insert(fw::Module* iModule);
 
 		fw::Executor::Shared mExecutor = nullptr;
 		fw::FirstNode<unsigned> mFirstNode;
 		fw::LastNode<bool> mLastNode;
 
-	private:
-		Graph(const Graph& iOther) = delete;
-
-		Graph& operator=(const Graph& iOther) = delete;
-		
-		fw::ErrorCode InitializeInternal(const cv::FileNode& iSettingsNode) override;
-
-		fw::ErrorCode DeInitializeInternal() override;
-
+	private:		
 		std::vector<fw::Module*> mModules;
 	};
 }

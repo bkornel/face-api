@@ -18,16 +18,20 @@ namespace face
 	public:
 		GeneralGraph();
 
+		GeneralGraph(const GeneralGraph& iOther) = delete;
+
 		virtual ~GeneralGraph();
+
+		GeneralGraph& operator=(const GeneralGraph& iOther) = delete;
 
 	protected:
 		fw::ErrorCode Connect() override;
 
+		fw::ErrorCode InitializeInternal(const cv::FileNode& iSettingsNode) override;
+
+		fw::ErrorCode DeInitializeInternal() override;
+
 	private:
-		GeneralGraph(const GeneralGraph& iOther) = delete;
-
-		GeneralGraph& operator=(const GeneralGraph& iOther) = delete;
-
 		ImageQueue* mImageQueue = nullptr;
 		FaceDetection* mFaceDetection = nullptr;
 		UserHistory* mUserHistory = nullptr;

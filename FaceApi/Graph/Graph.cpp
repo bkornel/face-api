@@ -9,11 +9,6 @@ namespace face
 	{
 	}
 
-	Graph::~Graph()
-	{
-		DeInitialize();
-	}
-
 	void Graph::Clear()
 	{
 		for (auto& module : mModules)
@@ -33,18 +28,10 @@ namespace face
 		return result;
 	}
 
-	fw::ErrorCode Graph::InitializeInternal(const cv::FileNode& /*iSettingsNode*/)
-	{
-		return fw::ErrorCode::OK;
-	}
-
 	fw::ErrorCode Graph::DeInitializeInternal()
 	{
 		for (auto& module : mModules)
-		{
 			module->DeInitialize();
-			delete module; module = nullptr;
-		}
 
 		mModules.clear();
 

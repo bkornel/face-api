@@ -12,12 +12,56 @@
 namespace face
 {
 	GeneralGraph::GeneralGraph() :
-		Graph("GeneralGraph")
+		Graph("GeneralGraph"),
+		mImageQueue(new ImageQueue()),
+		mFaceDetection(new FaceDetection()),
+		mUserManager(new UserManager()),
+		mUserProcessor(new UserProcessor()),
+		mUserHistory(new UserHistory()),
+		mVisualizer(new Visualizer())
 	{
 	}
 
 	GeneralGraph::~GeneralGraph()
 	{
+		DeInitialize();
+
+		delete mImageQueue;
+		delete mFaceDetection;
+		delete mUserManager;
+		delete mUserProcessor;
+		delete mUserHistory;
+		delete mVisualizer;
+	}
+
+	fw::ErrorCode GeneralGraph::InitializeInternal(const cv::FileNode& iSettingsNode)
+	{
+		fw::ErrorCode result = fw::ErrorCode::OK;
+
+		if ((result = Insert(mImageQueue)) != fw::ErrorCode::OK)
+			return result;
+
+		if ((result = Insert(mFaceDetection)) != fw::ErrorCode::OK)
+			return result;
+
+		if ((result = Insert(mUserManager)) != fw::ErrorCode::OK)
+			return result;
+
+		if ((result = Insert(mUserProcessor)) != fw::ErrorCode::OK)
+			return result;
+
+		if ((result = Insert(mUserHistory)) != fw::ErrorCode::OK)
+			return result;
+
+		if ((result = Insert(mVisualizer)) != fw::ErrorCode::OK)
+			return result;
+
+		return Connect();
+	}
+
+	fw::ErrorCode GeneralGraph::DeInitializeInternal()
+	{
+		return Graph::DeInitializeInternal();
 	}
 
 	fw::ErrorCode GeneralGraph::Connect()
