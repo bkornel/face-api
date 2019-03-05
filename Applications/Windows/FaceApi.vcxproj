@@ -58,6 +58,8 @@
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\Visualizer\Visualizer.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\User\User.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\User\UserData.cpp" />
+    <ClCompile Include="..\..\FaceApi\Graph\GeneralGraph.cpp" />
+    <ClCompile Include="..\..\FaceApi\Graph\Graph.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\CLM.h" />
@@ -103,6 +105,8 @@
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\User\User.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\User\UserData.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\User\UserDispatcher.hpp" />
+    <ClInclude Include="..\..\FaceApi\Graph\GeneralGraph.h" />
+    <ClInclude Include="..\..\FaceApi\Graph\Graph.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{3416DE23-C794-4DD7-B3CA-5BFAF7649D6D}</ProjectGuid>
@@ -197,8 +201,10 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories></AdditionalLibraryDirectories>
-      <AdditionalDependencies></AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>
@@ -240,8 +246,10 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories></AdditionalLibraryDirectories>
-      <AdditionalDependencies></AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>

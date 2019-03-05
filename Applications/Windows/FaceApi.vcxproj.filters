@@ -52,6 +52,9 @@
     <Filter Include="Modules\UserHistory">
       <UniqueIdentifier>{5e55172a-b12e-4394-a440-91caac080729}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Graph">
+      <UniqueIdentifier>{15447a17-50f7-4d47-b8a4-7195589c4425}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\IO.cc">
@@ -168,6 +171,12 @@
     </ClCompile>
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\FlowGraph.cpp">
       <Filter>Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\FaceApi\Graph\Graph.cpp">
+      <Filter>Graph</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\FaceApi\Graph\GeneralGraph.cpp">
+      <Filter>Graph</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -297,6 +306,12 @@
     </ClInclude>
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\FlowGraph.hpp">
       <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\FaceApi\Graph\Graph.h">
+      <Filter>Graph</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\FaceApi\Graph\GeneralGraph.h">
+      <Filter>Graph</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

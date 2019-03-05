@@ -13,3 +13,4 @@ Applications/Windows/Bin/x64/
 *.suo
 *.opendb
 *.avi
+.vs
