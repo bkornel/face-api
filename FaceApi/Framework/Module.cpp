@@ -1,7 +1,9 @@
-#include "Module.h"
+#include "Framework/Module.h"
 
 namespace fw
 {
+	Module::CommandHandlerType Module::commandHandler;
+
 	Module::Module(const std::string& iName) :
 		Thread(),
 		mName(iName)
@@ -17,6 +19,7 @@ namespace fw
 			Clear();
 			result = InitializeInternal(iSettings);
 			mInitialized = (result == ErrorCode::OK);
+			commandHandler += MAKE_DELEGATE(&Module::OnCommandArrived, this);
 		}
 
 		return result;
@@ -35,6 +38,7 @@ namespace fw
 
 			DeInitializeInternal();
 			mInitialized = false;
+			commandHandler -= MAKE_DELEGATE(&Module::OnCommandArrived, this);
 		}
 
 		return result;

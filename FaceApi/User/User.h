@@ -5,7 +5,7 @@
 #include <clm/CLM.h>
 
 #include "Common/ShapeUtil.h"
-#include "User/UserData.h"
+#include "User/UserData.hpp"
 
 namespace face
 {
@@ -15,7 +15,7 @@ namespace face
 		public UserData
 	{
 	public:
-		typedef std::shared_ptr<User> Shared;
+		FW_DEFINE_SMART_POINTERS(User)
 
 		enum class Status
 		{

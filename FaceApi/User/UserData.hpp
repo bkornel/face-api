@@ -10,7 +10,7 @@ namespace face
 	class UserData
 	{
 	public:
-		typedef std::shared_ptr<UserData> Shared;
+		FW_DEFINE_SMART_POINTERS(UserData)
 
 		UserData() = default;
 

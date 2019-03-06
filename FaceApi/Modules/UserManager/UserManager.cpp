@@ -263,4 +263,9 @@ namespace face
 
 		return size;
 	}
+
+	fw::ErrorCode UserManager::OnCommandArrived(fw::Message::Shared iMessage)
+	{
+		return fw::ErrorCode::OK;
+	}
 }

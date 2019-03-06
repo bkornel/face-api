@@ -4,16 +4,22 @@
 #include <memory>
 #include <opencv2/core.hpp>
 
-#include "Thread.h"
-#include "UtilOCV.h"
-#include "UtilString.h"
+#include "Framework/Event.hpp"
+#include "Framework/Message.h"
+#include "Framework/Thread.h"
+#include "Framework/UtilOCV.h"
+#include "Framework/UtilString.h"
 
 namespace fw
 {
 	class Module :
 		public Thread
 	{
+		using CommandHandlerType = Event<ErrorCode(Message::Shared)>;
+
 	public:
+		static CommandHandlerType commandHandler;
+
 		explicit Module(const std::string& iName);
 
 		virtual ~Module() = default;
@@ -37,6 +43,11 @@ namespace fw
 		}
 
 	protected:
+		virtual ErrorCode OnCommandArrived(Message::Shared iMessage)
+		{
+			return fw::ErrorCode::OK;
+		}
+
 		virtual ErrorCode InitializeInternal(const cv::FileNode& iSettings)
 		{
 			return fw::ErrorCode::OK;

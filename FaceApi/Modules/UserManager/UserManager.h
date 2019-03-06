@@ -58,6 +58,8 @@ namespace face
 
 		void RemoveInactiveUsers(bool forceToDelete = false);
 
+		fw::ErrorCode OnCommandArrived(fw::Message::Shared iMessage) override;
+
 		std::vector<User::Shared> mUsers;   ///< The vector storing all users
 		fw::Stopwatch mRemoveSW;
 		long long mTimestamp = 0;

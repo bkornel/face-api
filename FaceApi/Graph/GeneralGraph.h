@@ -1,3 +1,5 @@
+#pragma once
+
 #include <string>
 #include <vector>
 
@@ -7,9 +9,9 @@ namespace face
 {
 	class ImageQueue;
 	class FaceDetection;
-	class UserHistory;
 	class UserManager;
 	class UserProcessor;
+	class UserHistory;
 	class Visualizer;
 
 	class GeneralGraph :
@@ -34,9 +36,9 @@ namespace face
 	private:
 		ImageQueue* mImageQueue = nullptr;
 		FaceDetection* mFaceDetection = nullptr;
-		UserHistory* mUserHistory = nullptr;
 		UserManager* mUserManager = nullptr;
 		UserProcessor* mUserProcessor = nullptr;
+		UserHistory* mUserHistory = nullptr;
 		Visualizer* mVisualizer = nullptr;
 	};
 }

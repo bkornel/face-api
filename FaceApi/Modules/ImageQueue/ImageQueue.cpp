@@ -2,6 +2,7 @@
 #include <easyloggingpp/easyloggingpp.h>
 
 #include "Modules/ImageQueue/ImageQueue.h"
+#include "Messages/ImageSizeChangedMessage.h"
 
 namespace face
 {
@@ -38,6 +39,8 @@ namespace face
 		{
 			return fw::ErrorCode::BadParam;
 		}
+
+		commandHandler.Raise(std::make_shared<ImageSizeChangedMessage>(cv::Size(10, 10), 0U, 0LL));
 
 		const fw::ErrorCode result = mQueue.Push(std::make_shared<ImageMessage>(iFrame, sFrameId, fw::get_current_time()));
 		if (result == fw::ErrorCode::OK)

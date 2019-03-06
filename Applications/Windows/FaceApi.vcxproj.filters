@@ -166,9 +166,6 @@
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Messages\UserEntriesMessage.cpp">
       <Filter>Messages</Filter>
     </ClCompile>
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\User\UserData.cpp">
-      <Filter>User</Filter>
-    </ClCompile>
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\FlowGraph.cpp">
       <Filter>Framework</Filter>
     </ClCompile>
@@ -177,6 +174,9 @@
     </ClCompile>
     <ClCompile Include="..\..\FaceApi\Graph\GeneralGraph.cpp">
       <Filter>Graph</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\FaceApi\Messages\ImageSizeChangedMessage.cpp">
+      <Filter>Messages</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -298,9 +298,6 @@
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\UserEntriesMessage.h">
       <Filter>Messages</Filter>
     </ClInclude>
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\User\UserData.h">
-      <Filter>User</Filter>
-    </ClInclude>
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Functional.hpp">
       <Filter>Framework</Filter>
     </ClInclude>
@@ -312,6 +309,12 @@
     </ClInclude>
     <ClInclude Include="..\..\FaceApi\Graph\GeneralGraph.h">
       <Filter>Graph</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\FaceApi\Messages\ImageSizeChangedMessage.h">
+      <Filter>Messages</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\FaceApi\User\UserData.hpp">
+      <Filter>User</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
