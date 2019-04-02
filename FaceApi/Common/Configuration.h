@@ -36,6 +36,8 @@ namespace face
 
 		inline const OutputParams& GetOutput() const { return mOutput; }
 
+		inline const cv::FileNode& GetModulesNode() const { return mModulesNode; }
+
 		cv::FileNode GetModuleSettings(const std::string& iName) const;
 
 		void SetWorkingDirectory(const std::string& iWorkingDir);

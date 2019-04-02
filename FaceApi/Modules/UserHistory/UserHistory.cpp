@@ -26,7 +26,7 @@ namespace face
 		return fw::ErrorCode::OK;
 	}
 
-	UserEntriesMessage::Shared UserHistory::Process(ActiveUsersMessage::Shared iActiveUsers)
+	UserEntriesMessage::Shared UserHistory::Main(ActiveUsersMessage::Shared iActiveUsers)
 	{
 		if (!iActiveUsers || iActiveUsers->IsEmpty()) return nullptr;
 

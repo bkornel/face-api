@@ -172,9 +172,6 @@
     <ClCompile Include="..\..\FaceApi\Graph\Graph.cpp">
       <Filter>Graph</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\FaceApi\Graph\GeneralGraph.cpp">
-      <Filter>Graph</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\FaceApi\Messages\ImageSizeChangedMessage.cpp">
       <Filter>Messages</Filter>
     </ClCompile>
@@ -305,9 +302,6 @@
       <Filter>Framework</Filter>
     </ClInclude>
     <ClInclude Include="..\..\FaceApi\Graph\Graph.h">
-      <Filter>Graph</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\FaceApi\Graph\GeneralGraph.h">
       <Filter>Graph</Filter>
     </ClInclude>
     <ClInclude Include="..\..\FaceApi\Messages\ImageSizeChangedMessage.h">

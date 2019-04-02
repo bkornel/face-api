@@ -12,7 +12,7 @@ namespace face
 {
 	class ImageQueue :
 		public fw::Module,
-		public fw::Port<ImageMessage::Shared>
+		public fw::Port<ImageMessage::Shared(unsigned)>
 	{
 		using MessageQueue = fw::MessageQueue<ImageMessage::Shared>;
 
@@ -23,7 +23,7 @@ namespace face
 
 		fw::ErrorCode Push(const cv::Mat& iFrame);
 
-		ImageMessage::Shared Pop(unsigned iTickNumber);
+		ImageMessage::Shared Main(unsigned iTickNumber) override;
 
 		void Clear() override
 		{

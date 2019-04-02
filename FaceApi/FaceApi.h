@@ -5,6 +5,7 @@
 
 #include "Framework/Module.h"
 #include "Framework/FlowGraph.hpp"
+#include "Graph/Graph.h"
 #include "Modules/ImageQueue/ImageQueue.h"
 
 namespace face
@@ -79,6 +80,7 @@ namespace face
 		fw::LastNode<bool> mLastNode;
 
 		std::vector<fw::Module*> mModules;
+		std::shared_ptr<Graph> mGraph = nullptr;
 
 		ImageQueue* mImageQueue = nullptr;
 		FaceDetection* mFaceDetection = nullptr;

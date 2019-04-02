@@ -13,7 +13,7 @@ namespace face
 {
 	class UserHistory :
 		public fw::Module,
-		public fw::Port<UserEntriesMessage::Shared>
+		public fw::Port<UserEntriesMessage::Shared(ActiveUsersMessage::Shared)>
 	{
 		using Entry = UserEntriesMessage::Entry;
 		using EntryMap = UserEntriesMessage::EntryMap;
@@ -23,7 +23,7 @@ namespace face
 
 		virtual ~UserHistory() = default;
 
-		UserEntriesMessage::Shared Process(ActiveUsersMessage::Shared iActiveUsers);
+		UserEntriesMessage::Shared Main(ActiveUsersMessage::Shared iActiveUsers) override;
 
 		void Clear() override;
 

@@ -181,36 +181,41 @@ namespace fw
 		const FutureShared<T> mFuture = nullptr;
 	};
 
-	template<typename T>
-	struct Port
+	template<typename ReturnT>
+	class Port;
+
+	template<typename ReturnT, typename... ArgumentT>
+	struct Port<ReturnT(ArgumentT...)>
 	{
-		FutureShared<T> port = nullptr;
+		virtual ReturnT Main(ArgumentT...) = 0;
+		FutureShared<ReturnT> port = nullptr;
+		std::tuple<ArgumentT...> input;
 	};
 
-	template <typename R>
+	template <typename ReturnT>
 	struct FirstNode
 	{
-		R Main() { static R sTickCounter = 0; return sTickCounter++; }
+		ReturnT Main() { static ReturnT sTickCounter = 0; return sTickCounter++; }
 		void Tick() { port.first(); }
-		std::pair<std::function<void()>, FutureShared<R>> port;
+		std::pair<std::function<void()>, FutureShared<ReturnT>> port;
 	};
 
-	template <typename R>
-	struct LastNode : public Port<R>
+	template <typename ReturnT>
+	struct LastNode : public Port<ReturnT(ReturnT)>
 	{
-		R Main(R iSucceeded) { return iSucceeded; }
-		bool Get() { return Port<R>::port->Get(); }
-		void Wait() { Port<R>::port->Wait(); }
+		ReturnT Main(ReturnT iSucceeded) override { return iSucceeded; }
+		bool Get() { return Port<ReturnT(ReturnT)>::port->Get(); }
+		void Wait() { Port<ReturnT(ReturnT)>::port->Wait(); }
 	};
 
 	/// @brief Returns an action running the provided function with executor and a Future for the result.
 	/// This connect() is a special case, since no dependency is needed. It is provided for convenience.
-	template <typename R>
-	std::pair<std::function<void()>, FutureShared<R>> connect(std::function<R()> iFunction, Executor::Shared iExecutor)
+	template <typename ReturnT>
+	std::pair<std::function<void()>, FutureShared<ReturnT>> connect(std::function<ReturnT()> iFunction, Executor::Shared iExecutor)
 	{
 		// Using shared_ptr, because std::function is copyable, but Promise<R> is not.
-		auto promise = std::make_shared<Promise<R>>();
-		FutureShared<R> future = promise->GetFuture();
+		auto promise = std::make_shared<Promise<ReturnT>>();
+		FutureShared<ReturnT> future = promise->GetFuture();
 
 		auto task = [iFunction, promise, iExecutor] {
 			promise->Put(iFunction(), iExecutor);
@@ -223,11 +228,11 @@ namespace fw
 		return std::make_pair(runTask, future);
 	}
 
-	template <typename R, typename... Args>
-	FutureShared<R> connect(std::function<R(Args...)> iFunction, FutureShared<Args>... iFutures)
+	template <typename ReturnT, typename... ArgumentT>
+	FutureShared<ReturnT> connect(std::function<ReturnT(ArgumentT...)> iFunction, FutureShared<ArgumentT>... iFutures)
 	{
 		// Using shared_ptr, because std::function is copyable, but Promise is not.
-		auto promise = std::make_shared<Promise<R>>();
+		auto promise = std::make_shared<Promise<ReturnT>>();
 		auto future = promise->GetFuture();
 
 		auto task = [iFunction, promise, iFutures...](Executor::Shared executor)
@@ -235,7 +240,7 @@ namespace fw
 			promise->Put(iFunction(iFutures->Get()...), executor);
 		};
 
-		const unsigned count = static_cast<unsigned>(sizeof...(Args));
+		const unsigned count = static_cast<unsigned>(sizeof...(ArgumentT));
 		auto continuation = std::make_shared<Continuation>(std::move(task), count);
 
 		// Expand it in the initializer

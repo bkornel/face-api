@@ -43,6 +43,12 @@ namespace face
 		if ((result = Configuration::GetInstance().Initialize()) != fw::ErrorCode::OK) 
 			return result;
 
+		mGraph = std::make_shared<Graph>();
+
+		// Create and init modules here
+		if ((result = mGraph->Initialize(Configuration::GetInstance().GetModulesNode())) != fw::ErrorCode::OK)
+			return result;
+
 		// Create and init modules here
 		if ((result = CreateModules()) != fw::ErrorCode::OK) 
 			return result;
@@ -107,32 +113,32 @@ namespace face
 
 		// Image queue: popping out a frame
 		mImageQueue->port = fw::connect(
-			FW_BIND(&ImageQueue::Pop, mImageQueue),
+			FW_BIND(&ImageQueue::Main, mImageQueue),
 			mFirstNode.port.second);
 
 		// Face detector: detect faces on the frame pop from the queue
 		mFaceDetection->port = fw::connect(
-			FW_BIND(&FaceDetection::Detect, mFaceDetection),
+			FW_BIND(&FaceDetection::Main, mFaceDetection),
 			mImageQueue->port);
 
 		// User manager: manage active and inactive users, update them with the detected faces
 		mUserManager->port = fw::connect(
-			FW_BIND(&UserManager::Process, mUserManager),
+			FW_BIND(&UserManager::Main, mUserManager),
 			mImageQueue->port, mFaceDetection->port);
 
 		// User processor: extract all of the features from faces (e.g. shape model, head pose)
 		mUserProcessor->port = fw::connect(
-			FW_BIND(&UserProcessor::Process, mUserProcessor),
+			FW_BIND(&UserProcessor::Main, mUserProcessor),
 			mImageQueue->port, mUserManager->port);
 
 		// User history: maintain all entries that have been estimated by the user processor module in time
 		mUserHistory->port = fw::connect(
-			FW_BIND(&UserHistory::Process, mUserHistory),
+			FW_BIND(&UserHistory::Main, mUserHistory),
 			mUserProcessor->port);
 
 		// Visualizer: generate and draw the results
 		mVisualizer->port = fw::connect(
-			FW_BIND(&Visualizer::Draw, mVisualizer),
+			FW_BIND(&Visualizer::Main, mVisualizer),
 			mImageQueue->port, mUserProcessor->port);
 
 		// Last node: waiting for the results

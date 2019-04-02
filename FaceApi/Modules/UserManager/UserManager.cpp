@@ -48,7 +48,7 @@ namespace face
 		RemoveInactiveUsers(true);
 	}
 
-	ActiveUsersMessage::Shared UserManager::Process(ImageMessage::Shared iImage, RoiMessage::Shared iDetections)
+	ActiveUsersMessage::Shared UserManager::Main(ImageMessage::Shared iImage, RoiMessage::Shared iDetections)
 	{
 		if (!iImage || iImage->IsEmpty()) return nullptr;
 

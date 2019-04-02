@@ -46,7 +46,7 @@ namespace face
 		return ClmWrapper::GetInstance().Initialize(trackerFile, triFile, conFile);
 	}
 
-	ActiveUsersMessage::Shared UserProcessor::Process(ImageMessage::Shared iImage, ActiveUsersMessage::Shared iUsers)
+	ActiveUsersMessage::Shared UserProcessor::Main(ImageMessage::Shared iImage, ActiveUsersMessage::Shared iUsers)
 	{
 		if ((!iImage || iImage->IsEmpty()) || (!iUsers || iUsers->IsEmpty()))
 			return nullptr;

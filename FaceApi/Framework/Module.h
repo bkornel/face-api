@@ -18,6 +18,8 @@ namespace fw
 		using CommandHandlerType = Event<ErrorCode(Message::Shared)>;
 
 	public:
+		FW_DEFINE_SMART_POINTERS(Module)
+
 		static CommandHandlerType commandHandler;
 
 		explicit Module(const std::string& iName);

@@ -12,14 +12,14 @@ namespace face
 {
 	class Visualizer :
 		public fw::Module,
-		public fw::Port<bool>
+		public fw::Port<bool(ImageMessage::Shared, ActiveUsersMessage::Shared)>
 	{
 	public:
 		Visualizer();
 
 		virtual ~Visualizer() = default;
 
-		bool Draw(ImageMessage::Shared iImage, ActiveUsersMessage::Shared iUsers);
+		bool Main(ImageMessage::Shared iImage, ActiveUsersMessage::Shared iUsers) override;
 
 		inline bool HasOutput() const
 		{

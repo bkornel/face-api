@@ -15,14 +15,14 @@ namespace face
 {
 	class FaceDetection :
 		public fw::Module,
-		public fw::Port<RoiMessage::Shared>
+		public fw::Port<RoiMessage::Shared(ImageMessage::Shared)>
 	{
 	public:
 		FaceDetection();
 
 		virtual ~FaceDetection() = default;
 
-		RoiMessage::Shared Detect(ImageMessage::Shared iImage);
+		RoiMessage::Shared Main(ImageMessage::Shared iImage) override;
 
 		inline float GetMinSize() const
 		{

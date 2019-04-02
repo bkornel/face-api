@@ -52,7 +52,7 @@ namespace face
 		return result;
 	}
 
-	ImageMessage::Shared ImageQueue::Pop(unsigned /*iTickNumber*/)
+	ImageMessage::Shared ImageQueue::Main(unsigned /*iTickNumber*/)
 	{
 		std::tuple<ImageMessage::Shared> framePool;
 		if (mQueue.TryPop(framePool) != fw::ErrorCode::OK)

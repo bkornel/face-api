@@ -72,7 +72,7 @@ namespace face
 		return fw::ErrorCode::OK;
 	}
 
-	RoiMessage::Shared FaceDetection::Detect(ImageMessage::Shared iImage)
+	RoiMessage::Shared FaceDetection::Main(ImageMessage::Shared iImage)
 	{
 		assert(mDetectionSW.IsRunning());
 

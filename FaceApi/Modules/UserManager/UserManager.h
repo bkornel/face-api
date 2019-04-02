@@ -13,14 +13,14 @@ namespace face
 {
 	class UserManager :
 		public fw::Module,
-		public fw::Port<ActiveUsersMessage::Shared>
+		public fw::Port<ActiveUsersMessage::Shared(ImageMessage::Shared, RoiMessage::Shared)>
 	{
 	public:
 		UserManager();
 
 		virtual ~UserManager() = default;
 
-		ActiveUsersMessage::Shared Process(ImageMessage::Shared iImage, RoiMessage::Shared iDetections);
+		ActiveUsersMessage::Shared Main(ImageMessage::Shared iImage, RoiMessage::Shared iDetections) override;
 
 		void Clear() override;
 

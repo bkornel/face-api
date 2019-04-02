@@ -25,7 +25,7 @@ namespace face
 		return fw::ErrorCode::OK;
 	}
 
-	bool Visualizer::Draw(ImageMessage::Shared iImage, ActiveUsersMessage::Shared iUsers)
+	bool Visualizer::Main(ImageMessage::Shared iImage, ActiveUsersMessage::Shared iUsers)
 	{
 		if (!iImage || iImage->IsEmpty()) return false;
 

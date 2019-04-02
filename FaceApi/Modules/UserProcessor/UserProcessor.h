@@ -16,14 +16,14 @@ namespace face
 {
 	class UserProcessor :
 		public fw::Module,
-		public fw::Port<ActiveUsersMessage::Shared>
+		public fw::Port<ActiveUsersMessage::Shared(ImageMessage::Shared, ActiveUsersMessage::Shared)>
 	{
 	public:
 		UserProcessor();
 
 		virtual ~UserProcessor() = default;
 
-		ActiveUsersMessage::Shared Process(ImageMessage::Shared iImage, ActiveUsersMessage::Shared iActiveUsers);
+		ActiveUsersMessage::Shared Main(ImageMessage::Shared iImage, ActiveUsersMessage::Shared iActiveUsers) override;
 
 	private:
 		fw::ErrorCode InitializeInternal(const cv::FileNode& iSettings) override;

@@ -44,6 +44,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/clm)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/easyloggingpp)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Common)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Framework)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Graph)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Messages)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/FaceDetection)
@@ -81,8 +82,11 @@ set(SOURCES;
   Framework/UtilOCV.cpp;
   Framework/UtilString.cpp;
   Framework/VideoWriter.cpp;
+  Graph/GeneralGraph.cpp;
+  Graph/Graph.cpp;
   Messages/ActiveUsersMessage.cpp;
   Messages/ImageMessage.cpp;
+  Messages/ImageSizeChangedMessage.cpp;
   Messages/RoiMessage.cpp;
   Messages/UserEntriesMessage.cpp;
   Modules/FaceDetection/FaceDetection.cpp;

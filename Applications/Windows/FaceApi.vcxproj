@@ -57,7 +57,6 @@
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\UserProcessor.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\Visualizer\Visualizer.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\User\User.cpp" />
-    <ClCompile Include="..\..\FaceApi\Graph\GeneralGraph.cpp" />
     <ClCompile Include="..\..\FaceApi\Graph\Graph.cpp" />
     <ClCompile Include="..\..\FaceApi\Messages\ImageSizeChangedMessage.cpp" />
   </ItemGroup>
@@ -105,7 +104,6 @@
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\User\User.h" />
     <ClInclude Include="..\..\FaceApi\User\UserData.hpp" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\User\UserDispatcher.hpp" />
-    <ClInclude Include="..\..\FaceApi\Graph\GeneralGraph.h" />
     <ClInclude Include="..\..\FaceApi\Graph\Graph.h" />
     <ClInclude Include="..\..\FaceApi\Messages\ImageSizeChangedMessage.h" />
   </ItemGroup>

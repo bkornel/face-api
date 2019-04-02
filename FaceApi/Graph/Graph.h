@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -11,29 +12,34 @@ namespace face
 	class Graph :
 		public fw::Module
 	{
+		using ConnectionMap = std::map<int, std::string>;
+
 	public:
-		explicit Graph(const std::string& iName);
+		Graph();
 
-		Graph(const Graph& iOther) = delete;
-
-		virtual ~Graph() = default;
-
-		Graph& operator=(const Graph& iOther) = delete;
+		virtual ~Graph();
 
 		void Clear() override;
 
-	protected:
-		virtual fw::ErrorCode Connect() = 0;
+	private:
+		Graph(const Graph& iOther) = delete;
+
+		Graph& operator=(const Graph& iOther) = delete;
+
+		fw::ErrorCode InitializeInternal(const cv::FileNode& iModulesNode) override;
 
 		fw::ErrorCode DeInitializeInternal() override;
 
-		fw::ErrorCode Insert(fw::Module* iModule);
+		fw::ErrorCode CreateModules(const cv::FileNode& iModulesNode);
+
+		fw::ErrorCode CreateConnections(const cv::FileNode& iModulesNode);
+
+		fw::ErrorCode GetPredecessors(const std::string& iModuleName, const cv::FileNode& iModulesNode, ConnectionMap& oConnectionMap);
 
 		fw::Executor::Shared mExecutor = nullptr;
 		fw::FirstNode<unsigned> mFirstNode;
 		fw::LastNode<bool> mLastNode;
 
-	private:		
-		std::vector<fw::Module*> mModules;
+		std::vector<fw::Module::Shared> mModules;
 	};
 }
