@@ -82,7 +82,6 @@ set(SOURCES;
   Framework/UtilOCV.cpp;
   Framework/UtilString.cpp;
   Framework/VideoWriter.cpp;
-  Graph/GeneralGraph.cpp;
   Graph/Graph.cpp;
   Messages/ActiveUsersMessage.cpp;
   Messages/ImageMessage.cpp;
