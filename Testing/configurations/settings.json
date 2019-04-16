@@ -15,13 +15,13 @@
     },
     "modules": {
       "imageQueue": {
-        "connection": [ "FaceDetection:1", "UserManager:1", "UserProcessor:1", "Visualizer:1" ],
+        "port": [ "Begin:1" ],
         "bound": "10",
         "samplingFPS": "30.0",
         "thresholdMS": "100"
       },
       "faceDetection": {
-        "connection": [ "UserManager:2" ],
+        "port": [ "ImageQueue:1" ],
         "detectionSec": "10.0",
         "detectionOverlap": "0.2",
         "detectMultiScale": {
@@ -35,18 +35,18 @@
         "imageScale": "1.0"
       },
       "userHistory": {
-        "connection": [ "" ],
+        "port": [ "UserProcessor:1" ],
         "removeFreqMs": "10000"
       },
       "userManager": {
-        "connection": [ "UserProcessor:2" ],
+        "port": [ "ImageQueue:1", "FaceDetection:2" ],
         "maxUsers": "1",
         "userAwaySec": "15.0",
         "userOverlap": "0.2",
         "templateScale": "0.3"
       },
       "userProcessor": {
-        "connection": [ "UserHistory:1", "Visualizer:2" ],
+        "port": [ "ImageQueue:1", "UserManager:2" ],
         "headPose": {
           "estimateReprojection": "FALSE",
           "faceBoxOffset": "5.0"
@@ -68,7 +68,7 @@
         }
       },
       "Visualizer": {
-        "connection": [ "Last:1" ]
+        "port": [ "ImageQueue:1", "UserManager:2" ]
       }
     }
   }

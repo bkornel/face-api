@@ -12,7 +12,7 @@ namespace face
 	class Graph :
 		public fw::Module
 	{
-		using ConnectionMap = std::map<int, std::string>;
+		using PredecessorMap = std::map<int, std::string>;
 
 	public:
 		Graph();
@@ -34,7 +34,7 @@ namespace face
 
 		fw::ErrorCode CreateConnections(const cv::FileNode& iModulesNode);
 
-		fw::ErrorCode GetPredecessors(const std::string& iModuleName, const cv::FileNode& iModulesNode, ConnectionMap& oConnectionMap);
+		fw::ErrorCode GetPredecessors(const cv::FileNode& iModule, const cv::FileNode& iModules, PredecessorMap& oPredecessors);
 
 		fw::Executor::Shared mExecutor = nullptr;
 		fw::FirstNode<unsigned> mFirstNode;

@@ -14,6 +14,22 @@
 
 namespace face
 {
+	namespace
+	{
+		template<typename T>
+		std::shared_ptr<T> create_module(const std::string& iModuleName)
+		{
+			if (iModuleName == "imagequeue")			return std::make_shared<ImageQueue>();
+			else if (iModuleName == "facedetection")	return std::make_shared<FaceDetection>();
+			else if (iModuleName == "userhistory")		return std::make_shared<UserHistory>();
+			else if (iModuleName == "usermanager")		return std::make_shared<UserManager>();
+			else if (iModuleName == "userprocessor")	return std::make_shared<UserProcessor>();
+			else if (iModuleName == "visualizer")		return std::make_shared<Visualizer>();
+			
+			return nullptr;
+		}
+	}
+
 	Graph::Graph() :
 		fw::Module("Graph"),
 		mExecutor(fw::getInlineExecutor())
@@ -73,17 +89,11 @@ namespace face
 			if (moduleNode.empty() || !moduleNode.isNamed()) continue;
 
 			const std::string& moduleName = fw::str::to_lower(moduleNode.name());
-			std::shared_ptr<fw::Module> module = nullptr;
+			auto module = create_module<fw::Module>(moduleName);
 
-			if (moduleName == "imagequeue")			module = std::make_shared<ImageQueue>();
-			else if (moduleName == "facedetection")	module = std::make_shared<FaceDetection>();
-			else if (moduleName == "userhistory")	module = std::make_shared<UserHistory>();
-			else if (moduleName == "usermanager")	module = std::make_shared<UserManager>();
-			else if (moduleName == "userprocessor")	module = std::make_shared<UserProcessor>();
-			else if (moduleName == "visualizer")	module = std::make_shared<Visualizer>();
-			else
+			if (!module)
 			{
-				LOG(ERROR) << "Unknown module is referenced with name: " << moduleNode.name();
+				LOG(ERROR) << "Unknown module is referenced with name: " << moduleName;
 				return fw::ErrorCode::BadData;
 			}
 
@@ -92,8 +102,6 @@ namespace face
 			{
 				return result;
 			}
-
-			CV_Assert(module != nullptr);
 
 			mModules.push_back(module);
 		}
@@ -110,14 +118,14 @@ namespace face
 		for (const auto& moduleNode : iModulesNode)
 		{
 			const std::string& moduleName = fw::str::to_lower(moduleNode.name());
-			ConnectionMap connectionMap;
+			PredecessorMap predecessors;
 
-			if ((result = GetPredecessors(moduleName, iModulesNode, connectionMap)) != fw::ErrorCode::OK)
+			if ((result = GetPredecessors(moduleNode, iModulesNode, predecessors)) != fw::ErrorCode::OK)
 			{
 				return result;
 			}
 			
-			if (!connectionMap.empty())
+			if (!predecessors.empty())
 			{
 				// TODO(kbertok)
 			}
@@ -126,68 +134,75 @@ namespace face
 		return result;
 	}
 
-	fw::ErrorCode Graph::GetPredecessors(const std::string& iModuleName, const cv::FileNode& iModulesNode, ConnectionMap& oConnectionMap)
+	fw::ErrorCode Graph::GetPredecessors(const cv::FileNode& iModule, const cv::FileNode& iModules, PredecessorMap& oPredecessors)
 	{
-		CV_Assert(!iModuleName.empty() && !iModulesNode.empty());
+		CV_Assert(!iModule.empty() && !iModules.empty());
 
-		oConnectionMap.clear();
+		oPredecessors.clear();
 
-		if (iModuleName == "imagequeue")
+		// It does not have any predecessor
+		const cv::FileNode& ports = iModule["port"];
+		if (ports.empty() || ports.size() == 0U)
 		{
-			oConnectionMap[1] = "first";
 			return fw::ErrorCode::OK;
 		}
 
-		for (const auto& predecessorNode : iModulesNode)
+		const std::string& moduleName = fw::str::to_lower(iModule.name());
+		if (moduleName == "imagequeue")
 		{
-			const std::string& predecessorName = fw::str::to_lower(predecessorNode.name());
-			if (iModuleName == predecessorName)
+			oPredecessors[1] = "first";
+			return fw::ErrorCode::OK;
+		}
+
+		for (const auto& portNode : ports)
+		{
+			const std::string& port = fw::str::trim(fw::str::to_lower(portNode.string()));
+			if (port.empty())
 			{
-				continue;
+				LOG(ERROR) << "Port is not specified for: " << moduleName;
+				return fw::ErrorCode::NotFound;
 			}
 
-			const cv::FileNode& connectionNodes = predecessorNode["connection"];
-			if (connectionNodes.empty() || connectionNodes.size() == 0U)
+			const auto tokens = fw::str::split(port, ':');
+			if (tokens.size() != 2)
 			{
-				continue;
+				LOG(ERROR) << "Port format is wrong for: " << moduleName << ", port: " << port;
+				return fw::ErrorCode::BadData;
 			}
 
-			for (const auto& connectionNode : connectionNodes)
+			const int portNumber = fw::str::convert_to_number<int>(fw::str::trim(tokens[1]));
+			if (portNumber < 1)
 			{
-				const std::string& connection = fw::str::trim(fw::str::to_lower(connectionNode.string()));
+				LOG(ERROR) << "Port number is less than 1 for: " << moduleName << ", port: " << port;
+				return fw::ErrorCode::BadData;
+			}
 
-				if (connection.empty())
+			const std::string& portName = fw::str::trim(tokens[0]);
+			bool isFound = false;
+
+			for (const auto& module : iModules)
+			{
+				const std::string& predecessorName = fw::str::to_lower(module.name());
+				if (portName == predecessorName)
 				{
-					continue;
-				}
-
-				const auto tokens = fw::str::split(connection, ':');
-
-				if (tokens.size() != 2)
-				{
-					LOG(ERROR) << "Wrong format in connection: " << connectionNode.string();
-					return fw::ErrorCode::BadData;
-				}
-
-				const int portNumber = fw::str::convert_to_number<int>(fw::str::trim(tokens[1]));
-				if (portNumber < 1)
-				{
-					LOG(ERROR) << "Port number is less than 1: " << connectionNode.string();
-					return fw::ErrorCode::BadData;
-				}
-
-				const std::string& connectionName = fw::str::trim(tokens[0]);
-
-				if (connectionName == iModuleName)
-				{
-					if (oConnectionMap.find(portNumber) != oConnectionMap.end())
+					if (oPredecessors[portNumber].empty())
 					{
-						LOG(ERROR) << "Port(" << portNumber << ") is already used: " << iModuleName;
+						oPredecessors[portNumber] = predecessorName;
+						isFound = true;
+						break;
+					}
+					else
+					{
+						LOG(ERROR) << "Port number is already set for: " << moduleName << ", port: " << port;
 						return fw::ErrorCode::BadData;
 					}
-
-					oConnectionMap[portNumber] = predecessorName;
 				}
+			}
+
+			if (!isFound)
+			{
+				LOG(ERROR) << "Port is not defined in the configuration file for: " << moduleName << ", port: " << port;
+				return fw::ErrorCode::BadData;
 			}
 		}
 
