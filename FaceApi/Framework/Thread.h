@@ -33,7 +33,7 @@ namespace fw
 		}
 
 	protected:
-		virtual ErrorCode ThreadProcedure();
+		virtual ErrorCode Run();
 
 	private:
 		Thread(const Thread& iOther) = delete;

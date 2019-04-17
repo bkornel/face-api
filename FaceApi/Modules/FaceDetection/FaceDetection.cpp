@@ -4,6 +4,7 @@
 
 #include "Framework/Profiler.h"
 #include "Framework/UtilOCV.h"
+#include "Framework/UtilString.h"
 #include "Modules/FaceDetection/FaceDetection.h"
 
 //#define CROP_FACE_RECT

@@ -7,12 +7,17 @@ namespace fw
 		StopThread();
 	}
 
+	ErrorCode Thread::Run()
+	{
+		return ErrorCode::OK;
+	}
+
 	ErrorCode Thread::StartThread()
 	{
 		if (!mFirstRun) StopThread();
 
 		mStopThread = mFirstRun = false;
-		mThread = std::async(std::launch::async, &Thread::ThreadProcedure, this);
+		mThread = std::async(std::launch::async, &Thread::Run, this);
 
 		return ErrorCode::OK;
 	}
@@ -27,12 +32,6 @@ namespace fw
 		}
 
 		return ErrorCode::BadState;
-	}
-
-	ErrorCode Thread::ThreadProcedure()
-	{
-		ThreadSleep(1);
-		return ErrorCode::OK;
 	}
 
 	void Thread::ThreadSleep(long long iMilliseconds)

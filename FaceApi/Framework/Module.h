@@ -5,22 +5,17 @@
 #include <opencv2/core.hpp>
 
 #include "Framework/Event.hpp"
+#include "Framework/FlowGraph.hpp"
 #include "Framework/Message.h"
 #include "Framework/Thread.h"
-#include "Framework/UtilOCV.h"
-#include "Framework/UtilString.h"
 
 namespace fw
 {
 	class Module :
 		public Thread
 	{
-		using CommandHandlerType = Event<ErrorCode(Message::Shared)>;
-
 	public:
 		FW_DEFINE_SMART_POINTERS(Module)
-
-		static CommandHandlerType commandHandler;
 
 		explicit Module(const std::string& iName);
 
@@ -30,9 +25,9 @@ namespace fw
 
 		virtual ErrorCode DeInitialize();
 
-		virtual void Clear()
-		{
-		}
+		// Should be deleted, now it's only called when the frame size has changed
+		// This is going to be substituted with events
+		virtual void Clear();
 
 		inline bool IsInitialized() const
 		{
@@ -45,23 +40,45 @@ namespace fw
 		}
 
 	protected:
-		virtual ErrorCode OnCommandArrived(Message::Shared iMessage)
-		{
-			return fw::ErrorCode::OK;
-		}
+		using CommandHandlerType = Event<ErrorCode(Message::Shared)>;
 
-		virtual ErrorCode InitializeInternal(const cv::FileNode& iSettings)
-		{
-			return fw::ErrorCode::OK;
-		}
+		static CommandHandlerType sCommandHandler;
 
-		virtual ErrorCode DeInitializeInternal()
-		{
-			return fw::ErrorCode::OK;
-		}
+		virtual ErrorCode OnCommandArrived(Message::Shared iMessage);
+
+		virtual ErrorCode InitializeInternal(const cv::FileNode& iSettings);
+
+		virtual ErrorCode DeInitializeInternal();
 
 		bool mInitialized = false;
-
 		std::string mName;
+	};
+
+	template<typename ReturnT>
+	class ModuleWithPort;
+
+	template<typename ReturnT, typename... ArgumentT>
+	class ModuleWithPort<ReturnT(ArgumentT...)> :
+		public Module
+	{
+	public:
+		explicit ModuleWithPort(const std::string& iName) :
+			Module(iName)
+		{
+		}
+
+		virtual ~ModuleWithPort() = default;
+
+		virtual ReturnT Main(ArgumentT...) = 0;
+
+		inline FutureShared<ReturnT> GetPort() const
+		{
+			return mPort;
+		}
+	
+	// Set to protected later on
+	//protected:
+		FutureShared<ReturnT> mPort = nullptr;
+		std::tuple<ArgumentT...> mArgs;
 	};
 }

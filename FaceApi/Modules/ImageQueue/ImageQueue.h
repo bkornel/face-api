@@ -10,9 +10,10 @@
 
 namespace face
 {
+	using ImageQueueBase = fw::ModuleWithPort<ImageMessage::Shared(unsigned)>;
+
 	class ImageQueue :
-		public fw::Module,
-		public fw::Port<ImageMessage::Shared(unsigned)>
+		public ImageQueueBase
 	{
 		using MessageQueue = fw::MessageQueue<ImageMessage::Shared>;
 

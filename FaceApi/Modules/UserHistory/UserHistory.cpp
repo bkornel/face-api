@@ -2,7 +2,8 @@
 #include <easyloggingpp/easyloggingpp.h>
 
 #include "Framework/Profiler.h"
-
+#include "Framework/UtilOCV.h"
+#include "Framework/UtilString.h"
 #include "Modules/UserHistory/UserHistory.h"
 
 namespace face

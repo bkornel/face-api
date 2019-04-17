@@ -2,7 +2,7 @@
 
 namespace fw
 {
-	Module::CommandHandlerType Module::commandHandler;
+	Module::CommandHandlerType Module::sCommandHandler;
 
 	Module::Module(const std::string& iName) :
 		Thread(),
@@ -19,7 +19,7 @@ namespace fw
 			Clear();
 			result = InitializeInternal(iSettings);
 			mInitialized = (result == ErrorCode::OK);
-			commandHandler += MAKE_DELEGATE(&Module::OnCommandArrived, this);
+			sCommandHandler += MAKE_DELEGATE(&Module::OnCommandArrived, this);
 		}
 
 		return result;
@@ -31,16 +31,37 @@ namespace fw
 
 		if (mInitialized)
 		{
-			Clear();
-
 			if (IsRunning())
+			{
 				result = StopThread();
+			}
 
 			DeInitializeInternal();
+			Clear();
+
 			mInitialized = false;
-			commandHandler -= MAKE_DELEGATE(&Module::OnCommandArrived, this);
+			sCommandHandler -= MAKE_DELEGATE(&Module::OnCommandArrived, this);
 		}
 
 		return result;
+	}
+
+	void Module::Clear()
+	{
+	}
+
+	ErrorCode Module::OnCommandArrived(Message::Shared iMessage)
+	{
+		return fw::ErrorCode::OK;
+	}
+
+	ErrorCode Module::InitializeInternal(const cv::FileNode& iSettings)
+	{
+		return fw::ErrorCode::OK;
+	}
+
+	ErrorCode Module::DeInitializeInternal()
+	{
+		return fw::ErrorCode::OK;
 	}
 }

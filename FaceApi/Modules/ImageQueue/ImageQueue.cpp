@@ -1,13 +1,15 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <easyloggingpp/easyloggingpp.h>
 
+#include "Framework/UtilOCV.h"
+#include "Framework/UtilString.h"
 #include "Modules/ImageQueue/ImageQueue.h"
 #include "Messages/ImageSizeChangedMessage.h"
 
 namespace face
 {
 	ImageQueue::ImageQueue() :
-		fw::Module("ImageQueue"),
+		ImageQueueBase("ImageQueue"),
 		mQueue("ImageQueue", 12.0F, 10, 500)
 	{
 	}
@@ -40,7 +42,7 @@ namespace face
 			return fw::ErrorCode::BadParam;
 		}
 
-		commandHandler.Raise(std::make_shared<ImageSizeChangedMessage>(cv::Size(10, 10), 0U, 0LL));
+		sCommandHandler.Raise(std::make_shared<ImageSizeChangedMessage>(cv::Size(10, 10), 0U, 0LL));
 
 		const fw::ErrorCode result = mQueue.Push(std::make_shared<ImageMessage>(iFrame, sFrameId, fw::get_current_time()));
 		if (result == fw::ErrorCode::OK)

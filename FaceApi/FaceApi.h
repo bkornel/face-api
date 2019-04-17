@@ -69,7 +69,7 @@ namespace face
 
 		fw::ErrorCode DeInitializeInternal() override;
 
-		fw::ErrorCode ThreadProcedure() override;
+		fw::ErrorCode Run() override;
 
 		fw::ErrorCode CreateModules();
 

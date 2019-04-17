@@ -112,24 +112,24 @@ namespace face
 			mExecutor);
 
 		// Image queue: popping out a frame
-		mImageQueue->port = fw::connect(
+		mImageQueue->mPort = fw::connect(
 			FW_BIND(&ImageQueue::Main, mImageQueue),
 			mFirstNode.port.second);
 
 		// Face detector: detect faces on the frame pop from the queue
 		mFaceDetection->port = fw::connect(
 			FW_BIND(&FaceDetection::Main, mFaceDetection),
-			mImageQueue->port);
+			mImageQueue->GetPort());
 
 		// User manager: manage active and inactive users, update them with the detected faces
 		mUserManager->port = fw::connect(
 			FW_BIND(&UserManager::Main, mUserManager),
-			mImageQueue->port, mFaceDetection->port);
+			mImageQueue->GetPort(), mFaceDetection->port);
 
 		// User processor: extract all of the features from faces (e.g. shape model, head pose)
 		mUserProcessor->port = fw::connect(
 			FW_BIND(&UserProcessor::Main, mUserProcessor),
-			mImageQueue->port, mUserManager->port);
+			mImageQueue->GetPort(), mUserManager->port);
 
 		// User history: maintain all entries that have been estimated by the user processor module in time
 		mUserHistory->port = fw::connect(
@@ -139,7 +139,7 @@ namespace face
 		// Visualizer: generate and draw the results
 		mVisualizer->port = fw::connect(
 			FW_BIND(&Visualizer::Main, mVisualizer),
-			mImageQueue->port, mUserProcessor->port);
+			mImageQueue->GetPort(), mUserProcessor->port);
 
 		// Last node: waiting for the results
 		mLastNode.port = fw::connect(
@@ -189,7 +189,7 @@ namespace face
 		return code;
 	}
 
-	fw::ErrorCode FaceApi::ThreadProcedure()
+	fw::ErrorCode FaceApi::Run()
 	{
 		while (!GetThreadStopSignal())
 		{

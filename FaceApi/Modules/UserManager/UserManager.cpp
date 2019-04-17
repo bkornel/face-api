@@ -2,6 +2,8 @@
 #include <easyloggingpp/easyloggingpp.h>
 
 #include "Framework/Profiler.h"
+#include "Framework/UtilOCV.h"
+#include "Framework/UtilString.h"
 
 #include "Modules/UserManager/UserManager.h"
 
