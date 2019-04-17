@@ -1,18 +1,14 @@
-#include <iomanip>
-#include <easyloggingpp/easyloggingpp.h>
-
-#include "Common/Configuration.h"
-#include "Framework/Profiler.h"
 #include "Modules/UserProcessor/UserProcessor.h"
 #include "Modules/UserProcessor/ShapeModel/ClmWrapper.h"
 
+#include "Common/Configuration.h"
+#include "Framework/Profiler.h"
+
+#include <easyloggingpp/easyloggingpp.h>
+#include <iomanip>
+
 namespace face
 {
-	UserProcessor::UserProcessor() :
-		fw::Module("UserProcessor")
-	{
-	}
-
 	fw::ErrorCode UserProcessor::InitializeInternal(const cv::FileNode& iSettings)
 	{
 		std::string trackerFile = "face.tracker";

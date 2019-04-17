@@ -55,6 +55,9 @@
     <Filter Include="Graph">
       <UniqueIdentifier>{15447a17-50f7-4d47-b8a4-7195589c4425}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Modules\General">
+      <UniqueIdentifier>{ca94b630-505c-4ca5-822a-aa471e3e7954}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\IO.cc">
@@ -174,6 +177,12 @@
     </ClCompile>
     <ClCompile Include="..\..\FaceApi\Messages\ImageSizeChangedMessage.cpp">
       <Filter>Messages</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\FaceApi\Modules\General\FirstModule.cpp">
+      <Filter>Modules\General</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\FaceApi\Modules\General\LastModule.cpp">
+      <Filter>Modules\General</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -309,6 +318,15 @@
     </ClInclude>
     <ClInclude Include="..\..\FaceApi\User\UserData.hpp">
       <Filter>User</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\FaceApi\Modules\General\ModuleWithPort.hpp">
+      <Filter>Modules\General</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\FaceApi\Modules\General\FirstModule.h">
+      <Filter>Modules\General</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\FaceApi\Modules\General\LastModule.h">
+      <Filter>Modules\General</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

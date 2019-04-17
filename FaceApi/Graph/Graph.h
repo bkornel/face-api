@@ -1,11 +1,13 @@
 #pragma once
 
+#include "Framework/Module.h"
+#include "Framework/FlowGraph.hpp"
+#include "Modules/General/FirstModule.h"
+#include "Modules/General/LastModule.h"
+
 #include <map>
 #include <string>
 #include <vector>
-
-#include "Framework/Module.h"
-#include "Framework/FlowGraph.hpp"
 
 namespace face
 {
@@ -36,10 +38,9 @@ namespace face
 
 		fw::ErrorCode GetPredecessors(const cv::FileNode& iModule, const cv::FileNode& iModules, PredecessorMap& oPredecessors);
 
+		FirstModule::Shared mFirstNode = nullptr;
+		LastModule::Shared mLastNode = nullptr;
 		fw::Executor::Shared mExecutor = nullptr;
-		fw::FirstNode<unsigned> mFirstNode;
-		fw::LastNode<bool> mLastNode;
-
 		std::vector<fw::Module::Shared> mModules;
 	};
 }

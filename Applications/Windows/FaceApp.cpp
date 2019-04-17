@@ -1,9 +1,9 @@
-﻿#include <opencv2/imgcodecs.hpp>
-
-#include "FaceApp.h"
+﻿#include "FaceApp.h"
 #include "FaceApi.h"
 
 #include "Framework/UtilString.h"
+
+#include <opencv2/imgcodecs.hpp>
 
 void FaceApp::initialize(Application& self)
 {

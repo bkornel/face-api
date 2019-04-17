@@ -1,10 +1,10 @@
+#include "Framework/Util.h"
+
 #if defined(__ANDROID__)
 #include <android/log.h>
 #endif
 #include <ctime>
 #include <chrono>
-
-#include "Framework/Util.h"
 
 namespace fw
 {

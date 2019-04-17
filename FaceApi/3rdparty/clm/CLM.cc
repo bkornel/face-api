@@ -37,15 +37,17 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ///////////////////////////////////////////////////////////////////////////////
-#include <iostream>
-#include <opencv2/imgproc.hpp>
 
 #include "CLM.h"
 #include "Framework/Profiler.h"
 
+#include <iostream>
+#include <opencv2/imgproc.hpp>
+
 #define it at<int>
 #define db at<double>
 #define SQR(x) x*x
+
 using namespace FACETRACKER;
 using namespace std;
 

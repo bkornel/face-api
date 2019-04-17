@@ -1,22 +1,19 @@
 #pragma once
 
-#include "Common/Configuration.h"
-#include "Framework/Module.h"
-#include "Framework/FlowGraph.hpp"
-
-#include "User/User.h"
+#include "Framework/Stopwatch.h"
 #include "Messages/ImageMessage.h"
 #include "Messages/RoiMessage.h"
 #include "Messages/ActiveUsersMessage.h"
+#include "Modules/General/ModuleWithPort.hpp"
+#include "User/User.h"
 
 namespace face
 {
 	class UserManager :
-		public fw::Module,
-		public fw::Port<ActiveUsersMessage::Shared(ImageMessage::Shared, RoiMessage::Shared)>
+		public ModuleWithPort<ActiveUsersMessage::Shared(ImageMessage::Shared, RoiMessage::Shared)>
 	{
 	public:
-		UserManager();
+		UserManager() = default;
 
 		virtual ~UserManager() = default;
 

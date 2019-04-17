@@ -1,14 +1,15 @@
 #pragma once
 
+#include "Framework/Util.h"
+
+#include <easyloggingpp/easyloggingpp.h>
+
 #include <chrono>
 #include <limits>
 #include <mutex>
 #include <queue>
 #include <thread>
-
-#include <easyloggingpp/easyloggingpp.h>
-
-#include "Framework/Util.h"
+#include <cassert>
 
 namespace fw
 {

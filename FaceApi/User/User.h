@@ -1,11 +1,11 @@
 #pragma once
 
-#include <map>
-#include <opencv2/core/core.hpp>
-#include <clm/CLM.h>
-
 #include "Common/ShapeUtil.h"
 #include "User/UserData.hpp"
+
+#include <clm/CLM.h>
+#include <opencv2/core/core.hpp>
+#include <map>
 
 namespace face
 {

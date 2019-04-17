@@ -1,6 +1,6 @@
-#include <opencv2/imgproc/imgproc.hpp>
-
 #include "Messages/ImageMessage.h"
+
+#include <opencv2/imgproc/imgproc.hpp>
 
 namespace face
 {

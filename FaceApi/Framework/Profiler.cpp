@@ -1,9 +1,10 @@
 #include "Framework/Profiler.h"
 
+#include <easyloggingpp/easyloggingpp.h>
+#include <opencv2/core/core.hpp>
+
 #include <fstream>
 #include <functional>
-#include <opencv2/core/core.hpp>
-#include <easyloggingpp/easyloggingpp.h>
 
 namespace fw
 {

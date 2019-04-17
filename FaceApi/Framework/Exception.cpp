@@ -1,5 +1,6 @@
-#include <sstream>
 #include "Framework/Exception.h"
+
+#include <sstream>
 
 namespace fw
 {

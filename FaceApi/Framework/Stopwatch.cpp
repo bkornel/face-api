@@ -1,5 +1,6 @@
-#include <opencv2/core/core.hpp>
 #include "Framework/Stopwatch.h"
+
+#include <opencv2/core/core.hpp>
 
 #define TICK_COUNT (cv::getTickCount())
 #define TICK_FREQUENCY (cv::getTickFrequency())

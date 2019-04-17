@@ -1,7 +1,7 @@
-#include <iostream>
-
-#include "Framework/Util.h"
 #include "Framework/VideoWriter.h"
+#include "Framework/Util.h"
+
+#include <iostream>
 
 namespace face
 {

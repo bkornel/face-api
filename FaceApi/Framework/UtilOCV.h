@@ -1,10 +1,11 @@
 #pragma once
 
-#include <string>
+#include "Framework/Util.h"
+
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 
-#include "Framework/Util.h"
+#include <string>
 
 namespace fw
 {

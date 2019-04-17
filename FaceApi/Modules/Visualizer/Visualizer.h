@@ -1,21 +1,19 @@
 #pragma once
 
-#include <vector>
-#include <opencv2/core/core.hpp>
-
-#include "Framework/Module.h"
-#include "Framework/FlowGraph.hpp"
 #include "Messages/ImageMessage.h"
 #include "Messages/ActiveUsersMessage.h"
+#include "Modules/General/ModuleWithPort.hpp"
+
+#include <opencv2/core/core.hpp>
+#include <vector>
 
 namespace face
 {
 	class Visualizer :
-		public fw::Module,
-		public fw::Port<bool(ImageMessage::Shared, ActiveUsersMessage::Shared)>
+		public ModuleWithPort<bool(ImageMessage::Shared, ActiveUsersMessage::Shared)>
 	{
 	public:
-		Visualizer();
+		Visualizer() = default;
 
 		virtual ~Visualizer() = default;
 

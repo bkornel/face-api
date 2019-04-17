@@ -1,25 +1,23 @@
 #pragma once
 
-#include <map>
-
-#include "Framework/Module.h"
-#include "Framework/FlowGraph.hpp"
-
+#include "Framework/Stopwatch.h"
 #include "User/User.h"
 #include "Messages/ActiveUsersMessage.h"
 #include "Messages/UserEntriesMessage.h"
+#include "Modules/General/ModuleWithPort.hpp"
+
+#include <map>
 
 namespace face
 {
 	class UserHistory :
-		public fw::Module,
-		public fw::Port<UserEntriesMessage::Shared(ActiveUsersMessage::Shared)>
+		public ModuleWithPort<UserEntriesMessage::Shared(ActiveUsersMessage::Shared)>
 	{
 		using Entry = UserEntriesMessage::Entry;
 		using EntryMap = UserEntriesMessage::EntryMap;
 
 	public:
-		UserHistory();
+		UserHistory() = default;
 
 		virtual ~UserHistory() = default;
 
@@ -28,6 +26,9 @@ namespace face
 		void Clear() override;
 
 	private:
+		using Entry = UserEntriesMessage::Entry;
+		using EntryMap = UserEntriesMessage::EntryMap;
+
 		fw::ErrorCode InitializeInternal(const cv::FileNode& iSettings) override;
 
 		void RemoveOldEntries(long long iTimestamp);

@@ -1,9 +1,7 @@
-#include <cctype>
-#include <algorithm>
-#include <sstream>
-#include <vector>
-
 #include "Framework/UtilString.h"
+
+#include <algorithm>
+#include <cctype>
 
 namespace fw
 {

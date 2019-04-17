@@ -3,6 +3,7 @@
 #include <limits>
 #include <memory>
 #include <string>
+#include <cassert>
 
 #define FW_PLUGIN_NAME ("Face")
 
@@ -37,26 +38,65 @@ namespace fw
 
 	std::string& get_log_stamp();
 
-	template<typename _Tp>
-	_Tp scale_interval(_Tp valueIn, _Tp baseMin, _Tp baseMax, _Tp limitMin, _Tp limitMax)
+	template<typename T>
+	T scale_interval(T iValueIn, T iBaseMin, T iBaseMax, T iLimitMin, T iLimitMax)
 	{
-		return static_cast<_Tp>((((float)limitMax - (float)limitMin) * ((float)valueIn - (float)baseMin) /
-			((float)baseMax - (float)baseMin)) + (float)limitMin);
+		return static_cast<T>((((float)iLimitMax - (float)iLimitMin) * ((float)iValueIn - (float)iBaseMin) /
+			((float)iBaseMax - (float)iBaseMin)) + (float)iLimitMin);
 	}
 
-	template<typename _Tp>
-	inline bool equals(_Tp a, _Tp b)
+	template<typename T>
+	inline bool equals(T iA, T iB)
 	{
-		return abs(a - b) <= std::numeric_limits<_Tp>::epsilon();
+		return abs(iA - iB) <= std::numeric_limits<T>::epsilon();
 	}
 
 	template<typename ContainerT, typename PredicateT>
-	void remove_if(ContainerT& items, const PredicateT& predicate)
+	void remove_if(ContainerT& iItems, const PredicateT& iPredicate)
 	{
-		for (auto it = items.begin(); it != items.end(); )
+		for (auto it = iItems.begin(); it != iItems.end(); )
 		{
-			if (predicate(*it)) it = items.erase(it);
+			if (iPredicate(*it)) it = iItems.erase(it);
 			else ++it;
 		}
 	};
+
+	template <size_t index>
+	struct visit_tuple_impl
+	{
+		template <typename TupleT, typename FunctionT>
+		static void visit(TupleT& iTuple, size_t iIndex, FunctionT iFunction)
+		{
+			if (iIndex == index - 1)
+			{
+				iFunction(std::get<index - 1>(iTuple));
+			}
+			else
+			{
+				visit_tuple_impl<index - 1>::visit(iTuple, iIndex, iFunction);
+			}
+		}
+	};
+
+	template <>
+	struct visit_tuple_impl<0>
+	{
+		template <typename TupleT, typename FunctionT>
+		static void visit(TupleT& iTuple, size_t iIndex, FunctionT iFunction) 
+		{ 
+			assert(false); 
+		}
+	};
+
+	template <typename FunctionT, typename... Args>
+	void tuple_at(std::tuple<Args...> const& iTuple, size_t iIndex, FunctionT iFunction)
+	{
+		visit_tuple_impl<sizeof...(Args)>::visit(iTuple, iIndex, iFunction);
+	}
+
+	template <typename FunctionT, typename... Args>
+	void tuple_at(std::tuple<Args...>& iTuple, size_t iIndex, FunctionT iFunction)
+	{
+		visit_tuple_impl<sizeof...(Args)>::visit(iTuple, iIndex, iFunction);
+	}
 }

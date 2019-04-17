@@ -37,10 +37,11 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef __IO_h_
-#define __IO_h_
+#pragma once
+
 #include <opencv2/opencv.hpp>
 #include <fstream>
+
 namespace FACETRACKER
 {
 	//===========================================================================
@@ -58,4 +59,3 @@ namespace FACETRACKER
 	};
 	//===========================================================================
 }
-#endif

@@ -1,22 +1,20 @@
-#include <algorithm>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <easyloggingpp/easyloggingpp.h>
+#include "Modules/FaceDetection/FaceDetection.h"
 
+#include "Common/Configuration.h"
 #include "Framework/Profiler.h"
 #include "Framework/UtilOCV.h"
 #include "Framework/UtilString.h"
-#include "Modules/FaceDetection/FaceDetection.h"
+
+#include <easyloggingpp/easyloggingpp.h>
+#include <opencv2/imgproc/imgproc.hpp>
+
+#include <algorithm>
 
 //#define CROP_FACE_RECT
 
 namespace face
 {
 	const float FaceDetection::sForceDetectionSec = 0.5F;
-
-	FaceDetection::FaceDetection() :
-		fw::Module("FaceDetection")
-	{
-	}
 
 	fw::ErrorCode FaceDetection::InitializeInternal(const cv::FileNode& iSettings)
 	{

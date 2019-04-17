@@ -1,9 +1,9 @@
 #pragma once
 
-#include <memory>
-
 #include "Common/ShapeUtil.h"
 #include "Framework/UtilOCV.h"
+
+#include <memory>
 
 namespace face
 {

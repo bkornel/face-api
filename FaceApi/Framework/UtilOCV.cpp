@@ -1,8 +1,8 @@
 #define _USE_MATH_DEFINES
 
-#include <opencv2/calib3d.hpp>
-
 #include "Framework/UtilOCV.h"
+
+#include <opencv2/calib3d.hpp>
 
 namespace fw
 {

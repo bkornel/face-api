@@ -1,5 +1,9 @@
 #pragma once
 
+#include "Framework/Util.h"
+
+#include <opencv2/core.hpp>
+
 namespace face
 {
 	class User;

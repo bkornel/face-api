@@ -1,18 +1,14 @@
-#include <iomanip>
-#include <easyloggingpp/easyloggingpp.h>
+#include "Modules/UserHistory/UserHistory.h"
 
 #include "Framework/Profiler.h"
 #include "Framework/UtilOCV.h"
 #include "Framework/UtilString.h"
-#include "Modules/UserHistory/UserHistory.h"
+
+#include <easyloggingpp/easyloggingpp.h>
+#include <iomanip>
 
 namespace face
 {
-	UserHistory::UserHistory() :
-		fw::Module("UserHistory")
-	{
-	}
-
 	fw::ErrorCode UserHistory::InitializeInternal(const cv::FileNode& iSettings)
 	{
 		if (!iSettings.empty())

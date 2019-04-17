@@ -1,10 +1,11 @@
 #pragma once
 
-#include <map>
-#include <mutex>
+#include "Framework/Message.h"
+
 #include <opencv2/core/core.hpp>
 
-#include "Framework/Message.h"
+#include <map>
+#include <mutex>
 
 namespace face
 {

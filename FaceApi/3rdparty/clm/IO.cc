@@ -39,8 +39,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "IO.h"
 #include <stdio.h>
+
 using namespace FACETRACKER;
 using namespace std;
+
 //===========================================================================
 void IO::ReadMat(ifstream& s, cv::Mat &M)
 {

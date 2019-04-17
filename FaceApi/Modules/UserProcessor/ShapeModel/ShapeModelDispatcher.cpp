@@ -1,8 +1,8 @@
+#include "Modules/UserProcessor/ShapeModel/ShapeModelDispatcher.h"
+
 #include "Framework/UtilString.h"
 #include "Common/Configuration.h"
-
 #include "User/User.h"
-#include "Modules/UserProcessor/ShapeModel/ShapeModelDispatcher.h"
 
 namespace face
 {

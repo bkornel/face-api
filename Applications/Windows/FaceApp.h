@@ -1,10 +1,10 @@
 #pragma once
 
-#include <vector>
+#include "Framework/VideoWriter.h"
+
 #include <Poco/Util/Application.h>
 #include <opencv2/core/core.hpp>
-
-#include "Framework/VideoWriter.h"
+#include <vector>
 
 class FaceApp :
 	public Poco::Util::Application

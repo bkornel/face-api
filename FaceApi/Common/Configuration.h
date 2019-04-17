@@ -1,11 +1,12 @@
 #pragma once
 
-#include <vector>
-#include <string>
+#include "Framework/Util.h"
+
 #include <opencv2/core/core.hpp>
 #include <opencv2/videoio/videoio.hpp>
 
-#include "Framework/Util.h"
+#include <string>
+#include <vector>
 
 namespace face
 {

@@ -1,24 +1,23 @@
 #pragma once
 
-#include <string>
-#include <opencv2/core/core.hpp>
-#include <opencv2/objdetect/objdetect.hpp>
 
-#include "Common/Configuration.h"
-#include "Framework/Module.h"
-#include "Framework/FlowGraph.hpp"
 #include "Framework/Stopwatch.h"
 #include "Messages/ImageMessage.h"
 #include "Messages/RoiMessage.h"
+#include "Modules/General/ModuleWithPort.hpp"
+
+#include <opencv2/core/core.hpp>
+#include <opencv2/objdetect/objdetect.hpp>
+
+#include <string>
 
 namespace face
 {
 	class FaceDetection :
-		public fw::Module,
-		public fw::Port<RoiMessage::Shared(ImageMessage::Shared)>
+		public ModuleWithPort<RoiMessage::Shared(ImageMessage::Shared)>
 	{
 	public:
-		FaceDetection();
+		FaceDetection() = default;
 
 		virtual ~FaceDetection() = default;
 

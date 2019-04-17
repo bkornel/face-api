@@ -1,19 +1,14 @@
-#include <iomanip>
-#include <easyloggingpp/easyloggingpp.h>
+#include "Modules/UserManager/UserManager.h"
 
 #include "Framework/Profiler.h"
 #include "Framework/UtilOCV.h"
 #include "Framework/UtilString.h"
 
-#include "Modules/UserManager/UserManager.h"
+#include <easyloggingpp/easyloggingpp.h>
+#include <iomanip>
 
 namespace face
 {
-	UserManager::UserManager() :
-		fw::Module("UserManager")
-	{
-	}
-
 	fw::ErrorCode UserManager::InitializeInternal(const cv::FileNode& iSettings)
 	{
 		if (!iSettings.empty())
@@ -32,7 +27,7 @@ namespace face
 			if (fw::ocv::get_value(iSettings, "templateScale", value))
 			{
 				mTemplateScale = fw::str::convert_to_number<float>(value);
-				mTemplateScale = std::max(std::min(mTemplateScale, 1.0F), 0.2F);
+				mTemplateScale = (std::max)((std::min)(mTemplateScale, 1.0F), 0.2F);
 				mTemplateScaleInv = (1.0F / mTemplateScale);
 			}
 		}

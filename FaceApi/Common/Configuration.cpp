@@ -1,12 +1,13 @@
 #define _USE_MATH_DEFINES
 
-#include <cmath>
-#include <opencv2/highgui/highgui.hpp>
-#include <easyloggingpp/easyloggingpp.h>
-
 #include "Common/Configuration.h"
 #include "Framework/UtilString.h"
 #include "Framework/UtilOCV.h"
+
+#include <easyloggingpp/easyloggingpp.h>
+#include <opencv2/highgui/highgui.hpp>
+
+#include <cmath>
 
 namespace face
 {

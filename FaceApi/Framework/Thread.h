@@ -1,9 +1,9 @@
 #pragma once
 
+#include "Framework/Util.h"
+
 #include <memory>
 #include <future>
-
-#include "Framework/Util.h"
 
 namespace fw
 {

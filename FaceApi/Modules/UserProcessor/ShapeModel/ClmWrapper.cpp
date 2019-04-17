@@ -1,6 +1,7 @@
+#include "Modules/UserProcessor/ShapeModel/ClmWrapper.h"
+
 #include "Common/Configuration.h"
 #include "Common/ShapeUtil.h"
-#include "Modules/UserProcessor/ShapeModel/ClmWrapper.h"
 
 namespace face
 {

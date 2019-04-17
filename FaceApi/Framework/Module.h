@@ -1,13 +1,14 @@
 #pragma once
 
-#include <string>
-#include <memory>
-#include <opencv2/core.hpp>
-
 #include "Framework/Event.hpp"
 #include "Framework/FlowGraph.hpp"
 #include "Framework/Message.h"
 #include "Framework/Thread.h"
+
+#include <opencv2/core.hpp>
+
+#include <string>
+#include <memory>
 
 namespace fw
 {
@@ -17,7 +18,7 @@ namespace fw
 	public:
 		FW_DEFINE_SMART_POINTERS(Module)
 
-		explicit Module(const std::string& iName);
+		Module() = default;
 
 		virtual ~Module() = default;
 
@@ -52,33 +53,5 @@ namespace fw
 
 		bool mInitialized = false;
 		std::string mName;
-	};
-
-	template<typename ReturnT>
-	class ModuleWithPort;
-
-	template<typename ReturnT, typename... ArgumentT>
-	class ModuleWithPort<ReturnT(ArgumentT...)> :
-		public Module
-	{
-	public:
-		explicit ModuleWithPort(const std::string& iName) :
-			Module(iName)
-		{
-		}
-
-		virtual ~ModuleWithPort() = default;
-
-		virtual ReturnT Main(ArgumentT...) = 0;
-
-		inline FutureShared<ReturnT> GetPort() const
-		{
-			return mPort;
-		}
-	
-	// Set to protected later on
-	//protected:
-		FutureShared<ReturnT> mPort = nullptr;
-		std::tuple<ArgumentT...> mArgs;
 	};
 }

@@ -1,6 +1,5 @@
 #include "Graph/Graph.h"
 
-#include "3rdparty/easyloggingpp/easyloggingpp.h"
 #include "Common/Configuration.h"
 #include "Framework/UtilString.h"
 
@@ -11,6 +10,7 @@
 #include "Modules/UserProcessor/UserProcessor.h"
 #include "Modules/Visualizer/Visualizer.h"
 
+#include <easyloggingpp/easyloggingpp.h>
 
 namespace face
 {
@@ -21,6 +21,8 @@ namespace face
 		{
 			if (iModuleName == "imagequeue")			return std::make_shared<ImageQueue>();
 			else if (iModuleName == "facedetection")	return std::make_shared<FaceDetection>();
+			else if (iModuleName == "firstmodule")		return std::make_shared<FirstModule>();
+			else if (iModuleName == "lastmodule")		return std::make_shared<LastModule>();
 			else if (iModuleName == "userhistory")		return std::make_shared<UserHistory>();
 			else if (iModuleName == "usermanager")		return std::make_shared<UserManager>();
 			else if (iModuleName == "userprocessor")	return std::make_shared<UserProcessor>();
@@ -31,7 +33,6 @@ namespace face
 	}
 
 	Graph::Graph() :
-		fw::Module("Graph"),
 		mExecutor(fw::getInlineExecutor())
 	{
 	}
@@ -148,11 +149,6 @@ namespace face
 		}
 
 		const std::string& moduleName = fw::str::to_lower(iModule.name());
-		if (moduleName == "imagequeue")
-		{
-			oPredecessors[1] = "first";
-			return fw::ErrorCode::OK;
-		}
 
 		for (const auto& portNode : ports)
 		{

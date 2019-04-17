@@ -1,15 +1,16 @@
-#include <opencv2/highgui/highgui.hpp>
-
 #include "FaceApi.h"
 #include "Framework/Profiler.h"
 #include "Framework/Functional.hpp"
 
+#include "Modules/General/FirstModule.h"
+#include "Modules/General/LastModule.h"
 #include "Modules/FaceDetection/FaceDetection.h"
 #include "Modules/UserHistory/UserHistory.h"
 #include "Modules/UserManager/UserManager.h"
 #include "Modules/UserProcessor/UserProcessor.h"
 #include "Modules/Visualizer/Visualizer.h"
 
+#include <opencv2/highgui/highgui.hpp>
 
 INITIALIZE_EASYLOGGINGPP
 
@@ -24,7 +25,6 @@ namespace face
 	}
 
 	FaceApi::FaceApi() :
-		fw::Module("FaceApi"),
 		mExecutor(fw::getInlineExecutor()),
 		mOutputQueue("OutputQueue", 100.0F, 10)
 	{
@@ -86,6 +86,8 @@ namespace face
 
 	fw::ErrorCode FaceApi::CreateModules()
 	{
+		if (!mFirstModule)		mModules.push_back(mFirstModule     = new FirstModule());
+		if (!mLastModule)		mModules.push_back(mLastModule      = new LastModule());
 		if (!mImageQueue)		mModules.push_back(mImageQueue		= new ImageQueue());
 		if (!mFaceDetection)	mModules.push_back(mFaceDetection	= new FaceDetection());
 		if (!mUserManager)		mModules.push_back(mUserManager		= new UserManager());
@@ -107,44 +109,44 @@ namespace face
 	fw::ErrorCode FaceApi::CreateConnections()
 	{
 		// This the first node in the execution
-		mFirstNode.port = fw::connect(
-			FW_BIND(&fw::FirstNode<unsigned>::Main, &mFirstNode),
-			mExecutor);
+		mFirstModule->Connect(mExecutor);
 
 		// Image queue: popping out a frame
+		mImageQueue->SetArgument(mFirstModule->GetPort(), 0U);
+
 		mImageQueue->mPort = fw::connect(
 			FW_BIND(&ImageQueue::Main, mImageQueue),
-			mFirstNode.port.second);
+			mFirstModule->GetPort());
 
 		// Face detector: detect faces on the frame pop from the queue
-		mFaceDetection->port = fw::connect(
+		mFaceDetection->mPort = fw::connect(
 			FW_BIND(&FaceDetection::Main, mFaceDetection),
 			mImageQueue->GetPort());
 
 		// User manager: manage active and inactive users, update them with the detected faces
-		mUserManager->port = fw::connect(
+		mUserManager->mPort = fw::connect(
 			FW_BIND(&UserManager::Main, mUserManager),
-			mImageQueue->GetPort(), mFaceDetection->port);
+			mImageQueue->GetPort(), mFaceDetection->GetPort());
 
 		// User processor: extract all of the features from faces (e.g. shape model, head pose)
-		mUserProcessor->port = fw::connect(
+		mUserProcessor->mPort = fw::connect(
 			FW_BIND(&UserProcessor::Main, mUserProcessor),
-			mImageQueue->GetPort(), mUserManager->port);
+			mImageQueue->GetPort(), mUserManager->GetPort());
 
 		// User history: maintain all entries that have been estimated by the user processor module in time
-		mUserHistory->port = fw::connect(
+		mUserHistory->mPort = fw::connect(
 			FW_BIND(&UserHistory::Main, mUserHistory),
-			mUserProcessor->port);
+			mUserProcessor->GetPort());
 
 		// Visualizer: generate and draw the results
-		mVisualizer->port = fw::connect(
+		mVisualizer->mPort = fw::connect(
 			FW_BIND(&Visualizer::Main, mVisualizer),
-			mImageQueue->GetPort(), mUserProcessor->port);
+			mImageQueue->GetPort(), mUserProcessor->GetPort());
 
 		// Last node: waiting for the results
-		mLastNode.port = fw::connect(
-			FW_BIND(&fw::LastNode<bool>::Main, &mLastNode),
-			mVisualizer->port);
+		mLastModule->mPort = fw::connect(
+			FW_BIND(&LastModule::Main, mLastModule),
+			mVisualizer->GetPort());
 
 		return fw::ErrorCode::OK;
 	}
@@ -209,11 +211,11 @@ namespace face
 			mVisualizer->SetQueueSize(mImageQueue->GetQueueSize());
 
 			// Popping a frame out and waiting until the flow has been ended
-			mFirstNode.Tick();
-			mLastNode.Wait();
+			mFirstModule->Tick();
+			mLastModule->Wait();
 
 			// Pushing a debug frame if we have it
-			if (mLastNode.Get() && mVisualizer->HasOutput())
+			if (mLastModule->Get() && mVisualizer->HasOutput())
 			{
 				auto outputMessage = std::make_shared<ImageMessage>(
 					mVisualizer->GetResultImage(), 

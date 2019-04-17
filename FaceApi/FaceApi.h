@@ -1,15 +1,18 @@
 #pragma once
 
-#include <string>
-#include <vector>
-
+#include "Common/Configuration.h"
 #include "Framework/Module.h"
 #include "Framework/FlowGraph.hpp"
 #include "Graph/Graph.h"
 #include "Modules/ImageQueue/ImageQueue.h"
 
+#include <string>
+#include <vector>
+
 namespace face
 {
+	class FirstModule;
+	class LastModule;
 	class FaceDetection;
 	class UserHistory;
 	class UserManager;
@@ -76,12 +79,12 @@ namespace face
 		fw::ErrorCode CreateConnections();
 
 		fw::Executor::Shared mExecutor = nullptr;
-		fw::FirstNode<unsigned> mFirstNode;
-		fw::LastNode<bool> mLastNode;
 
 		std::vector<fw::Module*> mModules;
 		std::shared_ptr<Graph> mGraph = nullptr;
 
+		FirstModule* mFirstModule = nullptr;
+		LastModule* mLastModule = nullptr;
 		ImageQueue* mImageQueue = nullptr;
 		FaceDetection* mFaceDetection = nullptr;
 		UserHistory* mUserHistory = nullptr;

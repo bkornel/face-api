@@ -38,9 +38,12 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ///////////////////////////////////////////////////////////////////////////////
 #include "PDM.h"
+
 #define db at<double>
+
 using namespace FACETRACKER;
 using namespace std;
+
 //===========================================================================
 void AddOrthRow(cv::Mat &R)
 {

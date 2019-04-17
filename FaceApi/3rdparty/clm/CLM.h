@@ -42,6 +42,7 @@
 
 #include "PDM.h"
 #include "Patch.h"
+
 #include <vector>
 
 namespace FACETRACKER

@@ -59,6 +59,8 @@
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\User\User.cpp" />
     <ClCompile Include="..\..\FaceApi\Graph\Graph.cpp" />
     <ClCompile Include="..\..\FaceApi\Messages\ImageSizeChangedMessage.cpp" />
+    <ClCompile Include="..\..\FaceApi\Modules\General\FirstModule.cpp" />
+    <ClCompile Include="..\..\FaceApi\Modules\General\LastModule.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\CLM.h" />
@@ -102,6 +104,9 @@
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\UserProcessor.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\Visualizer\Visualizer.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\User\User.h" />
+    <ClInclude Include="..\..\FaceApi\Modules\General\FirstModule.h" />
+    <ClInclude Include="..\..\FaceApi\Modules\General\LastModule.h" />
+    <ClInclude Include="..\..\FaceApi\Modules\General\ModuleWithPort.hpp" />
     <ClInclude Include="..\..\FaceApi\User\UserData.hpp" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\User\UserDispatcher.hpp" />
     <ClInclude Include="..\..\FaceApi\Graph\Graph.h" />

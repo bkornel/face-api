@@ -4,18 +4,20 @@ namespace fw
 {
 	Module::CommandHandlerType Module::sCommandHandler;
 
-	Module::Module(const std::string& iName) :
-		Thread(),
-		mName(iName)
-	{
-	}
-
 	ErrorCode Module::Initialize(const cv::FileNode& iSettings)
 	{
 		ErrorCode result = ErrorCode::OK;
 
+		// Initialize only of it is not initialized
 		if (!mInitialized)
 		{
+			// set the module name
+			if (!iSettings.empty())
+			{
+				const cv::FileNode& nameNode = iSettings["name"];
+				mName = !nameNode.empty() ? nameNode.name() : iSettings.name();
+			}
+
 			Clear();
 			result = InitializeInternal(iSettings);
 			mInitialized = (result == ErrorCode::OK);
@@ -48,6 +50,7 @@ namespace fw
 
 	void Module::Clear()
 	{
+		// There is nothing to clear here, override the method in the child classes
 	}
 
 	ErrorCode Module::OnCommandArrived(Message::Shared iMessage)

@@ -1,10 +1,11 @@
-#include <numeric>
-#include <opencv2/core/core.hpp>
+#include "Modules/UserProcessor/ShapeNorm/ShapeNormDispatcher.h"
+#include "Modules/UserProcessor/ShapeModel/ClmWrapper.h"
 
 #include "Framework/UtilString.h"
 #include "User/User.h"
-#include "Modules/UserProcessor/ShapeModel/ClmWrapper.h"
-#include "Modules/UserProcessor/ShapeNorm/ShapeNormDispatcher.h"
+
+#include <opencv2/core/core.hpp>
+#include <numeric>
 
 namespace face
 {

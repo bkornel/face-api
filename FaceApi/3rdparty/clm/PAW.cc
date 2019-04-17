@@ -39,10 +39,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "PAW.h"
 #include <opencv2/imgproc.hpp>
+
 #define it at<int>
 #define db at<double>
+
 using namespace FACETRACKER;
 using namespace std;
+
 //=============================================================================
 bool sameSide(double x0, double y0, double x1, double y1,
 	double x2, double y2, double x3, double y3)

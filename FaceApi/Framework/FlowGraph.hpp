@@ -1,14 +1,15 @@
 #pragma once
 
+#include "Framework/Util.h"
+
 #include <atomic>
 #include <chrono>
 #include <condition_variable>
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <tuple>
 #include <vector>
-
-#include "Framework/Util.h"
 
 namespace fw
 {
@@ -181,33 +182,6 @@ namespace fw
 		const FutureShared<T> mFuture = nullptr;
 	};
 
-	template<typename ReturnT>
-	class Port;
-
-	template<typename ReturnT, typename... ArgumentT>
-	struct Port<ReturnT(ArgumentT...)>
-	{
-		virtual ReturnT Main(ArgumentT...) = 0;
-		FutureShared<ReturnT> port = nullptr;
-		std::tuple<ArgumentT...> input;
-	};
-
-	template <typename ReturnT>
-	struct FirstNode
-	{
-		ReturnT Main() { static ReturnT sTickCounter = 0; return sTickCounter++; }
-		void Tick() { port.first(); }
-		std::pair<std::function<void()>, FutureShared<ReturnT>> port;
-	};
-
-	template <typename ReturnT>
-	struct LastNode : public Port<ReturnT(ReturnT)>
-	{
-		ReturnT Main(ReturnT iSucceeded) override { return iSucceeded; }
-		bool Get() { return Port<ReturnT(ReturnT)>::port->Get(); }
-		void Wait() { Port<ReturnT(ReturnT)>::port->Wait(); }
-	};
-
 	/// @brief Returns an action running the provided function with executor and a Future for the result.
 	/// This connect() is a special case, since no dependency is needed. It is provided for convenience.
 	template <typename ReturnT>
@@ -215,7 +189,7 @@ namespace fw
 	{
 		// Using shared_ptr, because std::function is copyable, but Promise<R> is not.
 		auto promise = std::make_shared<Promise<ReturnT>>();
-		FutureShared<ReturnT> future = promise->GetFuture();
+		auto future = promise->GetFuture();
 
 		auto task = [iFunction, promise, iExecutor] {
 			promise->Put(iFunction(), iExecutor);
@@ -250,4 +224,14 @@ namespace fw
 
 		return future;
 	}
+
+	//template <size_t... Is>
+	//struct IndexSequence;
+
+	//template <typename ReturnT, typename... ArgumentT, size_t... Is>
+	//FutureShared<ReturnT> connect(std::function<ReturnT(ArgumentT...)> iFunction, std::tuple<FutureShared<ArgumentT>...> iFutures, IndexSequence<Is...>)
+	//{
+	//	return connect(iFunction, std::get<Is>(iFutures)...);
+	//}
+
 }

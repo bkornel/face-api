@@ -1,20 +1,16 @@
 #define _USE_MATH_DEFINES
 
-#include <iomanip>
+#include "Modules/Visualizer/Visualizer.h"
 
 #include "Common/Configuration.h"
 #include "Common/PoseUtil.h"
 #include "Common/ShapeUtil.h"
 #include "Framework/Profiler.h"
-#include "Modules/Visualizer/Visualizer.h"
+
+#include <iomanip>
 
 namespace face
 {
-	Visualizer::Visualizer() :
-		fw::Module("GeneralVisualizer")
-	{
-	}
-
 	fw::ErrorCode Visualizer::InitializeInternal(const cv::FileNode& iSettings)
 	{
 		mColorsOfAxes.push_back({ 255, 255, 255 });
@@ -29,7 +25,7 @@ namespace face
 	{
 		if (!iImage || iImage->IsEmpty()) return false;
 
-		mResultImage = iImage->GetFrameBGR().clone();
+		mResultImage = iImage->GetFrameBGR()/*.clone()*/;
 
 		if (iUsers && !iUsers->IsEmpty())
 		{

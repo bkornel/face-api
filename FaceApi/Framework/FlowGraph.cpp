@@ -1,7 +1,7 @@
+#include "Framework/FlowGraph.hpp"
+
 #include <future>
 #include <thread>
-
-#include "Framework/FlowGraph.hpp"
 
 namespace fw
 {

@@ -1,19 +1,15 @@
 #pragma once
 
-#include <string>
-
-#include "Common/Configuration.h"
-#include "Framework/Module.h"
 #include "Framework/MessageQueue.hpp"
-#include "Framework/FlowGraph.hpp"
 #include "Messages/ImageMessage.h"
+#include "Modules/General/ModuleWithPort.hpp"
+
+#include <string>
 
 namespace face
 {
-	using ImageQueueBase = fw::ModuleWithPort<ImageMessage::Shared(unsigned)>;
-
 	class ImageQueue :
-		public ImageQueueBase
+		public ModuleWithPort<ImageMessage::Shared(unsigned)>
 	{
 		using MessageQueue = fw::MessageQueue<ImageMessage::Shared>;
 
@@ -61,7 +57,7 @@ namespace face
 			return mQueue.GetBound();
 		}
 
-	private:
+	private:		
 		fw::ErrorCode InitializeInternal(const cv::FileNode& iSettings) override;
 
 		unsigned mLastFrameId = 0U;		///< Holds the ID of the last image frame.

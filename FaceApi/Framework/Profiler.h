@@ -1,5 +1,12 @@
 #pragma once
 
+#include "Framework/Stopwatch.h"
+
+#include <map>
+#include <vector>
+#include <string>
+#include <mutex>
+
 #define ENABLE_FACE_PROFILER
 
 // Profiler is enabled
@@ -13,13 +20,6 @@
 #define FACE_PROFILER_FRAME_ID(frameId)
 #define FACE_PROFILER_SAVE(name)
 #endif
-
-#include <map>
-#include <vector>
-#include <string>
-#include <mutex>
-
-#include "Framework/Stopwatch.h"
 
 namespace fw
 {

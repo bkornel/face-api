@@ -1,8 +1,8 @@
 #pragma once
 
-#include <opencv2/core/core.hpp>
-
 #include "Framework/Message.h"
+
+#include <opencv2/core/core.hpp>
 
 namespace face
 {

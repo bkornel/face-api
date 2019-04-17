@@ -40,9 +40,12 @@
 #include "Patch.h"
 #include <opencv2/highgui.hpp>
 #include <cassert>
+
 #define SGN(x) (((x) < 0) ? 0 : 1)
+
 using namespace FACETRACKER;
 using namespace std;
+
 //===========================================================================
 void sum2one(cv::Mat &M)
 {

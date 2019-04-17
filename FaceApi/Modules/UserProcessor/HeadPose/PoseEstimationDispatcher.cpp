@@ -1,11 +1,12 @@
 #define _USE_MATH_DEFINES
 
-#include "3rdparty/easyloggingpp/easyloggingpp.h"
+#include "Modules/UserProcessor/HeadPose/PoseEstimationDispatcher.h"
+
 #include "Common/Configuration.h"
 #include "Framework/UtilString.h"
-
 #include "User/User.h"
-#include "Modules/UserProcessor/HeadPose/PoseEstimationDispatcher.h"
+
+#include <easyloggingpp/easyloggingpp.h>
 
 namespace face
 {

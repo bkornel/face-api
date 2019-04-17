@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Framework/UtilOCV.h"
 #include "User/UserDispatcher.hpp"
 
 namespace face

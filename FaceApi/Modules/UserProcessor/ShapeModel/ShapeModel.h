@@ -1,13 +1,13 @@
 #pragma once
 
-#include <vector>
-#include <memory>
-#include <opencv2/core/core.hpp>
+#include "Framework/Util.h"
 
 #include <clm/CLM.h>
 #include <clm/FCheck.h>
+#include <opencv2/core/core.hpp>
 
-#include "Framework/Util.h"
+#include <vector>
+#include <memory>
 
 namespace face
 {

@@ -38,8 +38,10 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ///////////////////////////////////////////////////////////////////////////////
 #include "FCheck.h"
+
 using namespace FACETRACKER;
 using namespace std;
+
 FCheck::FCheck(FCheck const&rhs)
 {
 	this->_b = rhs._b; this->_w = rhs._w.clone(); this->_paw = rhs._paw;

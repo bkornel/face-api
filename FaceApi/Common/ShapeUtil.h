@@ -1,10 +1,11 @@
 #pragma once
 
-#include <map>
-#include <vector>
+#include "Framework/UtilOCV.h"
+
 #include <opencv2/core/core.hpp>
 
-#include "Framework/UtilOCV.h"
+#include <map>
+#include <vector>
 
 namespace face
 {

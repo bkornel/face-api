@@ -1,9 +1,11 @@
-#include <opencv2/imgproc/types_c.h>
-#include <easyloggingpp/easyloggingpp.h>
+#include "User/User.h"
+#include "User/UserDispatcher.hpp"
 
 #include "Common/Configuration.h"
-#include "User/UserDispatcher.hpp"
-#include "User/User.h"
+
+#include <easyloggingpp/easyloggingpp.h>
+#include <opencv2/imgproc/types_c.h>
+
 
 namespace face
 {

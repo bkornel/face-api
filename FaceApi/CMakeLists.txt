@@ -48,6 +48,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Graph)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Messages)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/FaceDetection)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/General)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/ImageQueue)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/UserHistory)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/UserManager)
@@ -99,6 +100,8 @@ set(SOURCES;
   Modules/UserProcessor/ShapeModel/ShapeModelDispatcher.cpp;
   Modules/UserProcessor/ShapeNorm/ShapeNormDispatcher.cpp;
   Modules/Visualizer/Visualizer.cpp;
+  Modules/General/FirstModule.cpp;
+  Modules/General/LastModule.cpp;
   User/User.cpp;
   User/UserData.cpp;
 )

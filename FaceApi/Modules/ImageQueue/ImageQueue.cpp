@@ -1,15 +1,15 @@
-#include <opencv2/highgui/highgui.hpp>
-#include <easyloggingpp/easyloggingpp.h>
+#include "Modules/ImageQueue/ImageQueue.h"
 
 #include "Framework/UtilOCV.h"
 #include "Framework/UtilString.h"
-#include "Modules/ImageQueue/ImageQueue.h"
 #include "Messages/ImageSizeChangedMessage.h"
+
+#include <easyloggingpp/easyloggingpp.h>
+#include <opencv2/highgui/highgui.hpp>
 
 namespace face
 {
 	ImageQueue::ImageQueue() :
-		ImageQueueBase("ImageQueue"),
 		mQueue("ImageQueue", 12.0F, 10, 500)
 	{
 	}
