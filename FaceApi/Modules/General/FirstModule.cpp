@@ -9,10 +9,10 @@ namespace face
 	{
 		auto result = fw::connect(FW_BIND(&FirstModule::Main, this), iExecutor);
 		mFunction = result.first;
-		mPort = result.second;
+		mOutputPort = result.second;
 	}
 
-	unsigned FirstModule::Main()
+	unsigned FirstModule::Main(bool)
 	{
 		static unsigned sTickCounter = 0U;
 		return sTickCounter++;

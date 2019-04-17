@@ -108,45 +108,46 @@ namespace face
 
 	fw::ErrorCode FaceApi::CreateConnections()
 	{
+		std::tuple<int, std::string, double> tuple;
+		fw::tuple::set(tuple, 0, 2);
+		//fw::tuple::set(tuple, 1, std::string("asdfg"));
+		fw::tuple::set(tuple, 2, 2.2);
+
+
+
 		// This the first node in the execution
 		mFirstModule->Connect(mExecutor);
 
 		// Image queue: popping out a frame
-		mImageQueue->SetArgument(mFirstModule->GetPort(), 0U);
-
-		mImageQueue->mPort = fw::connect(
-			FW_BIND(&ImageQueue::Main, mImageQueue),
-			mFirstModule->GetPort());
+		mImageQueue->SetInputPort(mFirstModule->GetOutputPort(), 0U);
+		mImageQueue->Connect();
 
 		// Face detector: detect faces on the frame pop from the queue
-		mFaceDetection->mPort = fw::connect(
-			FW_BIND(&FaceDetection::Main, mFaceDetection),
-			mImageQueue->GetPort());
+		mFaceDetection->SetInputPort(mImageQueue->GetOutputPort(), 0U);
+		mFaceDetection->Connect();
 
 		// User manager: manage active and inactive users, update them with the detected faces
-		mUserManager->mPort = fw::connect(
-			FW_BIND(&UserManager::Main, mUserManager),
-			mImageQueue->GetPort(), mFaceDetection->GetPort());
+		//mUserManager->SetInputPort(mImageQueue->GetOutputPort(), 0U);
+		//mUserManager->SetInputPort(mFaceDetection->GetOutputPort(), 1U);
+		mUserManager->Connect();
 
 		// User processor: extract all of the features from faces (e.g. shape model, head pose)
-		mUserProcessor->mPort = fw::connect(
-			FW_BIND(&UserProcessor::Main, mUserProcessor),
-			mImageQueue->GetPort(), mUserManager->GetPort());
+		//mUserProcessor->SetInputPort(mImageQueue->GetOutputPort(), 0U);
+		//mUserProcessor->SetInputPort(mUserManager->GetOutputPort(), 1U);
+		mUserProcessor->Connect();
 
 		// User history: maintain all entries that have been estimated by the user processor module in time
-		mUserHistory->mPort = fw::connect(
-			FW_BIND(&UserHistory::Main, mUserHistory),
-			mUserProcessor->GetPort());
+		mUserHistory->SetInputPort(mUserProcessor->GetOutputPort(), 0U);
+		mUserHistory->Connect();
 
 		// Visualizer: generate and draw the results
-		mVisualizer->mPort = fw::connect(
-			FW_BIND(&Visualizer::Main, mVisualizer),
-			mImageQueue->GetPort(), mUserProcessor->GetPort());
+		//mVisualizer->SetInputPort(mImageQueue->GetOutputPort(), 0U);
+		//mVisualizer->SetInputPort(mUserProcessor->GetOutputPort(), 1U);
+		mVisualizer->Connect();
 
 		// Last node: waiting for the results
-		mLastModule->mPort = fw::connect(
-			FW_BIND(&LastModule::Main, mLastModule),
-			mVisualizer->GetPort());
+		mLastModule->SetInputPort(mVisualizer->GetOutputPort(), 0U);
+		mLastModule->Connect();
 
 		return fw::ErrorCode::OK;
 	}

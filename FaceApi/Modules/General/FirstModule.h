@@ -7,7 +7,7 @@
 namespace face
 {
 	class FirstModule :
-		public ModuleWithPort<unsigned()>
+		public ModuleWithPort<unsigned(bool)>
 	{
 	public:
 		FirstModule() = default;
@@ -16,7 +16,7 @@ namespace face
 
 		void Connect(fw::Executor::Shared iExecutor);
 
-		unsigned Main();
+		unsigned Main(bool);
 
 		void Tick();
 

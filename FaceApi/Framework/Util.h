@@ -60,43 +60,4 @@ namespace fw
 			else ++it;
 		}
 	};
-
-	template <size_t index>
-	struct visit_tuple_impl
-	{
-		template <typename TupleT, typename FunctionT>
-		static void visit(TupleT& iTuple, size_t iIndex, FunctionT iFunction)
-		{
-			if (iIndex == index - 1)
-			{
-				iFunction(std::get<index - 1>(iTuple));
-			}
-			else
-			{
-				visit_tuple_impl<index - 1>::visit(iTuple, iIndex, iFunction);
-			}
-		}
-	};
-
-	template <>
-	struct visit_tuple_impl<0>
-	{
-		template <typename TupleT, typename FunctionT>
-		static void visit(TupleT& iTuple, size_t iIndex, FunctionT iFunction) 
-		{ 
-			assert(false); 
-		}
-	};
-
-	template <typename FunctionT, typename... Args>
-	void tuple_at(std::tuple<Args...> const& iTuple, size_t iIndex, FunctionT iFunction)
-	{
-		visit_tuple_impl<sizeof...(Args)>::visit(iTuple, iIndex, iFunction);
-	}
-
-	template <typename FunctionT, typename... Args>
-	void tuple_at(std::tuple<Args...>& iTuple, size_t iIndex, FunctionT iFunction)
-	{
-		visit_tuple_impl<sizeof...(Args)>::visit(iTuple, iIndex, iFunction);
-	}
 }

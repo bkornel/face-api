@@ -9,11 +9,11 @@ namespace face
 
 	bool LastModule::Get() const 
 	{ 
-		return mPort->Get(); 
+		return mOutputPort->Get();
 	}
 
 	void LastModule::Wait() const
 	{ 
-		mPort->Wait(); 
+		mOutputPort->Wait();
 	}
 }

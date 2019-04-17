@@ -184,15 +184,16 @@ namespace fw
 
 	/// @brief Returns an action running the provided function with executor and a Future for the result.
 	/// This connect() is a special case, since no dependency is needed. It is provided for convenience.
-	template <typename ReturnT>
-	std::pair<std::function<void()>, FutureShared<ReturnT>> connect(std::function<ReturnT()> iFunction, Executor::Shared iExecutor)
+	template <typename ReturnT, typename ArgumentT>
+	std::pair<std::function<void()>, FutureShared<ReturnT>> connect(std::function<ReturnT(ArgumentT)> iFunction, Executor::Shared iExecutor)
 	{
 		// Using shared_ptr, because std::function is copyable, but Promise<R> is not.
 		auto promise = std::make_shared<Promise<ReturnT>>();
 		auto future = promise->GetFuture();
 
 		auto task = [iFunction, promise, iExecutor] {
-			promise->Put(iFunction(), iExecutor);
+			ArgumentT arg{};
+			promise->Put(iFunction(arg), iExecutor);
 		};
 
 		auto runTask = [task, iExecutor] {
@@ -224,14 +225,4 @@ namespace fw
 
 		return future;
 	}
-
-	//template <size_t... Is>
-	//struct IndexSequence;
-
-	//template <typename ReturnT, typename... ArgumentT, size_t... Is>
-	//FutureShared<ReturnT> connect(std::function<ReturnT(ArgumentT...)> iFunction, std::tuple<FutureShared<ArgumentT>...> iFutures, IndexSequence<Is...>)
-	//{
-	//	return connect(iFunction, std::get<Is>(iFutures)...);
-	//}
-
 }
