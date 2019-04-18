@@ -12,46 +12,46 @@
 
 namespace fw
 {
-	class Module :
-		public Thread
-	{
-	public:
-		FW_DEFINE_SMART_POINTERS(Module)
+  class Module :
+    public Thread
+  {
+  public:
+    FW_DEFINE_SMART_POINTERS(Module);
 
-		Module() = default;
+    Module() = default;
 
-		virtual ~Module() = default;
+    virtual ~Module() = default;
 
-		virtual ErrorCode Initialize(const cv::FileNode& iSettings);
+    virtual ErrorCode Initialize(const cv::FileNode& iSettings);
 
-		virtual ErrorCode DeInitialize();
+    virtual ErrorCode DeInitialize();
 
-		// Should be deleted, now it's only called when the frame size has changed
-		// This is going to be substituted with events
-		virtual void Clear();
+    // Should be deleted, now it's only called when the frame size has changed
+    // This is going to be substituted with events
+    virtual void Clear();
 
-		inline bool IsInitialized() const
-		{
-			return mInitialized;
-		}
+    inline bool IsInitialized() const
+    {
+      return mInitialized;
+    }
 
-		inline const std::string& GetName() const
-		{
-			return mName;
-		}
+    inline const std::string& GetName() const
+    {
+      return mName;
+    }
 
-	protected:
-		using CommandHandlerType = Event<ErrorCode(Message::Shared)>;
+  protected:
+    using CommandEventHandler = Event<void(Message::Shared)>;
 
-		static CommandHandlerType sCommandHandler;
+    static CommandEventHandler sCommand;
 
-		virtual ErrorCode OnCommandArrived(Message::Shared iMessage);
+    virtual ErrorCode InitializeInternal(const cv::FileNode& iSettings);
 
-		virtual ErrorCode InitializeInternal(const cv::FileNode& iSettings);
+    virtual ErrorCode DeInitializeInternal();
 
-		virtual ErrorCode DeInitializeInternal();
+    virtual void OnCommand(Message::Shared iMessage);
 
-		bool mInitialized = false;
-		std::string mName;
-	};
+    bool mInitialized = false;
+    std::string mName;
+  };
 }

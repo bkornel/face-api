@@ -2,18 +2,22 @@
 
 namespace face
 {
-	bool LastModule::Main(bool iSucceeded)
-	{
-		return iSucceeded;
-	}
+  const cv::Mat LastModule::sEmptyMat;
 
-	bool LastModule::Get() const 
-	{ 
-		return mOutputPort->Get();
-	}
+  bool LastModule::Main(ImageMessage::Shared iImage)
+  {
+    mLastImage = iImage;
 
-	void LastModule::Wait() const
-	{ 
-		mOutputPort->Wait();
-	}
+    return (mLastImage != nullptr && !mLastImage->IsEmpty());
+  }
+
+  bool LastModule::Get() const
+  {
+    return mOutputPort->Get();
+  }
+
+  void LastModule::Wait() const
+  {
+    mOutputPort->Wait();
+  }
 }

@@ -5,50 +5,50 @@
 
 namespace face
 {
-	class User;
-	class ShapeModel;
-	class UserData;
+  class User;
+  class ShapeModel;
+  class UserData;
 
-	class ShapeModelDispatcher :
-		public UserDispatcher
-	{
-		typedef std::map<int, ShapeModel::Shared> ShapeModels;
+  class ShapeModelDispatcher :
+    public UserDispatcher
+  {
+    typedef std::map<int, ShapeModel::Shared> ShapeModels;
 
-	public:
-		ShapeModelDispatcher() = default;
+  public:
+    ShapeModelDispatcher() = default;
 
-		virtual ~ShapeModelDispatcher();
+    virtual ~ShapeModelDispatcher();
 
-		fw::ErrorCode Initialize(const cv::FileNode& iSettings) override;
+    fw::ErrorCode Initialize(const cv::FileNode& iSettings) override;
 
-		bool Dispatch(User& ioUser) override;
+    bool Dispatch(User& ioUser) override;
 
-		inline ShapeModel::Shared GetShapeModel() const
-		{
-			return mShapeModel;
-		}
+    inline ShapeModel::Shared GetShapeModel() const
+    {
+      return mShapeModel;
+    }
 
-		inline void SetFrame(const cv::Mat& iFrame)
-		{
-			mFrame = iFrame;
-		}
+    inline void SetFrame(const cv::Mat& iFrame)
+    {
+      mFrame = iFrame;
+    }
 
-	private:
-		static ShapeModels sShapeModels;
+  private:
+    static ShapeModels sShapeModels;
 
-		bool Fit(User& ioUser);
+    bool Fit(User& ioUser);
 
-		bool UpdateTemplate(User& ioUser);
+    bool UpdateTemplate(User& ioUser);
 
-		ShapeModel::Shared mShapeModel = nullptr;
-		std::vector<int> mUpdatedUserIDs;
+    ShapeModel::Shared mShapeModel = nullptr;
+    std::vector<int> mUpdatedUserIDs;
 
-		cv::Mat mFrame;
-		std::vector<int> mWinDetection = { 11, 9, 7 };
-		std::vector<int> mWinTracking = { 7 };
-		int mNoIter = 10;
-		double mClamp = 3.0;
-		double mFTol = 0.01;
-		bool mFailureCheck = false;
-	};
+    cv::Mat mFrame;
+    std::vector<int> mWinDetection = { 11, 9, 7 };
+    std::vector<int> mWinTracking = { 7 };
+    int mNoIter = 10;
+    double mClamp = 3.0;
+    double mFTol = 0.01;
+    bool mFailureCheck = false;
+  };
 }

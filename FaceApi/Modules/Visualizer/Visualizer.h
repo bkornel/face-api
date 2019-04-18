@@ -9,48 +9,37 @@
 
 namespace face
 {
-	class Visualizer :
-		public ModuleWithPort<bool(ImageMessage::Shared, ActiveUsersMessage::Shared)>
-	{
-	public:
-		Visualizer() = default;
+  class Visualizer :
+    public ModuleWithPort<ImageMessage::Shared(ImageMessage::Shared, ActiveUsersMessage::Shared)>
+  {
+  public:
+    Visualizer() = default;
 
-		virtual ~Visualizer() = default;
+    virtual ~Visualizer() = default;
 
-		bool Main(ImageMessage::Shared iImage, ActiveUsersMessage::Shared iUsers) override;
+    ImageMessage::Shared Main(ImageMessage::Shared iImage, ActiveUsersMessage::Shared iUsers) override;
 
-		inline bool HasOutput() const
-		{
-			return !mResultImage.empty();
-		}
+    inline void SetQueueSize(int iQueueSize)
+    {
+      mQueueSize = iQueueSize;
+    }
 
-		inline const cv::Mat& GetResultImage() const
-		{
-			return mResultImage;
-		}
+  private:
+    fw::ErrorCode InitializeInternal(const cv::FileNode& iSettings) override;
 
-		inline void SetQueueSize(int iQueueSize)
-		{
-			mQueueSize = iQueueSize;
-		}
+    void DrawShapeModel(const User& iUser, cv::Mat& oImage) const;
 
-	private:
-		fw::ErrorCode InitializeInternal(const cv::FileNode& iSettings) override;
+    void DrawUserData(const User& iUser, cv::Mat& oImage) const;
 
-		void DrawShapeModel(const User& iUser, cv::Mat& oImage) const;
+    void DrawAxes(const User& iUser, cv::Mat& oImage) const;
 
-		void DrawUserData(const User& iUser, cv::Mat& oImage) const;
+    void DrawBoundingBox(const User& iUser, cv::Mat& oImage, int iSegmentWidth = 5, int iThickness = 1) const;
 
-		void DrawAxes(const User& iUser, cv::Mat& oImage) const;
+    void DrawGeneral(double iRuntime, int iFrameID, cv::Mat& oImage) const;
 
-		void DrawBoundingBox(const User& iUser, cv::Mat& oImage, int iSegmentWidth = 5, int iThickness = 1) const;
+    void CreateShapeColorMap(const fw::ocv::VectorPt3D& iShape3D, cv::Mat& oColorMap) const;
 
-		void DrawGeneral(double iRuntime, int iFrameID, cv::Mat& oImage) const;
-
-		void CreateShapeColorMap(const fw::ocv::VectorPt3D& iShape3D, cv::Mat& oColorMap) const;
-
-		cv::Mat mResultImage;
-		std::vector<cv::Scalar> mColorsOfAxes;
-		int mQueueSize = 0;
-	};
+    std::vector<cv::Scalar> mColorsOfAxes;
+    int mQueueSize = 0;
+  };
 }

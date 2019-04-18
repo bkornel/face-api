@@ -1,28 +1,36 @@
 #pragma once
 
 #include "Modules/General/ModuleWithPort.hpp"
+#include "Framework/FlowGraph.hpp"
 
 #include <functional>
 
 namespace face
 {
-	class FirstModule :
-		public ModuleWithPort<unsigned(bool)>
-	{
-	public:
-		FirstModule() = default;
+  class FirstModule :
+    public ModuleWithPort<unsigned(bool)>
+  {
+  public:
+    FirstModule();
 
-		virtual ~FirstModule() = default;
+    virtual ~FirstModule() = default;
 
-		void Connect(fw::Executor::Shared iExecutor);
+    void Connect() override;
 
-		unsigned Main(bool);
+    unsigned Main(bool);
 
-		void Tick();
+    void Tick();
 
-	private:
-		void Connect() override;
+    void RunFaceDetector();
 
-		std::function<void()> mFunction;
-	};
+    void Clear() override
+    {
+      mTickCounter = 0U;
+    }
+
+  private:
+    unsigned mTickCounter = 0U;
+    std::function<void()> mFunction;
+    fw::Executor::Shared mExecutor = nullptr;
+  };
 }

@@ -11,36 +11,35 @@
 
 namespace face
 {
-	class Graph :
-		public fw::Module
-	{
-		using PredecessorMap = std::map<int, std::string>;
+  class Graph :
+    public fw::Module
+  {
+    using PredecessorMap = std::map<int, std::string>;
 
-	public:
-		Graph();
+  public:
+    Graph() = default;
 
-		virtual ~Graph();
+    virtual ~Graph();
 
-		void Clear() override;
+    void Clear() override;
 
-	private:
-		Graph(const Graph& iOther) = delete;
+  private:
+    Graph(const Graph& iOther) = delete;
 
-		Graph& operator=(const Graph& iOther) = delete;
+    Graph& operator=(const Graph& iOther) = delete;
 
-		fw::ErrorCode InitializeInternal(const cv::FileNode& iModulesNode) override;
+    fw::ErrorCode InitializeInternal(const cv::FileNode& iModulesNode) override;
 
-		fw::ErrorCode DeInitializeInternal() override;
+    fw::ErrorCode DeInitializeInternal() override;
 
-		fw::ErrorCode CreateModules(const cv::FileNode& iModulesNode);
+    fw::ErrorCode CreateModules(const cv::FileNode& iModulesNode);
 
-		fw::ErrorCode CreateConnections(const cv::FileNode& iModulesNode);
+    fw::ErrorCode CreateConnections(const cv::FileNode& iModulesNode);
 
-		fw::ErrorCode GetPredecessors(const cv::FileNode& iModule, const cv::FileNode& iModules, PredecessorMap& oPredecessors);
+    fw::ErrorCode GetPredecessors(const cv::FileNode& iModule, const cv::FileNode& iModules, PredecessorMap& oPredecessors);
 
-		FirstModule::Shared mFirstNode = nullptr;
-		LastModule::Shared mLastNode = nullptr;
-		fw::Executor::Shared mExecutor = nullptr;
-		std::vector<fw::Module::Shared> mModules;
-	};
+    FirstModule::Shared mFirstModule = nullptr;
+    LastModule::Shared mLastModule = nullptr;
+    std::vector<fw::Module::Shared> mModules;
+  };
 }

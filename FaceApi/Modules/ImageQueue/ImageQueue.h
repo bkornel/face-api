@@ -8,61 +8,63 @@
 
 namespace face
 {
-	class ImageQueue :
-		public ModuleWithPort<ImageMessage::Shared(unsigned)>
-	{
-		using MessageQueue = fw::MessageQueue<ImageMessage::Shared>;
+  class ImageQueue :
+    public ModuleWithPort<ImageMessage::Shared(unsigned)>
+  {
+    using MessageQueue = fw::MessageQueue<ImageMessage::Shared>;
 
-	public:
-		ImageQueue();
+  public:
+    ImageQueue();
 
-		virtual ~ImageQueue() = default;
+    virtual ~ImageQueue() = default;
 
-		fw::ErrorCode Push(const cv::Mat& iFrame);
+    fw::ErrorCode Push(const cv::Mat& iFrame);
 
-		ImageMessage::Shared Main(unsigned iTickNumber) override;
+    ImageMessage::Shared Main(unsigned iTickNumber) override;
 
-		void Clear() override
-		{
-			mQueue.Clear();
-		}
+    void Clear() override
+    {
+      mPushFrameId = 0U;
+      mQueue.Clear();
+    }
 
-		inline const cv::Size& GetImageSize() const
-		{
-			return mImageSize;
-		}
+    inline const cv::Size& GetImageSize() const
+    {
+      return mImageSize;
+    }
 
-		inline unsigned GetLastFrameId() const
-		{
-			return mLastFrameId;
-		}
+    inline unsigned GetLastFrameId() const
+    {
+      return mLastFrameId;
+    }
 
-		inline long long GetLastTimestamp() const
-		{
-			return mLastTimestamp;
-		}
+    inline long long GetLastTimestamp() const
+    {
+      return mLastTimestamp;
+    }
 
-		inline int GetQueueSize() const
-		{
-			return mQueue.GetSize();
-		}
+    inline int GetQueueSize() const
+    {
+      return mQueue.GetSize();
+    }
 
-		inline float GetSamplingFPS() const
-		{
-			return mQueue.GetSamplingFPS();
-		}
+    inline float GetSamplingFPS() const
+    {
+      return mQueue.GetSamplingFPS();
+    }
 
-		inline int GetBound() const
-		{
-			return mQueue.GetBound();
-		}
+    inline int GetBound() const
+    {
+      return mQueue.GetBound();
+    }
 
-	private:		
-		fw::ErrorCode InitializeInternal(const cv::FileNode& iSettings) override;
+  private:
+    fw::ErrorCode InitializeInternal(const cv::FileNode& iSettings) override;
 
-		unsigned mLastFrameId = 0U;		///< Holds the ID of the last image frame.
-		long long mLastTimestamp = 0;
-		MessageQueue mQueue;			///< Queue for handling the frames
-		cv::Size mImageSize;
-	};
+    unsigned mPushFrameId = 0U;
+    unsigned mLastFrameId = 0U;		///< Holds the ID of the last image frame.
+    long long mLastTimestamp = 0;
+    MessageQueue mQueue;			    ///< Queue for handling the frames
+    cv::Size mImageSize;
+  };
 }

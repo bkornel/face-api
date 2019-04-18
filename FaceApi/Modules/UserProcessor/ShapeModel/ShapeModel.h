@@ -11,46 +11,46 @@
 
 namespace face
 {
-	class ShapeModel
-	{
-	public:
-		typedef std::shared_ptr<ShapeModel> Shared;
+  class ShapeModel
+  {
+  public:
+    typedef std::shared_ptr<ShapeModel> Shared;
 
-		ShapeModel();
+    ShapeModel();
 
-		~ShapeModel() = default;
+    ~ShapeModel() = default;
 
-		void InitShape(const cv::Rect& iRect);
+    void InitShape(const cv::Rect& iRect);
 
-		void ShiftShape(const cv::Point& iOffset);
+    void ShiftShape(const cv::Point& iOffset);
 
-		void Fit(const cv::Mat& iFrame, std::vector<int> &iWinSize, int iNoIter, double iClamp, double iFTol);
+    void Fit(const cv::Mat& iFrame, std::vector<int> &iWinSize, int iNoIter, double iClamp, double iFTol);
 
-		bool FailureCheck(const cv::Mat& iFrame);
+    bool FailureCheck(const cv::Mat& iFrame);
 
-		bool GetMinMax2D(const cv::Rect& iRect, cv::Point2d& oMin, cv::Point2d& oMax) const;
+    bool GetMinMax2D(const cv::Rect& iRect, cv::Point2d& oMin, cv::Point2d& oMax) const;
 
-		inline const cv::Mat& GetShape2D() const
-		{
-			return mShape2D;
-		}
+    inline const cv::Mat& GetShape2D() const
+    {
+      return mShape2D;
+    }
 
-		inline const cv::Mat& GetRefShape() const
-		{
-			return mRefShape;
-		}
+    inline const cv::Mat& GetRefShape() const
+    {
+      return mRefShape;
+    }
 
-		inline const cv::Scalar& GetSimilarity() const
-		{
-			return mSimilarity;
-		}
+    inline const cv::Scalar& GetSimilarity() const
+    {
+      return mSimilarity;
+    }
 
-	private:
-		int mNumberOfPts = 0;
-		FACETRACKER::CLM mCLM;					///< Constrained Local Model
-		FACETRACKER::MFCheck mFailureCheck;		///< Checks for Tracking Failure
-		cv::Mat mShape2D;						///< Current 2D shape
-		cv::Mat mRefShape;						///< Reference shape model
-		cv::Scalar mSimilarity;					///< Initialization similarity
-	};
+  private:
+    int mNumberOfPts = 0;
+    FACETRACKER::CLM mCLM;					///< Constrained Local Model
+    FACETRACKER::MFCheck mFailureCheck;		///< Checks for Tracking Failure
+    cv::Mat mShape2D;						///< Current 2D shape
+    cv::Mat mRefShape;						///< Reference shape model
+    cv::Scalar mSimilarity;					///< Initialization similarity
+  };
 }

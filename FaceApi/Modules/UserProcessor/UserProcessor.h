@@ -11,21 +11,21 @@
 
 namespace face
 {
-	class UserProcessor :
-		public ModuleWithPort<ActiveUsersMessage::Shared(ImageMessage::Shared, ActiveUsersMessage::Shared)>
-	{
-	public:
-		UserProcessor() = default;
+  class UserProcessor :
+    public ModuleWithPort<ActiveUsersMessage::Shared(ImageMessage::Shared, ActiveUsersMessage::Shared)>
+  {
+  public:
+    UserProcessor() = default;
 
-		virtual ~UserProcessor() = default;
+    virtual ~UserProcessor() = default;
 
-		ActiveUsersMessage::Shared Main(ImageMessage::Shared iImage, ActiveUsersMessage::Shared iActiveUsers) override;
+    ActiveUsersMessage::Shared Main(ImageMessage::Shared iImage, ActiveUsersMessage::Shared iActiveUsers) override;
 
-	private:
-		fw::ErrorCode InitializeInternal(const cv::FileNode& iSettings) override;
+  private:
+    fw::ErrorCode InitializeInternal(const cv::FileNode& iSettings) override;
 
-		ShapeModelDispatcher mShapeModelDispatcher;
-		PoseEstimationDispatcher mPoseEstimationDispatcher;
-		ShapeNormDispatcher mShapeNormDispatcher;
-	};
+    ShapeModelDispatcher mShapeModelDispatcher;
+    PoseEstimationDispatcher mPoseEstimationDispatcher;
+    ShapeNormDispatcher mShapeNormDispatcher;
+  };
 }

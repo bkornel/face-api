@@ -9,63 +9,69 @@
 
 namespace face
 {
-	ImageQueue::ImageQueue() :
-		mQueue("ImageQueue", 12.0F, 10, 500)
-	{
-	}
+  ImageQueue::ImageQueue() :
+    mQueue("ImageQueue", 12.0F, 10, 500)
+  {
+  }
 
-	fw::ErrorCode ImageQueue::InitializeInternal(const cv::FileNode& iSettings)
-	{
-		if (!iSettings.empty())
-		{
-			std::string value;
+  fw::ErrorCode ImageQueue::InitializeInternal(const cv::FileNode& iSettings)
+  {
+    if (!iSettings.empty())
+    {
+      std::string value;
 
-			if (fw::ocv::get_value(iSettings, "samplingFPS", value))
-				mQueue.SetSamplingFPS(fw::str::convert_to_number<float>(value));
+      if (fw::ocv::get_value(iSettings, "samplingFPS", value))
+        mQueue.SetSamplingFPS(fw::str::convert_to_number<float>(value));
 
-			if (fw::ocv::get_value(iSettings, "bound", value))
-				mQueue.SetBound(fw::str::convert_to_number<int>(value));
+      if (fw::ocv::get_value(iSettings, "bound", value))
+        mQueue.SetBound(fw::str::convert_to_number<int>(value));
 
-			if (fw::ocv::get_value(iSettings, "thresholdMS", value))
-				mQueue.SetTimestampFiltering(fw::str::convert_to_number<int>(value));
-		}
+      if (fw::ocv::get_value(iSettings, "thresholdMS", value))
+        mQueue.SetTimestampFiltering(fw::str::convert_to_number<int>(value));
+    }
 
-		return fw::ErrorCode::OK;
-	}
+    return fw::ErrorCode::OK;
+  }
 
-	fw::ErrorCode ImageQueue::Push(const cv::Mat& iFrame)
-	{
-		static unsigned sFrameId = 0U;
+  fw::ErrorCode ImageQueue::Push(const cv::Mat& iFrame)
+  {
+    if (iFrame.empty())
+    {
+      return fw::ErrorCode::BadParam;
+    }
 
-		if (iFrame.empty())
-		{
-			return fw::ErrorCode::BadParam;
-		}
+    const long long timestamp = fw::get_current_time();
 
-		sCommandHandler.Raise(std::make_shared<ImageSizeChangedMessage>(cv::Size(10, 10), 0U, 0LL));
+    if (mImageSize != iFrame.size())
+    {
+      mImageSize = iFrame.size();
+      sCommand.Raise(std::make_shared<ImageSizeChangedMessage>(mImageSize, mPushFrameId, timestamp));
 
-		const fw::ErrorCode result = mQueue.Push(std::make_shared<ImageMessage>(iFrame, sFrameId, fw::get_current_time()));
-		if (result == fw::ErrorCode::OK)
-		{
-			mImageSize = iFrame.size();
-			sFrameId++;
-		}
+      LOG(INFO) << "Image size has been changed to: " << mImageSize;
+    }
 
-		return result;
-	}
+    const fw::ErrorCode result = mQueue.Push(std::make_shared<ImageMessage>(iFrame, mPushFrameId, timestamp));
 
-	ImageMessage::Shared ImageQueue::Main(unsigned /*iTickNumber*/)
-	{
-		std::tuple<ImageMessage::Shared> framePool;
-		if (mQueue.TryPop(framePool) != fw::ErrorCode::OK)
-		{
-			return nullptr;
-		}
+    if (result == fw::ErrorCode::OK)
+    {
+      mPushFrameId++;
+    }
 
-		ImageMessage::Shared image = std::get<0>(framePool);
-		mLastFrameId = image->GetFrameId();
-		mLastTimestamp = image->GetTimestamp();
+    return result;
+  }
 
-		return image;
-	}
+  ImageMessage::Shared ImageQueue::Main(unsigned /*iTickNumber*/)
+  {
+    std::tuple<ImageMessage::Shared> framePool;
+    if (mQueue.TryPop(framePool) != fw::ErrorCode::OK)
+    {
+      return nullptr;
+    }
+
+    ImageMessage::Shared image = std::get<0>(framePool);
+    mLastFrameId = image->GetFrameId();
+    mLastTimestamp = image->GetTimestamp();
+
+    return image;
+  }
 }

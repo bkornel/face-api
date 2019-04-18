@@ -9,62 +9,62 @@
 
 namespace face
 {
-	fw::ErrorCode UserProcessor::InitializeInternal(const cv::FileNode& iSettings)
-	{
-		std::string trackerFile = "face.tracker";
-		std::string triFile = "face.tri";
-		std::string conFile = "face.con";
+  fw::ErrorCode UserProcessor::InitializeInternal(const cv::FileNode& iSettings)
+  {
+    std::string trackerFile = "face.tracker";
+    std::string triFile = "face.tri";
+    std::string conFile = "face.con";
 
-		if (!iSettings.empty())
-		{
-			const cv::FileNode shapeModelNode = iSettings["shapeModel"];
+    if (!iSettings.empty())
+    {
+      const cv::FileNode shapeModelNode = iSettings["shapeModel"];
 
-			if (!shapeModelNode.empty())
-			{
-				std::string value;
+      if (!shapeModelNode.empty())
+      {
+        std::string value;
 
-				if (fw::ocv::get_value(iSettings, "trackerFile", value))
-					trackerFile = value;
+        if (fw::ocv::get_value(iSettings, "trackerFile", value))
+          trackerFile = value;
 
-				if (fw::ocv::get_value(iSettings, "triFile", value))
-					triFile = value;
+        if (fw::ocv::get_value(iSettings, "triFile", value))
+          triFile = value;
 
-				if (fw::ocv::get_value(iSettings, "conFile", value))
-					conFile = value;
+        if (fw::ocv::get_value(iSettings, "conFile", value))
+          conFile = value;
 
-				mShapeModelDispatcher.Initialize(shapeModelNode);
-			}
+        mShapeModelDispatcher.Initialize(shapeModelNode);
+      }
 
-			mPoseEstimationDispatcher.Initialize(iSettings["headPose"]);
-			mShapeNormDispatcher.Initialize(iSettings["shapeNorm"]);
-		}
+      mPoseEstimationDispatcher.Initialize(iSettings["headPose"]);
+      mShapeNormDispatcher.Initialize(iSettings["shapeNorm"]);
+    }
 
-		return ClmWrapper::GetInstance().Initialize(trackerFile, triFile, conFile);
-	}
+    return ClmWrapper::GetInstance().Initialize(trackerFile, triFile, conFile);
+  }
 
-	ActiveUsersMessage::Shared UserProcessor::Main(ImageMessage::Shared iImage, ActiveUsersMessage::Shared iUsers)
-	{
-		if ((!iImage || iImage->IsEmpty()) || (!iUsers || iUsers->IsEmpty()))
-			return nullptr;
+  ActiveUsersMessage::Shared UserProcessor::Main(ImageMessage::Shared iImage, ActiveUsersMessage::Shared iUsers)
+  {
+    if ((!iImage || iImage->IsEmpty()) || (!iUsers || iUsers->IsEmpty()))
+      return nullptr;
 
-		FACE_PROFILER(2_User_Processor);
+    FACE_PROFILER(2_User_Processor);
 
-		mShapeModelDispatcher.SetFrame(iImage->GetFrameGray());
-		
-		const auto& activeUSers = iUsers->GetActiveUsers();
-		for (const auto& user : activeUSers)
-		{
-			if (user->AcceptDispatcher(mShapeModelDispatcher))
-			{
-				mPoseEstimationDispatcher.EstimateCameraMatrix(iImage->GetSize());
+    mShapeModelDispatcher.SetFrame(iImage->GetFrameGray());
 
-				user->AcceptDispatcher(mPoseEstimationDispatcher);
-				user->AcceptDispatcher(mShapeNormDispatcher);
-			}
-		}
+    const auto& activeUSers = iUsers->GetActiveUsers();
+    for (const auto& user : activeUSers)
+    {
+      if (user->AcceptDispatcher(mShapeModelDispatcher))
+      {
+        mPoseEstimationDispatcher.EstimateCameraMatrix(iImage->GetSize());
 
-		iUsers->RemoveInactiveUsers();
+        user->AcceptDispatcher(mPoseEstimationDispatcher);
+        user->AcceptDispatcher(mShapeNormDispatcher);
+      }
+    }
 
-		return (iUsers->GetSize() > 0 ? iUsers : nullptr);
-	}
+    iUsers->RemoveInactiveUsers();
+
+    return (iUsers->GetSize() > 0 ? iUsers : nullptr);
+  }
 }

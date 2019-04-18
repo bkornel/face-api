@@ -6,46 +6,46 @@
 
 namespace face
 {
-	class ImageSizeChangedMessage :
-		public fw::Message
-	{
-	public:
-		FW_DEFINE_SMART_POINTERS(ImageSizeChangedMessage)
+  class ImageSizeChangedMessage :
+    public fw::Message
+  {
+  public:
+    FW_DEFINE_SMART_POINTERS(ImageSizeChangedMessage);
 
-		ImageSizeChangedMessage(const cv::Size& iSize, unsigned iFrameId, long long iTimestamp);
+    ImageSizeChangedMessage(const cv::Size& iSize, unsigned iFrameId, long long iTimestamp);
 
-		virtual ~ImageSizeChangedMessage() = default;
+    virtual ~ImageSizeChangedMessage() = default;
 
-		friend inline std::ostream& operator<<(std::ostream& ioStream, const ImageSizeChangedMessage& iMessage);
+    friend inline std::ostream& operator<<(std::ostream& ioStream, const ImageSizeChangedMessage& iMessage);
 
-		inline bool IsEmpty() const
-		{
-			return mSize.empty();
-		}
+    inline bool IsEmpty() const
+    {
+      return mSize.empty();
+    }
 
-		inline int GetWidth() const
-		{
-			return mSize.width;
-		}
+    inline int GetWidth() const
+    {
+      return mSize.width;
+    }
 
-		inline int GetHeight() const
-		{
-			return mSize.height;
-		}
+    inline int GetHeight() const
+    {
+      return mSize.height;
+    }
 
-		inline const cv::Size& GetSize() const
-		{
-			return mSize;
-		}
+    inline const cv::Size& GetSize() const
+    {
+      return mSize;
+    }
 
-	private:
-		cv::Size mSize;
-	};
+  private:
+    cv::Size mSize;
+  };
 
-	inline std::ostream& operator<< (std::ostream& ioStream, const ImageSizeChangedMessage& iMessage)
-	{
-		const fw::Message& base(iMessage);
-		ioStream << base << ", [Derived] Width: " << iMessage.GetWidth() << ", Height: " << iMessage.GetHeight();
-		return ioStream;
-	}
+  inline std::ostream& operator<< (std::ostream& ioStream, const ImageSizeChangedMessage& iMessage)
+  {
+    const fw::Message& base(iMessage);
+    ioStream << base << ", [Derived] Width: " << iMessage.GetWidth() << ", Height: " << iMessage.GetHeight();
+    return ioStream;
+  }
 }

@@ -7,41 +7,41 @@
 
 namespace fw
 {
-	class Thread
-	{
-	public:
-		Thread() = default;
+  class Thread
+  {
+  public:
+    Thread() = default;
 
-		virtual ~Thread();
+    virtual ~Thread();
 
-		ErrorCode StartThread();
+    ErrorCode StartThread();
 
-		ErrorCode StopThread();
+    ErrorCode StopThread();
 
-		void ThreadSleep(long long iMilliseconds);
+    void ThreadSleep(long long iMilliseconds);
 
-		bool IsRunning() const;
+    bool IsRunning() const;
 
-		inline bool GetThreadStopSignal() const
-		{
-			return mStopThread;
-		}
+    inline bool GetThreadStopSignal() const
+    {
+      return mStopThread;
+    }
 
-		inline void StopSignalThread()
-		{
-			mStopThread = true;
-		}
+    inline void StopSignalThread()
+    {
+      mStopThread = true;
+    }
 
-	protected:
-		virtual ErrorCode Run();
+  protected:
+    virtual ErrorCode Run();
 
-	private:
-		Thread(const Thread& iOther) = delete;
+  private:
+    Thread(const Thread& iOther) = delete;
 
-		Thread& operator=(const Thread& iOther) = delete;
+    Thread& operator=(const Thread& iOther) = delete;
 
-		std::future<ErrorCode> mThread;
-		volatile bool mStopThread = false;
-		volatile bool mFirstRun = true;
-	};
+    std::future<ErrorCode> mThread;
+    volatile bool mStopThread = false;
+    volatile bool mFirstRun = true;
+  };
 }

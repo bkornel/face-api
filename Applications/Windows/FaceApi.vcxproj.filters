@@ -184,6 +184,9 @@
     <ClCompile Include="..\..\FaceApi\Modules\General\LastModule.cpp">
       <Filter>Modules\General</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\FaceApi\Messages\CommandMessage.cpp">
+      <Filter>Messages</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\CLM.h">
@@ -330,6 +333,9 @@
     </ClInclude>
     <ClInclude Include="..\..\FaceApi\Framework\Tuple.hpp">
       <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\FaceApi\Messages\CommandMessage.h">
+      <Filter>Messages</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

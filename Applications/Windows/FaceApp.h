@@ -7,35 +7,35 @@
 #include <vector>
 
 class FaceApp :
-	public Poco::Util::Application
+  public Poco::Util::Application
 {
 public:
-	FaceApp() = default;
+  FaceApp() = default;
 
-	virtual ~FaceApp() = default;
+  virtual ~FaceApp() = default;
 
 protected:
-	virtual int main(const std::vector<std::string>& args);
+  virtual int main(const std::vector<std::string>& args);
 
-	virtual void initialize(Poco::Util::Application& self);
+  virtual void initialize(Poco::Util::Application& self);
 
-	virtual void uninitialize();
+  virtual void uninitialize();
 
-	void printProperties(const std::vector<std::string>& args);
+  void printProperties(const std::vector<std::string>& args);
 
-	void printProperties(const std::string& base);
+  void printProperties(const std::string& base);
 
-	void printKeys() const;
+  void printKeys() const;
 
 private:
-	FaceApp(const FaceApp&) = delete;
-	FaceApp& operator=(const FaceApp&) = delete;
+  FaceApp(const FaceApp&) = delete;
+  FaceApp& operator=(const FaceApp&) = delete;
 
-	void showResults();
+  void showResults();
 
-	bool mSaveVideo = false;
+  bool mSaveVideo = false;
 
-	cv::Mat mFrame;
-	cv::Mat mResultFrame;
-	face::VideoWriter mVideoWriter;
+  cv::Mat mFrame;
+  cv::Mat mResultFrame;
+  face::VideoWriter mVideoWriter;
 };

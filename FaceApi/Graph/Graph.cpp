@@ -14,239 +14,234 @@
 
 namespace face
 {
-	namespace
-	{
-		template<typename T>
-		std::shared_ptr<T> create_module(const std::string& iModuleName)
-		{
-			if (iModuleName == "imagequeue")			return std::make_shared<ImageQueue>();
-			else if (iModuleName == "facedetection")	return std::make_shared<FaceDetection>();
-			else if (iModuleName == "firstmodule")		return std::make_shared<FirstModule>();
-			else if (iModuleName == "lastmodule")		return std::make_shared<LastModule>();
-			else if (iModuleName == "userhistory")		return std::make_shared<UserHistory>();
-			else if (iModuleName == "usermanager")		return std::make_shared<UserManager>();
-			else if (iModuleName == "userprocessor")	return std::make_shared<UserProcessor>();
-			else if (iModuleName == "visualizer")		return std::make_shared<Visualizer>();
-			
-			return nullptr;
-		}
-	}
+  namespace
+  {
+    template<typename T>
+    std::shared_ptr<T> create_module(const std::string& iModuleName)
+    {
+      if (iModuleName == "imagequeue")			return std::make_shared<ImageQueue>();
+      else if (iModuleName == "facedetection")	return std::make_shared<FaceDetection>();
+      else if (iModuleName == "firstmodule")		return std::make_shared<FirstModule>();
+      else if (iModuleName == "lastmodule")		return std::make_shared<LastModule>();
+      else if (iModuleName == "userhistory")		return std::make_shared<UserHistory>();
+      else if (iModuleName == "usermanager")		return std::make_shared<UserManager>();
+      else if (iModuleName == "userprocessor")	return std::make_shared<UserProcessor>();
+      else if (iModuleName == "visualizer")		return std::make_shared<Visualizer>();
 
-	Graph::Graph() :
-		mExecutor(fw::getInlineExecutor())
-	{
-	}
+      return nullptr;
+    }
+  }
 
-	Graph::~Graph()
-	{
-		DeInitialize();
-	}
+  Graph::~Graph()
+  {
+    DeInitialize();
+  }
 
-	void Graph::Clear()
-	{
-		for (auto& module : mModules)
-			module->Clear();
-	}
+  void Graph::Clear()
+  {
+    for (auto& module : mModules)
+      module->Clear();
+  }
 
-	fw::ErrorCode Graph::InitializeInternal(const cv::FileNode& iModulesNode)
-	{
-		if (iModulesNode.empty())
-		{
-			return fw::ErrorCode::NotFound;
-		}
+  fw::ErrorCode Graph::InitializeInternal(const cv::FileNode& iModulesNode)
+  {
+    if (iModulesNode.empty())
+    {
+      return fw::ErrorCode::NotFound;
+    }
 
-		fw::ErrorCode result = fw::ErrorCode::OK;
-		if ((result = CreateModules(iModulesNode)) != fw::ErrorCode::OK)
-		{
-			return result;
-		}
+    fw::ErrorCode result = fw::ErrorCode::OK;
+    if ((result = CreateModules(iModulesNode)) != fw::ErrorCode::OK)
+    {
+      return result;
+    }
 
-		if ((result = CreateConnections(iModulesNode)) != fw::ErrorCode::OK)
-		{
-			return result;
-		}
+    if ((result = CreateConnections(iModulesNode)) != fw::ErrorCode::OK)
+    {
+      return result;
+    }
 
-		return result;
-	}
+    return result;
+  }
 
-	fw::ErrorCode Graph::DeInitializeInternal()
-	{
-		for (auto& module : mModules)
-		{
-			module->DeInitialize();
-		}
+  fw::ErrorCode Graph::DeInitializeInternal()
+  {
+    for (auto& module : mModules)
+    {
+      module->DeInitialize();
+    }
 
-		mModules.clear();
+    mModules.clear();
 
-		return fw::ErrorCode::OK;
-	}
+    return fw::ErrorCode::OK;
+  }
 
-	fw::ErrorCode Graph::CreateModules(const cv::FileNode& iModulesNode)
-	{
-		CV_Assert(!iModulesNode.empty());
+  fw::ErrorCode Graph::CreateModules(const cv::FileNode& iModulesNode)
+  {
+    CV_Assert(!iModulesNode.empty());
 
-		for (const auto& moduleNode : iModulesNode)
-		{
-			if (moduleNode.empty() || !moduleNode.isNamed()) continue;
+    for (const auto& moduleNode : iModulesNode)
+    {
+      if (moduleNode.empty() || !moduleNode.isNamed()) continue;
 
-			const std::string& moduleName = fw::str::to_lower(moduleNode.name());
-			auto module = create_module<fw::Module>(moduleName);
+      const std::string& moduleName = fw::str::to_lower(moduleNode.name());
+      auto module = create_module<fw::Module>(moduleName);
 
-			if (!module)
-			{
-				LOG(ERROR) << "Unknown module is referenced with name: " << moduleName;
-				return fw::ErrorCode::BadData;
-			}
+      if (!module)
+      {
+        LOG(ERROR) << "Unknown module is referenced with name: " << moduleName;
+        return fw::ErrorCode::BadData;
+      }
 
-			fw::ErrorCode result = fw::ErrorCode::OK;
-			if ((result = module->Initialize(moduleNode)) != fw::ErrorCode::OK)
-			{
-				return result;
-			}
+      fw::ErrorCode result = fw::ErrorCode::OK;
+      if ((result = module->Initialize(moduleNode)) != fw::ErrorCode::OK)
+      {
+        return result;
+      }
 
-			mModules.push_back(module);
-		}
+      mModules.push_back(module);
+    }
 
-		return fw::ErrorCode::OK;
-	}
+    return fw::ErrorCode::OK;
+  }
 
-	fw::ErrorCode Graph::CreateConnections(const cv::FileNode& iModulesNode)
-	{
-		CV_Assert(!iModulesNode.empty());
+  fw::ErrorCode Graph::CreateConnections(const cv::FileNode& iModulesNode)
+  {
+    CV_Assert(!iModulesNode.empty());
 
-		fw::ErrorCode result = fw::ErrorCode::OK;
+    fw::ErrorCode result = fw::ErrorCode::OK;
 
-		for (const auto& moduleNode : iModulesNode)
-		{
-			const std::string& moduleName = fw::str::to_lower(moduleNode.name());
-			PredecessorMap predecessors;
+    for (const auto& moduleNode : iModulesNode)
+    {
+      const std::string& moduleName = fw::str::to_lower(moduleNode.name());
+      PredecessorMap predecessors;
 
-			if ((result = GetPredecessors(moduleNode, iModulesNode, predecessors)) != fw::ErrorCode::OK)
-			{
-				return result;
-			}
-			
-			if (!predecessors.empty())
-			{
-				// TODO(kbertok)
-			}
-		}
+      if ((result = GetPredecessors(moduleNode, iModulesNode, predecessors)) != fw::ErrorCode::OK)
+      {
+        return result;
+      }
 
-		return result;
-	}
+      if (!predecessors.empty())
+      {
+        // TODO(kbertok)
+      }
+    }
 
-	fw::ErrorCode Graph::GetPredecessors(const cv::FileNode& iModule, const cv::FileNode& iModules, PredecessorMap& oPredecessors)
-	{
-		CV_Assert(!iModule.empty() && !iModules.empty());
+    return result;
+  }
 
-		oPredecessors.clear();
+  fw::ErrorCode Graph::GetPredecessors(const cv::FileNode& iModule, const cv::FileNode& iModules, PredecessorMap& oPredecessors)
+  {
+    CV_Assert(!iModule.empty() && !iModules.empty());
 
-		// It does not have any predecessor
-		const cv::FileNode& ports = iModule["port"];
-		if (ports.empty() || ports.size() == 0U)
-		{
-			return fw::ErrorCode::OK;
-		}
+    oPredecessors.clear();
 
-		const std::string& moduleName = fw::str::to_lower(iModule.name());
+    // It does not have any predecessor
+    const cv::FileNode& ports = iModule["port"];
+    if (ports.empty() || ports.size() == 0U)
+    {
+      return fw::ErrorCode::OK;
+    }
 
-		for (const auto& portNode : ports)
-		{
-			const std::string& port = fw::str::trim(fw::str::to_lower(portNode.string()));
-			if (port.empty())
-			{
-				LOG(ERROR) << "Port is not specified for: " << moduleName;
-				return fw::ErrorCode::NotFound;
-			}
+    const std::string& moduleName = fw::str::to_lower(iModule.name());
 
-			const auto tokens = fw::str::split(port, ':');
-			if (tokens.size() != 2)
-			{
-				LOG(ERROR) << "Port format is wrong for: " << moduleName << ", port: " << port;
-				return fw::ErrorCode::BadData;
-			}
+    for (const auto& portNode : ports)
+    {
+      const std::string& port = fw::str::trim(fw::str::to_lower(portNode.string()));
+      if (port.empty())
+      {
+        LOG(ERROR) << "Port is not specified for: " << moduleName;
+        return fw::ErrorCode::NotFound;
+      }
 
-			const int portNumber = fw::str::convert_to_number<int>(fw::str::trim(tokens[1]));
-			if (portNumber < 1)
-			{
-				LOG(ERROR) << "Port number is less than 1 for: " << moduleName << ", port: " << port;
-				return fw::ErrorCode::BadData;
-			}
+      const auto tokens = fw::str::split(port, ':');
+      if (tokens.size() != 2)
+      {
+        LOG(ERROR) << "Port format is wrong for: " << moduleName << ", port: " << port;
+        return fw::ErrorCode::BadData;
+      }
 
-			const std::string& portName = fw::str::trim(tokens[0]);
-			bool isFound = false;
+      const int portNumber = fw::str::convert_to_number<int>(fw::str::trim(tokens[1]));
+      if (portNumber < 1)
+      {
+        LOG(ERROR) << "Port number is less than 1 for: " << moduleName << ", port: " << port;
+        return fw::ErrorCode::BadData;
+      }
 
-			for (const auto& module : iModules)
-			{
-				const std::string& predecessorName = fw::str::to_lower(module.name());
-				if (portName == predecessorName)
-				{
-					if (oPredecessors[portNumber].empty())
-					{
-						oPredecessors[portNumber] = predecessorName;
-						isFound = true;
-						break;
-					}
-					else
-					{
-						LOG(ERROR) << "Port number is already set for: " << moduleName << ", port: " << port;
-						return fw::ErrorCode::BadData;
-					}
-				}
-			}
+      const std::string& portName = fw::str::trim(tokens[0]);
+      bool isFound = false;
 
-			if (!isFound)
-			{
-				LOG(ERROR) << "Port is not defined in the configuration file for: " << moduleName << ", port: " << port;
-				return fw::ErrorCode::BadData;
-			}
-		}
+      for (const auto& module : iModules)
+      {
+        const std::string& predecessorName = fw::str::to_lower(module.name());
+        if (portName == predecessorName)
+        {
+          if (oPredecessors[portNumber].empty())
+          {
+            oPredecessors[portNumber] = predecessorName;
+            isFound = true;
+            break;
+          }
+          else
+          {
+            LOG(ERROR) << "Port number is already set for: " << moduleName << ", port: " << port;
+            return fw::ErrorCode::BadData;
+          }
+        }
+      }
 
-		return fw::ErrorCode::OK;
-	}
+      if (!isFound)
+      {
+        LOG(ERROR) << "Port is not defined in the configuration file for: " << moduleName << ", port: " << port;
+        return fw::ErrorCode::BadData;
+      }
+    }
 
-	/*fw::ErrorCode GeneralGraph::Connect()
-	{
-		// This the first node in the execution
-		mFirstNode.port = fw::connect(
-			FW_BIND(&fw::FirstNode<unsigned>::Main, &mFirstNode),
-			mExecutor);
+    return fw::ErrorCode::OK;
+  }
 
-		// Image queue: popping out a frame
-		mImageQueue->port = fw::connect(
-			FW_BIND(&ImageQueue::Pop, mImageQueue),
-			mFirstNode.port.second);
+  /*fw::ErrorCode GeneralGraph::Connect()
+  {
+    // This the first node in the execution
+    mFirstNode.port = fw::connect(
+      FW_BIND(&fw::FirstNode<unsigned>::Main, &mFirstNode),
+      mExecutor);
 
-		// Face detector: detect faces on the frame pop from the queue
-		mFaceDetection->port = fw::connect(
-			FW_BIND(&FaceDetection::Detect, mFaceDetection),
-			mImageQueue->port);
+    // Image queue: popping out a frame
+    mImageQueue->port = fw::connect(
+      FW_BIND(&ImageQueue::Pop, mImageQueue),
+      mFirstNode.port.second);
 
-		// User manager: manage active and inactive users, update them with the detected faces
-		mUserManager->port = fw::connect(
-			FW_BIND(&UserManager::Process, mUserManager),
-			mImageQueue->port, mFaceDetection->port);
+    // Face detector: detect faces on the frame pop from the queue
+    mFaceDetection->port = fw::connect(
+      FW_BIND(&FaceDetection::Detect, mFaceDetection),
+      mImageQueue->port);
 
-		// User processor: extract all of the features from faces (e.g. shape model, head pose)
-		mUserProcessor->port = fw::connect(
-			FW_BIND(&UserProcessor::Process, mUserProcessor),
-			mImageQueue->port, mUserManager->port);
+    // User manager: manage active and inactive users, update them with the detected faces
+    mUserManager->port = fw::connect(
+      FW_BIND(&UserManager::Process, mUserManager),
+      mImageQueue->port, mFaceDetection->port);
 
-		// User history: maintain all entries that have been estimated by the user processor module in time
-		mUserHistory->port = fw::connect(
-			FW_BIND(&UserHistory::Process, mUserHistory),
-			mUserProcessor->port);
+    // User processor: extract all of the features from faces (e.g. shape model, head pose)
+    mUserProcessor->port = fw::connect(
+      FW_BIND(&UserProcessor::Process, mUserProcessor),
+      mImageQueue->port, mUserManager->port);
 
-		// Visualizer: generate and draw the results
-		mVisualizer->port = fw::connect(
-			FW_BIND(&Visualizer::Draw, mVisualizer),
-			mImageQueue->port, mUserProcessor->port);
+    // User history: maintain all entries that have been estimated by the user processor module in time
+    mUserHistory->port = fw::connect(
+      FW_BIND(&UserHistory::Process, mUserHistory),
+      mUserProcessor->port);
 
-		// Last node: waiting for the results
-		mLastNode.port = fw::connect(
-			FW_BIND(&fw::LastNode<bool>::Main, &mLastNode),
-			mVisualizer->port);
+    // Visualizer: generate and draw the results
+    mVisualizer->port = fw::connect(
+      FW_BIND(&Visualizer::Draw, mVisualizer),
+      mImageQueue->port, mUserProcessor->port);
 
-		return fw::ErrorCode::OK;
-	}*/
+    // Last node: waiting for the results
+    mLastNode.port = fw::connect(
+      FW_BIND(&fw::LastNode<bool>::Main, &mLastNode),
+      mVisualizer->port);
+
+    return fw::ErrorCode::OK;
+  }*/
 }

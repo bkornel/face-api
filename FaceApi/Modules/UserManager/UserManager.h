@@ -9,63 +9,60 @@
 
 namespace face
 {
-	class UserManager :
-		public ModuleWithPort<ActiveUsersMessage::Shared(ImageMessage::Shared, RoiMessage::Shared)>
-	{
-	public:
-		UserManager() = default;
+  class UserManager :
+    public ModuleWithPort<ActiveUsersMessage::Shared(ImageMessage::Shared, RoiMessage::Shared)>
+  {
+  public:
+    UserManager() = default;
 
-		virtual ~UserManager() = default;
+    virtual ~UserManager() = default;
 
-		ActiveUsersMessage::Shared Main(ImageMessage::Shared iImage, RoiMessage::Shared iDetections) override;
+    ActiveUsersMessage::Shared Main(ImageMessage::Shared iImage, RoiMessage::Shared iDetections) override;
 
-		void Clear() override;
+    void Clear() override;
 
-		std::size_t GetActiveUserSize() const;
+    std::size_t GetActiveUserSize() const;
 
-		inline bool IsAllPossibleUsersTracked() const
-		{
-			return GetMaxUsers() == GetActiveUserSize();
-		}
+    inline bool IsAllPossibleUsersTracked() const
+    {
+      return GetMaxUsers() == GetActiveUserSize();
+    }
 
-		inline int GetMaxUsers() const
-		{
-			return mMaxUsers;
-		}
+    inline int GetMaxUsers() const
+    {
+      return mMaxUsers;
+    }
 
-		inline void SetMinFaceSize(const cv::Size& iMinFaceSize)
-		{
-			mMinFaceSize = iMinFaceSize;
-		}
+  private:
+    fw::ErrorCode InitializeInternal(const cv::FileNode& iSettings) override;
 
-	private:
-		fw::ErrorCode InitializeInternal(const cv::FileNode& iSettings) override;
+    void PreprocessUsers();
 
-		void PreprocessUsers();
+    void ProcessDetections(RoiMessage::Shared iDetections);
 
-		void ProcessDetections(RoiMessage::Shared iDetections);
+    void TrackUsers(ImageMessage::Shared iImage);
 
-		void TrackUsers(ImageMessage::Shared iImage);
+    void PostprocessUsers();
 
-		void PostprocessUsers();
+    void MergeDetectionsAndUsers(std::vector<cv::Rect>& ioFaceROIs);
 
-		void MergeDetectionsAndUsers(std::vector<cv::Rect>& ioFaceROIs);
+    bool MatchTemplate(ImageMessage::Shared iImage, User::Shared ioUser, cv::Rect& oFaceRect);
 
-		bool MatchTemplate(ImageMessage::Shared iImage, User::Shared ioUser, cv::Rect& oFaceRect);
+    void RemoveInactiveUsers(bool forceToDelete = false);
 
-		void RemoveInactiveUsers(bool forceToDelete = false);
+    void OnCommand(fw::Message::Shared iMessage) override;
 
-		fw::ErrorCode OnCommandArrived(fw::Message::Shared iMessage) override;
+    std::vector<User::Shared> mUsers;   ///< The vector storing all users
+    fw::Stopwatch mRemoveSW;
+    long long mTimestamp = 0;
 
-		std::vector<User::Shared> mUsers;   ///< The vector storing all users
-		fw::Stopwatch mRemoveSW;
-		long long mTimestamp = 0;
+    cv::Size mMinFaceSize;
+    cv::Size mMaxFaceSize;
 
-		cv::Size mMinFaceSize;
-		int mMaxUsers = 1;
-		float mUserOverlap = 0.2F;
-		float mUserAwaySec = 15.0F;
-		float mTemplateScale = 1.0f;
-		float mTemplateScaleInv = 1.0f;
-	};
+    int mMaxUsers = 1;
+    float mUserOverlap = 0.2F;
+    float mUserAwaySec = 15.0F;
+    float mTemplateScale = 1.0f;
+    float mTemplateScaleInv = 1.0f;
+  };
 }

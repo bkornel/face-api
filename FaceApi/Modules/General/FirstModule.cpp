@@ -1,30 +1,34 @@
 #include "Modules/General/FirstModule.h"
-#include "Framework/Functional.hpp"
+#include "Messages/CommandMessage.h"
 
-#include <easyloggingpp/easyloggingpp.h>
+#include "Framework/Functional.hpp"
 
 namespace face
 {
-	void FirstModule::Connect(fw::Executor::Shared iExecutor)
-	{
-		auto result = fw::connect(FW_BIND(&FirstModule::Main, this), iExecutor);
-		mFunction = result.first;
-		mOutputPort = result.second;
-	}
+  FirstModule::FirstModule() :
+    mExecutor(fw::getInlineExecutor())
+  {
+  }
 
-	unsigned FirstModule::Main(bool)
-	{
-		static unsigned sTickCounter = 0U;
-		return sTickCounter++;
-	}
+  void FirstModule::Connect()
+  {
+    auto result = fw::connect(FW_BIND(&FirstModule::Main, this), mExecutor);
+    mFunction = result.first;
+    mOutputPort = result.second;
+  }
 
-	void FirstModule::Tick()
-	{
-		mFunction();
-	}
+  unsigned FirstModule::Main(bool)
+  {
+    return mTickCounter++;
+  }
 
-	void FirstModule::Connect()
-	{
-		LOG(WARNING) << "Do not call Connect() FirstModule. Call Connect(fw::Executor::Shared iExecutor) instead.";
-	}
+  void FirstModule::Tick()
+  {
+    mFunction();
+  }
+
+  void FirstModule::RunFaceDetector()
+  {
+    sCommand.Raise(std::make_shared<CommandMessage>(CommandMessage::Type::RunFaceDetection, mTickCounter, fw::get_current_time()));
+  }
 }
