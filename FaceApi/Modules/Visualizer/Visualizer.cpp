@@ -49,7 +49,7 @@ namespace face
 
     const long long runtimeMs = std::llabs(fw::get_current_time() - iImage->GetTimestamp());
 
-    DrawGeneral(runtimeMs, iImage->GetFrameId(), resultImage);
+    DrawGeneral(iImage, resultImage);
 
     return std::make_shared<ImageMessage>(resultImage, iImage->GetFrameId(), iImage->GetTimestamp());
   }
@@ -185,24 +185,29 @@ namespace face
     ss.str("");
   }
 
-  void Visualizer::DrawGeneral(double iRuntime, int iFrameID, cv::Mat& oImage) const
+  void Visualizer::DrawGeneral(ImageMessage::Shared iImage, cv::Mat& oImage) const
   {
-    static double sMinRuntime = iRuntime;
-    static double sMaxRuntime = iRuntime;
+    const double runtimeMs = std::llabs(fw::get_current_time() - iImage->GetTimestamp());
 
-    if (iRuntime < sMinRuntime) sMinRuntime = iRuntime;
-    if (iRuntime > sMaxRuntime) sMaxRuntime = iRuntime;
+    static double sMinRuntime = runtimeMs;
+    static double sMaxRuntime = runtimeMs;
+
+    if (runtimeMs < sMinRuntime) sMinRuntime = runtimeMs;
+    if (runtimeMs > sMaxRuntime) sMaxRuntime = runtimeMs;
 
     const int h = 5;
 
-    cv::Scalar c = fw::ocv::get_color(iRuntime, sMinRuntime, sMaxRuntime);
+    cv::Scalar c = fw::ocv::get_color(runtimeMs, sMinRuntime, sMaxRuntime);
     cv::Rect r(1, oImage.rows - h, oImage.cols - 1, h);
 
     cv::rectangle(oImage, r, c, 2);
     cv::rectangle(oImage, r, c, -1);
 
     std::stringstream ss;
-    ss << "Frame number: " << iFrameID << " (" << cvRound(iRuntime) << " ms @ " << cvRound(1000.0 / iRuntime) << " FPS) - Queue size: " << mQueueSize;
+    ss << "Frame number: " << iImage->GetFrameId() << 
+      " (" << cvRound(runtimeMs) << " ms @ " << cvRound(1000.0 / runtimeMs) << 
+      " FPS) - Queue size: " << iImage->GetQueueData().size;
+
     fw::ocv::put_text(ss.str(), { 10, oImage.rows - 15 }, oImage);
 
 #ifdef ENABLE_FACE_PROFILER
@@ -215,7 +220,9 @@ namespace face
       for (auto& m : lastMeasurement)
       {
         std::stringstream ss;
-        ss << "- " << m.first << "(" << (iFrameID - m.second.first) << "): " << cvRound(m.second.second) << " ms";
+        ss << "- " << m.first << "(" << (iImage->GetFrameId() - m.second.first) << 
+          "): " << cvRound(m.second.second) << " ms";
+
         fw::ocv::put_text(ss.str(), { 10, (barHeight * ++idx) + 20 }, oImage);
       }
     }

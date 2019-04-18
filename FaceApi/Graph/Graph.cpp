@@ -1,6 +1,7 @@
 #include "Graph/Graph.h"
 
 #include "Common/Configuration.h"
+#include "Framework/Profiler.h"
 #include "Framework/UtilString.h"
 
 #include "Modules/ImageQueue/ImageQueue.h"
@@ -14,6 +15,8 @@
 
 namespace face
 {
+  Graph::FrameProcessedHandler Graph::sFrameProcessed;
+
   namespace
   {
     template<typename T>
@@ -35,6 +38,29 @@ namespace face
   Graph::~Graph()
   {
     DeInitialize();
+  }
+
+  fw::ErrorCode Graph::Process()
+  {
+    // TODO: still not initialized
+    return fw::ErrorCode::OK;
+
+
+    if (!IsInitialized()) return fw::ErrorCode::BadState;
+
+    FACE_PROFILER_FRAME_ID(GetLastFrameId());
+
+    // Popping a frame out and waiting until the flow has been ended
+    mFirstModule->Tick();
+    mLastModule->Wait();
+
+    // Pushing a debug frame if we have it
+    if (mLastModule->HasOutput())
+    {
+      sFrameProcessed.Raise(mLastModule->GetLastImage());
+    }
+
+    return fw::ErrorCode::OK;
   }
 
   void Graph::Clear()
@@ -61,7 +87,13 @@ namespace face
       return result;
     }
 
-    return result;
+    // Start worker threads
+    if ((result = StartThread()) != fw::ErrorCode::OK)
+    {
+      return result;
+    }
+
+    return fw::ErrorCode::OK;
   }
 
   fw::ErrorCode Graph::DeInitializeInternal()

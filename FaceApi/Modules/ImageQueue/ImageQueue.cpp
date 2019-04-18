@@ -50,7 +50,10 @@ namespace face
       LOG(INFO) << "Image size has been changed to: " << mImageSize;
     }
 
-    const fw::ErrorCode result = mQueue.Push(std::make_shared<ImageMessage>(iFrame, mPushFrameId, timestamp));
+    ImageMessage::Shared message = std::make_shared<ImageMessage>(iFrame, mPushFrameId, timestamp);
+    message->SetQueueData(GetQueueSize(), GetSamplingFPS(), GetBound());
+
+    const fw::ErrorCode result = mQueue.Push(message);
 
     if (result == fw::ErrorCode::OK)
     {

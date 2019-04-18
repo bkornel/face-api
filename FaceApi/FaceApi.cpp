@@ -24,14 +24,17 @@ namespace face
   }
 
   FaceApi::FaceApi() :
-    mOutputQueue("OutputQueue", 100.0F, 10)
+    mOutputQueue("OutputQueue", 100.0F, 10),
+    mGraph(std::make_shared<Graph>())
   {
     START_EASYLOGGINGPP(0, static_cast<char**>(nullptr));
+    mGraph->sFrameProcessed += MAKE_DELEGATE(&FaceApi::OnFrameProcessed, this);
   }
 
   FaceApi::~FaceApi()
   {
     DeInitialize();
+    mGraph->sFrameProcessed -= MAKE_DELEGATE(&FaceApi::OnFrameProcessed, this);
   }
 
   fw::ErrorCode FaceApi::InitializeInternal(const cv::FileNode& /*iSettingsNode*/)
@@ -40,8 +43,6 @@ namespace face
 
     if ((result = Configuration::GetInstance().Initialize()) != fw::ErrorCode::OK)
       return result;
-
-    mGraph = std::make_shared<Graph>();
 
     // Create and init modules here
     if ((result = mGraph->Initialize(Configuration::GetInstance().GetModulesNode())) != fw::ErrorCode::OK)
@@ -71,6 +72,7 @@ namespace face
     }
 
     mModules.clear();
+    mOutputQueue.Clear();
 
     return fw::ErrorCode::OK;
   }
@@ -80,18 +82,27 @@ namespace face
     std::lock_guard<std::recursive_mutex> lock(sAppMutex);
     for (auto& module : mModules)
       module->Clear();
+
+    mOutputQueue.Clear();
   }
 
+  void FaceApi::OnFrameProcessed(ImageMessage::Shared iMessage)
+  {
+    if (!iMessage || iMessage->IsEmpty()) return;
+    mOutputQueue.Push(iMessage);
+  }
+
+  // TODO-BEGIN: will be deleted
   fw::ErrorCode FaceApi::CreateModules()
   {
     if (!mFirstModule)		mModules.push_back(mFirstModule = new FirstModule());
-    if (!mLastModule)		mModules.push_back(mLastModule = new LastModule());
-    if (!mImageQueue)		mModules.push_back(mImageQueue = new ImageQueue());
+    if (!mLastModule)		  mModules.push_back(mLastModule = new LastModule());
+    if (!mImageQueue)		  mModules.push_back(mImageQueue = new ImageQueue());
     if (!mFaceDetection)	mModules.push_back(mFaceDetection = new FaceDetection());
     if (!mUserManager)		mModules.push_back(mUserManager = new UserManager());
     if (!mUserProcessor)	mModules.push_back(mUserProcessor = new UserProcessor());
     if (!mUserHistory)		mModules.push_back(mUserHistory = new UserHistory());
-    if (!mVisualizer)		mModules.push_back(mVisualizer = new Visualizer());
+    if (!mVisualizer)		  mModules.push_back(mVisualizer = new Visualizer());
 
     for (auto& m : mModules)
     {
@@ -106,11 +117,6 @@ namespace face
 
   fw::ErrorCode FaceApi::CreateConnections()
   {
-    //std::tuple<int, std::string, double> tuple;
-    //fw::tuple::set(tuple, 0, 2);
-    //fw::tuple::set(tuple, 1, std::string("asdfg"));
-    //fw::tuple::set(tuple, 2, 2.2);
-
     // This the first node in the execution
     mFirstModule->Connect();
 
@@ -147,6 +153,7 @@ namespace face
 
     return fw::ErrorCode::OK;
   }
+  // TODO-END: will be deleted
 
   fw::ErrorCode FaceApi::PushCameraFrame(const cv::Mat& iFrame)
   {
@@ -181,24 +188,19 @@ namespace face
 
       std::lock_guard<std::recursive_mutex> lock(sAppMutex);
       FACE_PROFILER_FRAME_ID(GetLastFrameId());
-   
-      // Buffer visualization
-      mVisualizer->SetQueueSize(mImageQueue->GetQueueSize());
+      mGraph->Process();
 
+      // TODO-BEGIN: will be deleted
       // Popping a frame out and waiting until the flow has been ended
       mFirstModule->Tick();
       mLastModule->Wait();
 
       // Pushing a debug frame if we have it
-      if (mLastModule->Get())
+      if (mLastModule->HasOutput())
       {
-        auto outputMessage = std::make_shared<ImageMessage>(
-          mLastModule->GetLastResultBGR(),
-          GetLastFrameId(),
-          fw::get_current_time()
-        );
-        mOutputQueue.Push(outputMessage);
+        mOutputQueue.Push(mLastModule->GetLastImage());
       }
+      // TODO-END: will be deleted
 
       ThreadSleep(1);
     }

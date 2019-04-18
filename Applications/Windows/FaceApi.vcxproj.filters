@@ -331,9 +331,6 @@
     <ClInclude Include="..\..\FaceApi\Modules\General\LastModule.h">
       <Filter>Modules\General</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\FaceApi\Framework\Tuple.hpp">
-      <Filter>Framework</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\FaceApi\Messages\CommandMessage.h">
       <Filter>Messages</Filter>
     </ClInclude>

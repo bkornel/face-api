@@ -58,7 +58,7 @@ namespace FACETRACKER
 		cv::Mat S_; /** 3D shape vector								   */
 
 		PDM() { ; }
-		PDM(const char* fname) { this->Load(fname); }
+		explicit PDM(const char* fname) { this->Load(fname); }
 		PDM(cv::Mat &M, cv::Mat &V, cv::Mat &E) { this->Init(M, V, E); }
 		PDM& operator=(PDM const&rhs);
 		inline int nPoints() { return _M.rows / 3; }

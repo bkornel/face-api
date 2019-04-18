@@ -1,7 +1,9 @@
 #pragma once
 
+#include "Framework/Event.hpp"
 #include "Framework/Module.h"
 #include "Framework/FlowGraph.hpp"
+#include "Messages/ImageMessage.h"
 #include "Modules/General/FirstModule.h"
 #include "Modules/General/LastModule.h"
 
@@ -15,13 +17,28 @@ namespace face
     public fw::Module
   {
     using PredecessorMap = std::map<int, std::string>;
+    using FrameProcessedHandler = fw::Event<void(ImageMessage::Shared)>;
 
   public:
+    static FrameProcessedHandler sFrameProcessed;
+
     Graph() = default;
 
     virtual ~Graph();
 
     void Clear() override;
+
+    fw::ErrorCode Process();
+
+    inline unsigned GetLastFrameId() const
+    {
+      return mLastModule ? mLastModule->GetLastFrameId() : 0U;
+    }
+
+    inline long long GetLastTimestamp() const
+    {
+      return mLastModule ? mLastModule->GetLastTimestamp() : 0LL;
+    }
 
   private:
     Graph(const Graph& iOther) = delete;

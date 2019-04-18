@@ -77,6 +77,8 @@ namespace face
 
     fw::ErrorCode Run() override;
 
+    void OnFrameProcessed(ImageMessage::Shared iMessage);
+
     fw::ErrorCode CreateModules();
 
     fw::ErrorCode CreateConnections();

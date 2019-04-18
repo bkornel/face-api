@@ -19,11 +19,6 @@ namespace face
 
     ImageMessage::Shared Main(ImageMessage::Shared iImage, ActiveUsersMessage::Shared iUsers) override;
 
-    inline void SetQueueSize(int iQueueSize)
-    {
-      mQueueSize = iQueueSize;
-    }
-
   private:
     fw::ErrorCode InitializeInternal(const cv::FileNode& iSettings) override;
 
@@ -35,11 +30,10 @@ namespace face
 
     void DrawBoundingBox(const User& iUser, cv::Mat& oImage, int iSegmentWidth = 5, int iThickness = 1) const;
 
-    void DrawGeneral(double iRuntime, int iFrameID, cv::Mat& oImage) const;
+    void DrawGeneral(ImageMessage::Shared iImage, cv::Mat& oImage) const;
 
     void CreateShapeColorMap(const fw::ocv::VectorPt3D& iShape3D, cv::Mat& oColorMap) const;
 
     std::vector<cv::Scalar> mColorsOfAxes;
-    int mQueueSize = 0;
   };
 }

@@ -10,14 +10,4 @@ namespace face
 
     return (mLastImage != nullptr && !mLastImage->IsEmpty());
   }
-
-  bool LastModule::Get() const
-  {
-    return mOutputPort->Get();
-  }
-
-  void LastModule::Wait() const
-  {
-    mOutputPort->Wait();
-  }
 }

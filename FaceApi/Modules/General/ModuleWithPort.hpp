@@ -3,7 +3,6 @@
 #include "Framework/FlowGraph.hpp"
 #include "Framework/Functional.hpp"
 #include "Framework/Module.h"
-#include "Framework/Tuple.hpp"
 
 #include <easyloggingpp/easyloggingpp.h>
 
@@ -47,18 +46,12 @@ namespace face
 
       if (index >= size)
       {
-        LOG(ERROR) << "Trying to set the input port no. " << index << ", however the module " << GetName() << " has only " << size << " parameters.";
+        LOG(ERROR) << "Trying to set the input port no. " << index << ", however the module " << GetName() << " has only " << size << " ports.";
         return false;
       }
 
       std::get<index>(mInputPorts) = iValue;
       return true;
-    }
-
-    template<typename T>
-    inline void SetInputPort_tmp(T iValue, size_t iIndex)
-    {
-      fw::tuple::set(mInputPorts, iIndex, iValue);
     }
 
   protected:

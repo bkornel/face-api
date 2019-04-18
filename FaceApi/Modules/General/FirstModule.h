@@ -11,6 +11,8 @@ namespace face
     public ModuleWithPort<unsigned(bool)>
   {
   public:
+    FW_DEFINE_SMART_POINTERS(FirstModule);
+
     FirstModule();
 
     virtual ~FirstModule() = default;

@@ -11,15 +11,23 @@ namespace face
     public ModuleWithPort<bool(ImageMessage::Shared)>
   {
   public:
+    FW_DEFINE_SMART_POINTERS(LastModule);
+
     LastModule() = default;
 
     virtual ~LastModule() = default;
 
     bool Main(ImageMessage::Shared iImage) override;
 
-    bool Get() const;
+    inline bool HasOutput() const
+    {
+      return mOutputPort->Get();
+    }
 
-    void Wait() const;
+    inline void Wait() const
+    {
+      mOutputPort->Wait();
+    }
 
     inline unsigned GetLastFrameId() const
     {
@@ -31,9 +39,9 @@ namespace face
       return mLastImage ? mLastImage->GetTimestamp() : 0LL;
     }
 
-    inline const cv::Mat& GetLastResultBGR() const
+    inline ImageMessage::Shared GetLastImage() const
     {
-      return mLastImage ? mLastImage->GetFrameBGR() : sEmptyMat;
+      return mLastImage;
     }
 
   private:
