@@ -19,17 +19,18 @@ namespace face
 
   namespace
   {
-    template<typename T>
-    std::shared_ptr<T> create_module(const std::string& iModuleName)
+    fw::Module::Shared create_module(const std::string& iModuleName)
     {
-      if (iModuleName == "imagequeue")			return std::make_shared<ImageQueue>();
-      else if (iModuleName == "facedetection")	return std::make_shared<FaceDetection>();
-      else if (iModuleName == "firstmodule")		return std::make_shared<FirstModule>();
-      else if (iModuleName == "lastmodule")		return std::make_shared<LastModule>();
-      else if (iModuleName == "userhistory")		return std::make_shared<UserHistory>();
-      else if (iModuleName == "usermanager")		return std::make_shared<UserManager>();
-      else if (iModuleName == "userprocessor")	return std::make_shared<UserProcessor>();
-      else if (iModuleName == "visualizer")		return std::make_shared<Visualizer>();
+      const std::string& moduleName = fw::str::to_lower(iModuleName);
+
+      if (moduleName == "imagequeue")			    return std::make_shared<ImageQueue>();
+      else if (moduleName == "facedetection")	return std::make_shared<FaceDetection>();
+      else if (moduleName == "firstmodule")		return std::make_shared<FirstModule>();
+      else if (moduleName == "lastmodule")		return std::make_shared<LastModule>();
+      else if (moduleName == "userhistory")		return std::make_shared<UserHistory>();
+      else if (moduleName == "usermanager")		return std::make_shared<UserManager>();
+      else if (moduleName == "userprocessor")	return std::make_shared<UserProcessor>();
+      else if (moduleName == "visualizer")		return std::make_shared<Visualizer>();
 
       return nullptr;
     }
@@ -77,11 +78,14 @@ namespace face
     }
 
     fw::ErrorCode result = fw::ErrorCode::OK;
+
+    // Create the modules and load their settings
     if ((result = CreateModules(iModulesNode)) != fw::ErrorCode::OK)
     {
       return result;
     }
 
+    // Connect modules to each other
     if ((result = CreateConnections(iModulesNode)) != fw::ErrorCode::OK)
     {
       return result;
@@ -112,26 +116,57 @@ namespace face
   {
     CV_Assert(!iModulesNode.empty());
 
+    // Loop over the <modules> tag in the settings file
     for (const auto& moduleNode : iModulesNode)
     {
       if (moduleNode.empty() || !moduleNode.isNamed()) continue;
 
-      const std::string& moduleName = fw::str::to_lower(moduleNode.name());
-      auto module = create_module<fw::Module>(moduleName);
-
-      if (!module)
+      // Check for duplications
+      for (const auto& m : mModules)
       {
-        LOG(ERROR) << "Unknown module is referenced with name: " << moduleName;
+        if (m->GetName() == fw::Module::CreateModuleName(moduleNode))
+        {
+          LOG(ERROR) << "Module is already defined: " << m->GetName();
+          return fw::ErrorCode::BadData;
+        }
+      }
+
+      // Extend this function if you add a new module
+      auto newModule = create_module(moduleNode.name());
+
+      // Check if the module is not set up in this file
+      if (!newModule)
+      {
+        LOG(ERROR) << "Unknown module is referenced with name: " << moduleNode.name();
         return fw::ErrorCode::BadData;
       }
 
+      // Initialize the module (this will also load the module's settings)
       fw::ErrorCode result = fw::ErrorCode::OK;
-      if ((result = module->Initialize(moduleNode)) != fw::ErrorCode::OK)
+      if ((result = newModule->Initialize(moduleNode)) != fw::ErrorCode::OK)
       {
         return result;
       }
 
-      mModules.push_back(module);
+      // Create an alias for the first and last module of the process
+      if (!mFirstModule) mFirstModule = std::dynamic_pointer_cast<FirstModule>(newModule);
+
+      if (!mLastModule) mLastModule = std::dynamic_pointer_cast<LastModule>(newModule);
+
+      mModules.push_back(newModule);
+    }
+
+    // First-, and last modules are mandatory
+    if (!mFirstModule)
+    {
+      LOG(ERROR) << "First module is not defined.";
+      return fw::ErrorCode::BadData;
+    }
+
+    if (!mLastModule)
+    {
+      LOG(ERROR) << "Last module is not defined.";
+      return fw::ErrorCode::BadData;
     }
 
     return fw::ErrorCode::OK;
@@ -143,11 +178,12 @@ namespace face
 
     fw::ErrorCode result = fw::ErrorCode::OK;
 
+    // Loop over the <modules> tag in the settings file
     for (const auto& moduleNode : iModulesNode)
     {
-      const std::string& moduleName = fw::str::to_lower(moduleNode.name());
-      PredecessorMap predecessors;
+      PredecessorMap predecessors; // Key: port, value: module
 
+      // Read the <port> tag of each module
       if ((result = GetPredecessors(moduleNode, iModulesNode, predecessors)) != fw::ErrorCode::OK)
       {
         return result;
@@ -156,6 +192,7 @@ namespace face
       if (!predecessors.empty())
       {
         // TODO(kbertok)
+        const std::string& moduleName = fw::Module::CreateModuleName(moduleNode);
       }
     }
 
@@ -166,65 +203,72 @@ namespace face
   {
     CV_Assert(!iModule.empty() && !iModules.empty());
 
+    // Collect predecessor modules of iModule
     oPredecessors.clear();
 
-    // It does not have any predecessor
-    const cv::FileNode& ports = iModule["port"];
-    if (ports.empty() || ports.size() == 0U)
+    // Check if it does not have a predecessor
+    const cv::FileNode& portList = iModule["port"];
+    if (portList.empty() || portList.size() == 0U)
     {
       return fw::ErrorCode::OK;
     }
 
-    const std::string& moduleName = fw::str::to_lower(iModule.name());
+    const std::string& moduleName = fw::Module::CreateModuleName(iModule);
 
-    for (const auto& portNode : ports)
+    // Loop over the <port> list of iModule
+    for (const auto& portNode : portList)
     {
-      const std::string& port = fw::str::trim(fw::str::to_lower(portNode.string()));
-      if (port.empty())
+      const std::string& portNodeStr = fw::str::trim(portNode.string());
+      if (portNodeStr.empty())
       {
-        LOG(ERROR) << "Port is not specified for: " << moduleName;
+        LOG(ERROR) << "Input port is not specified. Module " << moduleName;
         return fw::ErrorCode::NotFound;
       }
 
-      const auto tokens = fw::str::split(port, ':');
+      // Tokenize the string: "predecessorName:portNumber"
+      const auto tokens = fw::str::split(portNodeStr, ':');
       if (tokens.size() != 2)
       {
-        LOG(ERROR) << "Port format is wrong for: " << moduleName << ", port: " << port;
+        LOG(ERROR) << "Input port format is wrong. Module " << moduleName << ", port: " << portNodeStr;
         return fw::ErrorCode::BadData;
       }
 
+      // Check the port number, indexing start from 1
       const int portNumber = fw::str::convert_to_number<int>(fw::str::trim(tokens[1]));
       if (portNumber < 1)
       {
-        LOG(ERROR) << "Port number is less than 1 for: " << moduleName << ", port: " << port;
+        LOG(ERROR) << "Port number is less than 1. Module " << moduleName << ", port: " << portNodeStr;
         return fw::ErrorCode::BadData;
       }
 
-      const std::string& portName = fw::str::trim(tokens[0]);
+      // Find the predecessor between all of the modules
+      const std::string& predecessorName = fw::str::trim(tokens[0]);
       bool isFound = false;
 
-      for (const auto& module : iModules)
+      // Loop over the modules
+      for (const auto& module : mModules)
       {
-        const std::string& predecessorName = fw::str::to_lower(module.name());
-        if (portName == predecessorName)
+        if (predecessorName == module->GetName())
         {
-          if (oPredecessors[portNumber].empty())
+          // If the port number is still not reserved
+          if (oPredecessors[portNumber] == nullptr)
           {
-            oPredecessors[portNumber] = predecessorName;
+            oPredecessors[portNumber] = module;
             isFound = true;
             break;
           }
           else
           {
-            LOG(ERROR) << "Port number is already set for: " << moduleName << ", port: " << port;
+            LOG(ERROR) << "Port number is already set. Module " << moduleName << ", port: " << portNodeStr;
             return fw::ErrorCode::BadData;
           }
         }
       }
 
+      // Predecessor could not be found in the settings file
       if (!isFound)
       {
-        LOG(ERROR) << "Port is not defined in the configuration file for: " << moduleName << ", port: " << port;
+        LOG(ERROR) << "Predecessor is not defined in the configuration file. Module " << moduleName << ", port: " << portNodeStr;
         return fw::ErrorCode::BadData;
       }
     }

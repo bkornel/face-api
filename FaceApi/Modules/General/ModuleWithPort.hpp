@@ -3,6 +3,7 @@
 #include "Framework/FlowGraph.hpp"
 #include "Framework/Functional.hpp"
 #include "Framework/Module.h"
+#include "Framework/UtilString.h"
 
 #include <easyloggingpp/easyloggingpp.h>
 

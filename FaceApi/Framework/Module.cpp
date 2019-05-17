@@ -1,11 +1,27 @@
 #include "Framework/Module.h"
+#include "Framework/UtilString.h"
 #include "Messages/ImageSizeChangedMessage.h"
 
 namespace fw
 {
   Module::CommandEventHandler Module::sCommand;
 
-  ErrorCode Module::Initialize(const cv::FileNode& iSettings)
+  std::string Module::CreateModuleName(const cv::FileNode& iModuleNode)
+  {
+    CV_Assert(!iModuleNode.empty() && iModuleNode.isNamed());
+
+    std::string moduleName = fw::str::trim(iModuleNode.name());
+
+    const cv::FileNode& instanceNode = iModuleNode["instance"];
+    if (!instanceNode.empty())
+    {
+      moduleName += "." + fw::str::trim(instanceNode.string());
+    }
+
+    return moduleName;
+  }
+
+  ErrorCode Module::Initialize(const cv::FileNode& iModuleNode)
   {
     ErrorCode result = ErrorCode::OK;
 
@@ -13,14 +29,13 @@ namespace fw
     if (!mInitialized)
     {
       // set the module name
-      if (!iSettings.empty())
+      if (!iModuleNode.empty() && iModuleNode.isNamed())
       {
-        const cv::FileNode& nameNode = iSettings["name"];
-        mName = !nameNode.empty() ? nameNode.name() : iSettings.name();
+        mName = Module::CreateModuleName(iModuleNode);
       }
 
       Clear();
-      result = InitializeInternal(iSettings);
+      result = InitializeInternal(iModuleNode);
       mInitialized = (result == ErrorCode::OK);
       sCommand += MAKE_DELEGATE(&Module::OnCommand, this);
     }
@@ -62,7 +77,7 @@ namespace fw
     }
   }
 
-  ErrorCode Module::InitializeInternal(const cv::FileNode& iSettings)
+  ErrorCode Module::InitializeInternal(const cv::FileNode& iModuleNode)
   {
     return fw::ErrorCode::OK;
   }

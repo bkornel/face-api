@@ -16,7 +16,7 @@ namespace face
   class Graph :
     public fw::Module
   {
-    using PredecessorMap = std::map<int, std::string>;
+    using PredecessorMap = std::map<int, fw::Module::Shared>;
     using FrameProcessedHandler = fw::Event<void(ImageMessage::Shared)>;
 
   public:

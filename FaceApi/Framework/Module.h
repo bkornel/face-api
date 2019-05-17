@@ -18,11 +18,13 @@ namespace fw
   public:
     FW_DEFINE_SMART_POINTERS(Module);
 
+    static std::string CreateModuleName(const cv::FileNode& iModuleNode);
+
     Module() = default;
 
     virtual ~Module() = default;
 
-    virtual ErrorCode Initialize(const cv::FileNode& iSettings);
+    virtual ErrorCode Initialize(const cv::FileNode& iModuleNode);
 
     virtual ErrorCode DeInitialize();
 
@@ -45,7 +47,7 @@ namespace fw
 
     static CommandEventHandler sCommand;
 
-    virtual ErrorCode InitializeInternal(const cv::FileNode& iSettings);
+    virtual ErrorCode InitializeInternal(const cv::FileNode& iModuleNode);
 
     virtual ErrorCode DeInitializeInternal();
 
