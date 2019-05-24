@@ -1,4 +1,4 @@
-#include "Modules/General/FirstModule.h"
+#include "Modules/FirstModule/FirstModule.h"
 #include "Messages/CommandMessage.h"
 
 #include "Framework/Functional.hpp"
@@ -10,11 +10,12 @@ namespace face
   {
   }
 
-  void FirstModule::Connect()
+  fw::ErrorCode FirstModule::Connect()
   {
     auto result = fw::connect(FW_BIND(&FirstModule::Main, this), mExecutor);
     mFunction = result.first;
     mOutputPort = result.second;
+    return fw::ErrorCode::OK;
   }
 
   unsigned FirstModule::Main(bool)

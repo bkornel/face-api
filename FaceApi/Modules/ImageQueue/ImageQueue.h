@@ -1,19 +1,25 @@
 #pragma once
 
+
 #include "Framework/MessageQueue.hpp"
+#include "Framework/Module.h"
+#include "Framework/Port.hpp"
+
 #include "Messages/ImageMessage.h"
-#include "Modules/General/ModuleWithPort.hpp"
 
 #include <string>
 
 namespace face
 {
   class ImageQueue :
-    public ModuleWithPort<ImageMessage::Shared(unsigned)>
+    public fw::Module,
+    public fw::Port<ImageMessage::Shared(unsigned)>
   {
     using MessageQueue = fw::MessageQueue<ImageMessage::Shared>;
 
   public:
+    FW_DEFINE_SMART_POINTERS(ImageQueue);
+
     ImageQueue();
 
     virtual ~ImageQueue() = default;

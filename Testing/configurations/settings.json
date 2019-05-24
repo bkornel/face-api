@@ -70,7 +70,7 @@
           "epsilon": "1e-6"
         }
       },
-      "Visualizer": {
+      "visualizer": {
         "port": [ "imageQueue:1", "userManager:2" ]
       },
       "lastModule": {

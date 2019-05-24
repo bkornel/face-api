@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Modules/General/ModuleWithPort.hpp"
+#include "Framework/Module.h"
+#include "Framework/Port.hpp"
 #include "Messages/ImageMessage.h"
 
 #include <functional>
@@ -8,7 +9,8 @@
 namespace face
 {
   class LastModule :
-    public ModuleWithPort<bool(ImageMessage::Shared)>
+    public fw::Module,
+    public fw::Port<bool(ImageMessage::Shared)>
   {
   public:
     FW_DEFINE_SMART_POINTERS(LastModule);

@@ -1,8 +1,10 @@
 #pragma once
 
+#include "Framework/Port.hpp"
+#include "Framework/Stopwatch.h"
+
 #include "Messages/ImageMessage.h"
 #include "Messages/ActiveUsersMessage.h"
-#include "Modules/General/ModuleWithPort.hpp"
 
 #include <opencv2/core/core.hpp>
 #include <vector>
@@ -10,9 +12,12 @@
 namespace face
 {
   class Visualizer :
-    public ModuleWithPort<ImageMessage::Shared(ImageMessage::Shared, ActiveUsersMessage::Shared)>
+    public fw::Module,
+    public fw::Port<ImageMessage::Shared(ImageMessage::Shared, ActiveUsersMessage::Shared)>
   {
   public:
+    FW_DEFINE_SMART_POINTERS(Visualizer);
+
     Visualizer() = default;
 
     virtual ~Visualizer() = default;

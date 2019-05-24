@@ -1,14 +1,16 @@
 #pragma once
 
-#include "Modules/General/ModuleWithPort.hpp"
 #include "Framework/FlowGraph.hpp"
+#include "Framework/Module.h"
+#include "Framework/Port.hpp"
 
 #include <functional>
 
 namespace face
 {
   class FirstModule :
-    public ModuleWithPort<unsigned(bool)>
+    public fw::Module,
+    public fw::Port<unsigned(bool)>
   {
   public:
     FW_DEFINE_SMART_POINTERS(FirstModule);
@@ -17,7 +19,7 @@ namespace face
 
     virtual ~FirstModule() = default;
 
-    void Connect() override;
+    fw::ErrorCode Connect() override;
 
     unsigned Main(bool);
 

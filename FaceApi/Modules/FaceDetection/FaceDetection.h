@@ -1,9 +1,10 @@
 #pragma once
 
+#include "Framework/Module.h"
 #include "Framework/Stopwatch.h"
+#include "Framework/Port.hpp"
 #include "Messages/ImageMessage.h"
 #include "Messages/RoiMessage.h"
-#include "Modules/General/ModuleWithPort.hpp"
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/objdetect/objdetect.hpp>
@@ -13,9 +14,12 @@
 namespace face
 {
   class FaceDetection :
-    public ModuleWithPort<RoiMessage::Shared(ImageMessage::Shared)>
+    public fw::Module,
+    public fw::Port<RoiMessage::Shared(ImageMessage::Shared)>
   {
   public:
+    FW_DEFINE_SMART_POINTERS(FaceDetection);
+
     FaceDetection() = default;
 
     virtual ~FaceDetection() = default;

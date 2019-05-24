@@ -1,16 +1,20 @@
 #pragma once
 
+#include "Framework/Module.h"
+#include "Framework/Port.hpp"
 #include "Framework/Stopwatch.h"
+
 #include "Messages/ImageMessage.h"
 #include "Messages/RoiMessage.h"
 #include "Messages/ActiveUsersMessage.h"
-#include "Modules/General/ModuleWithPort.hpp"
+
 #include "User/User.h"
 
 namespace face
 {
   class UserManager :
-    public ModuleWithPort<ActiveUsersMessage::Shared(ImageMessage::Shared, RoiMessage::Shared)>
+    public fw::Module,
+    public fw::Port<ActiveUsersMessage::Shared(ImageMessage::Shared, RoiMessage::Shared)>
   {
   public:
     UserManager() = default;

@@ -4,12 +4,8 @@
 #include "Framework/Profiler.h"
 #include "Framework/UtilString.h"
 
-#include "Modules/ImageQueue/ImageQueue.h"
-#include "Modules/FaceDetection/FaceDetection.h"
-#include "Modules/UserHistory/UserHistory.h"
-#include "Modules/UserManager/UserManager.h"
-#include "Modules/UserProcessor/UserProcessor.h"
-#include "Modules/Visualizer/Visualizer.h"
+#include "Modules/ModuleFactory.h"
+#include "Modules/ModuleConnector.h"
 
 #include <easyloggingpp/easyloggingpp.h>
 
@@ -19,18 +15,11 @@ namespace face
 
   namespace
   {
-    fw::Module::Shared create_module(const std::string& iModuleName)
+    template<typename T>
+    T connect(fw::Module::Shared iModule)
     {
-      const std::string& moduleName = fw::str::to_lower(iModuleName);
-
-      if (moduleName == "imagequeue")			    return std::make_shared<ImageQueue>();
-      else if (moduleName == "facedetection")	return std::make_shared<FaceDetection>();
-      else if (moduleName == "firstmodule")		return std::make_shared<FirstModule>();
-      else if (moduleName == "lastmodule")		return std::make_shared<LastModule>();
-      else if (moduleName == "userhistory")		return std::make_shared<UserHistory>();
-      else if (moduleName == "usermanager")		return std::make_shared<UserManager>();
-      else if (moduleName == "userprocessor")	return std::make_shared<UserProcessor>();
-      else if (moduleName == "visualizer")		return std::make_shared<Visualizer>();
+      ImageQueue::Shared imageQueue = std::dynamic_pointer_cast<ImageQueue>(iModule);
+      if (imageQueue) return imageQueue;
 
       return nullptr;
     }
@@ -132,26 +121,21 @@ namespace face
       }
 
       // Extend this function if you add a new module
-      auto newModule = create_module(moduleNode.name());
+      auto newModule = ModuleFactory::Create(moduleNode);
 
       // Check if the module is not set up in this file
       if (!newModule)
       {
-        LOG(ERROR) << "Unknown module is referenced with name: " << moduleNode.name();
         return fw::ErrorCode::BadData;
       }
 
-      // Initialize the module (this will also load the module's settings)
-      fw::ErrorCode result = fw::ErrorCode::OK;
-      if ((result = newModule->Initialize(moduleNode)) != fw::ErrorCode::OK)
-      {
-        return result;
-      }
-
       // Create an alias for the first and last module of the process
+      // Duplications are already checked above
       if (!mFirstModule) mFirstModule = std::dynamic_pointer_cast<FirstModule>(newModule);
 
       if (!mLastModule) mLastModule = std::dynamic_pointer_cast<LastModule>(newModule);
+
+      LOG(INFO) << "New module is created: [" << newModule->GetName() << "]";
 
       mModules.push_back(newModule);
     }
@@ -181,6 +165,25 @@ namespace face
     // Loop over the <modules> tag in the settings file
     for (const auto& moduleNode : iModulesNode)
     {
+      fw::Module::Shared module = nullptr;
+
+      // Find the corresponding module
+      for (const auto& m : mModules)
+      {
+        if (m->GetName() == fw::Module::CreateModuleName(moduleNode))
+        {
+          module = m;
+          break;
+        }
+      }
+
+      // Unknown module
+      if (module == nullptr)
+      {
+        LOG(ERROR) << "Unknown module is referenced with name: " << moduleNode.name();
+        return fw::ErrorCode::BadData;
+      }
+
       PredecessorMap predecessors; // Key: port, value: module
 
       // Read the <port> tag of each module
@@ -191,8 +194,11 @@ namespace face
 
       if (!predecessors.empty())
       {
-        // TODO(kbertok)
-        const std::string& moduleName = fw::Module::CreateModuleName(moduleNode);
+        ModuleConnector::Connect(module, predecessors);
+      }
+      else
+      {
+        LOG(INFO) << "Predecessors of [" << module->GetName() << "]:\t---";
       }
     }
 

@@ -4,8 +4,8 @@
 #include "Framework/MessageQueue.hpp"
 #include "Framework/Module.h"
 #include "Graph/Graph.h"
-#include "Modules/General/FirstModule.h"
-#include "Modules/General/LastModule.h"
+#include "Modules/FirstModule/FirstModule.h"
+#include "Modules/LastModule/LastModule.h"
 
 #include <string>
 #include <vector>

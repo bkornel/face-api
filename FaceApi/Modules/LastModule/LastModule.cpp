@@ -1,4 +1,4 @@
-#include "Modules/General/LastModule.h"
+#include "Modules/LastModule/LastModule.h"
 
 namespace face
 {

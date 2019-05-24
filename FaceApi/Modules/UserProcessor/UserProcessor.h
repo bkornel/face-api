@@ -1,10 +1,12 @@
 #pragma once
 
+#include "Framework/Port.hpp"
+#include "Framework/Stopwatch.h"
+
 #include "User/User.h"
 #include "Messages/ImageMessage.h"
 #include "Messages/ActiveUsersMessage.h"
 
-#include "Modules/General/ModuleWithPort.hpp"
 #include "Modules/UserProcessor/ShapeModel/ShapeModelDispatcher.h"
 #include "Modules/UserProcessor/ShapeNorm/ShapeNormDispatcher.h"
 #include "Modules/UserProcessor/HeadPose/PoseEstimationDispatcher.h"
@@ -12,9 +14,12 @@
 namespace face
 {
   class UserProcessor :
-    public ModuleWithPort<ActiveUsersMessage::Shared(ImageMessage::Shared, ActiveUsersMessage::Shared)>
+    public fw::Module,
+    public fw::Port<ActiveUsersMessage::Shared(ImageMessage::Shared, ActiveUsersMessage::Shared)>
   {
   public:
+    FW_DEFINE_SMART_POINTERS(UserProcessor);
+
     UserProcessor() = default;
 
     virtual ~UserProcessor() = default;
