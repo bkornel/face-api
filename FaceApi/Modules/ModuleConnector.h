@@ -9,9 +9,9 @@ namespace face
 {
   class ModuleConnector
   {
+  public:
     using PredecessorMap = std::map<int, fw::Module::Shared>;
 
-  public:
     static fw::ErrorCode Connect(fw::Module::Shared iModule, const PredecessorMap& iPredecessors);
   };
 }

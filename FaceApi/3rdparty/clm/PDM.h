@@ -40,7 +40,6 @@
 #pragma once
 
 #include "IO.h"
-#include <cassert>
 
 namespace FACETRACKER
 {
@@ -63,7 +62,7 @@ namespace FACETRACKER
 		PDM& operator=(PDM const&rhs);
 		inline int nPoints() { return _M.rows / 3; }
 		inline int nModes() { return _V.cols; }
-		inline double Var(int i) { assert(i < _E.cols); return _E.at<double>(0, i); }
+		inline double Var(int i) { CV_DbgAssert(i < _E.cols); return _E.at<double>(0, i); }
 		void Load(const char* fname);
 		void Save(const char* fname);
 		void Write(std::ofstream &s);

@@ -3,7 +3,9 @@
 #include "Framework/Event.hpp"
 #include "Framework/Module.h"
 #include "Framework/FlowGraph.hpp"
+
 #include "Messages/ImageMessage.h"
+
 #include "Modules/FirstModule/FirstModule.h"
 #include "Modules/LastModule/LastModule.h"
 

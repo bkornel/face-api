@@ -21,7 +21,7 @@ namespace face
 
     fw::ErrorCode Connect() override;
 
-    unsigned Main(bool);
+    unsigned Main(bool) override;
 
     void Tick();
 

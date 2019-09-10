@@ -156,14 +156,14 @@ namespace face
   const std::string& ShapeUtil::PointNameToString(Landmark iLandmark) const
   {
     auto it = mShapePoints.find(iLandmark);
-    assert(it != mShapePoints.end());
+    CV_DbgAssert(it != mShapePoints.end());
     return it->second;
   }
 
   const std::string& ShapeUtil::ShapeClusterToString(BodyPart iShapeCluster) const
   {
     auto it = mShapeClusters.find(iShapeCluster);
-    assert(it != mShapeClusters.end());
+    CV_DbgAssert(it != mShapeClusters.end());
     return it->second;
   }
 
@@ -179,7 +179,7 @@ namespace face
   const std::vector<Landmark>& ShapeUtil::GetLandmarks(BodyPart iClusterId) const
   {
     auto it = mShapeParts.find(iClusterId);
-    assert(it != mShapeParts.end());
+    CV_DbgAssert(it != mShapeParts.end());
     return it->second;
   }
 }

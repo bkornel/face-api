@@ -61,7 +61,7 @@ namespace face
 
   bool ShapeModelDispatcher::Dispatch(User& ioUser)
   {
-    assert(!mFrame.empty() && mFrame.type() == CV_8UC1);
+    CV_DbgAssert(!mFrame.empty() && mFrame.type() == CV_8UC1);
 
     const int userId = ioUser.GetUserId();
     auto it = sShapeModels.find(userId);

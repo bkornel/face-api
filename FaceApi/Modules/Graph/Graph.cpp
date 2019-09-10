@@ -1,6 +1,7 @@
-#include "Graph/Graph.h"
+#include "Modules/Graph/Graph.h"
 
 #include "Common/Configuration.h"
+
 #include "Framework/Profiler.h"
 #include "Framework/UtilString.h"
 
@@ -12,18 +13,6 @@
 namespace face
 {
   Graph::FrameProcessedHandler Graph::sFrameProcessed;
-
-  namespace
-  {
-    template<typename T>
-    T connect(fw::Module::Shared iModule)
-    {
-      ImageQueue::Shared imageQueue = std::dynamic_pointer_cast<ImageQueue>(iModule);
-      if (imageQueue) return imageQueue;
-
-      return nullptr;
-    }
-  }
 
   Graph::~Graph()
   {
@@ -99,7 +88,7 @@ namespace face
 
   fw::ErrorCode Graph::CreateModules(const cv::FileNode& iModulesNode)
   {
-    CV_Assert(!iModulesNode.empty());
+    CV_DbgAssert(!iModulesNode.empty());
 
     // Loop over the <modules> tag in the settings file
     for (const auto& moduleNode : iModulesNode)
@@ -156,7 +145,7 @@ namespace face
 
   fw::ErrorCode Graph::CreateConnections(const cv::FileNode& iModulesNode)
   {
-    CV_Assert(!iModulesNode.empty());
+    CV_DbgAssert(!iModulesNode.empty());
 
     fw::ErrorCode result = fw::ErrorCode::OK;
 
@@ -200,7 +189,7 @@ namespace face
 
   fw::ErrorCode Graph::GetPredecessors(const cv::FileNode& iModule, const cv::FileNode& iModules, PredecessorMap& oPredecessors)
   {
-    CV_Assert(!iModule.empty() && !iModules.empty());
+    CV_DbgAssert(!iModule.empty() && !iModules.empty());
 
     // Collect predecessor modules of iModule
     oPredecessors.clear();

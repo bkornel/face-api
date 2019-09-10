@@ -44,11 +44,11 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/clm)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/easyloggingpp)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Common)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Framework)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Graph)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Messages)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/FaceDetection)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/FirstModule)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/Graph)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/ImageQueue)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/LastModule)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/UserHistory)
@@ -84,15 +84,18 @@ set(SOURCES;
   Framework/UtilOCV.cpp;
   Framework/UtilString.cpp;
   Framework/VideoWriter.cpp;
-  Graph/Graph.cpp;
   Messages/ActiveUsersMessage.cpp;
+  Messages/CommandMessage.cpp;
+  Messages/ImageArrivedMessage.cpp;
   Messages/ImageMessage.cpp;
   Messages/ImageSizeChangedMessage.cpp;
   Messages/RoiMessage.cpp;
   Messages/UserEntriesMessage.cpp;
+  Modules/ModuleConnector.cpp;
   Modules/ModuleFactory.cpp;
   Modules/FaceDetection/FaceDetection.cpp;
   Modules/FirstModule/FirstModule.cpp;
+  Modules/Graph/Graph.cpp;
   Modules/ImageQueue/ImageQueue.cpp;
   Modules/LastModule/LastModule.cpp;
   Modules/UserHistory/UserHistory.cpp;

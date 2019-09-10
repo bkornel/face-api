@@ -201,7 +201,7 @@ namespace face
 
   bool UserManager::MatchTemplate(ImageMessage::Shared iImage, User::Shared ioUser, cv::Rect& oFaceRect)
   {
-    assert(mTemplateScale > 0.0F && mTemplateScale <= 1.0F);
+    CV_DbgAssert(mTemplateScale > 0.0F && mTemplateScale <= 1.0F);
 
     oFaceRect = {};
 

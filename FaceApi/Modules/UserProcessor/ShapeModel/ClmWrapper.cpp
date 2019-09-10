@@ -27,7 +27,7 @@ namespace face
     const auto& path = Configuration::GetInstance().GetDirectories().shapeModel;
 
     cv::Mat trianglesMat = FACETRACKER::IO::LoadTri((path + iTriFile).c_str());
-    assert(!trianglesMat.empty());
+    CV_DbgAssert(!trianglesMat.empty());
 
     ShapeUtil::Triangles triangles;
     for (int i = 0; i < trianglesMat.rows; i++)
@@ -37,7 +37,7 @@ namespace face
     ShapeUtil::GetInstance().SetTriangles(triangles);
 
     cv::Mat connectionsMat = FACETRACKER::IO::LoadCon((path + iConFile).c_str());
-    assert(!connectionsMat.empty());
+    CV_DbgAssert(!connectionsMat.empty());
 
     ShapeUtil::Connections connections;
     for (int i = 0; i < connectionsMat.cols; i++)
@@ -52,7 +52,7 @@ namespace face
     {
       int type;
       infile >> type;
-      assert(type == FACETRACKER::IO::TRACKER);
+      CV_DbgAssert(type == FACETRACKER::IO::TRACKER);
 
       mCLM.Read(infile);
       mFailureCheck.Read(infile);
@@ -68,7 +68,7 @@ namespace face
 
       const cv::Mat& refShape2D = mReferenceShapeMat2D;
       const cv::Mat& refShape3D = mCLM._pdm._M;
-      assert(mCount == (refShape3D.rows / 3));
+      CV_DbgAssert(mCount == (refShape3D.rows / 3));
 
       for (int i = 0; i < mCount; i++)
       {

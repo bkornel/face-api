@@ -1,11 +1,10 @@
 #include "FaceApi.h"
+
+#include "Common/Configuration.h"
+#include "Framework/Profiler.h"
+
 #include "Messages/CommandMessage.h"
 #include "Messages/ImageArrivedMessage.h"
-
-#include "Framework/Profiler.h"
-#include "Framework/Functional.hpp"
-
-#include <opencv2/highgui/highgui.hpp>
 
 INITIALIZE_EASYLOGGINGPP
 

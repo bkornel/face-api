@@ -3,7 +3,6 @@
 #include <limits>
 #include <memory>
 #include <string>
-#include <cassert>
 
 #define FW_PLUGIN_NAME ("Face")
 

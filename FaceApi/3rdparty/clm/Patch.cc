@@ -39,7 +39,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "Patch.h"
 #include <opencv2/highgui.hpp>
-#include <cassert>
 
 #define SGN(x) (((x) < 0) ? 0 : 1)
 
@@ -49,7 +48,7 @@ using namespace std;
 //===========================================================================
 void sum2one(cv::Mat &M)
 {
-	assert(M.type() == CV_64F);
+  CV_DbgAssert(M.type() == CV_64F);
 	double sum = 0; int cols = M.cols, rows = M.rows;
 	if (M.isContinuous()) { cols *= rows; rows = 1; }
 	for (int i = 0; i < rows; i++)
@@ -62,8 +61,8 @@ void sum2one(cv::Mat &M)
 //===========================================================================
 void Grad(cv::Mat& im, cv::Mat& grad)
 {
-	assert((im.rows == grad.rows) && (im.cols == grad.cols));
-	assert((im.type() == CV_32F) && (grad.type() == CV_32F));
+  CV_DbgAssert((im.rows == grad.rows) && (im.cols == grad.cols));
+  CV_DbgAssert((im.type() == CV_32F) && (grad.type() == CV_32F));
 	int x, y, h = im.rows, w = im.cols; float vx, vy; grad = cv::Scalar(0);
 	cv::MatIterator_<float> gp = grad.begin<float>() + w + 1;
 	cv::MatIterator_<float> px1 = im.begin<float>() + w + 2;
@@ -82,8 +81,8 @@ void Grad(cv::Mat& im, cv::Mat& grad)
 //===========================================================================
 void LBP(cv::Mat& im, cv::Mat& lbp)
 {
-	assert((im.rows == lbp.rows) && (im.cols == lbp.cols));
-	assert((im.type() == CV_32F) && (lbp.type() == CV_32F));
+  CV_DbgAssert((im.rows == lbp.rows) && (im.cols == lbp.cols));
+  CV_DbgAssert((im.type() == CV_32F) && (lbp.type() == CV_32F));
 	int x, y, h = im.rows, w = im.cols; float v[9]; lbp = cv::Scalar(0);
 	cv::MatIterator_<float> lp = lbp.begin<float>() + w + 1;
 	cv::MatIterator_<float> p1 = im.begin<float>();
@@ -120,12 +119,12 @@ Patch& Patch::operator= (Patch const& rhs)
 //===========================================================================
 void Patch::Load(const char* fname)
 {
-	ifstream s(fname); assert(s.is_open()); this->Read(s); s.close();
+	ifstream s(fname); CV_DbgAssert(s.is_open()); this->Read(s); s.close();
 }
 //===========================================================================
 void Patch::Save(const char* fname)
 {
-	ofstream s(fname); assert(s.is_open()); this->Write(s); s.close();
+	ofstream s(fname); CV_DbgAssert(s.is_open()); this->Write(s); s.close();
 }
 //===========================================================================
 void Patch::Write(ofstream &s)
@@ -140,19 +139,19 @@ void Patch::Write(ofstream &s)
 //===========================================================================
 void Patch::Read(ifstream &s, bool readType)
 {
-	if (readType) { int type; s >> type; assert(type == IO::PATCH); }
+	if (readType) { int type; s >> type; CV_DbgAssert(type == IO::PATCH); }
 	s >> _t >> _a >> _b; IO::ReadMat(s, _W);
 }
 //===========================================================================
 void Patch::Init(int t, double a, double b, cv::Mat &W)
 {
-	assert((W.type() == CV_32F)); _t = t; _a = a; _b = b; _W = W.clone();
+  CV_DbgAssert((W.type() == CV_32F)); _t = t; _a = a; _b = b; _W = W.clone();
 }
 //===========================================================================
 void Patch::Response(cv::Mat &im, cv::Mat &resp)
 {
-	assert((im.type() == CV_32F) && (resp.type() == CV_64F));
-	assert((im.rows >= _W.rows) && (im.cols >= _W.cols));
+  CV_DbgAssert((im.type() == CV_32F) && (resp.type() == CV_64F));
+  CV_DbgAssert((im.rows >= _W.rows) && (im.cols >= _W.cols));
 	int h = im.rows - _W.rows + 1, w = im.cols - _W.cols + 1; cv::Mat I;
 	if (resp.rows != h || resp.cols != w)resp.create(h, w, CV_64F);
 	if (res_.rows != h || res_.cols != w)res_.create(h, w, CV_32F);
@@ -212,12 +211,12 @@ void MPatch::Init(std::vector<Patch> &p)
 //===========================================================================
 void MPatch::Load(const char* fname)
 {
-	ifstream s(fname); assert(s.is_open()); this->Read(s); s.close();
+	ifstream s(fname); CV_DbgAssert(s.is_open()); this->Read(s); s.close();
 }
 //===========================================================================
 void MPatch::Save(const char* fname)
 {
-	ofstream s(fname); assert(s.is_open()); this->Write(s); s.close();
+	ofstream s(fname); CV_DbgAssert(s.is_open()); this->Write(s); s.close();
 }
 //===========================================================================
 void MPatch::Write(ofstream &s)
@@ -225,21 +224,21 @@ void MPatch::Write(ofstream &s)
 	int type = IO::MPATCH;
 	int size = _p.size();
 	s << type << " " << _w << " " << _h << " " << size << " ";
-	assert(type == IO::MPATCH);
+  CV_DbgAssert(type == IO::MPATCH);
 	for (int i = 0; i < (int)_p.size(); i++)_p[i].Write(s);
 }
 //===========================================================================
 void MPatch::Read(ifstream &s, bool readType)
 {
-	if (readType) { int type; s >> type; assert(type == IO::MPATCH); }
+	if (readType) { int type; s >> type; CV_DbgAssert(type == IO::MPATCH); }
 	int n; s >> _w >> _h >> n; _p.resize(n);
 	for (int i = 0; i < n; i++)_p[i].Read(s);
 }
 //===========================================================================
 void MPatch::Response(cv::Mat &im, cv::Mat &resp)
 {
-	assert((im.type() == CV_32F) && (resp.type() == CV_64F));
-	assert((im.rows >= _h) && (im.cols >= _w));
+  CV_DbgAssert((im.type() == CV_32F) && (resp.type() == CV_64F));
+  CV_DbgAssert((im.rows >= _h) && (im.cols >= _w));
 	int h = im.rows - _h + 1, w = im.cols - _w + 1;
 	if (resp.rows != h || resp.cols != w)resp.create(h, w, CV_64F);
 	if (res_.rows != h || res_.cols != w)res_.create(h, w, CV_64F);

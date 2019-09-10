@@ -47,7 +47,7 @@ using namespace std;
 //===========================================================================
 void AddOrthRow(cv::Mat &R)
 {
-	assert((R.rows == 3) && (R.cols == 3));
+  CV_DbgAssert((R.rows == 3) && (R.cols == 3));
 	R.db(2, 0) = R.db(0, 1)*R.db(1, 2) - R.db(0, 2)*R.db(1, 1);
 	R.db(2, 1) = R.db(0, 2)*R.db(1, 0) - R.db(0, 0)*R.db(1, 2);
 	R.db(2, 2) = R.db(0, 0)*R.db(1, 1) - R.db(0, 1)*R.db(1, 0);
@@ -55,7 +55,7 @@ void AddOrthRow(cv::Mat &R)
 //=============================================================================
 void MetricUpgrade(cv::Mat &R)
 {
-	assert((R.rows == 3) && (R.cols == 3));
+  CV_DbgAssert((R.rows == 3) && (R.cols == 3));
 	cv::SVD svd(R, cv::SVD::MODIFY_A);
 	cv::Mat X = svd.u*svd.vt, W = cv::Mat::eye(3, 3, CV_64F);
 	W.db(2, 2) = determinant(X); R = svd.u*W*svd.vt;
@@ -76,13 +76,13 @@ void Euler2Rot(cv::Mat &R, const double pitch, const double yaw, const double ro
 //===========================================================================
 void Euler2Rot(cv::Mat &R, cv::Mat &p, bool full = true)
 {
-	assert((p.rows == 6) && (p.cols == 1));
+  CV_DbgAssert((p.rows == 6) && (p.cols == 1));
 	Euler2Rot(R, p.db(1, 0), p.db(2, 0), p.db(3, 0), full);
 }
 //=============================================================================
 void Rot2Euler(cv::Mat &R, double& pitch, double& yaw, double& roll)
 {
-	assert((R.rows == 3) && (R.cols == 3));
+  CV_DbgAssert((R.rows == 3) && (R.cols == 3));
 	double q[4];
 	q[0] = sqrt(1 + R.db(0, 0) + R.db(1, 1) + R.db(2, 2)) / 2;
 	q[1] = (R.db(2, 1) - R.db(1, 2)) / (4 * q[0]);
@@ -97,14 +97,14 @@ void Rot2Euler(cv::Mat &R, double& pitch, double& yaw, double& roll)
 //=============================================================================
 void Rot2Euler(cv::Mat &R, cv::Mat &p)
 {
-	assert((p.rows == 6) && (p.cols == 1));
+  CV_DbgAssert((p.rows == 6) && (p.cols == 1));
 	Rot2Euler(R, p.db(1, 0), p.db(2, 0), p.db(3, 0));
 }
 //=============================================================================
 void Align3Dto2DShapes(double& scale, double& pitch, double& yaw, double& roll,
 	double& x, double& y, cv::Mat &s2D, cv::Mat &s3D)
 {
-	assert((s2D.cols == 1) && (s3D.rows == 3 * (s2D.rows / 2)) && (s3D.cols == 1));
+  CV_DbgAssert((s2D.cols == 1) && (s3D.rows == 3 * (s2D.rows / 2)) && (s3D.cols == 1));
 	int i, n = s2D.rows / 2; double t2[2], t3[3];
 	cv::Mat s2D_cpy = s2D.clone(), s3D_cpy = s3D.clone();
 	cv::Mat X = (s2D_cpy.reshape(1, 2)).t(), S = (s3D_cpy.reshape(1, 3)).t();
@@ -139,8 +139,8 @@ PDM& PDM::operator= (PDM const& rhs)
 //===========================================================================
 void PDM::Init(cv::Mat &M, cv::Mat &V, cv::Mat &E)
 {
-	assert((M.type() == CV_64F) && (V.type() == CV_64F) && (E.type() == CV_64F));
-	assert((V.rows == M.rows) && (V.cols == E.cols));
+  CV_DbgAssert((M.type() == CV_64F) && (V.type() == CV_64F) && (E.type() == CV_64F));
+  CV_DbgAssert((V.rows == M.rows) && (V.cols == E.cols));
 	_M = M.clone(); _V = V.clone(); _E = E.clone();
 	S_.create(_M.rows, 1, CV_64F);
 	R_.create(3, 3, CV_64F); s_.create(_M.rows, 1, CV_64F); P_.create(2, 3, CV_64F);
@@ -150,7 +150,7 @@ void PDM::Init(cv::Mat &M, cv::Mat &V, cv::Mat &E)
 //===========================================================================
 void PDM::Clamp(cv::Mat &p, double c)
 {
-	assert((p.rows == _E.cols) && (p.cols == 1) && (p.type() == CV_64F));
+  CV_DbgAssert((p.rows == _E.cols) && (p.cols == 1) && (p.type() == CV_64F));
 	cv::MatIterator_<double> e = _E.begin<double>();
 	cv::MatIterator_<double> p1 = p.begin<double>();
 	cv::MatIterator_<double> p2 = p.end<double>(); double v;
@@ -165,18 +165,18 @@ void PDM::CalcShape3D(cv::Mat &s, cv::Mat &plocal)
 	if (s.empty())
 		s.create(_M.size(), _M.type());
 
-	assert((s.type() == CV_64F) && (plocal.type() == CV_64F));
-	assert((s.rows == _M.rows) && (s.cols = 1));
-	assert((plocal.rows == _E.cols) && (plocal.cols == 1));
+  CV_DbgAssert((s.type() == CV_64F) && (plocal.type() == CV_64F));
+  CV_DbgAssert((s.rows == _M.rows) && (s.cols = 1));
+  CV_DbgAssert((plocal.rows == _E.cols) && (plocal.cols == 1));
 	s = _M + _V * plocal;
 }
 //===========================================================================
 void PDM::CalcShape2D(cv::Mat &s, cv::Mat &plocal, cv::Mat &pglobl)
 {
-	assert((s.type() == CV_64F) && (plocal.type() == CV_64F) &&
+  CV_DbgAssert((s.type() == CV_64F) && (plocal.type() == CV_64F) &&
 		(pglobl.type() == CV_64F));
-	assert((plocal.rows == _E.cols) && (plocal.cols == 1));
-	assert((pglobl.rows == 6) && (pglobl.cols == 1));
+  CV_DbgAssert((plocal.rows == _E.cols) && (plocal.cols == 1));
+  CV_DbgAssert((pglobl.rows == 6) && (pglobl.cols == 1));
 	int n = _M.rows / 3; double a = pglobl.db(0, 0), x = pglobl.db(4, 0), y = pglobl.db(5, 0);
 	Euler2Rot(R_, pglobl); S_ = _M + _V * plocal;
 	if ((s.rows != _M.rows) || (s.cols == 1))s.create(2 * n, 1, CV_64F);
@@ -191,7 +191,7 @@ void PDM::CalcShape2D(cv::Mat &s, cv::Mat &plocal, cv::Mat &pglobl)
 //===========================================================================
 void PDM::CalcParams(cv::Mat &s, cv::Mat &plocal, cv::Mat &pglobl)
 {
-	assert((s.type() == CV_64F) && (s.rows == 2 * (_M.rows / 3)) && (s.cols = 1));
+  CV_DbgAssert((s.type() == CV_64F) && (s.rows == 2 * (_M.rows / 3)) && (s.cols = 1));
 	if ((pglobl.rows != 6) || (pglobl.cols != 1) || (pglobl.type() != CV_64F))
 		pglobl.create(6, 1, CV_64F);
 	int j, n = _M.rows / 3; double si, scale, pitch, yaw, roll, tx, ty, Tx, Ty, Tz;
@@ -232,7 +232,7 @@ void PDM::Identity(cv::Mat &plocal, cv::Mat &pglobl)
 void PDM::CalcRigidJacob(cv::Mat &plocal, cv::Mat &pglobl, cv::Mat &Jacob)
 {
 	int i, n = _M.rows / 3/*, m = _V.cols*/; double X, Y, Z;
-	assert((plocal.rows == _V.cols) && (plocal.cols == 1) &&
+  CV_DbgAssert((plocal.rows == _V.cols) && (plocal.cols == 1) &&
 		(pglobl.rows == 6) && (pglobl.cols == 1) &&
 		(Jacob.rows == 2 * n) && (Jacob.cols == 6));
 	double rx[3][3] = { { 0, 0, 0 }, { 0, 0, -1 }, { 0, 1, 0 } }; cv::Mat Rx(3, 3, CV_64F, rx);
@@ -241,7 +241,7 @@ void PDM::CalcRigidJacob(cv::Mat &plocal, cv::Mat &pglobl, cv::Mat &Jacob)
 	double s = pglobl.db(0, 0);
 	this->CalcShape3D(S_, plocal); Euler2Rot(R_, pglobl);
 	P_ = s * R_(cv::Rect(0, 0, 3, 2)); Px_ = P_ * Rx; Py_ = P_ * Ry; Pz_ = P_ * Rz;
-	assert(R_.isContinuous() && Px_.isContinuous() &&
+  CV_DbgAssert(R_.isContinuous() && Px_.isContinuous() &&
 		Py_.isContinuous() && Pz_.isContinuous());
 	const double* px = Px_.ptr<double>(0);
 	const double* py = Py_.ptr<double>(0);
@@ -267,7 +267,7 @@ void PDM::CalcRigidJacob(cv::Mat &plocal, cv::Mat &pglobl, cv::Mat &Jacob)
 void PDM::CalcJacob(cv::Mat &plocal, cv::Mat &pglobl, cv::Mat &Jacob)
 {
 	int i, j, n = _M.rows / 3, m = _V.cols; double X, Y, Z;
-	assert((plocal.rows == m) && (plocal.cols == 1) &&
+  CV_DbgAssert((plocal.rows == m) && (plocal.cols == 1) &&
 		(pglobl.rows == 6) && (pglobl.cols == 1) &&
 		(Jacob.rows == 2 * n) && (Jacob.cols == 6 + m));
 	double s = pglobl.db(0, 0);
@@ -276,7 +276,7 @@ void PDM::CalcJacob(cv::Mat &plocal, cv::Mat &pglobl, cv::Mat &Jacob)
 	double rz[3][3] = { { 0, -1, 0 }, { 1, 0, 0 }, { 0, 0, 0 } }; cv::Mat Rz(3, 3, CV_64F, rz);
 	this->CalcShape3D(S_, plocal); Euler2Rot(R_, pglobl);
 	P_ = s * R_(cv::Rect(0, 0, 3, 2)); Px_ = P_ * Rx; Py_ = P_ * Ry; Pz_ = P_ * Rz;
-	assert(R_.isContinuous() && Px_.isContinuous() &&
+  CV_DbgAssert(R_.isContinuous() && Px_.isContinuous() &&
 		Py_.isContinuous() && Pz_.isContinuous() && P_.isContinuous());
 	const double* px = Px_.ptr<double>(0);
 	const double* py = Py_.ptr<double>(0);
@@ -310,7 +310,7 @@ void PDM::CalcJacob(cv::Mat &plocal, cv::Mat &pglobl, cv::Mat &Jacob)
 //===========================================================================
 void PDM::CalcReferenceUpdate(cv::Mat &dp, cv::Mat &plocal, cv::Mat &pglobl)
 {
-	assert((dp.rows == 6 + _V.cols) && (dp.cols == 1));
+  CV_DbgAssert((dp.rows == 6 + _V.cols) && (dp.cols == 1));
 	plocal += dp(cv::Rect(0, 6, 1, _V.cols));
 	pglobl.db(0, 0) += dp.db(0, 0);
 	pglobl.db(4, 0) += dp.db(4, 0);
@@ -324,7 +324,7 @@ void PDM::CalcReferenceUpdate(cv::Mat &dp, cv::Mat &plocal, cv::Mat &pglobl)
 //===========================================================================
 void PDM::ApplySimT(double a, double b, double tx, double ty, cv::Mat &pglobl)
 {
-	assert((pglobl.rows == 6) && (pglobl.cols == 1) && (pglobl.type() == CV_64F));
+  CV_DbgAssert((pglobl.rows == 6) && (pglobl.cols == 1) && (pglobl.type() == CV_64F));
 	double angle = atan2(b, a), scale = a / cos(angle);
 	double ca = cos(angle), sa = sin(angle);
 	double xc = pglobl.db(4, 0), yc = pglobl.db(5, 0);
@@ -337,7 +337,7 @@ void PDM::ApplySimT(double a, double b, double tx, double ty, cv::Mat &pglobl)
 //===========================================================================
 void PDM::Read(ifstream &s, bool readType)
 {
-	if (readType) { int type; s >> type; assert(type == IO::PDM); }
+	if (readType) { int type; s >> type; CV_DbgAssert(type == IO::PDM); }
 	IO::ReadMat(s, _V); IO::ReadMat(s, _E); IO::ReadMat(s, _M);
 	S_.create(_M.rows, 1, CV_64F);
 	R_.create(3, 3, CV_64F); s_.create(_M.rows, 1, CV_64F); P_.create(2, 3, CV_64F);
@@ -354,11 +354,11 @@ void PDM::Write(ofstream &s)
 //===========================================================================
 void PDM::Load(const char* fname)
 {
-	ifstream s(fname); assert(s.is_open()); this->Read(s); s.close();
+	ifstream s(fname); CV_DbgAssert(s.is_open()); this->Read(s); s.close();
 }
 //===========================================================================
 void PDM::Save(const char* fname)
 {
-	ofstream s(fname); assert(s.is_open()); this->Write(s); s.close();
+	ofstream s(fname); CV_DbgAssert(s.is_open()); this->Write(s); s.close();
 }
 //===========================================================================

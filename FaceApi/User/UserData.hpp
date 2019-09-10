@@ -34,13 +34,13 @@ namespace face
     inline const cv::Point2d& GetPoint2d(Landmark iIdx) const
     {
       const int idx = static_cast<int>(iIdx);
-      assert(idx >= 0 && idx < mShape2D.size());
+      CV_DbgAssert(idx >= 0 && idx < mShape2D.size());
       return mShape2D[idx];
     }
     inline const cv::Point3d& GetPoint3d(Landmark iIdx) const
     {
       const int idx = static_cast<int>(iIdx);
-      assert(idx >= 0 && idx < mShape3D.size());
+      CV_DbgAssert(idx >= 0 && idx < mShape3D.size());
       return mShape3D[idx];
     }
 

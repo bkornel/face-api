@@ -9,13 +9,13 @@ namespace face
   ImageMessage::ImageMessage(const cv::Mat& iImage, unsigned iFrameId, long long iTimestamp) :
     Message(iFrameId, iTimestamp)
   {
-    assert(!iImage.empty());
+    CV_DbgAssert(!iImage.empty());
     mFrames.first = iImage.clone();
   }
 
   const cv::Mat& ImageMessage::GetFrameGray()
   {
-    assert(!IsEmpty());
+    CV_DbgAssert(!IsEmpty());
     std::lock_guard<std::recursive_mutex> lock(sMutex);
 
     if (mFrames.second.empty())
@@ -29,7 +29,7 @@ namespace face
 
   const cv::Mat& ImageMessage::GetResizedBGR(float iScaleFactor)
   {
-    assert(!IsEmpty() && iScaleFactor > 0.0F);
+    CV_DbgAssert(!IsEmpty() && iScaleFactor > 0.0F);
 
     if (std::abs(iScaleFactor - 1.0F) <= std::numeric_limits<float>::epsilon())
     {
@@ -51,7 +51,7 @@ namespace face
 
   const cv::Mat& ImageMessage::GetResizedGray(float iScaleFactor)
   {
-    assert(!IsEmpty() && iScaleFactor > 0.0F);
+    CV_DbgAssert(!IsEmpty() && iScaleFactor > 0.0F);
 
     if (std::abs(iScaleFactor - 1.0F) <= std::numeric_limits<float>::epsilon())
     {

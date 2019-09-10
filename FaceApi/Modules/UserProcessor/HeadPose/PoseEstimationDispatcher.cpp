@@ -107,7 +107,7 @@ namespace face
 
   void PoseEstimationDispatcher::estimateFaceBox()
   {
-    assert(!mShape3D.empty());
+    CV_DbgAssert(!mShape3D.empty());
 
     cv::Point3d minPt = sObjectPoints[0];
     cv::Point3d maxPt = sObjectPoints[0];

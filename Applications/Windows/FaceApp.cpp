@@ -1,6 +1,7 @@
 ﻿#include "FaceApp.h"
 #include "FaceApi.h"
 
+#include "Common/Configuration.h"
 #include "Framework/UtilString.h"
 
 #include <opencv2/imgcodecs.hpp>
@@ -98,7 +99,7 @@ int FaceApp::main(const std::vector<std::string>& args)
 
 void FaceApp::showResults()
 {
-  CV_Assert(!mResultFrame.empty());
+  CV_DbgAssert(!mResultFrame.empty());
 
   cv::imshow(FW_PLUGIN_NAME, mResultFrame);
   const int keyPressed = cv::waitKey(1);

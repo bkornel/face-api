@@ -117,7 +117,7 @@ namespace face
 
   RoiMessage::Shared FaceDetection::Main(ImageMessage::Shared iImage)
   {
-    assert(mDetectionSW.IsRunning());
+    CV_DbgAssert(mDetectionSW.IsRunning());
 
     if (!iImage || iImage->IsEmpty() || !RunDetectection())
     {

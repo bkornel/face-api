@@ -7,6 +7,7 @@
 
 #include <easyloggingpp/easyloggingpp.h>
 
+#include <tuple>
 #include <type_traits>
 #include <utility>
 
@@ -18,10 +19,10 @@ namespace fw
   template<typename ReturnT, typename... ArgumentT>
   class Port<ReturnT(ArgumentT...)>
   {
+  public:
     using OutputPort = fw::FutureShared<ReturnT>;
     using InputPorts = std::tuple<fw::FutureShared<ArgumentT>...>;
 
-  public:
     Port()
     {
       static constexpr auto size = std::tuple_size<InputPorts>::value;
@@ -89,18 +90,18 @@ namespace fw
     }
 
   protected:
-    template <size_t I>
+    template <size_t S>
     struct InputPortHelper
     {
       template<typename T1, typename T2>
       static fw::ErrorCode SetInputPort(const T1& iSource, T2& ioDestination, size_t iIndex)
       {
-        if (iIndex == I - 1)
+        if (iIndex == S - 1)
         {
-          return SetInputPort(iSource, std::get<I - 1>(ioDestination));
+          return SetInputPort(iSource, std::get<S - 1>(ioDestination));
         }
 
-        return InputPortHelper<I - 1>::SetInputPort(iSource, ioDestination, iIndex);
+        return InputPortHelper<S - 1>::SetInputPort(iSource, ioDestination, iIndex);
       }
 
       template<typename T1, typename T2, typename std::enable_if<std::is_same<T1, T2>::value>::type* = nullptr>
@@ -113,6 +114,7 @@ namespace fw
       template<typename T1, typename T2, typename std::enable_if<!std::is_same<T1, T2>::value>::type* = nullptr>
       static fw::ErrorCode SetInputPort(const T1& iSource, T2& ioDestination)
       {
+        CV_DbgAssert(false);
         return fw::ErrorCode::BadParam;
       }
     };
@@ -123,12 +125,11 @@ namespace fw
       template<typename T1, typename T2>
       static fw::ErrorCode SetInputPort(const T1& iSource, T2& ioDestination, size_t iIndex) 
       { 
-        assert(false); 
+        CV_DbgAssert(false);
         return fw::ErrorCode::BadParam;
       }
     };
-
-
+    
     template<size_t... Is>
     inline void Connect(std::index_sequence<Is...>)
     {

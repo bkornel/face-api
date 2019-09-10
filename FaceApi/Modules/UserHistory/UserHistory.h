@@ -15,9 +15,6 @@ namespace face
     public fw::Module,
     public fw::Port<UserEntriesMessage::Shared(ActiveUsersMessage::Shared)>
   {
-    using Entry = UserEntriesMessage::Entry;
-    using EntryMap = UserEntriesMessage::EntryMap;
-
   public:
     FW_DEFINE_SMART_POINTERS(UserHistory);
 

@@ -1,12 +1,11 @@
 #pragma once
 
-#include "Common/Configuration.h"
 #include "Framework/MessageQueue.hpp"
 #include "Framework/Module.h"
-#include "Graph/Graph.h"
+
+#include "Modules/Graph/Graph.h"
 
 #include <string>
-#include <vector>
 
 namespace face
 {

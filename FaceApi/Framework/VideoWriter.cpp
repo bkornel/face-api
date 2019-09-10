@@ -24,7 +24,7 @@ namespace face
 
   bool VideoWriter::Write(const cv::Mat& iFrame)
   {
-    assert(!iFrame.empty());
+    CV_DbgAssert(!iFrame.empty());
 
     if (!IsOpened() && !mVideoWriter.open(mFilename, mFourCC, mFPS, iFrame.size(), mIsColor))
     {

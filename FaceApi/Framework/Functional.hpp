@@ -3,7 +3,7 @@
 #include <functional>
 #include <utility>
 
-#define FW_BIND(function, callee) (fw::create_binder(function).Create<function>(callee))
+#define FW_BIND(function, callee) (fw::create_binder(function).template Create<function>(callee))
 
 namespace fw
 {

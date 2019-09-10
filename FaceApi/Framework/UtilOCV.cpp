@@ -29,7 +29,7 @@ namespace fw
 
     void put_text(const std::string& iText, const cv::Point& iLocation, cv::Mat& oFrame, bool iUseBG, const Font& iFont)
     {
-      assert(!oFrame.empty());
+      CV_DbgAssert(!oFrame.empty());
 
       if (iUseBG)
       {
@@ -109,7 +109,7 @@ namespace fw
 
     double sum_squared(const cv::Mat& iMatrix)
     {
-      assert(!iMatrix.empty() && (iMatrix.channels() == 1 || iMatrix.channels() == 2 || iMatrix.channels() == 3));
+      CV_DbgAssert(!iMatrix.empty() && (iMatrix.channels() == 1 || iMatrix.channels() == 2 || iMatrix.channels() == 3));
 
       cv::Mat pow;
       cv::pow(iMatrix, 2.0, pow);

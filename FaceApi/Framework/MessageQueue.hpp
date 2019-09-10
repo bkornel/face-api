@@ -3,13 +3,13 @@
 #include "Framework/Util.h"
 
 #include <easyloggingpp/easyloggingpp.h>
+#include <opencv2/core/base.hpp>
 
 #include <chrono>
 #include <limits>
 #include <mutex>
 #include <queue>
 #include <thread>
-#include <cassert>
 
 namespace fw
 {
@@ -153,14 +153,14 @@ namespace fw
 
     void SetBound(int iBound)
     {
-      assert(iBound > 0);
+      CV_DbgAssert(iBound > 0);
       std::lock_guard<std::mutex> lock(mMutex);
       mBound = (std::min)((std::max)(iBound, MIN_BOUND), MAX_BOUND);
     }
 
     void SetSamplingFPS(float iSamplingFPS)
     {
-      assert(iSamplingFPS > 0.0F);
+      CV_DbgAssert(iSamplingFPS > 0.0F);
       std::lock_guard<std::mutex> lock(mMutex);
       mSamplingFPS = (std::min)((std::max)(iSamplingFPS, MIN_SAMPLING_RATE_FPS), MAX_SAMPLING_RATE_FPS);
       mSamplingMs = ConvertFpsToMs(mSamplingFPS);
@@ -200,7 +200,7 @@ namespace fw
       mQueue.push(std::make_pair(mTimestampMs, iMessageTuple));
       mSize++;
 
-      assert(mSize == static_cast<int>(mQueue.size()));
+      CV_DbgAssert(mSize == static_cast<int>(mQueue.size()));
 
       return ErrorCode::OK;
     }
@@ -238,14 +238,14 @@ namespace fw
       mQueue.pop();
       mSize--;
 
-      assert(mSize == static_cast<int>(mQueue.size()));
+      CV_DbgAssert(mSize == static_cast<int>(mQueue.size()));
 
       return ErrorCode::OK;
     }
 
     void InternalFiltering()
     {
-      assert(mThresholdMs > 0LL);
+      CV_DbgAssert(mThresholdMs > 0LL);
 
       const long long currentTimestampMs = fw::get_current_time();
 
@@ -265,7 +265,7 @@ namespace fw
           mQueue.pop();
           mSize--;
 
-          assert(mSize == static_cast<int>(mQueue.size()));
+          CV_DbgAssert(mSize == static_cast<int>(mQueue.size()));
         }
 
         //if (startSize != mSize)
@@ -277,7 +277,7 @@ namespace fw
 
     inline long long ConvertFpsToMs(float iFPS) const
     {
-      assert(iFPS > 0.0F);
+      CV_DbgAssert(iFPS > 0.0F);
       return static_cast<long long>((1.0F / iFPS) * 1000.0F);
     }
 

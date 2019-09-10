@@ -146,7 +146,7 @@ namespace
 
 	void get_quadrangle_sub_pix(const cv::Mat& iSrc, cv::Mat& oDst, const cv::Mat& iMap)
 	{
-		CV_Assert(iSrc.channels() == oDst.channels());
+    CV_DbgAssert(iSrc.channels() == oDst.channels());
 
 		cv::Size win_size = oDst.size();
 		double matrix[6] = { 0 };
@@ -163,7 +163,7 @@ namespace
 				matrix, iSrc.channels());
 		else
 		{
-			CV_Assert(iSrc.depth() == oDst.depth());
+			CV_DbgAssert(iSrc.depth() == oDst.depth());
 			cv::warpAffine(iSrc, oDst, M, oDst.size(),
 				cv::INTER_LINEAR + cv::WARP_INVERSE_MAP,
 				cv::BORDER_REPLICATE);
@@ -175,7 +175,7 @@ namespace
 void CalcSimT(cv::Mat &src, cv::Mat &dst,
 	double &a, double &b, double &tx, double &ty)
 {
-	assert((src.type() == CV_64F) && (dst.type() == CV_64F) &&
+  CV_DbgAssert((src.type() == CV_64F) && (dst.type() == CV_64F) &&
 		(src.rows == dst.rows) && (src.cols == dst.cols) && (src.cols == 1));
 	int i, n = src.rows / 2;
 	cv::Mat H(4, 4, CV_64F, cv::Scalar(0));
@@ -210,7 +210,7 @@ void invSimT(double a1, double b1, double tx1, double ty1,
 //=============================================================================
 void SimT(cv::Mat &s, double a, double b, double tx, double ty)
 {
-	assert((s.type() == CV_64F) && (s.cols == 1));
+  CV_DbgAssert((s.type() == CV_64F) && (s.cols == 1));
 	int i, n = s.rows / 2; double x, y;
 	cv::MatIterator_<double> xp = s.begin<double>(), yp = s.begin<double>() + n;
 	for (i = 0; i < n; i++, ++xp, ++yp)
@@ -271,13 +271,13 @@ CLM& CLM::operator= (CLM const& rhs)
 void CLM::Init(PDM &s, cv::Mat &r, vector<cv::Mat> &c,
 	vector<cv::Mat> &v, vector<vector<MPatch> > &p)
 {
-	int n = p.size(); assert(((int)c.size() == n) && ((int)v.size() == n));
-	assert((r.type() == CV_64F) && (r.rows == 2 * s.nPoints()) && (r.cols == 1));
+	int n = p.size(); CV_DbgAssert(((int)c.size() == n) && ((int)v.size() == n));
+  CV_DbgAssert((r.type() == CV_64F) && (r.rows == 2 * s.nPoints()) && (r.cols == 1));
 	for (int i = 0; i < n; i++)
 	{
-		assert((int)p[i].size() == s.nPoints());
-		assert((c[i].type() == CV_64F) && (c[i].rows == 3) && (c[i].cols == 1));
-		assert((v[i].type() == CV_32S) && (v[i].rows == s.nPoints()) &&
+    CV_DbgAssert((int)p[i].size() == s.nPoints());
+    CV_DbgAssert((c[i].type() == CV_64F) && (c[i].rows == 3) && (c[i].cols == 1));
+    CV_DbgAssert((v[i].type() == CV_32S) && (v[i].rows == s.nPoints()) &&
 			(v[i].cols == 1));
 	}
 	_pdm = s; _refs = r.clone(); _cent.resize(n); _visi.resize(n); _patch.resize(n);
@@ -303,12 +303,12 @@ void CLM::Init(PDM &s, cv::Mat &r, vector<cv::Mat> &c,
 //=============================================================================
 void CLM::Load(const char* fname)
 {
-	ifstream s(fname); assert(s.is_open()); this->Read(s); s.close();
+	ifstream s(fname); CV_DbgAssert(s.is_open()); this->Read(s); s.close();
 }
 //=============================================================================
 void CLM::Save(const char* fname)
 {
-	ofstream s(fname); assert(s.is_open()); this->Write(s); s.close();
+	ofstream s(fname); CV_DbgAssert(s.is_open()); this->Write(s); s.close();
 }
 //=============================================================================
 void CLM::Write(ofstream &s)
@@ -329,7 +329,7 @@ void CLM::Write(ofstream &s)
 //=============================================================================
 void CLM::Read(ifstream &s, bool readType)
 {
-	if (readType) { int type; s >> type; assert(type == IO::CLM); }
+	if (readType) { int type; s >> type; CV_DbgAssert(type == IO::CLM); }
 	int n; s >> n; _pdm.Read(s); _cent.resize(n); _visi.resize(n);
 	_patch.resize(n); IO::ReadMat(s, _refs);
 	for (int i = 0; i < (int)_cent.size(); i++)IO::ReadMat(s, _cent[i]);
@@ -379,7 +379,7 @@ void CLM::Fit(const cv::Mat& im, vector<int> &wSize,
 {
 	FACE_PROFILER(3_Users_Fit_Shape);
 
-	assert(im.type() == CV_8UC1);
+  CV_DbgAssert(im.type() == CV_8UC1);
 	int i, idx, n = _pdm.nPoints(); double a1, b1, tx1, ty1, a2, b2, tx2, ty2;
 	for (int witer = 0; witer < (int)wSize.size(); witer++)
 	{

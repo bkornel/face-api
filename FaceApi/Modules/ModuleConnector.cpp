@@ -20,9 +20,9 @@ namespace face
     template<typename T1, typename T2>
     bool set_input_port(T1 iModule, fw::Module::Shared iPredecessor, int iPortNo)
     {
-      CV_Assert(iModule && iPredecessor);
+      CV_DbgAssert(iModule && iPredecessor);
 
-      T2::Shared derived = std::dynamic_pointer_cast<T2>(iPredecessor);
+      std::shared_ptr<T2> derived = std::dynamic_pointer_cast<T2>(iPredecessor);
       if (!derived)
       {
         return false;
@@ -34,9 +34,11 @@ namespace face
     template<typename T>
     bool connect(fw::Module::Shared iModule, const ModuleConnector::PredecessorMap& iPredecessors)
     {
-      CV_Assert(iModule);
+      CV_DbgAssert(iModule);
 
-      T::Shared derived = std::dynamic_pointer_cast<T>(iModule);
+      using TShared = std::shared_ptr<T>;
+
+      TShared derived = std::dynamic_pointer_cast<T>(iModule);
       if (!derived)
       {
         return false;
@@ -50,13 +52,13 @@ namespace face
           return false;
         }
 
-        if (set_input_port<T::Shared, FaceDetection>(derived, predecessor.second, predecessor.first)) continue;
-        if (set_input_port<T::Shared, FirstModule>(derived, predecessor.second, predecessor.first)) continue;
-        if (set_input_port<T::Shared, ImageQueue>(derived, predecessor.second, predecessor.first)) continue;
-        if (set_input_port<T::Shared, UserHistory>(derived, predecessor.second, predecessor.first)) continue;
-        if (set_input_port<T::Shared, UserManager>(derived, predecessor.second, predecessor.first)) continue;
-        if (set_input_port<T::Shared, UserProcessor>(derived, predecessor.second, predecessor.first)) continue;
-        if (set_input_port<T::Shared, Visualizer>(derived, predecessor.second, predecessor.first)) continue;
+        if (set_input_port<TShared, FaceDetection>(derived, predecessor.second, predecessor.first)) continue;
+        if (set_input_port<TShared, FirstModule>(derived, predecessor.second, predecessor.first)) continue;
+        if (set_input_port<TShared, ImageQueue>(derived, predecessor.second, predecessor.first)) continue;
+        if (set_input_port<TShared, UserHistory>(derived, predecessor.second, predecessor.first)) continue;
+        if (set_input_port<TShared, UserManager>(derived, predecessor.second, predecessor.first)) continue;
+        if (set_input_port<TShared, UserProcessor>(derived, predecessor.second, predecessor.first)) continue;
+        if (set_input_port<TShared, Visualizer>(derived, predecessor.second, predecessor.first)) continue;
         // REMARK: Insert new modules here
 
         LOG(ERROR) << "Connection cannot be created: " << predecessor.second->GetName() << " -> " << iModule->GetName();
@@ -71,7 +73,7 @@ namespace face
 
   fw::ErrorCode ModuleConnector::Connect(fw::Module::Shared iModule, const PredecessorMap& iPredecessors)
   {
-    CV_Assert(iModule);
+    CV_DbgAssert(iModule);
 
     std::stringstream ss;
     ss << "Predecessors of [" << iModule->GetName() << "]:\t";

@@ -9,7 +9,7 @@ namespace fw
 
   std::string Module::CreateModuleName(const cv::FileNode& iModuleNode)
   {
-    CV_Assert(!iModuleNode.empty() && iModuleNode.isNamed());
+    CV_DbgAssert(!iModuleNode.empty() && iModuleNode.isNamed());
 
     std::string moduleName = fw::str::trim(iModuleNode.name());
 
