@@ -4,21 +4,12 @@
 #include "Framework/MessageQueue.hpp"
 #include "Framework/Module.h"
 #include "Graph/Graph.h"
-#include "Modules/FirstModule/FirstModule.h"
-#include "Modules/LastModule/LastModule.h"
 
 #include <string>
 #include <vector>
 
 namespace face
 {
-  class ImageQueue;
-  class FaceDetection;
-  class UserHistory;
-  class UserManager;
-  class UserProcessor;
-  class Visualizer;
-
   class FaceApi :
     public fw::Module
   {
@@ -29,7 +20,7 @@ namespace face
 
     virtual ~FaceApi();
 
-    fw::ErrorCode PushCameraFrame(const cv::Mat& iFrame);
+    void PushCameraFrame(const cv::Mat& iFrame);
 
     fw::ErrorCode GetResultImage(cv::Mat& oResultImage);
 
@@ -37,7 +28,8 @@ namespace face
 
     inline void SetRunFaceDetector()
     {
-      if (mFirstModule) mFirstModule->RunFaceDetector();;
+      // TODO
+      //if (mGraph) mGraph->RunFaceDetector();
     }
 
     inline void OnOffVerbose()
@@ -49,12 +41,12 @@ namespace face
 
     inline unsigned GetLastFrameId() const
     {
-      return mLastModule ? mLastModule->GetLastFrameId() : 0U;
+      return mGraph ? mGraph->GetLastFrameId() : 0U;
     }
 
     inline long long GetLastTimestamp() const
     {
-      return mLastModule ? mLastModule->GetLastTimestamp() : 0LL;
+      return mGraph ? mGraph->GetLastTimestamp() : 0LL;
     }
 
     void SetWorkingDirectory(const std::string& iWorkingDirectory)
@@ -79,22 +71,7 @@ namespace face
 
     void OnFrameProcessed(ImageMessage::Shared iMessage);
 
-    fw::ErrorCode CreateModules();
-
-    fw::ErrorCode CreateConnections();
-
-    std::vector<fw::Module*> mModules;
-    std::shared_ptr<Graph> mGraph = nullptr;
-
-    FirstModule* mFirstModule = nullptr;
-    LastModule* mLastModule = nullptr;
-    ImageQueue* mImageQueue = nullptr;
-    FaceDetection* mFaceDetection = nullptr;
-    UserHistory* mUserHistory = nullptr;
-    UserManager* mUserManager = nullptr;
-    UserProcessor* mUserProcessor = nullptr;
-    Visualizer* mVisualizer = nullptr;
-
+    Graph::Shared mGraph = nullptr;
     MessageQueue mOutputQueue;
   };
 }

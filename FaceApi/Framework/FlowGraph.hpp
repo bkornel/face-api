@@ -52,16 +52,32 @@ namespace fw
   template <typename T>
   class Promise;
 
+  class IFuture
+  {
+  public:
+    FW_DEFINE_SMART_POINTERS(IFuture);
+
+    IFuture() = default;
+
+    virtual ~IFuture() = default;
+
+    virtual void Listen(Continuation::Shared iContinuation) = 0;
+
+    virtual bool Ready() const = 0;
+
+    virtual void Wait() const = 0;
+  };
+
   /// @brief Future is a flow graph equivalent of std::future. Future differs from a
   /// std::future in that it implements an observer pattern -- once the promise
   /// puts value, observing continuations are notified and run.
   template <typename T>
-  class Future
+  class Future : public IFuture
   {
     friend class Promise<T>;
 
   public:
-    ~Future() = default;
+    virtual ~Future() = default;
 
     Future(Future&& iRhs) = default;
 
@@ -77,7 +93,7 @@ namespace fw
     ///
     /// If ready, the continuation will be notified and run immediately with an
     /// inline executor.
-    void Listen(Continuation::Shared iContinuation)
+    void Listen(Continuation::Shared iContinuation) override 
     {
       bool isValid = false;
       {
@@ -94,14 +110,14 @@ namespace fw
 
     /// @brief ready returns true iff the value is ready.
     /// Subsequent calls to get() will  not block.
-    bool Ready() const
+    bool Ready() const override
     {
       std::lock_guard<std::mutex> lock(mMutex);
       return (mValue.get() != nullptr);
     }
 
     /// @brief Blocks till this Future is ready.
-    void Wait() const
+    void Wait() const override
     {
       std::unique_lock<std::mutex> lock(mMutex);
       mCV.wait(lock, [this] { return (this->mValue.get() != nullptr); });

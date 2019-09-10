@@ -49,27 +49,30 @@ namespace fw
       return fw::ErrorCode::OK;
     }
 
-    template<size_t index, typename T>
-    inline fw::ErrorCode SetInputPort(T iValue)
+    template<typename T>
+    inline fw::ErrorCode SetInputPort(T iValue, size_t iIndex)
     {
       static constexpr auto size = std::tuple_size<InputPorts>::value;
 
-      if (mIsInputSet[index])
+      if (iIndex >= size)
       {
-        LOG(ERROR) << "Input port " << index << ", has already been set for the module.";
+        LOG(ERROR) << "Trying to set the input port no. " << iIndex << ", however the module has only " << size << " ports.";
         return fw::ErrorCode::BadParam;
       }
 
-      if (index >= size)
+      if (mIsInputSet[iIndex])
       {
-        LOG(ERROR) << "Trying to set the input port no. " << index << ", however the module has only " << size << " ports.";
+        LOG(ERROR) << "Input port " << iIndex << ", has already been set for the module.";
         return fw::ErrorCode::BadParam;
       }
 
-      std::get<index>(mInputPorts) = iValue;
-      mIsInputSet[index] = true;
+      if (InputPortHelper<size>::SetInputPort(iValue, mInputPorts, iIndex) == fw::ErrorCode::OK)
+      {
+        mIsInputSet[iIndex] = true;
+        return fw::ErrorCode::OK;
+      }
 
-      return fw::ErrorCode::OK;
+      return fw::ErrorCode::BadParam;
     }
 
     inline bool IsAllInputPortSet() const
@@ -86,6 +89,46 @@ namespace fw
     }
 
   protected:
+    template <size_t I>
+    struct InputPortHelper
+    {
+      template<typename T1, typename T2>
+      static fw::ErrorCode SetInputPort(const T1& iSource, T2& ioDestination, size_t iIndex)
+      {
+        if (iIndex == I - 1)
+        {
+          return SetInputPort(iSource, std::get<I - 1>(ioDestination));
+        }
+
+        return InputPortHelper<I - 1>::SetInputPort(iSource, ioDestination, iIndex);
+      }
+
+      template<typename T1, typename T2, typename std::enable_if<std::is_same<T1, T2>::value>::type* = nullptr>
+      static fw::ErrorCode SetInputPort(const T1& iSource, T2& ioDestination)
+      {
+        ioDestination = iSource;
+        return fw::ErrorCode::OK;
+      }
+
+      template<typename T1, typename T2, typename std::enable_if<!std::is_same<T1, T2>::value>::type* = nullptr>
+      static fw::ErrorCode SetInputPort(const T1& iSource, T2& ioDestination)
+      {
+        return fw::ErrorCode::BadParam;
+      }
+    };
+
+    template <>
+    struct InputPortHelper<0>
+    {
+      template<typename T1, typename T2>
+      static fw::ErrorCode SetInputPort(const T1& iSource, T2& ioDestination, size_t iIndex) 
+      { 
+        assert(false); 
+        return fw::ErrorCode::BadParam;
+      }
+    };
+
+
     template<size_t... Is>
     inline void Connect(std::index_sequence<Is...>)
     {

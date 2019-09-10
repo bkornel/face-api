@@ -20,6 +20,8 @@ namespace face
     using FrameProcessedHandler = fw::Event<void(ImageMessage::Shared)>;
 
   public:
+    FW_DEFINE_SMART_POINTERS(Graph);
+
     static FrameProcessedHandler sFrameProcessed;
 
     Graph() = default;

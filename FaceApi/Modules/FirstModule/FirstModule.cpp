@@ -8,6 +8,7 @@ namespace face
   FirstModule::FirstModule() :
     mExecutor(fw::getInlineExecutor())
   {
+    Connect();
   }
 
   fw::ErrorCode FirstModule::Connect()

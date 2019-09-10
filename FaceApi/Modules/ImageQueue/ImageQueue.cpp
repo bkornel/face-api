@@ -1,8 +1,9 @@
 #include "Modules/ImageQueue/ImageQueue.h"
+#include "Messages/ImageArrivedMessage.h"
+#include "Messages/ImageSizeChangedMessage.h"
 
 #include "Framework/UtilOCV.h"
 #include "Framework/UtilString.h"
-#include "Messages/ImageSizeChangedMessage.h"
 
 #include <easyloggingpp/easyloggingpp.h>
 #include <opencv2/highgui/highgui.hpp>
@@ -31,6 +32,17 @@ namespace face
     }
 
     return fw::ErrorCode::OK;
+  }
+
+  void ImageQueue::OnCommand(fw::Message::Shared iMessage)
+  {
+    Module::OnCommand(iMessage);
+
+    ImageArrivedMessage::Shared imageArrived = std::dynamic_pointer_cast<ImageArrivedMessage>(iMessage);
+    if (imageArrived && !imageArrived->IsEmpty())
+    {
+      Push(imageArrived->GetFrame());
+    }
   }
 
   fw::ErrorCode ImageQueue::Push(const cv::Mat& iFrame)

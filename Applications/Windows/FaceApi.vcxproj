@@ -59,6 +59,7 @@
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\User\User.cpp" />
     <ClCompile Include="..\..\FaceApi\Graph\Graph.cpp" />
     <ClCompile Include="..\..\FaceApi\Messages\CommandMessage.cpp" />
+    <ClCompile Include="..\..\FaceApi\Messages\ImageArrivedMessage.cpp" />
     <ClCompile Include="..\..\FaceApi\Messages\ImageSizeChangedMessage.cpp" />
     <ClCompile Include="..\..\FaceApi\Modules\FirstModule\FirstModule.cpp" />
     <ClCompile Include="..\..\FaceApi\Modules\LastModule\LastModule.cpp" />
@@ -109,6 +110,7 @@
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\User\User.h" />
     <ClInclude Include="..\..\FaceApi\Framework\Port.hpp" />
     <ClInclude Include="..\..\FaceApi\Messages\CommandMessage.h" />
+    <ClInclude Include="..\..\FaceApi\Messages\ImageArrivedMessage.h" />
     <ClInclude Include="..\..\FaceApi\Modules\FirstModule\FirstModule.h" />
     <ClInclude Include="..\..\FaceApi\Modules\LastModule\LastModule.h" />
     <ClInclude Include="..\..\FaceApi\Modules\ModuleConnector.h" />

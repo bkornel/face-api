@@ -18,23 +18,24 @@ namespace face
   namespace
   {
     template<typename T1, typename T2>
-    bool set_input_port(T1 iModule, fw::Module::Shared iPredecessor)
+    bool set_input_port(T1 iModule, fw::Module::Shared iPredecessor, int iPortNo)
     {
+      CV_Assert(iModule && iPredecessor);
+
       T2::Shared derived = std::dynamic_pointer_cast<T2>(iPredecessor);
       if (!derived)
       {
         return false;
       }
-        
-      // TODO(kbertok): change concept
-      //iModule->SetInputPort<0>(derived->GetOutputPort());
-
-      return true;
+      
+      return iModule->SetInputPort(derived->GetOutputPort(), iPortNo - 1) == fw::ErrorCode::OK;
     }
 
     template<typename T>
     bool connect(fw::Module::Shared iModule, const ModuleConnector::PredecessorMap& iPredecessors)
     {
+      CV_Assert(iModule);
+
       T::Shared derived = std::dynamic_pointer_cast<T>(iModule);
       if (!derived)
       {
@@ -49,21 +50,20 @@ namespace face
           return false;
         }
 
-        if (set_input_port<T::Shared, FaceDetection>(derived, predecessor.second)) continue;
-        if (set_input_port<T::Shared, FirstModule>(derived, predecessor.second)) continue;
-        if (set_input_port<T::Shared, ImageQueue>(derived, predecessor.second)) continue;
-        if (set_input_port<T::Shared, LastModule>(derived, predecessor.second)) continue;
-        if (set_input_port<T::Shared, UserHistory>(derived, predecessor.second)) continue;
-        if (set_input_port<T::Shared, UserManager>(derived, predecessor.second)) continue;
-        if (set_input_port<T::Shared, UserProcessor>(derived, predecessor.second)) continue;
-        if (set_input_port<T::Shared, Visualizer>(derived, predecessor.second)) continue;
+        if (set_input_port<T::Shared, FaceDetection>(derived, predecessor.second, predecessor.first)) continue;
+        if (set_input_port<T::Shared, FirstModule>(derived, predecessor.second, predecessor.first)) continue;
+        if (set_input_port<T::Shared, ImageQueue>(derived, predecessor.second, predecessor.first)) continue;
+        if (set_input_port<T::Shared, UserHistory>(derived, predecessor.second, predecessor.first)) continue;
+        if (set_input_port<T::Shared, UserManager>(derived, predecessor.second, predecessor.first)) continue;
+        if (set_input_port<T::Shared, UserProcessor>(derived, predecessor.second, predecessor.first)) continue;
+        if (set_input_port<T::Shared, Visualizer>(derived, predecessor.second, predecessor.first)) continue;
+        // REMARK: Insert new modules here
 
         LOG(ERROR) << "Connection cannot be created: " << predecessor.second->GetName() << " -> " << iModule->GetName();
         return false;
       }
 
-      // TODO(kbertok): change concept
-      //derived->Connect();
+      derived->Connect();
 
       return true;
     }
@@ -83,11 +83,9 @@ namespace face
     if (connect<UserManager>(iModule, iPredecessors)) return fw::ErrorCode::OK;
     if (connect<UserProcessor>(iModule, iPredecessors)) return fw::ErrorCode::OK;
     if (connect<Visualizer>(iModule, iPredecessors)) return fw::ErrorCode::OK;
+    // REMARK: Insert new modules here
 
     LOG(INFO) << ss.str();
-
-    //mFaceDetection->SetInputPort<0>(mImageQueue->GetOutputPort());
-    //mFaceDetection->Connect();
     
     return fw::ErrorCode::OK;
   }

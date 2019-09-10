@@ -37,10 +37,6 @@
         "fileName": "haarcascade_frontalface_alt2.xml",
         "imageScale": "1.0"
       },
-      "userHistory": {
-        "port": [ "userProcessor:1" ],
-        "removeFreqMs": "10000"
-      },
       "userManager": {
         "port": [ "imageQueue:1", "faceDetection:2" ],
         "maxUsers": "1",
@@ -69,6 +65,10 @@
           "maxCount": "1000",
           "epsilon": "1e-6"
         }
+      },
+      "userHistory": {
+        "port": [ "userProcessor:1" ],
+        "removeFreqMs": "10000"
       },
       "visualizer": {
         "port": [ "imageQueue:1", "userManager:2" ]

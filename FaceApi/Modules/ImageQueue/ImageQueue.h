@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include "Framework/MessageQueue.hpp"
 #include "Framework/Module.h"
 #include "Framework/Port.hpp"
@@ -66,6 +65,8 @@ namespace face
 
   private:
     fw::ErrorCode InitializeInternal(const cv::FileNode& iSettings) override;
+
+    void OnCommand(fw::Message::Shared iMessage) override;
 
     unsigned mPushFrameId = 0U;
     unsigned mLastFrameId = 0U;		///< Holds the ID of the last image frame.

@@ -28,6 +28,7 @@ namespace face
     else if (moduleName == "usermanager")		newModule = std::make_shared<UserManager>();
     else if (moduleName == "userprocessor")	newModule = std::make_shared<UserProcessor>();
     else if (moduleName == "visualizer")		newModule = std::make_shared<Visualizer>();
+    // REMARK: Insert new modules here
 
     // Check if the module is not set up in this file
     if (!newModule)

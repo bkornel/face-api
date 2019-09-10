@@ -17,6 +17,8 @@ namespace face
     public fw::Port<ActiveUsersMessage::Shared(ImageMessage::Shared, RoiMessage::Shared)>
   {
   public:
+    FW_DEFINE_SMART_POINTERS(UserManager);
+
     UserManager() = default;
 
     virtual ~UserManager() = default;
