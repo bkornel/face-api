@@ -15,7 +15,8 @@ namespace face
     enum class Type
     {
       Invalid = -1,
-      RunFaceDetection
+      RunFaceDetection,
+      VerboseModeChanged
     };
 
     CommandMessage(Type iType, unsigned iFrameId, long long iTimestamp);

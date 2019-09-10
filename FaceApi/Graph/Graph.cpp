@@ -107,13 +107,15 @@ namespace face
       if (moduleNode.empty() || !moduleNode.isNamed()) continue;
 
       // Check for duplications
-      for (const auto& m : mModules)
+      auto it = std::find_if(mModules.begin(), mModules.end(), [&](const fw::Module::Shared& obj) 
       {
-        if (m->GetName() == fw::Module::CreateModuleName(moduleNode))
-        {
-          LOG(ERROR) << "Module is already defined: " << m->GetName();
-          return fw::ErrorCode::BadData;
-        }
+        return obj->GetName() == fw::Module::CreateModuleName(moduleNode);
+      });
+
+      if (it != mModules.end())
+      {
+        LOG(ERROR) << "Module is already defined: " << (*it)->GetName();
+        return fw::ErrorCode::BadData;
       }
 
       // Extend this function if you add a new module
@@ -161,25 +163,20 @@ namespace face
     // Loop over the <modules> tag in the settings file
     for (const auto& moduleNode : iModulesNode)
     {
-      fw::Module::Shared module = nullptr;
-
       // Find the corresponding module
-      for (const auto& m : mModules)
+      auto it = std::find_if(mModules.begin(), mModules.end(), [&](const fw::Module::Shared& obj)
       {
-        if (m->GetName() == fw::Module::CreateModuleName(moduleNode))
-        {
-          module = m;
-          break;
-        }
-      }
+        return obj->GetName() == fw::Module::CreateModuleName(moduleNode);
+      });
 
       // Unknown module
-      if (module == nullptr)
+      if (it == mModules.end())
       {
         LOG(ERROR) << "Unknown module is referenced with name: " << moduleNode.name();
         return fw::ErrorCode::BadData;
       }
 
+      fw::Module::Shared module = *it;
       PredecessorMap predecessors; // Key: port, value: module
 
       // Read the <port> tag of each module

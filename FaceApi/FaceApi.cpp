@@ -1,4 +1,5 @@
 #include "FaceApi.h"
+#include "Messages/CommandMessage.h"
 #include "Messages/ImageArrivedMessage.h"
 
 #include "Framework/Profiler.h"
@@ -47,6 +48,9 @@ namespace face
     if ((result = StartThread()) != fw::ErrorCode::OK)
       return result;
 
+    if (Configuration::GetInstance().GetVerbose())
+      OnOffVerbose();
+
     return fw::ErrorCode::OK;
   }
 
@@ -59,7 +63,9 @@ namespace face
   void FaceApi::Clear()
   {
     std::lock_guard<std::recursive_mutex> lock(sAppMutex);
+    mGraph->Clear();
     mOutputQueue.Clear();
+    mCameraFrameId = 0U;
   }
 
   void FaceApi::OnFrameProcessed(ImageMessage::Shared iMessage)
@@ -70,10 +76,9 @@ namespace face
 
   void FaceApi::PushCameraFrame(const cv::Mat& iFrame)
   {
-    static unsigned sFrameId = 0U;
     const long long timestamp = fw::get_current_time();
 
-    sCommand.Raise(std::make_shared<ImageArrivedMessage>(iFrame, sFrameId++, timestamp));
+    sCommand.Raise(std::make_shared<ImageArrivedMessage>(iFrame, mCameraFrameId++, timestamp));
   }
 
   fw::ErrorCode FaceApi::GetResultImage(cv::Mat& oResultImage)
@@ -114,5 +119,22 @@ namespace face
     FACE_PROFILER_SAVE(profilerPath);
 
     return fw::ErrorCode::OK;
+  }
+
+  void FaceApi::SetRunFaceDetector()
+  {
+    const long long timestamp = fw::get_current_time();
+    sCommand.Raise(std::make_shared<CommandMessage>(CommandMessage::Type::RunFaceDetection, mCameraFrameId, timestamp));
+  }
+
+  void FaceApi::OnOffVerbose()
+  {
+    const long long timestamp = fw::get_current_time();
+    sCommand.Raise(std::make_shared<CommandMessage>(CommandMessage::Type::VerboseModeChanged, mCameraFrameId, timestamp));
+  }
+
+  void FaceApi::SetWorkingDirectory(const std::string& iWorkingDirectory)
+  {
+    Configuration::GetInstance().SetWorkingDirectory(iWorkingDirectory);
   }
 }

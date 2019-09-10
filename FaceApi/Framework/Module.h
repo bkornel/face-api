@@ -54,6 +54,7 @@ namespace fw
     virtual void OnCommand(Message::Shared iMessage);
 
     bool mInitialized = false;
+    bool mVerboseMode = false;
     std::string mName;
   };
 }

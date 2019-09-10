@@ -42,7 +42,7 @@ namespace face
 
         DrawUserData(*user, resultImage);
 
-        if (Configuration::GetInstance().GetOutput().verbose)
+        if (mVerboseMode)
           DrawAxes(*user, resultImage);
       }
     }
@@ -211,7 +211,7 @@ namespace face
     fw::ocv::put_text(ss.str(), { 10, oImage.rows - 15 }, oImage);
 
 #ifdef ENABLE_FACE_PROFILER
-    if (Configuration::GetInstance().GetOutput().verbose)
+    if (mVerboseMode)
     {
       const int barHeight = 15;
       const auto& lastMeasurement = fw::ProfilerDatabase::GetInstance().GetLastMeasurement();

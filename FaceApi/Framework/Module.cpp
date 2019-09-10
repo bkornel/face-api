@@ -1,5 +1,6 @@
 #include "Framework/Module.h"
 #include "Framework/UtilString.h"
+#include "Messages/CommandMessage.h"
 #include "Messages/ImageSizeChangedMessage.h"
 
 namespace fw
@@ -71,9 +72,21 @@ namespace fw
 
   void Module::OnCommand(Message::Shared iMessage)
   {
+    face::CommandMessage::Shared command = std::dynamic_pointer_cast<face::CommandMessage>(iMessage);
+    if (command)
+    {
+      if (command->GetType() == face::CommandMessage::Type::VerboseModeChanged)
+      {
+        mVerboseMode = !mVerboseMode;
+      }
+
+      return;
+    }
+
     if (std::dynamic_pointer_cast<face::ImageSizeChangedMessage>(iMessage))
     {
       Clear();
+      return;
     }
   }
 

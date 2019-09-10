@@ -26,18 +26,9 @@ namespace face
 
     void Clear() override;
 
-    inline void SetRunFaceDetector()
-    {
-      // TODO
-      //if (mGraph) mGraph->RunFaceDetector();
-    }
+    void SetRunFaceDetector();
 
-    inline void OnOffVerbose()
-    {
-      static bool verbose = Configuration::GetInstance().GetOutput().verbose;
-      verbose = !verbose;
-      Configuration::GetInstance().SetVerboseMode(verbose);
-    }
+    void OnOffVerbose();
 
     inline unsigned GetLastFrameId() const
     {
@@ -49,10 +40,7 @@ namespace face
       return mGraph ? mGraph->GetLastTimestamp() : 0LL;
     }
 
-    void SetWorkingDirectory(const std::string& iWorkingDirectory)
-    {
-      Configuration::GetInstance().SetWorkingDirectory(iWorkingDirectory);
-    }
+    void SetWorkingDirectory(const std::string& iWorkingDirectory);
 
   private:
     static std::recursive_mutex sAppMutex;		///< The mutex to lock critical sections
@@ -72,6 +60,7 @@ namespace face
     void OnFrameProcessed(ImageMessage::Shared iMessage);
 
     Graph::Shared mGraph = nullptr;
+    unsigned mCameraFrameId = 0U;
     MessageQueue mOutputQueue;
   };
 }

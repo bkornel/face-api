@@ -70,7 +70,7 @@ namespace face
     if (!outputNode.empty())
     {
       if (fw::ocv::get_value(outputNode, "verbose", value))
-        mOutput.verbose = fw::str::convert_to_boolean(value);
+        mVerbose = fw::str::convert_to_boolean(value);
 
       if (fw::ocv::get_value(outputNode, "video", value))
         mOutput.video = fw::str::convert_to_boolean(value);

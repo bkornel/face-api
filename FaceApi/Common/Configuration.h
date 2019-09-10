@@ -12,7 +12,6 @@ namespace face
 {
   struct OutputParams
   {
-    bool verbose = false;
     bool video = false;
     float videoFPS = 15.0F;
     int videoFourCC = cv::VideoWriter::fourcc('M', 'J', 'P', 'G');
@@ -39,14 +38,11 @@ namespace face
 
     inline const cv::FileNode& GetModulesNode() const { return mModulesNode; }
 
+    inline bool GetVerbose() const { return mVerbose; }
+
     cv::FileNode GetModuleSettings(const std::string& iName) const;
 
     void SetWorkingDirectory(const std::string& iWorkingDir);
-
-    inline void SetVerboseMode(bool iVerboseMode)
-    {
-      mOutput.verbose = iVerboseMode;
-    }
 
   private:
     Configuration() = default;
@@ -66,5 +62,6 @@ namespace face
 
     DirectoryParams mDirectories;
     OutputParams mOutput;
+    bool mVerbose = false;
   };
 }
