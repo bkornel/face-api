@@ -44,13 +44,10 @@ android {
 
     sourceSets {
         main {
-            assets.srcDirs = ['src/main/assets', 'src/main/assets/']
-            jni.srcDirs = [jni.srcDirs, 'src/main/cpp/', '../../../FaceApi/']
-            jniLibs.srcDirs = [jniLibs.srcDirs, 'jniLibs/']
+            assets.srcDirs += 'src/main/assets'
+            jni.srcDirs += ['src/main/cpp', '../../../FaceApi']
+            //jniLibs.srcDirs += 'libs'
         }
-    }
-
-    productFlavors {
     }
 
     externalNativeBuild {
