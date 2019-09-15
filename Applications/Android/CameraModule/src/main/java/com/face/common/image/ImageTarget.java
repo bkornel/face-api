@@ -27,8 +27,8 @@ public class ImageTarget implements Target {
     }
 
     @Override
-    public void onBitmapFailed(Drawable iDrawable) {
-        mTarget.onBitmapFailed(iDrawable);
+    public void onBitmapFailed(Exception e, Drawable iDrawable) {
+        mTarget.onBitmapFailed(e, iDrawable);
         mCallback.removeTarget(this);
     }
 

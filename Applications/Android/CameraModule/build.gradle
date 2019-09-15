@@ -7,12 +7,12 @@ repositories {
 }
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion 28
     buildToolsVersion '28.0.3'
 
     defaultConfig {
         minSdkVersion 23
-        targetSdkVersion 27
+        targetSdkVersion 28
         versionCode 1
         versionName "1.0"
 
@@ -58,11 +58,11 @@ android {
 }
 
 dependencies {
-    implementation 'com.squareup.picasso:picasso:2.2.0'
-    implementation 'com.jakewharton.timber:timber:2.2.2'
+    implementation 'com.squareup.picasso:picasso:2.71828'
+    implementation 'com.jakewharton.timber:timber:4.7.1'
     implementation 'com.android.support:support-annotations:28.0.0'
-    implementation 'com.android.support:support-v4:27.1.1'
+    implementation 'com.android.support:support-v4:28.0.0'
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'com.android.support:exifinterface:27.1.1'
-    implementation 'org.jetbrains:annotations:15.0'
+    implementation 'com.android.support:exifinterface:28.0.0'
+    implementation 'org.jetbrains:annotations:17.0.0'
 }

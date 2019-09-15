@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.text.TextUtils;
 
+import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.PicassoTools;
 import com.squareup.picasso.Target;
@@ -25,14 +26,14 @@ public enum ImageManager implements ImageTargetCallback {
 
     public void init(Context iContext) {
         mContext = iContext;
-        mPicasso = Picasso.with(iContext);
+        mPicasso = Picasso.get();
         mBitmaps = new HashMap<>();
         mTargets = new HashSet<>();
     }
 
     public void load(String iPath, int iWidth, int iHeight, Target iTarget) {
         if (iPath == null) {
-            iTarget.onBitmapFailed(null);
+            iTarget.onBitmapFailed(null,null);
             return;
         }
 
@@ -44,9 +45,9 @@ public enum ImageManager implements ImageTargetCallback {
             File file = !TextUtils.isEmpty(iPath) ? new File(iPath) : null;
             ImageTarget imageTarget = new ImageTarget(iTarget, iPath, this);
 
-            Picasso.with(mContext)
+            Picasso.get()
                     .load(file)
-                    .skipMemoryCache()
+                    .memoryPolicy(MemoryPolicy.NO_CACHE)
                     .config(Bitmap.Config.ARGB_8888)
                     .transform(new ScaleTransformation(iWidth, iHeight))
                     .into(imageTarget);

@@ -36,7 +36,7 @@ public class PhotoActivity extends BaseActivity {
         }
 
         @Override
-        public void onBitmapFailed(Drawable iDrawable) {
+        public void onBitmapFailed(Exception e, Drawable iDrawable) {
             mProgressBar.setVisibility(View.GONE);
             mBitmap = null;
         }
