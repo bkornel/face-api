@@ -12,7 +12,11 @@ namespace fw
   public:
     Thread() = default;
 
+    Thread(const Thread& iOther) = delete;
+
     virtual ~Thread();
+
+    Thread& operator=(const Thread& iOther) = delete;
 
     ErrorCode StartThread();
 
@@ -36,10 +40,6 @@ namespace fw
     virtual ErrorCode Run();
 
   private:
-    Thread(const Thread& iOther) = delete;
-
-    Thread& operator=(const Thread& iOther) = delete;
-
     std::future<ErrorCode> mThread;
     volatile bool mStopThread = false;
     volatile bool mFirstRun = true;

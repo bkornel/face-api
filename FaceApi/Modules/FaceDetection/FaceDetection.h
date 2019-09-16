@@ -26,11 +26,6 @@ namespace face
 
     RoiMessage::Shared Main(ImageMessage::Shared iImage) override;
 
-    inline float GetMinSize() const
-    {
-      return mMinSizeFactor;
-    }
-
   protected:
     const static float sForceDetectionSec;
 

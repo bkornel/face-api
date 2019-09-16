@@ -30,7 +30,7 @@ namespace face
       return mEntryMap.size();
     }
 
-    inline std::size_t GetNumerOfEntries() const
+    inline std::size_t GetNumberOfEntries() const
     {
       std::size_t count = 0U;
       for (auto& e : mEntryMap)
@@ -47,7 +47,7 @@ namespace face
   {
     const fw::Message& base(iMessage);
     ioStream << base << ", [Derived] Number of users: " << iMessage.GetSize() <<
-      ", numer of entries: " << iMessage.GetNumerOfEntries();
+      ", numer of entries: " << iMessage.GetNumberOfEntries();
     return ioStream;
   }
 }

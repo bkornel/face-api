@@ -81,7 +81,7 @@ namespace fw
 
   /// @brief Helper function for creating binder objects
   template<typename CalleeT, typename ReturnT, typename... ArgumentT>
-  static Binder<CalleeT, ReturnT, ArgumentT...> create_binder(ReturnT(CalleeT::*)(ArgumentT...))
+  static Binder<CalleeT, ReturnT, ArgumentT...> create_binder(ReturnT(CalleeT::* /*unused*/)(ArgumentT...))
   {
     return Binder<CalleeT, ReturnT, ArgumentT...>();
   }

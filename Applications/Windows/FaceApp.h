@@ -11,15 +11,19 @@ class FaceApp :
 {
 public:
   FaceApp() = default;
+  
+  FaceApp(const FaceApp& iOther) = delete;
 
   virtual ~FaceApp() = default;
 
+  FaceApp& operator=(const FaceApp& iOther) = delete;
+
 protected:
-  virtual int main(const std::vector<std::string>& args);
+  int main(const std::vector<std::string>& args) override;
 
-  virtual void initialize(Poco::Util::Application& self);
+  void initialize(Poco::Util::Application& self) override;
 
-  virtual void uninitialize();
+  void uninitialize() override;
 
   void printProperties(const std::vector<std::string>& args);
 
@@ -28,9 +32,6 @@ protected:
   void printKeys() const;
 
 private:
-  FaceApp(const FaceApp&) = delete;
-  FaceApp& operator=(const FaceApp&) = delete;
-
   void showResults();
 
   bool mSaveVideo = false;

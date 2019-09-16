@@ -28,7 +28,11 @@ namespace face
 
     Graph() = default;
 
-    virtual ~Graph();
+    Graph(const Graph& iOther) = delete;
+
+    ~Graph() override;
+
+    Graph& operator=(const Graph& iOther) = delete;
 
     void Clear() override;
 
@@ -45,10 +49,6 @@ namespace face
     }
 
   private:
-    Graph(const Graph& iOther) = delete;
-
-    Graph& operator=(const Graph& iOther) = delete;
-
     fw::ErrorCode InitializeInternal(const cv::FileNode& iModulesNode) override;
 
     fw::ErrorCode DeInitializeInternal() override;

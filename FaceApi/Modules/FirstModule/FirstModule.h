@@ -17,11 +17,11 @@ namespace face
 
     FirstModule();
 
-    virtual ~FirstModule() = default;
+    ~FirstModule() override = default;
 
     fw::ErrorCode Connect() override;
 
-    unsigned Main(bool) override;
+    unsigned Main(bool iParam) override;
 
     void Tick();
 

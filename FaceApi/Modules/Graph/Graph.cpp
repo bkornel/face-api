@@ -124,7 +124,7 @@ namespace face
 
       LOG(INFO) << "New module is created: [" << newModule->GetName() << "]";
 
-      mModules.push_back(newModule);
+      mModules.emplace_back(newModule);
     }
 
     // First-, and last modules are mandatory

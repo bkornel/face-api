@@ -35,7 +35,7 @@ namespace fw
     if (mNames.empty() || mNames.find(nameHash) == mNames.end())
       mNames[nameHash] = iName;
 
-    mMeasurements[nameHash].push_back({ mCurrentFrameId, iMilliseconds });
+    mMeasurements[nameHash].emplace_back(mCurrentFrameId, iMilliseconds);
   }
 
   void ProfilerDatabase::Save(const std::string& iPath) const

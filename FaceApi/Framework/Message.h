@@ -14,7 +14,11 @@ namespace fw
 
     Message(unsigned iFrameId, long long iTimestamp);
 
+    Message(const Message& iOther) = delete;
+
     virtual ~Message() = default;
+
+    Message& operator=(const Message& iOther) = delete;
 
     friend inline std::ostream& operator<<(std::ostream& ioStream, const Message& iMessage);
 
@@ -29,10 +33,6 @@ namespace fw
     }
 
   private:
-    Message(const Message& iOther) = delete;
-
-    Message& operator=(const Message& iOther) = delete;
-
     unsigned mFrameId = 0U;
     long long mTimestamp = 0;
   };

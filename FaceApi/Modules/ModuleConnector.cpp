@@ -27,7 +27,7 @@ namespace face
       {
         return false;
       }
-      
+
       return iModule->SetInputPort(derived->GetOutputPort(), iPortNo - 1) == fw::ErrorCode::OK;
     }
 
@@ -88,7 +88,7 @@ namespace face
     // REMARK: Insert new modules here
 
     LOG(INFO) << ss.str();
-    
+
     return fw::ErrorCode::OK;
   }
 }

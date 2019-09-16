@@ -51,10 +51,14 @@ namespace fw
       SetTimestampFiltering(iThresholdMs);
     }
 
+    MessageQueue& operator=(const MessageQueue& iOther) = delete;
+
     ~MessageQueue()
     {
       Clear();
     }
+
+    MessageQueue(const MessageQueue& iOther) = delete;
 
     ErrorCode Push(const MessageTuple& iMessageTuple)
     {
@@ -178,9 +182,6 @@ namespace fw
 
     const static int MAX_BOUND;
     const static int MIN_BOUND;
-
-    MessageQueue& operator=(const MessageQueue& iOther) = delete;
-    MessageQueue(const MessageQueue& iOther) = delete;
 
     ErrorCode InternalPush(const MessageTuple& iMessageTuple)
     {

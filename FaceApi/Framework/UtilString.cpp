@@ -9,82 +9,82 @@ namespace fw
   {
     static const std::string sWhiteSpaces = " \n\r\t";
 
-    bool is_number(const std::string& value)
+    bool is_number(const std::string& iValue)
     {
-      return !value.empty() && std::find_if(value.begin(), value.end(), [&](char c)
+      return !iValue.empty() && std::find_if(iValue.begin(), iValue.end(), [&](char c)
       {
         return !std::isdigit(c);
-      }) == value.end();
+      }) == iValue.end();
     }
 
-    bool convert_to_boolean(const std::string& value)
+    bool convert_to_boolean(const std::string& iValue)
     {
-      const std::string& trimmedValue = to_lower(trim(value));
+      const std::string& trimmedValue = to_lower(trim(iValue));
       return trimmedValue == "true" || trimmedValue == "t" || trimmedValue == "1";
     }
 
-    bool starts_with(const std::string& str, const std::string& starting)
+    bool starts_with(const std::string& iString, const std::string& iStarting)
     {
-      return !starting.empty() ? str.substr(0, starting.size()) == starting : false;
+      return !iStarting.empty() ? iString.substr(0, iStarting.size()) == iStarting : false;
     }
 
-    bool ends_with(const std::string& str, const std::string& ending)
+    bool ends_with(const std::string& iString, const std::string& iEnding)
     {
-      return str.length() >= ending.length() ? str.compare(str.length() - ending.length(), ending.length(), ending) == 0 : false;
+      return iString.length() >= iEnding.length() ? iString.compare(iString.length() - iEnding.length(), iEnding.length(), iEnding) == 0 : false;
     }
 
-    std::string trim_left(const std::string& str)
+    std::string trim_left(const std::string& iString)
     {
-      const size_t startpos = str.find_first_not_of(sWhiteSpaces);
-      return (startpos == std::string::npos) ? "" : str.substr(startpos);
+      const size_t startpos = iString.find_first_not_of(sWhiteSpaces);
+      return (startpos == std::string::npos) ? "" : iString.substr(startpos);
     }
 
-    std::string trim_right(const std::string& str)
+    std::string trim_right(const std::string& iString)
     {
-      const size_t endpos = str.find_last_not_of(sWhiteSpaces);
-      return (endpos == std::string::npos) ? "" : str.substr(0, endpos + 1);
+      const size_t endpos = iString.find_last_not_of(sWhiteSpaces);
+      return (endpos == std::string::npos) ? "" : iString.substr(0, endpos + 1);
     }
 
-    std::string trim(const std::string& str)
+    std::string trim(const std::string& iString)
     {
-      return trim_right(trim_left(str));
+      return trim_right(trim_left(iString));
     }
 
-    std::string to_upper(const std::string& str)
+    std::string to_upper(const std::string& iString)
     {
-      if (str.empty()) return "";
+      if (iString.empty()) return "";
 
-      std::string str2 = str;
+      std::string str2 = iString;
       std::transform(str2.begin(), str2.end(), str2.begin(), ::toupper);
 
       return str2;
     }
 
-    std::string to_lower(const std::string& str)
+    std::string to_lower(const std::string& iString)
     {
-      if (str.empty()) return "";
+      if (iString.empty()) return "";
 
-      std::string str2 = str;
+      std::string str2 = iString;
       std::transform(str2.begin(), str2.end(), str2.begin(), ::tolower);
 
       return str2;
     }
 
-    std::vector<std::string>& split(const std::string& str, char delim, std::vector<std::string>& elems)
+    std::vector<std::string>& split(const std::string& iString, char iDelimiter, std::vector<std::string>& iTokens)
     {
-      std::stringstream ss(str);
+      std::stringstream ss(iString);
       std::string item;
-      while (std::getline(ss, item, delim))
+      while (std::getline(ss, item, iDelimiter))
       {
-        elems.push_back(item);
+        iTokens.emplace_back(item);
       }
-      return elems;
+      return iTokens;
     }
 
-    std::vector<std::string> split(const std::string& str, char delim)
+    std::vector<std::string> split(const std::string& iString, char iDelimiter)
     {
       std::vector<std::string> elems;
-      split(str, delim, elems);
+      split(iString, iDelimiter, elems);
       return elems;
     }
 

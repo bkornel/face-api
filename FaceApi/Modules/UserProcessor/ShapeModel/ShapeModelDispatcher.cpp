@@ -31,7 +31,7 @@ namespace face
 
         auto tokens = fw::str::split(value, ',');
         for (auto itToken : tokens)
-          mWinDetection.push_back(fw::str::convert_to_number<int>(itToken));
+          mWinDetection.emplace_back(fw::str::convert_to_number<int>(itToken));
       }
 
       if (fw::ocv::get_value(iSettings, "winTracking", value))
@@ -40,7 +40,7 @@ namespace face
 
         auto tokens = fw::str::split(value, ',');
         for (auto itToken : tokens)
-          mWinTracking.push_back(fw::str::convert_to_number<int>(itToken));
+          mWinTracking.emplace_back(fw::str::convert_to_number<int>(itToken));
       }
 
       if (fw::ocv::get_value(iSettings, "nIter", value))
@@ -76,7 +76,7 @@ namespace face
       mShapeModel = it->second;
     }
 
-    mUpdatedUserIDs.push_back(userId);
+    mUpdatedUserIDs.emplace_back(userId);
 
     return Fit(ioUser);
   }

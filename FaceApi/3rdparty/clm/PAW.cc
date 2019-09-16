@@ -52,7 +52,7 @@ bool sameSide(double x0, double y0, double x1, double y1,
 {
 	double x = (x3 - x2)*(y0 - y2) - (x0 - x2)*(y3 - y2);
 	double y = (x3 - x2)*(y1 - y2) - (x1 - x2)*(y3 - y2);
-	if (x*y >= 0)return true; else return false;
+	return x * y >= 0;
 }
 //=============================================================================
 int isWithinTri(double x, double y, cv::Mat &tri, cv::Mat &shape)
@@ -109,7 +109,7 @@ void PAW::Write(ofstream &s)
 //===========================================================================
 void PAW::Read(ifstream &s, bool readType)
 {
-	if (readType) { int type; s >> type; CV_DbgAssert(type == IO::PAW); }
+	if (readType) { int type = 0; s >> type; CV_DbgAssert(type == IO::PAW); }
 	s >> _nPix >> _xmin >> _ymin;
 	IO::ReadMat(s, _src); IO::ReadMat(s, _tri); IO::ReadMat(s, _tridx);
 	IO::ReadMat(s, _mask); IO::ReadMat(s, _alpha); IO::ReadMat(s, _beta);

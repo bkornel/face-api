@@ -2,8 +2,6 @@
 
 namespace face
 {
-  const cv::Mat LastModule::sEmptyMat;
-
   bool LastModule::Main(ImageMessage::Shared iImage)
   {
     mLastImage = iImage;

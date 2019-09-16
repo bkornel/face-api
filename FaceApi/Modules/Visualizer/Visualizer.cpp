@@ -13,10 +13,10 @@ namespace face
 {
   fw::ErrorCode Visualizer::InitializeInternal(const cv::FileNode& iSettings)
   {
-    mColorsOfAxes.push_back({ 255, 255, 255 });
-    mColorsOfAxes.push_back({ 255, 0, 0 });
-    mColorsOfAxes.push_back({ 0, 255, 0 });
-    mColorsOfAxes.push_back({ 0, 0, 255 });
+    mColorsOfAxes.emplace_back(255, 255, 255);
+    mColorsOfAxes.emplace_back(255, 0, 0);
+    mColorsOfAxes.emplace_back(0, 255, 0);
+    mColorsOfAxes.emplace_back(0, 0, 255);
 
     return fw::ErrorCode::OK;
   }
@@ -46,8 +46,6 @@ namespace face
           DrawAxes(*user, resultImage);
       }
     }
-
-    const long long runtimeMs = std::llabs(fw::get_current_time() - iImage->GetTimestamp());
 
     DrawGeneral(iImage, resultImage);
 

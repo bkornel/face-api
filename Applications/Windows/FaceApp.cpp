@@ -75,11 +75,17 @@ int FaceApp::main(const std::vector<std::string>& args)
 
   while (capture.isOpened())
   {
-    if (!face::FaceApi::GetInstance().IsRunning()) break;
+    if (!face::FaceApi::GetInstance().IsRunning())
+    {
+      break;
+    }
 
     capture >> mFrame;
 
-    if (mFrame.empty()) break;
+    if (mFrame.empty())
+    {
+      break;
+    }
 
     face::FaceApi::GetInstance().PushCameraFrame(mFrame);
 
@@ -142,16 +148,16 @@ void FaceApp::printProperties(const std::vector<std::string>& args)
 {
   LOG(INFO) << "Command line: ";
   std::ostringstream ostr;
-  for (auto it = argv().begin(); it != argv().end(); ++it)
+  for (const auto & it : argv())
   {
-    ostr << *it << ' ';
+    ostr << it << ' ';
   }
   LOG(INFO) << ostr.str();
 
   LOG(INFO) << "Arguments to main(): ";
-  for (auto it = args.begin(); it != args.end(); ++it)
+  for (const auto & arg : args)
   {
-    LOG(INFO) << *it;
+    LOG(INFO) << arg;
   }
 
   LOG(INFO) << "Application properties: ";
@@ -176,11 +182,14 @@ void FaceApp::printProperties(const std::string& base)
   }
   else
   {
-    for (auto it = keys.begin(); it != keys.end(); ++it)
+    for (auto & key : keys)
     {
       std::string fullKey = base;
-      if (!fullKey.empty()) fullKey += '.';
-      fullKey.append(*it);
+      if (!fullKey.empty())
+      {
+        fullKey += '.';
+      }
+      fullKey.append(key);
       printProperties(fullKey);
     }
   }

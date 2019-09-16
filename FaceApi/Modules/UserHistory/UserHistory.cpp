@@ -45,7 +45,7 @@ namespace face
         UserData::Shared userData = std::dynamic_pointer_cast<UserData>(user);
         if (userData != nullptr)
         {
-          mEntryMap[user->GetUserId()].push_back(std::make_pair(lastUpdateTs, userData));
+          mEntryMap[user->GetUserId()].emplace_back(lastUpdateTs, userData);
         }
       }
     }

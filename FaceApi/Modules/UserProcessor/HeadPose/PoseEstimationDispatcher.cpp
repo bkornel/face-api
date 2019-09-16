@@ -97,11 +97,11 @@ namespace face
     {
       const cv::Mat& objPtRot = mExtrinsics * cv::Mat_<double>({ 4, 1 }, { objPt.x, objPt.y, objPt.z, 1.0 });
 
-      mShape3D.push_back({
+      mShape3D.emplace_back(
         objPtRot.at<double>(0, 0),
         objPtRot.at<double>(1, 0),
         objPtRot.at<double>(2, 0)
-        });
+      );
     }
   }
 

@@ -17,16 +17,16 @@ namespace fw
     void Reset();
 
     //! Calculate frame per second from time delay.
-    double GetFPS(bool stopped = true) const;
+    double GetFPS(bool iStopped = true) const;
 
     //! Returns the elapsed time between the declaration of object (or since the last call of Reset method) and current time in second.
-    double GetElapsedTimeSec(bool stopped = true) const;
+    double GetElapsedTimeSec(bool iStopped = true) const;
 
     //! Returns the elapsed time between the declaration of object (or since the last call of Reset method) and current time in milli second.
-    double GetElapsedTimeMilliSec(bool stopped = true) const;
+    double GetElapsedTimeMilliSec(bool iStopped = true) const;
 
     //! Returns the elapsed time between the declaration of object and current time in millisecond.
-    double GetElapsedTimeFromConstructionSec(bool stopped = true) const;
+    double GetElapsedTimeFromConstructionSec(bool iStopped = true) const;
 
     inline bool IsRunning() const
     {

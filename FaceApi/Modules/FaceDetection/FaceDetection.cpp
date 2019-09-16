@@ -167,9 +167,9 @@ namespace face
       cv::Rect r2 = rect;
       r2 += cv::Point(cvRound(rect.width * 0.1F), 0.0F);
       r2 -= cv::Size(cvRound(rect.width * 0.2F), 0.0F);
-      scaledFaceROIs.push_back(r2);
+      scaledFaceROIs.emplace_back(r2);
 #else
-      scaledFaceROIs.push_back(rect);
+      scaledFaceROIs.emplace_back(rect);
 #endif
     }
 

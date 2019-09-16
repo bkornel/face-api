@@ -51,8 +51,8 @@ namespace face
 
     mShapeModelDispatcher.SetFrame(iImage->GetFrameGray());
 
-    const auto& activeUSers = iUsers->GetActiveUsers();
-    for (const auto& user : activeUSers)
+    const auto& activeUsers = iUsers->GetActiveUsers();
+    for (const auto& user : activeUsers)
     {
       if (user->AcceptDispatcher(mShapeModelDispatcher))
       {

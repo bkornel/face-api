@@ -100,7 +100,7 @@ namespace fw
 
   /// @brief Helper function for creating delegates
   template<typename CalleeT, typename ReturnT, typename... ArgumentT>
-  static DelegateMaker<CalleeT, ReturnT, ArgumentT... > MakeDelegate(ReturnT(CalleeT::*)(ArgumentT...))
+  static DelegateMaker<CalleeT, ReturnT, ArgumentT... > MakeDelegate(ReturnT(CalleeT::* /*unused*/)(ArgumentT...))
   {
     return DelegateMaker<CalleeT, ReturnT, ArgumentT...>();
   }
@@ -140,7 +140,7 @@ namespace fw
     Event& operator+=(DelegateT iDelegate)
     {
       if (std::find(mDelegates.begin(), mDelegates.end(), iDelegate) == mDelegates.end())
-        mDelegates.push_back(iDelegate);
+        mDelegates.emplace_back(iDelegate);
 
       return *this;
     }

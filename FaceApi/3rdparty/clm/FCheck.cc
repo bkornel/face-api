@@ -86,7 +86,7 @@ void FCheck::Write(ofstream &s)
 //===========================================================================
 void FCheck::Read(ifstream &s, bool readType)
 {
-	if (readType) { int type; s >> type; CV_DbgAssert(type == IO::FCHECK); }
+	if (readType) { int type = 0; s >> type; CV_DbgAssert(type == IO::FCHECK); }
 	s >> _b; IO::ReadMat(s, _w); _paw.Read(s);
 	crop_.create(_paw._mask.rows, _paw._mask.cols, CV_8U);
 	vec_.create(_paw._nPix, 1, CV_64F);
@@ -126,8 +126,8 @@ void MFCheck::Write(ofstream &s)
 //===========================================================================
 void MFCheck::Read(ifstream &s, bool readType)
 {
-	if (readType) { int type; s >> type; CV_DbgAssert(type == IO::MFCHECK); }
-	int n; s >> n; _fcheck.resize(n);
+	if (readType) { int type = 0; s >> type; CV_DbgAssert(type == IO::MFCHECK); }
+	int n = 0; s >> n; _fcheck.resize(n);
 	for (int i = 0; i < n; i++)_fcheck[i].Read(s);
 }
 //===========================================================================

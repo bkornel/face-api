@@ -17,7 +17,7 @@ namespace face
 
     LastModule() = default;
 
-    virtual ~LastModule() = default;
+    ~LastModule() override = default;
 
     bool Main(ImageMessage::Shared iImage) override;
 
@@ -47,7 +47,6 @@ namespace face
     }
 
   private:
-    static const cv::Mat sEmptyMat;
     ImageMessage::Shared mLastImage = nullptr;
   };
 }

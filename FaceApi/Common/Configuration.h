@@ -30,6 +30,10 @@ namespace face
   public:
     static Configuration& GetInstance();
 
+    Configuration(const Configuration& iOther) = delete;
+
+    Configuration& operator=(const Configuration& iOther) = delete;
+
     fw::ErrorCode Initialize(const std::string& iConfigFile = "settings.json");
 
     inline const DirectoryParams& GetDirectories() const { return mDirectories; }
@@ -46,10 +50,6 @@ namespace face
 
   private:
     Configuration() = default;
-
-    Configuration(const Configuration& iOther) = delete;
-
-    Configuration& operator=(const Configuration& iOther) = delete;
 
     bool LoadSettings(const cv::FileNode& iGeneralNode);
 

@@ -17,14 +17,14 @@ namespace fw
 
     Exception(const Exception& iOther);
 
-    virtual ~Exception() noexcept;
+    virtual ~Exception() noexcept = default;
 
     Exception& operator=(const Exception& iOther);
 
     virtual const char* what() const throw();
 
   private:
-    void CreateErrorText(ErrorCode iErrorCode, const std::string& iInfoText);
+    void CreateErrorText(const std::string& iInfoText);
 
     ErrorCode mErrorCode;
     std::string mErrorText;

@@ -31,26 +31,26 @@ namespace fw
     mConstructionTime = mStartTime = mStopTime = TICK_COUNT;
   }
 
-  double Stopwatch::GetFPS(bool stopped) const
+  double Stopwatch::GetFPS(bool iStopped) const
   {
-    const long long diff = std::abs(stopped ? mStopTime - mStartTime : TICK_COUNT - mStartTime);
+    const long long diff = std::abs(iStopped ? mStopTime - mStartTime : TICK_COUNT - mStartTime);
     return diff > 0 ? 1.0 / (diff / TICK_FREQUENCY) : 0.0;
   }
 
-  double Stopwatch::GetElapsedTimeSec(bool stopped) const
+  double Stopwatch::GetElapsedTimeSec(bool iStopped) const
   {
-    const long long diff = std::abs(stopped ? mStopTime - mStartTime : TICK_COUNT - mStartTime);
+    const long long diff = std::abs(iStopped ? mStopTime - mStartTime : TICK_COUNT - mStartTime);
     return diff > 0 ? (diff / TICK_FREQUENCY) : 0.0;
   }
 
-  double Stopwatch::GetElapsedTimeMilliSec(bool stopped) const
+  double Stopwatch::GetElapsedTimeMilliSec(bool iStopped) const
   {
-    return GetElapsedTimeSec(stopped) * 1000.0;
+    return GetElapsedTimeSec(iStopped) * 1000.0;
   }
 
-  double Stopwatch::GetElapsedTimeFromConstructionSec(bool stopped) const
+  double Stopwatch::GetElapsedTimeFromConstructionSec(bool iStopped) const
   {
-    const long long diff = std::abs(stopped ? mStopTime - mConstructionTime : TICK_COUNT - mConstructionTime);
+    const long long diff = std::abs(iStopped ? mStopTime - mConstructionTime : TICK_COUNT - mConstructionTime);
     return diff > 0 ? (diff / TICK_FREQUENCY) : 0.0;
   }
 }

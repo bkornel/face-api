@@ -8,7 +8,7 @@ namespace face
     for (const auto& user : iActiveUsers)
     {
       if (user && user->IsActive())
-        mActiveUsers.push_back(user);
+        mActiveUsers.emplace_back(user);
     }
   }
 

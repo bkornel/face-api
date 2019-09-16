@@ -139,7 +139,7 @@ void Patch::Write(ofstream &s)
 //===========================================================================
 void Patch::Read(ifstream &s, bool readType)
 {
-	if (readType) { int type; s >> type; CV_DbgAssert(type == IO::PATCH); }
+	if (readType) { int type = 0; s >> type; CV_DbgAssert(type == IO::PATCH); }
 	s >> _t >> _a >> _b; IO::ReadMat(s, _W);
 }
 //===========================================================================
@@ -230,8 +230,8 @@ void MPatch::Write(ofstream &s)
 //===========================================================================
 void MPatch::Read(ifstream &s, bool readType)
 {
-	if (readType) { int type; s >> type; CV_DbgAssert(type == IO::MPATCH); }
-	int n; s >> _w >> _h >> n; _p.resize(n);
+	if (readType) { int type = 0; s >> type; CV_DbgAssert(type == IO::MPATCH); }
+	int n = 0; s >> _w >> _h >> n; _p.resize(n);
 	for (int i = 0; i < n; i++)_p[i].Read(s);
 }
 //===========================================================================

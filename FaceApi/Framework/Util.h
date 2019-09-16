@@ -31,7 +31,7 @@ namespace fw
     BadParam = 9
   };
 
-  typedef ErrorCode ResultCode;
+  using ResultCode = ErrorCode;
 
   long long get_current_time();
 

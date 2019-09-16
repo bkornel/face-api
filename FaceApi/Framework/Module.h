@@ -22,7 +22,7 @@ namespace fw
 
     Module() = default;
 
-    virtual ~Module() = default;
+    ~Module() override = default;
 
     virtual ErrorCode Initialize(const cv::FileNode& iModuleNode);
 

@@ -32,7 +32,7 @@ namespace face
     ShapeUtil::Triangles triangles;
     for (int i = 0; i < trianglesMat.rows; i++)
     {
-      triangles.push_back(std::make_tuple(trianglesMat.at<int>(i, 0), trianglesMat.at<int>(i, 0), trianglesMat.at<int>(i, 2)));
+      triangles.emplace_back(trianglesMat.at<int>(i, 0), trianglesMat.at<int>(i, 0), trianglesMat.at<int>(i, 2));
     }
     ShapeUtil::GetInstance().SetTriangles(triangles);
 
@@ -42,7 +42,7 @@ namespace face
     ShapeUtil::Connections connections;
     for (int i = 0; i < connectionsMat.cols; i++)
     {
-      connections.push_back({ connectionsMat.at<int>(0, i), connectionsMat.at<int>(1, i) });
+      connections.emplace_back(connectionsMat.at<int>(0, i), connectionsMat.at<int>(1, i));
     }
     ShapeUtil::GetInstance().SetConnections(connections);
 
@@ -50,7 +50,7 @@ namespace face
 
     if (infile.is_open())
     {
-      int type;
+      int type = 0;
       infile >> type;
       CV_DbgAssert(type == FACETRACKER::IO::TRACKER);
 
@@ -60,6 +60,8 @@ namespace face
       FACETRACKER::IO::ReadMat(infile, mReferenceShapeMat2D);
 
       mCount = mReferenceShapeMat2D.rows / 2;
+      CV_DbgAssert(mCount > 0);
+
       mReferenceShape2D.resize(mCount);
       mReferenceShape3D.resize(mCount);
 

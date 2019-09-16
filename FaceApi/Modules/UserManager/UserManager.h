@@ -29,11 +29,6 @@ namespace face
 
     std::size_t GetActiveUserSize() const;
 
-    inline bool IsAllPossibleUsersTracked() const
-    {
-      return GetMaxUsers() == GetActiveUserSize();
-    }
-
     inline int GetMaxUsers() const
     {
       return mMaxUsers;
@@ -55,8 +50,6 @@ namespace face
     bool MatchTemplate(ImageMessage::Shared iImage, User::Shared ioUser, cv::Rect& oFaceRect);
 
     void RemoveInactiveUsers(bool forceToDelete = false);
-
-    void OnCommand(fw::Message::Shared iMessage) override;
 
     std::vector<User::Shared> mUsers;   ///< The vector storing all users
     fw::Stopwatch mRemoveSW;

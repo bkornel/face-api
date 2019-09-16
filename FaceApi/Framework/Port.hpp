@@ -26,11 +26,9 @@ namespace fw
     Port()
     {
       static constexpr auto size = std::tuple_size<InputPorts>::value;
+      CV_DbgAssert(size > 0u);
 
-      if (size > 0u)
-      {
-        mIsInputSet.resize(size, false);
-      }
+      mIsInputSet.resize(size, false);
     }
 
     virtual ~Port() = default;
@@ -131,7 +129,7 @@ namespace fw
     };
     
     template<size_t... Is>
-    inline void Connect(std::index_sequence<Is...>)
+    inline void Connect(std::index_sequence<Is...> /*unused*/)
     {
       mOutputPort = fw::connect(FW_BIND(&Port::Main, this), std::get<Is>(mInputPorts)...);
     }

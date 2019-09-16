@@ -19,7 +19,7 @@ namespace face
     return fw::ErrorCode::OK;
   }
 
-  unsigned FirstModule::Main(bool)
+  unsigned FirstModule::Main(bool /*iParam*/)
   {
     return mTickCounter++;
   }

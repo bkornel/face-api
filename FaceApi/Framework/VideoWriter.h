@@ -11,7 +11,11 @@ namespace face
 
     VideoWriter() = default;
 
+    VideoWriter(const VideoWriter& iOther) = delete;
+
     ~VideoWriter();
+
+    VideoWriter& operator=(const VideoWriter& iOther) = delete;
 
     void Create(const std::string& iPath, const std::string& iName, int iFourCC = sDefaultFourCC, double iFPS = 25.0, bool iIsColor = true);
 
@@ -25,10 +29,6 @@ namespace face
     }
 
   private:
-    VideoWriter(const VideoWriter& iOther) = delete;
-
-    VideoWriter& operator=(const VideoWriter& iOther) = delete;
-
     cv::VideoWriter mVideoWriter;
     std::string mFilename;
 

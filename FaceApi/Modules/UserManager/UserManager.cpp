@@ -122,7 +122,7 @@ namespace face
     {
       if (GetActiveUserSize() >= mMaxUsers) break;
 
-      mUsers.push_back(std::make_shared<User>(r, sLastUserID, mTimestamp));
+      mUsers.emplace_back(std::make_shared<User>(r, sLastUserID, mTimestamp));
       LOG(INFO) << "New user has been recognized, Welcome User(" << sLastUserID << ")!";
       sLastUserID++;
     }
@@ -245,7 +245,7 @@ namespace face
       {
         const long long diff = std::llabs(fw::get_current_time() - user->GetLastUpdateTs());
         if (iForceToDelete || (diff > mUserAwaySec * 1000.0F))
-          userIDs.push_back(user->GetUserId());
+          userIDs.emplace_back(user->GetUserId());
       }
     }
 
@@ -275,9 +275,5 @@ namespace face
     }
 
     return size;
-  }
-
-  void UserManager::OnCommand(fw::Message::Shared iMessage)
-  {
   }
 }

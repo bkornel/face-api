@@ -8,32 +8,32 @@ namespace fw
 {
   namespace str
   {
-    bool is_number(const std::string& value);
+    bool is_number(const std::string& iValue);
 
-    bool convert_to_boolean(const std::string& value);
+    bool convert_to_boolean(const std::string& iValue);
 
-    bool ends_with(const std::string& str, const std::string& ending);
+    bool ends_with(const std::string& iString, const std::string& iEnding);
 
-    bool starts_with(const std::string& str, const std::string& starting);
+    bool starts_with(const std::string& iString, const std::string& iStarting);
 
-    std::string trim_left(const std::string& str);
+    std::string trim_left(const std::string& iString);
 
-    std::string trim_right(const std::string& str);
+    std::string trim_right(const std::string& iString);
 
-    std::string trim(const std::string& str);
+    std::string trim(const std::string& iString);
 
-    std::string to_upper(const std::string& str);
+    std::string to_upper(const std::string& iString);
 
-    std::string to_lower(const std::string& str);
+    std::string to_lower(const std::string& iString);
 
-    std::vector<std::string>& split(const std::string& str, char delim, std::vector<std::string>& elems);
+    std::vector<std::string>& split(const std::string& iString, char iDelimiter, std::vector<std::string>& iTokens);
 
-    std::vector<std::string> split(const std::string& str, char delim);
+    std::vector<std::string> split(const std::string& iString, char iDelimiter);
 
     template<typename T>
-    T convert_to_number(const std::string& value)
+    T convert_to_number(const std::string& iValue)
     {
-      const std::string& trimmedValue = trim(value);
+      const std::string& trimmedValue = trim(iValue);
       std::stringstream ss(trimmedValue);
 
       T i;

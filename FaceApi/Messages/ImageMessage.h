@@ -18,13 +18,13 @@ namespace face
     struct QueueData
     {
       int size = 0;
-      float samplingFPS = 0.0f;
+      float samplingFPS = 0.0F;
       int bound = 0;
     };
 
     ImageMessage(const cv::Mat& iImage, unsigned iFrameId, long long iTimestamp);
 
-    virtual ~ImageMessage() = default;
+    ~ImageMessage() override = default;
 
     friend inline std::ostream& operator<<(std::ostream& ioStream, const ImageMessage& iMessage);
 

@@ -77,9 +77,13 @@ namespace fw
     friend class Promise<T>;
 
   public:
-    virtual ~Future() = default;
+    Future(const Future& iRhs) = delete;
 
     Future(Future&& iRhs) = default;
+
+    ~Future() override = default;
+
+    Future& operator=(const Future& iRhs) = delete;
 
     /// @brief If ready, returns value stored in the future.Otherwise the behavior is undefined.
     T Get() const
@@ -93,15 +97,15 @@ namespace fw
     ///
     /// If ready, the continuation will be notified and run immediately with an
     /// inline executor.
-    void Listen(Continuation::Shared iContinuation) override 
+    void Listen(Continuation::Shared iContinuation) override
     {
       bool isValid = false;
       {
         std::lock_guard<std::mutex> lock(mMutex);
-        isValid = (mValue.get() != nullptr);
+        isValid = (mValue != nullptr);
 
         if (!isValid)
-          mContinuations.push_back(iContinuation);
+          mContinuations.emplace_back(iContinuation);
       }
 
       if (isValid)
@@ -113,36 +117,32 @@ namespace fw
     bool Ready() const override
     {
       std::lock_guard<std::mutex> lock(mMutex);
-      return (mValue.get() != nullptr);
+      return mValue != nullptr;
     }
 
     /// @brief Blocks till this Future is ready.
     void Wait() const override
     {
       std::unique_lock<std::mutex> lock(mMutex);
-      mCV.wait(lock, [this] { return (this->mValue.get() != nullptr); });
+      mCV.wait(lock, [this] { return mValue != nullptr; });
     }
 
     template <typename Rep, typename Period>
     bool WaitFor(const std::chrono::duration<Rep, Period>& iTimeout) const
     {
       std::unique_lock<std::mutex> lock(mMutex);
-      return mCV.wait_for(lock, iTimeout, [this] { return (this->mValue.get() != nullptr); });
+      return mCV.wait_for(lock, iTimeout, [this] { return mValue != nullptr; });
     }
 
     template <typename Clock, typename Duration>
     bool WaitUntil(const std::chrono::time_point<Clock, Duration>& iTimeout) const
     {
       std::unique_lock<std::mutex> lock(mMutex);
-      return mCV.wait_until(lock, iTimeout, [this] { return (this->mValue.get() != nullptr); });
+      return mCV.wait_until(lock, iTimeout, [this] { return mValue != nullptr; });
     }
 
   private:
     Future() = default;
-
-    Future(const Future& iRhs) = delete;
-
-    Future& operator=(const Future& iRhs) = delete;
 
     void Put(const T& iArg, Executor::Shared iExecutor)
     {
@@ -175,7 +175,11 @@ namespace fw
   public:
     Promise() : mFuture(new Future<T>()) {}
 
+    Promise(const Promise<T>& iRhs) = delete;
+
     Promise(Promise<T>&& iRhs) = default;
+
+    Promise<T>& operator=(const Promise<T>& iRhs) = delete;
 
     FutureShared<T> GetFuture() const
     {
@@ -192,9 +196,6 @@ namespace fw
     }
 
   private:
-    Promise(const Promise<T>& iRhs) = delete;
-    Promise<T>& operator=(const Promise<T>& iRhs) = delete;
-
     const FutureShared<T> mFuture = nullptr;
   };
 
