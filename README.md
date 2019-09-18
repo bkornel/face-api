@@ -35,7 +35,7 @@ You should follow the directory structure below during the compilation:
 |-- ...
 ```
 
-# Building the API and the applications
+# Building the API and the Applications
 
 ## Windows
 
@@ -43,18 +43,59 @@ The solution file can be found in [Applications/Windows](https://github.com/bkor
 
 ## Android
 
-The Adnroid Studio project can be found in [Applications/Android](https://github.com/bkornel/face-api/tree/master/Applications/Android). The following packages must be installed via SDK manager
+The Android Studio project can be found in [Applications/Android](https://github.com/bkornel/face-api/tree/master/Applications/Android). The following packages must be installed via SDK manager
 
 ### SDK platforms
 - Min SDK version: API 23 (Android 6.0)
-- Target SDK version: API 27 (Android 8.1)
+- Target SDK version: API 28 (Android 9.0)
 
 ### SDK Tools
-- LLDB 3.1
-- CMake 3.6.x
-- NDK 19.x
+- LLDB 3.1 or newer
+- CMake 3.6.x or newer
+- NDK 19.x or newer
 
 The C++ part (image processing algorithms) is set up as a CMake external native build in the Android Studio project, thus it is built automatically when you make the project.
+
+# Modules
+
+The whole module graph can be created from the settings file (defined in [`settings.json`](https://github.com/bkornel/face-api/blob/master/Testing/configurations/settings.json) by default). Modules can interact and exchange information whith each others via ports. Every module must have one output port and can have any input ports (zero or more).
+
+Ports can be defined by implementing the `fw::Port` interface. For example the [`UserManager`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/UserManager/UserManager.h) class:
+
+```
+class UserManager :
+  public fw::Module,
+  public fw::Port<ActiveUsersMessage::Shared(ImageMessage::Shared, RoiMessage::Shared)>
+{
+  ...
+  ActiveUsersMessage::Shared Main(ImageMessage::Shared iImage, RoiMessage::Shared iDetections) override;
+  ...
+};
+```
+
+This class has the `ActiveUsersMessage::Shared` output and the `ImageMessage::Shared` and `RoiMessage::Shared` inputs. The `Main` member function of the class must defined according to the template arguments of `fw::Port`.
+
+## Module Graph
+
+The module graph can be defined in the settings file ([`settings.json`](https://github.com/bkornel/face-api/blob/master/Testing/configurations/settings.json) by default). For the [`UserManager`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/UserManager/UserManager.h) module it is:
+
+```
+"userManager": {
+  "port": [ "imageQueue:1", "faceDetection:2" ],
+  ...
+}
+```
+
+Where the [`ImageQueue`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/ImageQueue/ImageQueue.h) module returns with an `ImageMessage::Shared` and transfers the information to the first inputport of [`UserManager`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/UserManager/UserManager.h) and so does the [`FaceDetection`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/FaceDetection/FaceDetection.h) with `RoiMessage::Shared`.
+
+## Adding a New Module
+
+The native side must be only extended in case of adding a new module to the system.
+- First the `ModuleFactory::Create(...)` in [`ModuleFactory.cpp`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/ModuleFactory.cpp) which creates and initializes every module
+- Then the `ModuleConnector::Connect(...)` in [`ModuleConnector.cpp`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/ModuleConnector.cpp) which connects all the inputs (predecessors) to a given module
+- Finally the `connect(...)` in the anonymous namespace of [`ModuleConnector.cpp`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/ModuleConnector.cpp) which connects the ith input to a given module
+
+These are just copy-pasting 1-2 line, you should find the `// REMARK: Insert new modules here` comments in the files above.
 
 # References
 
