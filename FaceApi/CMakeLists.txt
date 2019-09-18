@@ -48,7 +48,6 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Messages)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/FaceDetection)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/FirstModule)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/Graph)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/ImageQueue)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/LastModule)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/UserHistory)
@@ -93,9 +92,9 @@ set(SOURCES;
   Messages/UserEntriesMessage.cpp;
   Modules/ModuleConnector.cpp;
   Modules/ModuleFactory.cpp;
+  Modules/ModuleGraph.cpp;
   Modules/FaceDetection/FaceDetection.cpp;
   Modules/FirstModule/FirstModule.cpp;
-  Modules/Graph/Graph.cpp;
   Modules/ImageQueue/ImageQueue.cpp;
   Modules/LastModule/LastModule.cpp;
   Modules/UserHistory/UserHistory.cpp;

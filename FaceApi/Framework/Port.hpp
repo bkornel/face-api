@@ -45,7 +45,7 @@ namespace fw
       static constexpr auto size = std::tuple_size<InputPorts>::value;
       Connect(std::make_index_sequence<size>{});
 
-      return fw::ErrorCode::OK;
+      return mOutputPort ? fw::ErrorCode::OK : fw::ErrorCode::BadState;
     }
 
     template<typename T>

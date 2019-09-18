@@ -20,16 +20,16 @@ namespace face
 
   FaceApi::FaceApi() :
     mOutputQueue("OutputQueue", 100.0F, 10),
-    mGraph(std::make_shared<Graph>())
+    mModuleGraph(std::make_shared<ModuleGraph>())
   {
     START_EASYLOGGINGPP(0, static_cast<char**>(nullptr));
-    mGraph->sFrameProcessed += MAKE_DELEGATE(&FaceApi::OnFrameProcessed, this);
+    mModuleGraph->sFrameProcessed += MAKE_DELEGATE(&FaceApi::OnFrameProcessed, this);
   }
 
   FaceApi::~FaceApi()
   {
     DeInitialize();
-    mGraph->sFrameProcessed -= MAKE_DELEGATE(&FaceApi::OnFrameProcessed, this);
+    mModuleGraph->sFrameProcessed -= MAKE_DELEGATE(&FaceApi::OnFrameProcessed, this);
   }
 
   fw::ErrorCode FaceApi::InitializeInternal(const cv::FileNode& /*iSettingsNode*/)
@@ -40,7 +40,7 @@ namespace face
       return result;
 
     // Create and init modules here
-    if ((result = mGraph->Initialize(Configuration::GetInstance().GetModulesNode())) != fw::ErrorCode::OK)
+    if ((result = mModuleGraph->Initialize(Configuration::GetInstance().GetModulesNode())) != fw::ErrorCode::OK)
       return result;
 
     // Start worker threads
@@ -62,7 +62,7 @@ namespace face
   void FaceApi::Clear()
   {
     std::lock_guard<std::recursive_mutex> lock(sAppMutex);
-    mGraph->Clear();
+    mModuleGraph->Clear();
     mOutputQueue.Clear();
     mCameraFrameId = 0U;
   }
@@ -108,7 +108,7 @@ namespace face
 
       std::lock_guard<std::recursive_mutex> lock(sAppMutex);
       FACE_PROFILER_FRAME_ID(GetLastFrameId());
-      mGraph->Process();
+      mModuleGraph->Process();
 
       ThreadSleep(1);
     }

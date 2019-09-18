@@ -15,24 +15,24 @@
 
 namespace face
 {
-  class Graph :
+  class ModuleGraph :
     public fw::Module
   {
     using PredecessorMap = std::map<int, fw::Module::Shared>;
     using FrameProcessedHandler = fw::Event<void(ImageMessage::Shared)>;
 
   public:
-    FW_DEFINE_SMART_POINTERS(Graph);
+    FW_DEFINE_SMART_POINTERS(ModuleGraph);
 
     static FrameProcessedHandler sFrameProcessed;
 
-    Graph() = default;
+    ModuleGraph() = default;
 
-    Graph(const Graph& iOther) = delete;
+    ModuleGraph(const ModuleGraph& iOther) = delete;
 
-    ~Graph() override;
+    ~ModuleGraph() override;
 
-    Graph& operator=(const Graph& iOther) = delete;
+    ModuleGraph& operator=(const ModuleGraph& iOther) = delete;
 
     void Clear() override;
 
@@ -58,6 +58,8 @@ namespace face
     fw::ErrorCode CreateConnections(const cv::FileNode& iModulesNode);
 
     fw::ErrorCode GetPredecessors(const cv::FileNode& iModule, const cv::FileNode& iModules, PredecessorMap& oPredecessors);
+
+    std::vector<cv::FileNode> GetConnectionOrder(const cv::FileNode& iModulesNode);
 
     FirstModule::Shared mFirstModule = nullptr;
     LastModule::Shared mLastModule = nullptr;

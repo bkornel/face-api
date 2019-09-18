@@ -44,6 +44,9 @@ namespace face
         return false;
       }
 
+      std::stringstream ss;
+      ss << "Predecessors of [" << iModule->GetName() << "]:\t";
+
       for (const auto& predecessor : iPredecessors)
       {
         if (!predecessor.second)
@@ -52,31 +55,63 @@ namespace face
           return false;
         }
 
-        if (set_input_port<TShared, FaceDetection>(derived, predecessor.second, predecessor.first)) continue;
-        if (set_input_port<TShared, FirstModule>(derived, predecessor.second, predecessor.first)) continue;
-        if (set_input_port<TShared, ImageQueue>(derived, predecessor.second, predecessor.first)) continue;
-        if (set_input_port<TShared, UserHistory>(derived, predecessor.second, predecessor.first)) continue;
-        if (set_input_port<TShared, UserManager>(derived, predecessor.second, predecessor.first)) continue;
-        if (set_input_port<TShared, UserProcessor>(derived, predecessor.second, predecessor.first)) continue;
-        if (set_input_port<TShared, Visualizer>(derived, predecessor.second, predecessor.first)) continue;
+        if (set_input_port<TShared, FaceDetection>(derived, predecessor.second, predecessor.first))
+        {
+          ss << "[" << predecessor.second->GetName() << ":" << predecessor.first << "]\t";
+          continue;
+        }
+
+        if (set_input_port<TShared, FirstModule>(derived, predecessor.second, predecessor.first))
+        {
+          ss << "[" << predecessor.second->GetName() << ":" << predecessor.first << "]\t";
+          continue;
+        }
+
+        if (set_input_port<TShared, ImageQueue>(derived, predecessor.second, predecessor.first))
+        {
+          ss << "[" << predecessor.second->GetName() << ":" << predecessor.first << "]\t";
+          continue;
+        }
+
+        if (set_input_port<TShared, UserHistory>(derived, predecessor.second, predecessor.first))
+        {
+          ss << "[" << predecessor.second->GetName() << ":" << predecessor.first << "]\t";
+          continue;
+        }
+
+        if (set_input_port<TShared, UserManager>(derived, predecessor.second, predecessor.first))
+        {
+          ss << "[" << predecessor.second->GetName() << ":" << predecessor.first << "]\t";
+          continue;
+        }
+
+        if (set_input_port<TShared, UserProcessor>(derived, predecessor.second, predecessor.first))
+        {
+          ss << "[" << predecessor.second->GetName() << ":" << predecessor.first << "]\t";
+          continue;
+        }
+
+        if (set_input_port<TShared, Visualizer>(derived, predecessor.second, predecessor.first))
+        {
+          ss << "[" << predecessor.second->GetName() << ":" << predecessor.first << "]\t";
+          continue;
+        }
+
         // REMARK: Insert new modules here
 
         LOG(ERROR) << "Connection cannot be created: " << predecessor.second->GetName() << " -> " << iModule->GetName();
         return false;
       }
 
-      derived->Connect();
+      LOG(INFO) << ss.str();
 
-      return true;
+      return derived->Connect() == fw::ErrorCode::OK;
     }
   }
 
   fw::ErrorCode ModuleConnector::Connect(fw::Module::Shared iModule, const PredecessorMap& iPredecessors)
   {
     CV_DbgAssert(iModule);
-
-    std::stringstream ss;
-    ss << "Predecessors of [" << iModule->GetName() << "]:\t";
 
     if (connect<FaceDetection>(iModule, iPredecessors)) return fw::ErrorCode::OK;
     if (connect<ImageQueue>(iModule, iPredecessors)) return fw::ErrorCode::OK;
@@ -87,8 +122,8 @@ namespace face
     if (connect<Visualizer>(iModule, iPredecessors)) return fw::ErrorCode::OK;
     // REMARK: Insert new modules here
 
-    LOG(INFO) << ss.str();
+    LOG(ERROR) << "Connection cannot be created: " << iModule->GetName();
 
-    return fw::ErrorCode::OK;
+    return fw::ErrorCode::BadState;
   }
 }

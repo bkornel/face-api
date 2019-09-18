@@ -58,9 +58,6 @@
     <Filter Include="Modules\LastModule">
       <UniqueIdentifier>{7a8b2dd8-8dea-4b94-9fda-9adb687bc8dc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Modules\Graph">
-      <UniqueIdentifier>{420a20b4-a5a0-4fb8-b98c-f9664991275a}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\IO.cc">
@@ -196,8 +193,8 @@
     <ClCompile Include="..\..\FaceApi\Messages\ImageArrivedMessage.cpp">
       <Filter>Messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\FaceApi\Modules\Graph\Graph.cpp">
-      <Filter>Modules\Graph</Filter>
+    <ClCompile Include="..\..\FaceApi\Modules\ModuleGraph.cpp">
+      <Filter>Modules</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -352,8 +349,8 @@
     <ClInclude Include="..\..\FaceApi\Messages\ImageArrivedMessage.h">
       <Filter>Messages</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\FaceApi\Modules\Graph\Graph.h">
-      <Filter>Modules\Graph</Filter>
+    <ClInclude Include="..\..\FaceApi\Modules\ModuleGraph.h">
+      <Filter>Modules</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

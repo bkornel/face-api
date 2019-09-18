@@ -1,4 +1,4 @@
-#include "Modules/Graph/Graph.h"
+#include "Modules/ModuleGraph.h"
 
 #include "Common/Configuration.h"
 
@@ -9,17 +9,18 @@
 #include "Modules/ModuleConnector.h"
 
 #include <easyloggingpp/easyloggingpp.h>
+#include <queue>
 
 namespace face
 {
-  Graph::FrameProcessedHandler Graph::sFrameProcessed;
+  ModuleGraph::FrameProcessedHandler ModuleGraph::sFrameProcessed;
 
-  Graph::~Graph()
+  ModuleGraph::~ModuleGraph()
   {
     DeInitialize();
   }
 
-  fw::ErrorCode Graph::Process()
+  fw::ErrorCode ModuleGraph::Process()
   {
     if (!IsInitialized()) return fw::ErrorCode::BadState;
 
@@ -38,13 +39,13 @@ namespace face
     return fw::ErrorCode::OK;
   }
 
-  void Graph::Clear()
+  void ModuleGraph::Clear()
   {
     for (auto& module : mModules)
       module->Clear();
   }
 
-  fw::ErrorCode Graph::InitializeInternal(const cv::FileNode& iModulesNode)
+  fw::ErrorCode ModuleGraph::InitializeInternal(const cv::FileNode& iModulesNode)
   {
     if (iModulesNode.empty())
     {
@@ -74,7 +75,7 @@ namespace face
     return fw::ErrorCode::OK;
   }
 
-  fw::ErrorCode Graph::DeInitializeInternal()
+  fw::ErrorCode ModuleGraph::DeInitializeInternal()
   {
     for (auto& module : mModules)
     {
@@ -86,7 +87,7 @@ namespace face
     return fw::ErrorCode::OK;
   }
 
-  fw::ErrorCode Graph::CreateModules(const cv::FileNode& iModulesNode)
+  fw::ErrorCode ModuleGraph::CreateModules(const cv::FileNode& iModulesNode)
   {
     CV_DbgAssert(!iModulesNode.empty());
 
@@ -143,14 +144,15 @@ namespace face
     return fw::ErrorCode::OK;
   }
 
-  fw::ErrorCode Graph::CreateConnections(const cv::FileNode& iModulesNode)
+  fw::ErrorCode ModuleGraph::CreateConnections(const cv::FileNode& iModulesNode)
   {
     CV_DbgAssert(!iModulesNode.empty());
 
     fw::ErrorCode result = fw::ErrorCode::OK;
+    std::vector<cv::FileNode> modules = GetConnectionOrder(iModulesNode);
 
     // Loop over the <modules> tag in the settings file
-    for (const auto& moduleNode : iModulesNode)
+    for (const auto& moduleNode : modules)
     {
       // Find the corresponding module
       auto it = std::find_if(mModules.begin(), mModules.end(), [&](const fw::Module::Shared& obj)
@@ -176,7 +178,10 @@ namespace face
 
       if (!predecessors.empty())
       {
-        ModuleConnector::Connect(module, predecessors);
+        if ((result = ModuleConnector::Connect(module, predecessors)) != fw::ErrorCode::OK)
+        {
+          return result;
+        }
       }
       else
       {
@@ -187,7 +192,7 @@ namespace face
     return result;
   }
 
-  fw::ErrorCode Graph::GetPredecessors(const cv::FileNode& iModule, const cv::FileNode& iModules, PredecessorMap& oPredecessors)
+  fw::ErrorCode ModuleGraph::GetPredecessors(const cv::FileNode& iModule, const cv::FileNode& iModules, PredecessorMap& oPredecessors)
   {
     CV_DbgAssert(!iModule.empty() && !iModules.empty());
 
@@ -196,7 +201,7 @@ namespace face
 
     // Check if it does not have a predecessor
     const cv::FileNode& portList = iModule["port"];
-    if (portList.empty() || portList.size() == 0U)
+    if (portList.empty())
     {
       return fw::ErrorCode::OK;
     }
@@ -215,7 +220,7 @@ namespace face
 
       // Tokenize the string: "predecessorName:portNumber"
       const auto tokens = fw::str::split(portNodeStr, ':');
-      if (tokens.size() != 2)
+      if (tokens.size() != 2U)
       {
         LOG(ERROR) << "Input port format is wrong. Module " << moduleName << ", port: " << portNodeStr;
         return fw::ErrorCode::BadData;
@@ -262,5 +267,82 @@ namespace face
     }
 
     return fw::ErrorCode::OK;
+  }
+
+  std::vector<cv::FileNode> ModuleGraph::GetConnectionOrder(const cv::FileNode& iModulesNode)
+  {
+    CV_DbgAssert(!iModulesNode.empty());
+
+    using ModulesPrioElem = std::pair<cv::FileNode, unsigned>;
+    std::vector<ModulesPrioElem> modulesPrio;
+
+    // Loop over the <modules> tag in the settings file
+    for (const auto& moduleNode : iModulesNode)
+    {
+      modulesPrio.emplace_back(moduleNode, 0U);
+    }
+
+    // Loop over the <modules> tag in the settings file
+    for (const auto& moduleNode : iModulesNode)
+    {
+      std::queue<std::string> predecessors;
+
+      // Loop over the <port> list of moduleNode
+      for (const auto& portNode : moduleNode["port"])
+      {
+        // Tokenize the string: "predecessorName:portNumber"
+        const auto tokens = fw::str::split(fw::str::trim(portNode.string()), ':');
+        if (tokens.size() != 2U)
+        {
+          continue;
+        }
+
+        predecessors.emplace(fw::str::trim(tokens[0]));
+      }
+
+      // Loop over the path of predecessors until the first module is not reached
+      while (!predecessors.empty())
+      {
+        const std::string& predecessorName = predecessors.front();
+
+        auto it = std::find_if(modulesPrio.begin(), modulesPrio.end(), [&](const ModulesPrioElem& iObj)
+        {
+          return predecessorName == fw::Module::CreateModuleName(iObj.first);
+        });
+
+        if (it != modulesPrio.end()) 
+        {
+          it->second++;
+
+          // Loop over the <port> list of it->first and queueing them
+          for (const auto& portNode : it->first["port"])
+          {
+            // Tokenize the string: "predecessorName:portNumber"
+            const auto tokens = fw::str::split(fw::str::trim(portNode.string()), ':');
+            if (tokens.size() != 2U)
+            {
+              continue;
+            }
+
+            predecessors.emplace(fw::str::trim(tokens[0]));
+          }
+        }
+
+        predecessors.pop();
+      }
+    }
+
+    std::sort(modulesPrio.begin(), modulesPrio.end(), [&](const ModulesPrioElem& iFirst, const ModulesPrioElem& iSecond)
+    {
+      return iFirst.second > iSecond.second;
+    });
+
+    std::vector<cv::FileNode> modules;
+    for (const auto& m : modulesPrio)
+    {
+      modules.emplace_back(m.first);
+    }
+
+    return modules;
   }
 }

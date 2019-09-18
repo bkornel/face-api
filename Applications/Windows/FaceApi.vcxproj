@@ -61,10 +61,10 @@
     <ClCompile Include="..\..\FaceApi\Messages\ImageArrivedMessage.cpp" />
     <ClCompile Include="..\..\FaceApi\Messages\ImageSizeChangedMessage.cpp" />
     <ClCompile Include="..\..\FaceApi\Modules\FirstModule\FirstModule.cpp" />
-    <ClCompile Include="..\..\FaceApi\Modules\Graph\Graph.cpp" />
     <ClCompile Include="..\..\FaceApi\Modules\LastModule\LastModule.cpp" />
     <ClCompile Include="..\..\FaceApi\Modules\ModuleConnector.cpp" />
     <ClCompile Include="..\..\FaceApi\Modules\ModuleFactory.cpp" />
+    <ClCompile Include="..\..\FaceApi\Modules\ModuleGraph.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\CLM.h" />
@@ -112,10 +112,10 @@
     <ClInclude Include="..\..\FaceApi\Messages\CommandMessage.h" />
     <ClInclude Include="..\..\FaceApi\Messages\ImageArrivedMessage.h" />
     <ClInclude Include="..\..\FaceApi\Modules\FirstModule\FirstModule.h" />
-    <ClInclude Include="..\..\FaceApi\Modules\Graph\Graph.h" />
     <ClInclude Include="..\..\FaceApi\Modules\LastModule\LastModule.h" />
     <ClInclude Include="..\..\FaceApi\Modules\ModuleConnector.h" />
     <ClInclude Include="..\..\FaceApi\Modules\ModuleFactory.h" />
+    <ClInclude Include="..\..\FaceApi\Modules\ModuleGraph.h" />
     <ClInclude Include="..\..\FaceApi\User\UserData.hpp" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\User\UserDispatcher.hpp" />
     <ClInclude Include="..\..\FaceApi\Messages\ImageSizeChangedMessage.h" />

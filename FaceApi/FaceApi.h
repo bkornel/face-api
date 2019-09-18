@@ -3,7 +3,7 @@
 #include "Framework/MessageQueue.hpp"
 #include "Framework/Module.h"
 
-#include "Modules/Graph/Graph.h"
+#include "Modules/ModuleGraph.h"
 
 #include <string>
 
@@ -35,12 +35,12 @@ namespace face
 
     inline unsigned GetLastFrameId() const
     {
-      return mGraph ? mGraph->GetLastFrameId() : 0U;
+      return mModuleGraph ? mModuleGraph->GetLastFrameId() : 0U;
     }
 
     inline long long GetLastTimestamp() const
     {
-      return mGraph ? mGraph->GetLastTimestamp() : 0LL;
+      return mModuleGraph ? mModuleGraph->GetLastTimestamp() : 0LL;
     }
 
     void SetWorkingDirectory(const std::string& iWorkingDirectory);
@@ -58,7 +58,7 @@ namespace face
 
     void OnFrameProcessed(ImageMessage::Shared iMessage);
 
-    Graph::Shared mGraph = nullptr;
+    ModuleGraph::Shared mModuleGraph = nullptr;
     unsigned mCameraFrameId = 0U;
     MessageQueue mOutputQueue;
   };

@@ -3,6 +3,8 @@
 #include "Messages/CommandMessage.h"
 #include "Messages/ImageSizeChangedMessage.h"
 
+#include <easyloggingpp/easyloggingpp.h>
+
 namespace fw
 {
   Module::CommandEventHandler Module::sCommand;
@@ -36,7 +38,12 @@ namespace fw
       }
 
       Clear();
-      result = InitializeInternal(iModuleNode);
+
+      if ((result = InitializeInternal(iModuleNode)) != fw::ErrorCode::OK)
+      {
+        LOG(ERROR) << "Error during initializing module: " << mName;
+      }
+
       mInitialized = (result == ErrorCode::OK);
       sCommand += MAKE_DELEGATE(&Module::OnCommand, this);
     }
