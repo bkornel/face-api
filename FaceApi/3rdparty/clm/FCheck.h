@@ -37,11 +37,11 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef __FCheck_h_
-#define __FCheck_h_
+#pragma once
 
-#include <vector>
 #include "PAW.h"
+#include <vector>
+
 namespace FACETRACKER
 {
 	//===========================================================================
@@ -93,6 +93,4 @@ namespace FACETRACKER
 		void Read(std::ifstream &s, bool readType = true);
 		bool Check(int idx, const  cv::Mat &im, cv::Mat &s);
 	};
-	//===========================================================================
 }
-#endif

@@ -14,12 +14,17 @@
       }
     },
     "modules": {
+      "firstModule": {
+        "port": []
+      },
       "imageQueue": {
+        "port": [ "firstModule:1" ],
         "bound": "10",
         "samplingFPS": "30.0",
         "thresholdMS": "100"
       },
       "faceDetection": {
+        "port": [ "imageQueue:1" ],
         "detectionSec": "10.0",
         "detectionOverlap": "0.2",
         "detectMultiScale": {
@@ -32,16 +37,15 @@
         "fileName": "haarcascade_frontalface_alt2.xml",
         "imageScale": "1.0"
       },
-      "userHistory": {
-        "removeFreqMs": "10000"
-      },
       "userManager": {
+        "port": [ "imageQueue:1", "faceDetection:2" ],
         "maxUsers": "1",
         "userAwaySec": "15.0",
         "userOverlap": "0.2",
         "templateScale": "0.3"
       },
       "userProcessor": {
+        "port": [ "imageQueue:1", "userManager:2" ],
         "headPose": {
           "estimateReprojection": "FALSE",
           "faceBoxOffset": "5.0"
@@ -62,7 +66,15 @@
           "epsilon": "1e-6"
         }
       },
-      "Visualizer": {
+      "userHistory": {
+        "port": [ "userProcessor:1" ],
+        "removeFreqMs": "10000"
+      },
+      "visualizer": {
+        "port": [ "imageQueue:1", "userManager:2" ]
+      },
+      "lastModule": {
+        "port": [ "visualizer:1" ]
       }
     }
   }

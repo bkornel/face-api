@@ -1,71 +1,77 @@
 #pragma once
 
-#include <string>
-
-#include "Common/Configuration.h"
-#include "Framework/Module.h"
 #include "Framework/MessageQueue.hpp"
-#include "Framework/FlowGraph.hpp"
+#include "Framework/Module.h"
+#include "Framework/Port.hpp"
+
 #include "Messages/ImageMessage.h"
+
+#include <string>
 
 namespace face
 {
-	class ImageQueue :
-		public fw::Module,
-		public fw::Port<ImageMessage::Shared>
-	{
-		using MessageQueue = fw::MessageQueue<ImageMessage::Shared>;
+  class ImageQueue :
+    public fw::Module,
+    public fw::Port<ImageMessage::Shared(unsigned)>
+  {
+    using MessageQueue = fw::MessageQueue<ImageMessage::Shared>;
 
-	public:
-		ImageQueue();
+  public:
+    FW_DEFINE_SMART_POINTERS(ImageQueue);
 
-		virtual ~ImageQueue() = default;
+    ImageQueue();
 
-		fw::ErrorCode Push(const cv::Mat& iFrame);
+    virtual ~ImageQueue() = default;
 
-		ImageMessage::Shared Pop(unsigned iTickNumber);
+    fw::ErrorCode Push(const cv::Mat& iFrame);
 
-		void Clear() override
-		{
-			mQueue.Clear();
-		}
+    ImageMessage::Shared Main(unsigned iTickNumber) override;
 
-		inline const cv::Size& GetImageSize() const
-		{
-			return mImageSize;
-		}
+    void Clear() override
+    {
+      mPushFrameId = 0U;
+      mQueue.Clear();
+    }
 
-		inline unsigned GetLastFrameId() const
-		{
-			return mLastFrameId;
-		}
+    inline const cv::Size& GetImageSize() const
+    {
+      return mImageSize;
+    }
 
-		inline long long GetLastTimestamp() const
-		{
-			return mLastTimestamp;
-		}
+    inline unsigned GetLastFrameId() const
+    {
+      return mLastFrameId;
+    }
 
-		inline int GetQueueSize() const
-		{
-			return mQueue.GetSize();
-		}
+    inline long long GetLastTimestamp() const
+    {
+      return mLastTimestamp;
+    }
 
-		inline float GetSamplingFPS() const
-		{
-			return mQueue.GetSamplingFPS();
-		}
+    inline int GetQueueSize() const
+    {
+      return mQueue.GetSize();
+    }
 
-		inline int GetBound() const
-		{
-			return mQueue.GetBound();
-		}
+    inline float GetSamplingFPS() const
+    {
+      return mQueue.GetSamplingFPS();
+    }
 
-	private:
-		fw::ErrorCode InitializeInternal(const cv::FileNode& iSettings) override;
+    inline int GetBound() const
+    {
+      return mQueue.GetBound();
+    }
 
-		unsigned mLastFrameId = 0U;		///< Holds the ID of the last image frame.
-		long long mLastTimestamp = 0;
-		MessageQueue mQueue;			///< Queue for handling the frames
-		cv::Size mImageSize;
-	};
+  private:
+    fw::ErrorCode InitializeInternal(const cv::FileNode& iSettings) override;
+
+    void OnCommand(fw::Message::Shared iMessage) override;
+
+    unsigned mPushFrameId = 0U;
+    unsigned mLastFrameId = 0U;		///< Holds the ID of the last image frame.
+    long long mLastTimestamp = 0;
+    MessageQueue mQueue;			    ///< Queue for handling the frames
+    cv::Size mImageSize;
+  };
 }

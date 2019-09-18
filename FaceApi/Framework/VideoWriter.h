@@ -4,36 +4,36 @@
 
 namespace face
 {
-	class VideoWriter
-	{
-	public:
-		const static int sDefaultFourCC;
+  class VideoWriter
+  {
+  public:
+    const static int sDefaultFourCC;
 
-		VideoWriter() = default;
+    VideoWriter() = default;
 
-		~VideoWriter();
+    VideoWriter(const VideoWriter& iOther) = delete;
 
-		void Create(const std::string& iPath, const std::string& iName, int iFourCC = sDefaultFourCC, double iFPS = 25.0, bool iIsColor = true);
+    ~VideoWriter();
 
-		bool Write(const cv::Mat& iFrame);
+    VideoWriter& operator=(const VideoWriter& iOther) = delete;
 
-		void Close();
+    void Create(const std::string& iPath, const std::string& iName, int iFourCC = sDefaultFourCC, double iFPS = 25.0, bool iIsColor = true);
 
-		inline bool IsOpened() const
-		{
-			return mVideoWriter.isOpened();
-		}
+    bool Write(const cv::Mat& iFrame);
 
-	private:
-		VideoWriter(const VideoWriter& iOther) = delete;
+    void Close();
 
-		VideoWriter& operator=(const VideoWriter& iOther) = delete;
+    inline bool IsOpened() const
+    {
+      return mVideoWriter.isOpened();
+    }
 
-		cv::VideoWriter mVideoWriter;
-		std::string mFilename;
+  private:
+    cv::VideoWriter mVideoWriter;
+    std::string mFilename;
 
-		int mFourCC = sDefaultFourCC;
-		double mFPS = 25.0;
-		bool mIsColor = true;
-	};
+    int mFourCC = sDefaultFourCC;
+    double mFPS = 25.0;
+    bool mIsColor = true;
+  };
 }

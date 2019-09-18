@@ -1,92 +1,65 @@
 #pragma once
 
-#include <string>
-#include <vector>
-
+#include "Framework/MessageQueue.hpp"
 #include "Framework/Module.h"
-#include "Framework/FlowGraph.hpp"
-#include "Modules/ImageQueue/ImageQueue.h"
+
+#include "Modules/ModuleGraph.h"
+
+#include <string>
 
 namespace face
 {
-	class FaceDetection;
-	class UserHistory;
-	class UserManager;
-	class UserProcessor;
-	class Visualizer;
+  class FaceApi :
+    public fw::Module
+  {
+    using MessageQueue = fw::MessageQueue<ImageMessage::Shared>;
 
-	class FaceApi :
-		public fw::Module
-	{
-		typedef fw::MessageQueue<ImageMessage::Shared> MessageQueue;
+  public:
+    static FaceApi& GetInstance();
 
-	public:
-		static FaceApi& GetInstance();
+    FaceApi(const FaceApi& iOther) = delete;
 
-		virtual ~FaceApi();
+    ~FaceApi() override;
 
-		fw::ErrorCode PushCameraFrame(const cv::Mat& iFrame);
+    FaceApi& operator=(const FaceApi& iOther) = delete;
 
-		fw::ErrorCode GetResultImage(cv::Mat& oResultImage);
+    void PushCameraFrame(const cv::Mat& iFrame);
 
-		void Clear() override;
+    fw::ErrorCode GetResultImage(cv::Mat& oResultImage);
 
-		void SetRunDetectionFlag(bool iForce = false);
+    void Clear() override;
 
-		inline void OnOffVerbose()
-		{
-			static bool verbose = Configuration::GetInstance().GetOutput().verbose;
-			verbose = !verbose;
-			Configuration::GetInstance().SetVerboseMode(verbose);
-		}
+    void SetRunFaceDetector();
 
-		inline unsigned GetLastFrameId() const
-		{
-			return mImageQueue->GetLastFrameId();
-		}
+    void OnOffVerbose();
 
-		inline long long GetLastTimestamp() const
-		{
-			return mImageQueue->GetLastTimestamp();
-		}
+    inline unsigned GetLastFrameId() const
+    {
+      return mModuleGraph ? mModuleGraph->GetLastFrameId() : 0U;
+    }
 
-		void SetWorkingDirectory(const std::string& iWorkingDirectory)
-		{
-			Configuration::GetInstance().SetWorkingDirectory(iWorkingDirectory);
-		}
+    inline long long GetLastTimestamp() const
+    {
+      return mModuleGraph ? mModuleGraph->GetLastTimestamp() : 0LL;
+    }
 
-	private:
-		static std::recursive_mutex sAppMutex;		///< The mutex to lock critical sections
+    void SetWorkingDirectory(const std::string& iWorkingDirectory);
 
-		FaceApi();
+  private:
+    static std::recursive_mutex sAppMutex;		///< The mutex to lock critical sections
 
-		FaceApi(const FaceApi& iOther) = delete;
+    FaceApi();
 
-		FaceApi& operator=(const FaceApi& iOther) = delete;
+    fw::ErrorCode InitializeInternal(const cv::FileNode& iSettingsNode) override;
 
-		fw::ErrorCode InitializeInternal(const cv::FileNode& iSettingsNode) override;
+    fw::ErrorCode DeInitializeInternal() override;
 
-		fw::ErrorCode DeInitializeInternal() override;
+    fw::ErrorCode Run() override;
 
-		fw::ErrorCode ThreadProcedure() override;
+    void OnFrameProcessed(ImageMessage::Shared iMessage);
 
-		fw::ErrorCode CreateModules();
-
-		fw::ErrorCode CreateConnections();
-
-		fw::Executor::Shared mExecutor = nullptr;
-		fw::FirstNode<unsigned> mFirstNode;
-		fw::LastNode<bool> mLastNode;
-
-		std::vector<fw::Module*> mModules;
-
-		ImageQueue* mImageQueue = nullptr;
-		FaceDetection* mFaceDetection = nullptr;
-		UserHistory* mUserHistory = nullptr;
-		UserManager* mUserManager = nullptr;
-		UserProcessor* mUserProcessor = nullptr;
-		Visualizer* mVisualizer = nullptr;
-
-		MessageQueue mOutputQueue;
-	};
+    ModuleGraph::Shared mModuleGraph = nullptr;
+    unsigned mCameraFrameId = 0U;
+    MessageQueue mOutputQueue;
+  };
 }

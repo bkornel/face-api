@@ -57,7 +57,14 @@
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\UserProcessor.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\Visualizer\Visualizer.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\User\User.cpp" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\User\UserData.cpp" />
+    <ClCompile Include="..\..\FaceApi\Messages\CommandMessage.cpp" />
+    <ClCompile Include="..\..\FaceApi\Messages\ImageArrivedMessage.cpp" />
+    <ClCompile Include="..\..\FaceApi\Messages\ImageSizeChangedMessage.cpp" />
+    <ClCompile Include="..\..\FaceApi\Modules\FirstModule\FirstModule.cpp" />
+    <ClCompile Include="..\..\FaceApi\Modules\LastModule\LastModule.cpp" />
+    <ClCompile Include="..\..\FaceApi\Modules\ModuleConnector.cpp" />
+    <ClCompile Include="..\..\FaceApi\Modules\ModuleFactory.cpp" />
+    <ClCompile Include="..\..\FaceApi\Modules\ModuleGraph.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\CLM.h" />
@@ -101,8 +108,17 @@
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\UserProcessor.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\Visualizer\Visualizer.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\User\User.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\User\UserData.h" />
+    <ClInclude Include="..\..\FaceApi\Framework\Port.hpp" />
+    <ClInclude Include="..\..\FaceApi\Messages\CommandMessage.h" />
+    <ClInclude Include="..\..\FaceApi\Messages\ImageArrivedMessage.h" />
+    <ClInclude Include="..\..\FaceApi\Modules\FirstModule\FirstModule.h" />
+    <ClInclude Include="..\..\FaceApi\Modules\LastModule\LastModule.h" />
+    <ClInclude Include="..\..\FaceApi\Modules\ModuleConnector.h" />
+    <ClInclude Include="..\..\FaceApi\Modules\ModuleFactory.h" />
+    <ClInclude Include="..\..\FaceApi\Modules\ModuleGraph.h" />
+    <ClInclude Include="..\..\FaceApi\User\UserData.hpp" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\User\UserDispatcher.hpp" />
+    <ClInclude Include="..\..\FaceApi\Messages\ImageSizeChangedMessage.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{3416DE23-C794-4DD7-B3CA-5BFAF7649D6D}</ProjectGuid>
@@ -197,8 +213,10 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories></AdditionalLibraryDirectories>
-      <AdditionalDependencies></AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>
@@ -240,8 +258,10 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories></AdditionalLibraryDirectories>
-      <AdditionalDependencies></AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>

@@ -1,5 +1,12 @@
 #pragma once
 
+#include "Framework/Stopwatch.h"
+
+#include <map>
+#include <vector>
+#include <string>
+#include <mutex>
+
 #define ENABLE_FACE_PROFILER
 
 // Profiler is enabled
@@ -14,56 +21,49 @@
 #define FACE_PROFILER_SAVE(name)
 #endif
 
-#include <map>
-#include <vector>
-#include <string>
-#include <mutex>
-
-#include "Stopwatch.h"
-
 namespace fw
 {
-	class Profiler
-	{
-	public:
-		explicit Profiler(const std::string& iName);
+  class Profiler
+  {
+  public:
+    explicit Profiler(const std::string& iName);
 
-		~Profiler();
+    ~Profiler();
 
-	private:
-		std::string mName;
-		Stopwatch mStopwatch;
-	};
+  private:
+    std::string mName;
+    Stopwatch mStopwatch;
+  };
 
-	class ProfilerDatabase
-	{
-	public:
-		using Measurement = std::pair<unsigned, double>;
+  class ProfilerDatabase
+  {
+  public:
+    using Measurement = std::pair<unsigned, double>;
 
-		static ProfilerDatabase& GetInstance();
+    static ProfilerDatabase& GetInstance();
 
-		void Push(const std::string& iName, double iMilliseconds);
+    void Push(const std::string& iName, double iMilliseconds);
 
-		void Save(const std::string& iName) const;
+    void Save(const std::string& iName) const;
 
-		std::map<std::string, Measurement> GetLastMeasurement() const;
+    std::map<std::string, Measurement> GetLastMeasurement() const;
 
-		inline void setCurrentFrameId(unsigned iCurrentFrameId)
-		{
-			mCurrentFrameId = iCurrentFrameId;
-		}
+    inline void setCurrentFrameId(unsigned iCurrentFrameId)
+    {
+      mCurrentFrameId = iCurrentFrameId;
+    }
 
-	private:
-		static std::recursive_mutex sMutex;
+  private:
+    static std::recursive_mutex sMutex;
 
-		ProfilerDatabase() = default;
+    ProfilerDatabase() = default;
 
-		ProfilerDatabase(const ProfilerDatabase& iOther) = delete;
+    ProfilerDatabase(const ProfilerDatabase& iOther) = delete;
 
-		ProfilerDatabase& operator=(const ProfilerDatabase& iOther) = delete;
+    ProfilerDatabase& operator=(const ProfilerDatabase& iOther) = delete;
 
-		unsigned mCurrentFrameId = 0U;
-		std::map<std::size_t, std::string> mNames;
-		std::map<std::size_t, std::vector<Measurement>> mMeasurements;
-	};
+    unsigned mCurrentFrameId = 0U;
+    std::map<std::size_t, std::string> mNames;
+    std::map<std::size_t, std::vector<Measurement>> mMeasurements;
+  };
 }

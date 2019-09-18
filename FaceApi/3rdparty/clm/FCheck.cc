@@ -38,8 +38,10 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ///////////////////////////////////////////////////////////////////////////////
 #include "FCheck.h"
+
 using namespace FACETRACKER;
 using namespace std;
+
 FCheck::FCheck(FCheck const&rhs)
 {
 	this->_b = rhs._b; this->_w = rhs._w.clone(); this->_paw = rhs._paw;
@@ -60,7 +62,7 @@ FCheck& FCheck::operator= (FCheck const& rhs)
 //===========================================================================
 void FCheck::Init(double b, cv::Mat &w, PAW &paw)
 {
-	assert((w.type() == CV_64F) && (w.rows == paw._nPix));
+  CV_DbgAssert((w.type() == CV_64F) && (w.rows == paw._nPix));
 	_b = b; _w = w.clone(); _paw = paw;
 	crop_.create(_paw._mask.rows, _paw._mask.cols, CV_8U);
 	vec_.create(_paw._nPix, 1, CV_64F);
@@ -68,12 +70,12 @@ void FCheck::Init(double b, cv::Mat &w, PAW &paw)
 //===========================================================================
 void FCheck::Load(const char* fname)
 {
-	ifstream s(fname); assert(s.is_open()); this->Read(s); s.close();
+	ifstream s(fname); CV_DbgAssert(s.is_open()); this->Read(s); s.close();
 }
 //===========================================================================
 void FCheck::Save(const char* fname)
 {
-	ofstream s(fname); assert(s.is_open()); this->Write(s); s.close();
+	ofstream s(fname); CV_DbgAssert(s.is_open()); this->Write(s); s.close();
 }
 //===========================================================================
 void FCheck::Write(ofstream &s)
@@ -84,7 +86,7 @@ void FCheck::Write(ofstream &s)
 //===========================================================================
 void FCheck::Read(ifstream &s, bool readType)
 {
-	if (readType) { int type; s >> type; assert(type == IO::FCHECK); }
+	if (readType) { int type = 0; s >> type; CV_DbgAssert(type == IO::FCHECK); }
 	s >> _b; IO::ReadMat(s, _w); _paw.Read(s);
 	crop_.create(_paw._mask.rows, _paw._mask.cols, CV_8U);
 	vec_.create(_paw._nPix, 1, CV_64F);
@@ -92,7 +94,7 @@ void FCheck::Read(ifstream &s, bool readType)
 //===========================================================================
 bool FCheck::Check(const cv::Mat &im, cv::Mat &s)
 {
-	assert((im.type() == CV_8U) && (s.type() == CV_64F) &&
+  CV_DbgAssert((im.type() == CV_8U) && (s.type() == CV_64F) &&
 		(s.rows / 2 == _paw.nPoints()) && (s.cols == 1));
 	_paw.Crop(im, crop_, s);
 	if ((vec_.rows != _paw._nPix) || (vec_.cols != 1))vec_.create(_paw._nPix, 1, CV_64F);
@@ -108,12 +110,12 @@ bool FCheck::Check(const cv::Mat &im, cv::Mat &s)
 //===========================================================================
 void MFCheck::Load(const char* fname)
 {
-	ifstream s(fname); assert(s.is_open()); this->Read(s); s.close();
+	ifstream s(fname); CV_DbgAssert(s.is_open()); this->Read(s); s.close();
 }
 //===========================================================================
 void MFCheck::Save(const char* fname)
 {
-	ofstream s(fname); assert(s.is_open()); this->Write(s); s.close();
+	ofstream s(fname); CV_DbgAssert(s.is_open()); this->Write(s); s.close();
 }
 //===========================================================================
 void MFCheck::Write(ofstream &s)
@@ -124,14 +126,14 @@ void MFCheck::Write(ofstream &s)
 //===========================================================================
 void MFCheck::Read(ifstream &s, bool readType)
 {
-	if (readType) { int type; s >> type; assert(type == IO::MFCHECK); }
-	int n; s >> n; _fcheck.resize(n);
+	if (readType) { int type = 0; s >> type; CV_DbgAssert(type == IO::MFCHECK); }
+	int n = 0; s >> n; _fcheck.resize(n);
 	for (int i = 0; i < n; i++)_fcheck[i].Read(s);
 }
 //===========================================================================
 bool MFCheck::Check(int idx, const cv::Mat &im, cv::Mat &s)
 {
-	assert((idx >= 0) && (idx < (int)_fcheck.size()));
+  CV_DbgAssert((idx >= 0) && (idx < (int)_fcheck.size()));
 	return _fcheck[idx].Check(im, s);
 }
 //===========================================================================

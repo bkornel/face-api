@@ -1,54 +1,60 @@
 #pragma once
 
-#include <string>
-#include <memory>
+#include "Framework/Event.hpp"
+#include "Framework/FlowGraph.hpp"
+#include "Framework/Message.h"
+#include "Framework/Thread.h"
+
 #include <opencv2/core.hpp>
 
-#include "Thread.h"
-#include "UtilOCV.h"
-#include "UtilString.h"
+#include <string>
+#include <memory>
 
 namespace fw
 {
-	class Module :
-		public Thread
-	{
-	public:
-		explicit Module(const std::string& iName);
+  class Module :
+    public Thread
+  {
+  public:
+    FW_DEFINE_SMART_POINTERS(Module);
 
-		virtual ~Module() = default;
+    static std::string CreateModuleName(const cv::FileNode& iModuleNode);
 
-		virtual ErrorCode Initialize(const cv::FileNode& iSettings);
+    Module() = default;
 
-		virtual ErrorCode DeInitialize();
+    ~Module() override = default;
 
-		virtual void Clear()
-		{
-		}
+    virtual ErrorCode Initialize(const cv::FileNode& iModuleNode);
 
-		inline bool IsInitialized() const
-		{
-			return mInitialized;
-		}
+    virtual ErrorCode DeInitialize();
 
-		inline const std::string& GetName() const
-		{
-			return mName;
-		}
+    // Should be deleted, now it's only called when the frame size has changed
+    // This is going to be substituted with events
+    virtual void Clear();
 
-	protected:
-		virtual ErrorCode InitializeInternal(const cv::FileNode& iSettings)
-		{
-			return fw::ErrorCode::OK;
-		}
+    inline bool IsInitialized() const
+    {
+      return mInitialized;
+    }
 
-		virtual ErrorCode DeInitializeInternal()
-		{
-			return fw::ErrorCode::OK;
-		}
+    inline const std::string& GetName() const
+    {
+      return mName;
+    }
 
-		bool mInitialized = false;
+  protected:
+    using CommandEventHandler = Event<void(Message::Shared)>;
 
-		std::string mName;
-	};
+    static CommandEventHandler sCommand;
+
+    virtual ErrorCode InitializeInternal(const cv::FileNode& iModuleNode);
+
+    virtual ErrorCode DeInitializeInternal();
+
+    virtual void OnCommand(Message::Shared iMessage);
+
+    bool mInitialized = false;
+    bool mVerboseMode = false;
+    std::string mName;
+  };
 }

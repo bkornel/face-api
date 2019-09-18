@@ -1539,7 +1539,7 @@ namespace el
 						}
 						else
 						{
-							m_params.push_back(std::string(m_argv[i]));
+							m_params.emplace_back(std::string(m_argv[i]));
 						}
 					}
 				}
@@ -1983,7 +1983,7 @@ namespace el
 					setValue(conf->level(), static_cast<std::size_t>(v), &m_maxLogFileSizeMap);
 					if (v != 0)
 					{
-						withFileSizeLimit.push_back(conf);
+						withFileSizeLimit.emplace_back(conf);
 					}
 				}
 				else if (conf->configurationType() == ConfigurationType::LogFlushThreshold)
@@ -2490,7 +2490,7 @@ namespace el
 				return;
 			}
 			base::threading::ScopedLock scopedLock(customFormatSpecifiersLock());
-			m_customFormatSpecifiers.push_back(customFormatSpecifier);
+			m_customFormatSpecifiers.emplace_back(customFormatSpecifier);
 		}
 
 		bool Storage::uninstallCustomFormatSpecifier(const char* formatSpecifier)
@@ -2967,7 +2967,7 @@ namespace el
 				m_loggerIds.reserve(count);
 				for (int i = 0; i < count; ++i)
 				{
-					m_loggerIds.push_back(std::string(id));
+					m_loggerIds.emplace_back(std::string(id));
 					id = va_arg(loggersList, const char*);
 				}
 				va_end(loggersList);
@@ -3305,20 +3305,20 @@ namespace el
 							{
 								// Success (see http://gcc.gnu.org/onlinedocs/libstdc++/libstdc++-html-USERS-4.3/a01696.html)
 								StackTraceEntry entry(i - 1, location, demangName, hex, addr);
-								m_stack.push_back(entry);
+								m_stack.emplace_back(entry);
 							}
 							else
 							{
 								// Not successful - we will use mangled name
 								StackTraceEntry entry(i - 1, location, mangName, hex, addr);
-								m_stack.push_back(entry);
+								m_stack.emplace_back(entry);
 							}
 							free(demangName);
 						}
 						else
 						{
 							StackTraceEntry entry(i - 1, line);
-							m_stack.push_back(entry);
+							m_stack.emplace_back(entry);
 						}
 					}
 				}
@@ -3542,7 +3542,7 @@ namespace el
 		for (base::RegisteredLoggers::iterator it = ELPP->registeredLoggers()->list().begin();
 			it != ELPP->registeredLoggers()->list().end(); ++it)
 		{
-			targetList->push_back(it->first);
+			targetList->emplace_back(it->first);
 		}
 		return targetList;
 	}

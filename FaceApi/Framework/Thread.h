@@ -1,47 +1,47 @@
 #pragma once
 
+#include "Framework/Util.h"
+
 #include <memory>
 #include <future>
 
-#include "Util.h"
-
 namespace fw
 {
-	class Thread
-	{
-	public:
-		Thread() = default;
+  class Thread
+  {
+  public:
+    Thread() = default;
 
-		virtual ~Thread();
+    Thread(const Thread& iOther) = delete;
 
-		ErrorCode StartThread();
+    virtual ~Thread();
 
-		ErrorCode StopThread();
+    Thread& operator=(const Thread& iOther) = delete;
 
-		void ThreadSleep(long long iMilliseconds);
+    ErrorCode StartThread();
 
-		bool IsRunning() const;
+    ErrorCode StopThread();
 
-		inline bool GetThreadStopSignal() const
-		{
-			return mStopThread;
-		}
+    void ThreadSleep(long long iMilliseconds);
 
-		inline void StopSignalThread()
-		{
-			mStopThread = true;
-		}
+    bool IsRunning() const;
 
-	protected:
-		virtual ErrorCode ThreadProcedure();
+    inline bool GetThreadStopSignal() const
+    {
+      return mStopThread;
+    }
 
-	private:
-		Thread(const Thread& iOther) = delete;
+    inline void StopSignalThread()
+    {
+      mStopThread = true;
+    }
 
-		Thread& operator=(const Thread& iOther) = delete;
+  protected:
+    virtual ErrorCode Run();
 
-		std::future<ErrorCode> mThread;
-		volatile bool mStopThread = false;
-		volatile bool mFirstRun = true;
-	};
+  private:
+    std::future<ErrorCode> mThread;
+    volatile bool mStopThread = false;
+    volatile bool mFirstRun = true;
+  };
 }

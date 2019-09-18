@@ -1,32 +1,32 @@
 #pragma once
 
+#include "Framework/Util.h"
+
 #include <exception>
 #include <string>
 
-#include "Util.h"
-
 namespace fw
 {
-	class Exception :
-		public std::exception
-	{
-	public:
-		Exception(ErrorCode iErrorCode, const std::string& iInfoText);
+  class Exception :
+    public std::exception
+  {
+  public:
+    Exception(ErrorCode iErrorCode, const std::string& iInfoText);
 
-		Exception(ErrorCode iErrorCode, const char* iInfoText = "");
+    Exception(ErrorCode iErrorCode, const char* iInfoText = "");
 
-		Exception(const Exception& iOther);
+    Exception(const Exception& iOther);
 
-		virtual ~Exception() noexcept;
+    virtual ~Exception() noexcept = default;
 
-		Exception& operator=(const Exception& iOther);
+    Exception& operator=(const Exception& iOther);
 
-		virtual const char* what() const throw();
+    virtual const char* what() const throw();
 
-	private:
-		void CreateErrorText(ErrorCode iErrorCode, const std::string& iInfoText);
+  private:
+    void CreateErrorText(const std::string& iInfoText);
 
-		ErrorCode mErrorCode;
-		std::string mErrorText;
-	};
+    ErrorCode mErrorCode;
+    std::string mErrorText;
+  };
 }

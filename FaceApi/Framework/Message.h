@@ -1,45 +1,45 @@
 #pragma once
 
+#include "Framework/Util.h"
+
 #include <iostream>
 #include <memory>
 
-#include "Framework/Util.h"
-
 namespace fw
 {
-	class Message
-	{
-	public:
-		FW_DEFINE_SMART_POINTERS(Message)
+  class Message
+  {
+  public:
+    FW_DEFINE_SMART_POINTERS(Message);
 
-		Message(unsigned iFrameId, long long iTimestamp);
+    Message(unsigned iFrameId, long long iTimestamp);
 
-		virtual ~Message() = default;
+    Message(const Message& iOther) = delete;
 
-		friend inline std::ostream& operator<<(std::ostream& ioStream, const Message& iMessage);
+    virtual ~Message() = default;
 
-		inline unsigned GetFrameId() const
-		{
-			return mFrameId;
-		}
+    Message& operator=(const Message& iOther) = delete;
 
-		inline long long GetTimestamp() const
-		{
-			return mTimestamp;
-		}
+    friend inline std::ostream& operator<<(std::ostream& ioStream, const Message& iMessage);
 
-	private:
-		Message(const Message& iOther) = delete;
+    inline unsigned GetFrameId() const
+    {
+      return mFrameId;
+    }
 
-		Message& operator=(const Message& iOther) = delete;
+    inline long long GetTimestamp() const
+    {
+      return mTimestamp;
+    }
 
-		unsigned mFrameId = 0U;
-		long long mTimestamp = 0;
-	};
+  private:
+    unsigned mFrameId = 0U;
+    long long mTimestamp = 0;
+  };
 
-	inline std::ostream& operator<< (std::ostream& ioStream, const Message& iMessage)
-	{
-		ioStream << "[Base] Frame ID: " << iMessage.mFrameId << ", timestamp: " << iMessage.mTimestamp;
-		return ioStream;
-	}
+  inline std::ostream& operator<< (std::ostream& ioStream, const Message& iMessage)
+  {
+    ioStream << "[Base] Frame ID: " << iMessage.mFrameId << ", timestamp: " << iMessage.mTimestamp;
+    return ioStream;
+  }
 }

@@ -1,8 +1,7 @@
 #pragma once
 
-#include "Common/Configuration.h"
-#include "Framework/Module.h"
-#include "Framework/FlowGraph.hpp"
+#include "Framework/Port.hpp"
+#include "Framework/Stopwatch.h"
 
 #include "User/User.h"
 #include "Messages/ImageMessage.h"
@@ -14,22 +13,24 @@
 
 namespace face
 {
-	class UserProcessor :
-		public fw::Module,
-		public fw::Port<ActiveUsersMessage::Shared>
-	{
-	public:
-		UserProcessor();
+  class UserProcessor :
+    public fw::Module,
+    public fw::Port<ActiveUsersMessage::Shared(ImageMessage::Shared, ActiveUsersMessage::Shared)>
+  {
+  public:
+    FW_DEFINE_SMART_POINTERS(UserProcessor);
 
-		virtual ~UserProcessor() = default;
+    UserProcessor() = default;
 
-		ActiveUsersMessage::Shared Process(ImageMessage::Shared iImage, ActiveUsersMessage::Shared iActiveUsers);
+    virtual ~UserProcessor() = default;
 
-	private:
-		fw::ErrorCode InitializeInternal(const cv::FileNode& iSettings) override;
+    ActiveUsersMessage::Shared Main(ImageMessage::Shared iImage, ActiveUsersMessage::Shared iActiveUsers) override;
 
-		ShapeModelDispatcher mShapeModelDispatcher;
-		PoseEstimationDispatcher mPoseEstimationDispatcher;
-		ShapeNormDispatcher mShapeNormDispatcher;
-	};
+  private:
+    fw::ErrorCode InitializeInternal(const cv::FileNode& iSettings) override;
+
+    ShapeModelDispatcher mShapeModelDispatcher;
+    PoseEstimationDispatcher mPoseEstimationDispatcher;
+    ShapeNormDispatcher mShapeNormDispatcher;
+  };
 }

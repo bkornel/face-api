@@ -37,9 +37,10 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef __PAW_h_
-#define __PAW_h_
+#pragma once
+
 #include "IO.h"
+
 namespace FACETRACKER
 {
 	//===========================================================================
@@ -84,4 +85,3 @@ namespace FACETRACKER
 	};
 	//===========================================================================
 }
-#endif

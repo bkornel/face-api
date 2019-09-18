@@ -1,70 +1,91 @@
 #pragma once
 
-#include <map>
-#include <mutex>
+#include "Framework/Message.h"
+
 #include <opencv2/core/core.hpp>
 
-#include "Framework/Message.h"
+#include <map>
+#include <mutex>
 
 namespace face
 {
-	class ImageMessage :
-		public fw::Message
-	{
-	public:
-		FW_DEFINE_SMART_POINTERS(ImageMessage)
+  class ImageMessage :
+    public fw::Message
+  {
+  public:
+    FW_DEFINE_SMART_POINTERS(ImageMessage);
 
-		ImageMessage(const cv::Mat& iImage, unsigned iFrameId, long long iTimestamp);
+    struct QueueData
+    {
+      int size = 0;
+      float samplingFPS = 0.0F;
+      int bound = 0;
+    };
 
-		virtual ~ImageMessage() = default;
+    ImageMessage(const cv::Mat& iImage, unsigned iFrameId, long long iTimestamp);
 
-		friend inline std::ostream& operator<<(std::ostream& ioStream, const ImageMessage& iMessage);
+    ~ImageMessage() override = default;
 
-		inline bool IsEmpty() const
-		{
-			return mFrames.first.empty();
-		}
+    friend inline std::ostream& operator<<(std::ostream& ioStream, const ImageMessage& iMessage);
 
-		inline const cv::Mat& GetFrameBGR() const
-		{
-			return mFrames.first;
-		}
+    inline bool IsEmpty() const
+    {
+      return mFrames.first.empty();
+    }
 
-		const cv::Mat& GetFrameGray();
+    inline const cv::Mat& GetFrameBGR() const
+    {
+      return mFrames.first;
+    }
 
-		const cv::Mat& GetResizedBGR(float iScaleFactor);
+    const cv::Mat& GetFrameGray();
 
-		const cv::Mat& GetResizedGray(float iScaleFactor);
+    const cv::Mat& GetResizedBGR(float iScaleFactor);
 
-		inline int GetWidth() const
-		{
-			return mFrames.first.cols;
-		}
+    const cv::Mat& GetResizedGray(float iScaleFactor);
 
-		inline int GetHeight() const
-		{
-			return mFrames.first.rows;
-		}
+    inline int GetWidth() const
+    {
+      return mFrames.first.cols;
+    }
 
-		inline cv::Size GetSize() const
-		{
-			return mFrames.first.size();
-		}
+    inline int GetHeight() const
+    {
+      return mFrames.first.rows;
+    }
 
-	private:
-		using ImagePair = std::pair<cv::Mat, cv::Mat>; // BGR - Gray
-		using ResizedImages = std::map<int, ImagePair>; // Key: width of the image (aspect ratio is fixed)
+    inline cv::Size GetSize() const
+    {
+      return mFrames.first.size();
+    }
 
-		static std::recursive_mutex sMutex;
+    inline const QueueData& GetQueueData() const
+    {
+      return mQueueData;
+    }
 
-		ImagePair mFrames;
-		ResizedImages mResizedFrames;
-	};
+    inline void SetQueueData(int iSize, float iSamplingFPS, int iBound)
+    {
+      mQueueData.size = iSize;
+      mQueueData.samplingFPS = iSamplingFPS;
+      mQueueData.bound = iBound;
+    }
 
-	inline std::ostream& operator<< (std::ostream& ioStream, const ImageMessage& iMessage)
-	{
-		const fw::Message& base(iMessage);
-		ioStream << base << ", [Derived] Width: " << iMessage.GetWidth() << ", Height: " << iMessage.GetHeight();
-		return ioStream;
-	}
+  private:
+    using ImagePair = std::pair<cv::Mat, cv::Mat>; // BGR - Gray
+    using ResizedImages = std::map<int, ImagePair>; // Key: width of the image (aspect ratio is fixed)
+
+    static std::recursive_mutex sMutex;
+
+    ImagePair mFrames;
+    ResizedImages mResizedFrames;
+    QueueData mQueueData;
+  };
+
+  inline std::ostream& operator<< (std::ostream& ioStream, const ImageMessage& iMessage)
+  {
+    const fw::Message& base(iMessage);
+    ioStream << base << ", [Derived] Width: " << iMessage.GetWidth() << ", Height: " << iMessage.GetHeight();
+    return ioStream;
+  }
 }

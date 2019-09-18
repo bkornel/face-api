@@ -38,8 +38,9 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ///////////////////////////////////////////////////////////////////////////////
 #pragma once
+
 #include "IO.h"
-#include <cassert>
+
 namespace FACETRACKER
 {
 	//===========================================================================
@@ -56,12 +57,12 @@ namespace FACETRACKER
 		cv::Mat S_; /** 3D shape vector								   */
 
 		PDM() { ; }
-		PDM(const char* fname) { this->Load(fname); }
+		explicit PDM(const char* fname) { this->Load(fname); }
 		PDM(cv::Mat &M, cv::Mat &V, cv::Mat &E) { this->Init(M, V, E); }
 		PDM& operator=(PDM const&rhs);
 		inline int nPoints() { return _M.rows / 3; }
 		inline int nModes() { return _V.cols; }
-		inline double Var(int i) { assert(i < _E.cols); return _E.at<double>(0, i); }
+		inline double Var(int i) { CV_DbgAssert(i < _E.cols); return _E.at<double>(0, i); }
 		void Load(const char* fname);
 		void Save(const char* fname);
 		void Write(std::ofstream &s);

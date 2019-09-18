@@ -39,17 +39,20 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "PAW.h"
 #include <opencv2/imgproc.hpp>
+
 #define it at<int>
 #define db at<double>
+
 using namespace FACETRACKER;
 using namespace std;
+
 //=============================================================================
 bool sameSide(double x0, double y0, double x1, double y1,
 	double x2, double y2, double x3, double y3)
 {
 	double x = (x3 - x2)*(y0 - y2) - (x0 - x2)*(y3 - y2);
 	double y = (x3 - x2)*(y1 - y2) - (x1 - x2)*(y3 - y2);
-	if (x*y >= 0)return true; else return false;
+	return x * y >= 0;
 }
 //=============================================================================
 int isWithinTri(double x, double y, cv::Mat &tri, cv::Mat &shape)
@@ -89,12 +92,12 @@ PAW& PAW::operator= (PAW const& rhs)
 //===========================================================================
 void PAW::Load(const char* fname)
 {
-	ifstream s(fname); assert(s.is_open()); this->Read(s); s.close();
+	ifstream s(fname); CV_DbgAssert(s.is_open()); this->Read(s); s.close();
 }
 //===========================================================================
 void PAW::Save(const char* fname)
 {
-	ofstream s(fname); assert(s.is_open()); this->Write(s); s.close();
+	ofstream s(fname); CV_DbgAssert(s.is_open()); this->Write(s); s.close();
 }
 //===========================================================================
 void PAW::Write(ofstream &s)
@@ -106,7 +109,7 @@ void PAW::Write(ofstream &s)
 //===========================================================================
 void PAW::Read(ifstream &s, bool readType)
 {
-	if (readType) { int type; s >> type; assert(type == IO::PAW); }
+	if (readType) { int type = 0; s >> type; CV_DbgAssert(type == IO::PAW); }
 	s >> _nPix >> _xmin >> _ymin;
 	IO::ReadMat(s, _src); IO::ReadMat(s, _tri); IO::ReadMat(s, _tridx);
 	IO::ReadMat(s, _mask); IO::ReadMat(s, _alpha); IO::ReadMat(s, _beta);
@@ -117,8 +120,8 @@ void PAW::Read(ifstream &s, bool readType)
 //===========================================================================
 void PAW::Init(cv::Mat &src, cv::Mat &tri)
 {
-	assert((src.type() == CV_64F) && (src.cols == 1));
-	assert((tri.type() == CV_32S) && (tri.cols == 3));
+  CV_DbgAssert((src.type() == CV_64F) && (src.cols == 1));
+  CV_DbgAssert((tri.type() == CV_32S) && (tri.cols == 3));
 	_src = src.clone(); _tri = tri.clone();
 	int i, j, k, l, n = this->nPoints(); double c1, c2, c3, c4, c5;
 	_alpha.create(this->nTri(), 3, CV_64F); _beta.create(this->nTri(), 3, CV_64F);
@@ -162,7 +165,7 @@ void PAW::Init(cv::Mat &src, cv::Mat &tri)
 //=============================================================================
 void PAW::Crop(const cv::Mat &src, cv::Mat &dst, cv::Mat &s)
 {
-	assert((s.type() == CV_64F) && (s.rows == _src.rows) && (s.cols == 1) &&
+  CV_DbgAssert((s.type() == CV_64F) && (s.rows == _src.rows) && (s.cols == 1) &&
 		(src.type() == dst.type()));
 	_dst = s; this->CalcCoeff(); this->WarpRegion(_mapx, _mapy);
 	cv::remap(src, dst, _mapx, _mapy, cv::INTER_LINEAR);
@@ -190,7 +193,7 @@ void PAW::CalcCoeff()
 //=============================================================================
 void PAW::WarpRegion(cv::Mat &mapx, cv::Mat &mapy)
 {
-	assert((mapx.type() == CV_32F) && (mapy.type() == CV_32F));
+  CV_DbgAssert((mapx.type() == CV_32F) && (mapy.type() == CV_32F));
 	if ((mapx.rows != _mask.rows) || (mapx.cols != _mask.cols))
 		_mapx.create(_mask.rows, _mask.cols, CV_32F);
 	if ((mapy.rows != _mask.rows) || (mapy.cols != _mask.cols))

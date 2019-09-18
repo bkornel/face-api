@@ -1,67 +1,67 @@
 #pragma once
 
-#include <vector>
-#include <string>
+#include "Framework/Util.h"
+
 #include <opencv2/core/core.hpp>
 #include <opencv2/videoio/videoio.hpp>
 
-#include "Framework/Util.h"
+#include <string>
+#include <vector>
 
 namespace face
 {
-	struct OutputParams
-	{
-		bool verbose = false;
-		bool video = false;
-		float videoFPS = 15.0F;
-		int videoFourCC = cv::VideoWriter::fourcc('M', 'J', 'P', 'G');
-	};
+  struct OutputParams
+  {
+    bool video = false;
+    float videoFPS = 15.0F;
+    int videoFourCC = cv::VideoWriter::fourcc('M', 'J', 'P', 'G');
+  };
 
-	struct DirectoryParams
-	{
-		std::string working;
-		std::string faceDetector = "faceDetector/";
-		std::string shapeModel = "shapeModel/";
-		std::string output = "output/";
-	};
+  struct DirectoryParams
+  {
+    std::string working;
+    std::string faceDetector = "faceDetector/";
+    std::string shapeModel = "shapeModel/";
+    std::string output = "output/";
+  };
 
-	class Configuration
-	{
-	public:
-		static Configuration& GetInstance();
+  class Configuration
+  {
+  public:
+    static Configuration& GetInstance();
 
-		fw::ErrorCode Initialize(const std::string& iConfigFile = "settings.json");
+    Configuration(const Configuration& iOther) = delete;
 
-		inline const DirectoryParams& GetDirectories() const { return mDirectories; }
+    Configuration& operator=(const Configuration& iOther) = delete;
 
-		inline const OutputParams& GetOutput() const { return mOutput; }
+    fw::ErrorCode Initialize(const std::string& iConfigFile = "settings.json");
 
-		cv::FileNode GetModuleSettings(const std::string& iName) const;
+    inline const DirectoryParams& GetDirectories() const { return mDirectories; }
 
-		void SetWorkingDirectory(const std::string& iWorkingDir);
+    inline const OutputParams& GetOutput() const { return mOutput; }
 
-		inline void SetVerboseMode(bool iVerboseMode)
-		{
-			mOutput.verbose = iVerboseMode;
-		}
+    inline const cv::FileNode& GetModulesNode() const { return mModulesNode; }
 
-	private:
-		Configuration() = default;
+    inline bool GetVerbose() const { return mVerbose; }
 
-		Configuration(const Configuration& iOther) = delete;
+    cv::FileNode GetModuleSettings(const std::string& iName) const;
 
-		Configuration& operator=(const Configuration& iOther) = delete;
+    void SetWorkingDirectory(const std::string& iWorkingDir);
 
-		bool LoadSettings(const cv::FileNode& iGeneralNode);
+  private:
+    Configuration() = default;
 
-		void RebuildPaths();
+    bool LoadSettings(const cv::FileNode& iGeneralNode);
 
-		void FixPathSeparator(std::string& ioPath);
+    void RebuildPaths();
 
-		cv::FileStorage mFileStorage;
-		cv::FileNode mModulesNode;
+    void FixPathSeparator(std::string& ioPath);
 
-		DirectoryParams mDirectories;
-		OutputParams mOutput;
-	};
+    cv::FileStorage mFileStorage;
+    cv::FileNode mModulesNode;
+
+    DirectoryParams mDirectories;
+    OutputParams mOutput;
+    bool mVerbose = false;
+  };
 }

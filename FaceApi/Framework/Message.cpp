@@ -1,10 +1,10 @@
-#include "Message.h"
+#include "Framework/Message.h"
 
 namespace fw
 {
-	Message::Message(unsigned iFrameId, long long iTimestamp) :
-		mFrameId(iFrameId),
-		mTimestamp(iTimestamp)
-	{
-	}
+  Message::Message(unsigned iFrameId, long long iTimestamp) :
+    mFrameId(iFrameId),
+    mTimestamp(iTimestamp)
+  {
+  }
 }

@@ -1,58 +1,44 @@
 #pragma once
 
-#include <vector>
-#include <opencv2/core/core.hpp>
+#include "Framework/Port.hpp"
+#include "Framework/Stopwatch.h"
 
-#include "Framework/Module.h"
-#include "Framework/FlowGraph.hpp"
 #include "Messages/ImageMessage.h"
 #include "Messages/ActiveUsersMessage.h"
 
+#include <opencv2/core/core.hpp>
+#include <vector>
+
 namespace face
 {
-	class Visualizer :
-		public fw::Module,
-		public fw::Port<bool>
-	{
-	public:
-		Visualizer();
+  class Visualizer :
+    public fw::Module,
+    public fw::Port<ImageMessage::Shared(ImageMessage::Shared, ActiveUsersMessage::Shared)>
+  {
+  public:
+    FW_DEFINE_SMART_POINTERS(Visualizer);
 
-		virtual ~Visualizer() = default;
+    Visualizer() = default;
 
-		bool Draw(ImageMessage::Shared iImage, ActiveUsersMessage::Shared iUsers);
+    virtual ~Visualizer() = default;
 
-		inline bool HasOutput() const
-		{
-			return !mResultImage.empty();
-		}
+    ImageMessage::Shared Main(ImageMessage::Shared iImage, ActiveUsersMessage::Shared iUsers) override;
 
-		inline const cv::Mat& GetResultImage() const
-		{
-			return mResultImage;
-		}
+  private:
+    fw::ErrorCode InitializeInternal(const cv::FileNode& iSettings) override;
 
-		inline void SetQueueSize(int iQueueSize)
-		{
-			mQueueSize = iQueueSize;
-		}
+    void DrawShapeModel(const User& iUser, cv::Mat& oImage) const;
 
-	private:
-		fw::ErrorCode InitializeInternal(const cv::FileNode& iSettings) override;
+    void DrawUserData(const User& iUser, cv::Mat& oImage) const;
 
-		void DrawShapeModel(const User& iUser, cv::Mat& oImage) const;
+    void DrawAxes(const User& iUser, cv::Mat& oImage) const;
 
-		void DrawUserData(const User& iUser, cv::Mat& oImage) const;
+    void DrawBoundingBox(const User& iUser, cv::Mat& oImage, int iSegmentWidth = 5, int iThickness = 1) const;
 
-		void DrawAxes(const User& iUser, cv::Mat& oImage) const;
+    void DrawGeneral(ImageMessage::Shared iImage, cv::Mat& oImage) const;
 
-		void DrawBoundingBox(const User& iUser, cv::Mat& oImage, int iSegmentWidth = 5, int iThickness = 1) const;
+    void CreateShapeColorMap(const fw::ocv::VectorPt3D& iShape3D, cv::Mat& oColorMap) const;
 
-		void DrawGeneral(double iRuntime, int iFrameID, cv::Mat& oImage) const;
-
-		void CreateShapeColorMap(const fw::ocv::VectorPt3D& iShape3D, cv::Mat& oColorMap) const;
-
-		cv::Mat mResultImage;
-		std::vector<cv::Scalar> mColorsOfAxes;
-		int mQueueSize = 0;
-	};
+    std::vector<cv::Scalar> mColorsOfAxes;
+  };
 }

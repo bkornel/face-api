@@ -39,12 +39,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "IO.h"
 #include <stdio.h>
+
 using namespace FACETRACKER;
 using namespace std;
+
 //===========================================================================
 void IO::ReadMat(ifstream& s, cv::Mat &M)
 {
-	int r, c, t; s >> r >> c >> t;
+	int r = 0, c = 0, t = 0; s >> r >> c >> t;
 	M = cv::Mat(r, c, t);
 	switch (M.type())
 	{
@@ -107,7 +109,7 @@ void IO::WriteMat(ofstream& s, cv::Mat &M)
 //===========================================================================
 cv::Mat IO::LoadCon(const char* fname)
 {
-	int i, n; char str[256]; char c; fstream file(fname, fstream::in);
+	int i, n = 0; char str[256]; char c = '0'; fstream file(fname, fstream::in);
 	if (!file.is_open())
 	{
 		printf("ERROR(%s,%d) : Failed opening file %s for reading\n",
@@ -122,7 +124,7 @@ cv::Mat IO::LoadCon(const char* fname)
 //=============================================================================
 cv::Mat IO::LoadTri(const char* fname)
 {
-	int i, n; char str[256]; char c; fstream file(fname, fstream::in);
+	int i, n = 0; char str[256] = {'0'}; char c = '0'; fstream file(fname, fstream::in);
 	if (!file.is_open())
 	{
 		printf("ERROR(%s,%d) : Failed opening file %s for reading\n",

@@ -1,39 +1,41 @@
 #pragma once
 
-#include <map>
-
 #include "Framework/Module.h"
-#include "Framework/FlowGraph.hpp"
-
+#include "Framework/Port.hpp"
+#include "Framework/Stopwatch.h"
 #include "User/User.h"
 #include "Messages/ActiveUsersMessage.h"
 #include "Messages/UserEntriesMessage.h"
 
+#include <map>
+
 namespace face
 {
-	class UserHistory :
-		public fw::Module,
-		public fw::Port<UserEntriesMessage::Shared>
-	{
-		using Entry = UserEntriesMessage::Entry;
-		using EntryMap = UserEntriesMessage::EntryMap;
+  class UserHistory :
+    public fw::Module,
+    public fw::Port<UserEntriesMessage::Shared(ActiveUsersMessage::Shared)>
+  {
+  public:
+    FW_DEFINE_SMART_POINTERS(UserHistory);
 
-	public:
-		UserHistory();
+    UserHistory() = default;
 
-		virtual ~UserHistory() = default;
+    virtual ~UserHistory() = default;
 
-		UserEntriesMessage::Shared Process(ActiveUsersMessage::Shared iActiveUsers);
+    UserEntriesMessage::Shared Main(ActiveUsersMessage::Shared iActiveUsers) override;
 
-		void Clear() override;
+    void Clear() override;
 
-	private:
-		fw::ErrorCode InitializeInternal(const cv::FileNode& iSettings) override;
+  private:
+    using Entry = UserEntriesMessage::Entry;
+    using EntryMap = UserEntriesMessage::EntryMap;
 
-		void RemoveOldEntries(long long iTimestamp);
+    fw::ErrorCode InitializeInternal(const cv::FileNode& iSettings) override;
 
-		EntryMap mEntryMap;
-		fw::Stopwatch mRemoveSW;
-		long long mRemoveFreqMs = 10000LL;
-	};
+    void RemoveOldEntries(long long iTimestamp);
+
+    EntryMap mEntryMap;
+    fw::Stopwatch mRemoveSW;
+    long long mRemoveFreqMs = 10000LL;
+  };
 }
