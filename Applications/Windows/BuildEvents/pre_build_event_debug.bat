@@ -3,11 +3,11 @@
 set outDir=..\Bin\Debug
 set to3rdParty=..\..\..\..\3rdparty
 
-set opencvBinDir=%to3rdParty%\opencv-4.0.1\Windows\x64\vc15\bin
-set pocoBinDir=%to3rdParty%\poco-1.8.1\Windows\x64\vc15\bin
+set opencvBinDir=%to3rdParty%\opencv-4.1.1\Windows\x64\vc16\bin
+set pocoBinDir=%to3rdParty%\poco-1.9.4\Windows\x64\vc16\bin
 set testingDir=..\..\..\Testing
 
-set opencvFiles=(opencv_calib3d401d opencv_core401d opencv_features2d401d opencv_ffmpeg401_64 opencv_flann401d opencv_highgui401d opencv_imgcodecs401d opencv_imgproc401d opencv_ml401d opencv_objdetect401d opencv_videoio401d)
+set opencvFiles=(opencv_calib3d411d opencv_core411d opencv_features2d411d opencv_flann411d opencv_highgui411d opencv_imgcodecs411d opencv_imgproc411d opencv_ml411d opencv_objdetect411d opencv_videoio411d opencv_videoio_ffmpeg411_64)
 set pocoFiles=(PocoFoundationd PocoUtild PocoXMLd PocoJSONd)
 
 for %%i in %pocoFiles% do (

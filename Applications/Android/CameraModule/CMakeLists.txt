@@ -13,7 +13,7 @@ message("- Output directory of ${TARGET_NAME}: '${CMAKE_BINARY_DIR}'")
 # Setting some paths to 3rdparties and to the application logic
 set(DEPENDECIES_DIR "${CMAKE_SOURCE_DIR}/../../../../3rdparty")
 set(FACE_API_DIR    "${CMAKE_SOURCE_DIR}/../../../${TARGET_NAME_FACE_API}")
-set(OpenCV_DIR      "${DEPENDECIES_DIR}/opencv-4.0.1/android/src/sdk/native/jni")
+set(OpenCV_DIR      "${DEPENDECIES_DIR}/opencv-4.1.1/android/src/sdk/native/jni")
 
 # Finding 3rparty libraries
 find_package(OpenCV REQUIRED)
