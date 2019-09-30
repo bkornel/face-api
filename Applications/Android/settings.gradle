@@ -1,3 +1,3 @@
 include ':CameraModule', ':FaceApp', ':OpenCV', ':Dlib'
-project(':OpenCV').projectDir = new File(settingsDir, '../../../3rdparty/opencv-4.0.1/android')
+project(':OpenCV').projectDir = new File(settingsDir, '../../../3rdparty/opencv-4.1.1/android')
 project(':Dlib').projectDir = new File(settingsDir, '../../../3rdparty/dlib-19.17.99/android')

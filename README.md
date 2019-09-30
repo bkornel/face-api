@@ -19,14 +19,14 @@ https://www.youtube.com/watch?v=iS4eDf775GI
 
 # Prerequisites
 
-All dependencies of the compilation in Windows (Visual Studio 2017) and Android can be downloaded (as pre-built libraries) from the following repository:<br>
+All dependencies of the compilation in Windows (Visual Studio 2019) and Android can be downloaded (as pre-built libraries) from the following repository:<br>
 https://github.com/bkornel/3rdparty<br>
 
 You should follow the directory structure below during the compilation:
 ```
 [local_path_of_the_project]
 |- 3rdparty
-|-- opencv-4.0.1
+|-- opencv-4.1.1
 |-- ...
 |- face-api
 |-- Applications
@@ -50,9 +50,9 @@ The Android Studio project can be found in [Applications/Android](https://github
 - Target SDK version: API 28 (Android 9.0)
 
 ### SDK Tools
-- LLDB 3.1 or newer
+- LLDB 3.x or newer
 - CMake 3.6.x or newer
-- NDK 19.x or newer
+- NDK 20.x or newer
 
 The C++ part (image processing algorithms) is set up as a CMake external native build in the Android Studio project, thus it is built automatically when you make the project.
 
