@@ -1,5 +1,7 @@
 package com.face.common.camera;
 
+import org.jetbrains.annotations.NotNull;
+
 public enum FlashMode {
     ON(0, "On"),
     AUTO(1, "Auto"),
@@ -26,6 +28,7 @@ public enum FlashMode {
         return mId;
     }
 
+    @NotNull
     @Override
     public String toString() {
         return mName;

@@ -211,7 +211,7 @@ public class CameraFragment extends BaseFragment {
                 mSavePhotoTask.PhotoSaved.addHandler(this::onPhotoSaved);
                 mSavePhotoTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             } catch (IllegalStateException ex) {
-                Timber.e(ex.getMessage());
+                Timber.e(ex);
             }
             mCapturePressed = false;
         }

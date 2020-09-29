@@ -15,6 +15,7 @@ import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 
 public enum ImageManager implements ImageTargetCallback {
     i;
@@ -45,6 +46,7 @@ public enum ImageManager implements ImageTargetCallback {
             File file = !TextUtils.isEmpty(iPath) ? new File(iPath) : null;
             ImageTarget imageTarget = new ImageTarget(iTarget, iPath, this);
 
+            assert file != null;
             Picasso.get()
                     .load(file)
                     .memoryPolicy(MemoryPolicy.NO_CACHE)
@@ -69,7 +71,7 @@ public enum ImageManager implements ImageTargetCallback {
     }
 
     private Bitmap getBitmap(String iPath) {
-        return iPath != null && mBitmaps.get(iPath) != null ? mBitmaps.get(iPath).get() : null;
+        return iPath != null && mBitmaps.get(iPath) != null ? Objects.requireNonNull(mBitmaps.get(iPath)).get() : null;
     }
 
     public void clear() {

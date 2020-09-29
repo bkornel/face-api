@@ -1,6 +1,8 @@
 package com.face.common.camera;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 
@@ -18,7 +20,7 @@ public class PictureSize {
         mWidth = iWidth;
         mHeight = iHeight;
 
-        mName = Integer.toString(iWidth) + "x" + Integer.toString(iHeight);
+        mName = iWidth + "x" + iHeight;
         mRatio = Ratio.pickRatio(iWidth, iHeight);
     }
 
@@ -66,6 +68,7 @@ public class PictureSize {
         return mWidth * mHeight;
     }
 
+    @NotNull
     @Override
     public String toString() {
         return mName;

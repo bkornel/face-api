@@ -131,7 +131,7 @@ public class FocusView extends SurfaceView implements SurfaceHolder.Callback, Ca
 
         if (hasAutoFocus()) {
             Camera.Parameters parameters = mCamera.getParameters();
-            if (parameters.getFocusMode() != Camera.Parameters.FOCUS_MODE_AUTO) {
+            if (!parameters.getFocusMode().equals(Camera.Parameters.FOCUS_MODE_AUTO)) {
                 parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
                 mCamera.setParameters(parameters);
             }

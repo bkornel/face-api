@@ -1,5 +1,7 @@
 package com.face.common.camera;
 
+import org.jetbrains.annotations.NotNull;
+
 public enum FocusMode {
 
     AUTO(0, "Auto"),
@@ -26,6 +28,7 @@ public enum FocusMode {
         return mId;
     }
 
+    @NotNull
     @Override
     public String toString() {
         return mName;

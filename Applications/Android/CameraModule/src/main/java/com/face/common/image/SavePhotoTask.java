@@ -56,14 +56,14 @@ public class SavePhotoTask extends AsyncTask<Void, Void, File> {
             mBitmap.recycle();
 
         } catch (FileNotFoundException e) {
-            Timber.e(e, "File not found: " + e.getMessage());
+            Timber.e(e, "File not found: %s", e.getMessage());
         } finally {
             try {
                 if (stream != null) {
                     stream.close();
                 }
             } catch (IOException e) {
-                Timber.e(e, e.getMessage());
+                Timber.e(e);
             }
         }
 
@@ -80,7 +80,7 @@ public class SavePhotoTask extends AsyncTask<Void, Void, File> {
     private File getOutputFile() {
         // To be safe, we should check that the SDCard is mounted
         if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-            Timber.e("External storage state: " + Environment.getExternalStorageState());
+            Timber.e("External storage state: %s", Environment.getExternalStorageState());
             return null;
         }
 
@@ -88,7 +88,7 @@ public class SavePhotoTask extends AsyncTask<Void, Void, File> {
         File directory = new File(Constants.Directories.GALLERY);
         if (!directory.exists()) {
             if (!directory.mkdirs()) {
-                Timber.e("Failed to create directory: " + directory.getAbsolutePath());
+                Timber.e("Failed to create directory: %s", directory.getAbsolutePath());
                 return null;
             }
         }

@@ -2,13 +2,14 @@
 buildscript {
     repositories {
         mavenCentral()
+        jcenter()
         google()
     }
 
     dependencies {
         // FIXME: Shared-objects from CMake are not copied to the APK with higher version of Android gradle plugins
         //noinspection GradleDependency
-        classpath 'com.android.tools.build:gradle:3.4.1'
+        classpath 'com.android.tools.build:gradle:4.0.1'
     }
 }
 

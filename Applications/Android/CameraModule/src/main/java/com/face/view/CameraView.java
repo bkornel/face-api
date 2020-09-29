@@ -117,7 +117,7 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback, C
             setDisplayOrientation();
             mCamera.startPreview();
         } catch (Exception e) {
-            Timber.e(e, "Error starting preview: " + e.getMessage());
+            Timber.e(e, "Error starting preview: %s", e.getMessage());
         }
     }
 
@@ -127,7 +127,7 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback, C
                 mCamera.setPreviewCallback(null);
                 mCamera.stopPreview();
             } catch (Exception e) {
-                Timber.e(e, "Error stopping preview: " + e.getMessage());
+                Timber.e(e, "Error stopping preview: %s", e.getMessage());
             }
         }
     }
@@ -217,7 +217,7 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback, C
             mCameraView = new WeakReference<>(iCameraView);
         }
 
-        protected int NativeCall(int iRotation, int iWidth, int iHeight, byte iYUV[], int[] iRGBA) {
+        protected int NativeCall(int iRotation, int iWidth, int iHeight, byte[] iYUV, int[] iRGBA) {
             CameraView cp = mCameraView.get();
             if (cp == null || cp.mActivity.isFinishing()) return -1;
 

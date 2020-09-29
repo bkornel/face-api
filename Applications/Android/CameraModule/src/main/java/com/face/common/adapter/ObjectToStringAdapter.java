@@ -25,9 +25,7 @@ public class ObjectToStringAdapter<T> extends BaseListAdapter<T> {
         return createView(iPosition, ioView, iParent, true);
     }
 
-    @SuppressWarnings(value = "unchecked")
     private View createView(int iPosition, View ioView, ViewGroup iParent, boolean iDropDown) {
-        @SuppressWarnings("unchecked")
         TextView text;
 
         if (ioView == null) {

@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.6.0)
 
+set(CMAKE_CXX_STANDARD 14)
+
 # The shared library has the name: libFaceApi.so
 set(TARGET_NAME FaceApi)
 
@@ -8,7 +10,7 @@ message("- Output directory of ${TARGET_NAME}: '${CMAKE_BINARY_DIR}/${TARGET_NAM
 
 # Setting some paths to 3rdparties and to the application logic
 set(DEPENDECIES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../3rdparty")
-set(OpenCV_DIR      "${DEPENDECIES_DIR}/opencv-4.1.1")
+set(OpenCV_DIR      "${DEPENDECIES_DIR}/opencv-4.4.0")
 
 # Libraries have to determined based on the platform
 set(LIBRARIES "")

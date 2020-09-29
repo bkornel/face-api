@@ -104,15 +104,15 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;ELPP_THREAD_SAFE;ELPP_FORCE_USE_STD_THREAD;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\FaceApi;$(ProjectDir)..\..\FaceApi\3rdparty;$(ProjectDir)..\..\FaceApi\Framework;$(ProjectDir)..\..\..\3rdParty\opencv-4.1.1\windows\include;$(ProjectDir)..\..\..\3rdParty\poco-1.9.4\windows\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\FaceApi;$(ProjectDir)..\..\FaceApi\3rdparty;$(ProjectDir)..\..\FaceApi\Framework;$(ProjectDir)..\..\..\3rdParty\opencv-4.4.0\windows\include;$(ProjectDir)..\..\..\3rdParty\poco-1.10.1\windows\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(OutDir);$(ProjectDir)..\..\..\3rdParty\opencv-4.1.1\windows\x64\vc16\lib;$(ProjectDir)..\..\..\3rdParty\poco-1.9.4\windows\x64\vc16\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>FaceApi.lib;opencv_calib3d411d.lib;opencv_core411d.lib;opencv_flann411d.lib;opencv_highgui411d.lib;opencv_imgcodecs411d.lib;opencv_imgproc411d.lib;opencv_objdetect411d.lib;opencv_videoio411d.lib;PocoFoundationd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir);$(ProjectDir)..\..\..\3rdParty\opencv-4.4.0\windows\x64\vc16\lib;$(ProjectDir)..\..\..\3rdParty\poco-1.10.1\windows\x64\vc16\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>FaceApi.lib;opencv_calib3d440d.lib;opencv_core440d.lib;opencv_flann440d.lib;opencv_highgui440d.lib;opencv_imgcodecs440d.lib;opencv_imgproc440d.lib;opencv_objdetect440d.lib;opencv_videoio440d.lib;PocoFoundationd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>cd $(SolutionDir)BuildEvents\
@@ -146,7 +146,7 @@ pre_build_event_$(Configuration).bat</Command>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;ELPP_THREAD_SAFE;ELPP_FORCE_USE_STD_THREAD;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\FaceApi;$(ProjectDir)..\..\FaceApi\3rdparty;$(ProjectDir)..\..\FaceApi\Framework;$(ProjectDir)..\..\..\3rdParty\opencv-4.1.1\windows\include;$(ProjectDir)..\..\..\3rdParty\poco-1.9.4\windows\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\FaceApi;$(ProjectDir)..\..\FaceApi\3rdparty;$(ProjectDir)..\..\FaceApi\Framework;$(ProjectDir)..\..\..\3rdParty\opencv-4.4.0\windows\include;$(ProjectDir)..\..\..\3rdParty\poco-1.10.1\windows\include</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
@@ -154,8 +154,8 @@ pre_build_event_$(Configuration).bat</Command>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(OutDir);$(ProjectDir)..\..\..\3rdParty\opencv-4.1.1\windows\x64\vc16\lib;$(ProjectDir)..\..\..\3rdParty\poco-1.9.4\windows\x64\vc16\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>FaceApi.lib;opencv_calib3d411.lib;opencv_core411.lib;opencv_flann411.lib;opencv_highgui411.lib;opencv_imgcodecs411.lib;opencv_imgproc411.lib;opencv_objdetect411.lib;opencv_videoio411.lib;PocoFoundation.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir);$(ProjectDir)..\..\..\3rdParty\opencv-4.4.0\windows\x64\vc16\lib;$(ProjectDir)..\..\..\3rdParty\poco-1.10.1\windows\x64\vc16\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>FaceApi.lib;opencv_calib3d440.lib;opencv_core440.lib;opencv_flann440.lib;opencv_highgui440.lib;opencv_imgcodecs440.lib;opencv_imgproc440.lib;opencv_objdetect440.lib;opencv_videoio440.lib;PocoFoundation.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>cd $(SolutionDir)BuildEvents\

@@ -14,6 +14,7 @@ public class Assets {
             String[] files = iAssetManager.list(iSource);
             new File(iDestination).mkdirs();
 
+            assert files != null;
             for (String file : files) {
                 String sourceFile = iSource + File.separator + file;
                 String destinationFile = iDestination + File.separator + file;
