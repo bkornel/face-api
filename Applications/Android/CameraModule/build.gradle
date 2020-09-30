@@ -20,12 +20,10 @@ android {
                 version "3.6.0"
                 arguments "-DANDROID_ARM_NEON=TRUE",
                           "-DANDROID_CPP_FEATURES=rtti exceptions"
-                cppFlags "-std=c++14"
             }
         }
 
         ndk {
-            //abiFilters 'x86', 'x86_64', 'armeabi', 'armeabi-v7a', 'arm64-v8a'
             abiFilters 'armeabi-v7a', 'arm64-v8a'
         }
     }
@@ -55,7 +53,6 @@ android {
             path file('CMakeLists.txt')
         }
     }
-    ndkVersion '21.0.6113669'
 }
 
 dependencies {
