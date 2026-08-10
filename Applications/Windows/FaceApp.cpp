@@ -98,6 +98,12 @@ int FaceApp::main(const std::vector<std::string>& args)
         mVideoWriter.Write(mResultFrame);
       }
     }
+    else
+    {
+      // Keep pumping the window even when no frame came out, otherwise the
+      // OpenCV window stops responding and the keys below are never read.
+      handleKey(cv::waitKey(1));
+    }
   }
 
   return Poco::Util::Application::EXIT_OK;
@@ -108,8 +114,11 @@ void FaceApp::showResults()
   CV_DbgAssert(!mResultFrame.empty());
 
   cv::imshow(FW_PLUGIN_NAME, mResultFrame);
-  const int keyPressed = cv::waitKey(1);
+  handleKey(cv::waitKey(1));
+}
 
+void FaceApp::handleKey(int keyPressed)
+{
   if (keyPressed == 27)
   {
     LOG(INFO) << "Exiting from the application";
@@ -117,6 +126,13 @@ void FaceApp::showResults()
   }
   else if (keyPressed == 's')
   {
+    // handleKey() also runs when no frame came out of the pipeline.
+    if (mResultFrame.empty())
+    {
+      LOG(WARNING) << "There is no result frame to save yet.";
+      return;
+    }
+
     const std::string& name = "result_frame_" + std::to_string(face::FaceApi::GetInstance().GetLastFrameId()) + ".png";
     const std::string& path = face::Configuration::GetInstance().GetDirectories().output + name;
     cv::imwrite(path, mResultFrame);

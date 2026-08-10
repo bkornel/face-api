@@ -2,6 +2,8 @@
 
 #include "Framework/Util.h"
 
+#include <opencv2/core/base.hpp>
+
 #include <atomic>
 #include <chrono>
 #include <condition_variable>
@@ -85,11 +87,13 @@ namespace fw
 
     Future& operator=(const Future& iRhs) = delete;
 
-    /// @brief If ready, returns value stored in the future.Otherwise the behavior is undefined.
+    /// @brief If ready, returns the value stored in the future.
+    /// If no value has been put yet, a default constructed T is returned.
     T Get() const
     {
       std::lock_guard<std::mutex> lock(mMutex);
-      return *mValue;
+      CV_DbgAssert(mValue != nullptr);
+      return mValue ? *mValue : T();
     }
 
     /// @brief If not ready, adds a continuation to be used once value is present.
@@ -127,6 +131,25 @@ namespace fw
       mCV.wait(lock, [this] { return mValue != nullptr; });
     }
 
+    /// @brief Number of values that have been put into this Future so far.
+    /// A Future is reused for every frame, so Ready() stays true once the first
+    /// value arrived. Callers that need to wait for a *new* value must read the
+    /// generation first and then wait for it to change.
+    unsigned long long GetGeneration() const
+    {
+      std::lock_guard<std::mutex> lock(mMutex);
+      return mGeneration;
+    }
+
+    /// @brief Blocks until a value newer than iGeneration has been put.
+    /// @return false if the timeout elapsed before a new value arrived.
+    template <typename Rep, typename Period>
+    bool WaitForNewValue(unsigned long long iGeneration, const std::chrono::duration<Rep, Period>& iTimeout) const
+    {
+      std::unique_lock<std::mutex> lock(mMutex);
+      return mCV.wait_for(lock, iTimeout, [this, iGeneration] { return mGeneration > iGeneration; });
+    }
+
     template <typename Rep, typename Period>
     bool WaitFor(const std::chrono::duration<Rep, Period>& iTimeout) const
     {
@@ -150,6 +173,7 @@ namespace fw
       {
         std::unique_lock<std::mutex> lock(mMutex);
         mValue.reset(new T(iArg));
+        mGeneration++;
         continuationsAux = mContinuations;
       }
 
@@ -161,6 +185,7 @@ namespace fw
     mutable std::mutex mMutex;
     mutable std::condition_variable mCV;
     std::unique_ptr<T> mValue = nullptr;
+    unsigned long long mGeneration = 0ULL;
     std::vector<Continuation::Shared>  mContinuations;
   };
 

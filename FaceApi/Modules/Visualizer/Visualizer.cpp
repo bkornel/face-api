@@ -25,7 +25,10 @@ namespace face
   {
     if (!iImage || iImage->IsEmpty()) return nullptr;
 
-    cv::Mat resultImage = iImage->GetFrameBGR()/*.clone()*/;
+    // Must be a deep copy: cv::Mat assignment shares the pixel buffer, so drawing
+    // would overwrite the frame that ImageQueue still owns and that the other
+    // modules read from.
+    cv::Mat resultImage = iImage->GetFrameBGR().clone();
 
     if (iUsers && !iUsers->IsEmpty())
     {
@@ -80,7 +83,9 @@ namespace face
     const std::size_t n = iShape3D.size();
 
     float minZ = (std::numeric_limits<float>::max)();
-    float maxZ = (std::numeric_limits<float>::min)();
+    // lowest(), not min(): min() is the smallest positive normalized value, which
+    // is larger than every negative z and would break the scaling.
+    float maxZ = (std::numeric_limits<float>::lowest)();
 
     for (const auto& pt : iShape3D)
     {
@@ -183,28 +188,33 @@ namespace face
     ss.str("");
   }
 
-  void Visualizer::DrawGeneral(ImageMessage::Shared iImage, cv::Mat& oImage) const
+  void Visualizer::DrawGeneral(ImageMessage::Shared iImage, cv::Mat& oImage)
   {
     const double runtimeMs = std::llabs(fw::get_current_time() - iImage->GetTimestamp());
 
-    static double sMinRuntime = runtimeMs;
-    static double sMaxRuntime = runtimeMs;
-
-    if (runtimeMs < sMinRuntime) sMinRuntime = runtimeMs;
-    if (runtimeMs > sMaxRuntime) sMaxRuntime = runtimeMs;
+    // Members instead of function statics: this is called from the graph thread
+    // and the range has to be resettable together with the rest of the module.
+    if (runtimeMs < mMinRuntimeMs) mMinRuntimeMs = runtimeMs;
+    if (runtimeMs > mMaxRuntimeMs) mMaxRuntimeMs = runtimeMs;
 
     const int h = 5;
 
-    cv::Scalar c = fw::ocv::get_color(runtimeMs, sMinRuntime, sMaxRuntime);
+    cv::Scalar c = fw::ocv::get_color(runtimeMs, mMinRuntimeMs, mMaxRuntimeMs);
     cv::Rect r(1, oImage.rows - h, oImage.cols - 1, h);
 
     cv::rectangle(oImage, r, c, 2);
     cv::rectangle(oImage, r, c, -1);
 
     std::stringstream ss;
-    ss << "Frame number: " << iImage->GetFrameId() << 
-      " (" << cvRound(runtimeMs) << " ms @ " << cvRound(1000.0 / runtimeMs) << 
-      " FPS) - Queue size: " << iImage->GetQueueData().size;
+    ss << "Frame number: " << iImage->GetFrameId() << " (" << cvRound(runtimeMs) << " ms @ ";
+
+    // A frame can be processed inside the same millisecond the timestamp was taken.
+    if (runtimeMs > 0.0)
+      ss << cvRound(1000.0 / runtimeMs);
+    else
+      ss << "-";
+
+    ss << " FPS) - Queue size: " << iImage->GetQueueData().size;
 
     fw::ocv::put_text(ss.str(), { 10, oImage.rows - 15 }, oImage);
 

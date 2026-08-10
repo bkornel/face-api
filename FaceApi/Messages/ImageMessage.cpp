@@ -4,8 +4,6 @@
 
 namespace face
 {
-  std::recursive_mutex ImageMessage::sMutex;
-
   ImageMessage::ImageMessage(const cv::Mat& iImage, unsigned iFrameId, long long iTimestamp) :
     Message(iFrameId, iTimestamp)
   {
@@ -16,7 +14,7 @@ namespace face
   const cv::Mat& ImageMessage::GetFrameGray()
   {
     CV_DbgAssert(!IsEmpty());
-    std::lock_guard<std::recursive_mutex> lock(sMutex);
+    std::lock_guard<std::recursive_mutex> lock(mMutex);
 
     if (mFrames.second.empty())
     {
@@ -36,7 +34,7 @@ namespace face
       return GetFrameBGR();
     }
 
-    std::lock_guard<std::recursive_mutex> lock(sMutex);
+    std::lock_guard<std::recursive_mutex> lock(mMutex);
 
     const int width = cvRound(GetWidth() * iScaleFactor);
     cv::Mat& resized = mResizedFrames[width].first;
@@ -58,7 +56,7 @@ namespace face
       return GetFrameGray();
     }
 
-    std::lock_guard<std::recursive_mutex> lock(sMutex);
+    std::lock_guard<std::recursive_mutex> lock(mMutex);
 
     const int width = cvRound(GetWidth() * iScaleFactor);
     cv::Mat& resized = mResizedFrames[width].second;

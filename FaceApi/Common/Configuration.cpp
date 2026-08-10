@@ -86,13 +86,13 @@ namespace face
     if (!dirNode.empty())
     {
       if (fw::ocv::get_value(dirNode, "faceDetector", value))
-        mDirectories.faceDetector = value;
+        mRelativeDirectories.faceDetector = value;
 
       if (fw::ocv::get_value(dirNode, "shapeModel", value))
-        mDirectories.shapeModel = value;
+        mRelativeDirectories.shapeModel = value;
 
       if (fw::ocv::get_value(dirNode, "output", value))
-        mDirectories.output = value;
+        mRelativeDirectories.output = value;
     }
 
     RebuildPaths();
@@ -125,21 +125,27 @@ namespace face
 
   void Configuration::SetWorkingDirectory(const std::string& iWorkingDir)
   {
-    mDirectories.working = iWorkingDir;
+    mRelativeDirectories.working = iWorkingDir;
     RebuildPaths();
   }
 
+  /// Always composes the absolute paths from the working directory plus the
+  /// relative values, so calling it repeatedly is safe. The previous version
+  /// prepended the working directory to the already resolved path, which
+  /// doubled the prefix whenever it ran twice without a reload in between.
   void Configuration::RebuildPaths()
   {
-    FixPathSeparator(mDirectories.working);
+    FixPathSeparator(mRelativeDirectories.working);
 
-    mDirectories.faceDetector = mDirectories.working + mDirectories.faceDetector;
+    mDirectories.working = mRelativeDirectories.working;
+
+    mDirectories.faceDetector = mDirectories.working + mRelativeDirectories.faceDetector;
     FixPathSeparator(mDirectories.faceDetector);
 
-    mDirectories.shapeModel = mDirectories.working + mDirectories.shapeModel;
+    mDirectories.shapeModel = mDirectories.working + mRelativeDirectories.shapeModel;
     FixPathSeparator(mDirectories.shapeModel);
 
-    mDirectories.output = mDirectories.working + mDirectories.output;
+    mDirectories.output = mDirectories.working + mRelativeDirectories.output;
     FixPathSeparator(mDirectories.output);
   }
 

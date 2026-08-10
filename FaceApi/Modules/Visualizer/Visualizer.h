@@ -7,6 +7,7 @@
 #include "Messages/ActiveUsersMessage.h"
 
 #include <opencv2/core/core.hpp>
+#include <limits>
 #include <vector>
 
 namespace face
@@ -24,6 +25,12 @@ namespace face
 
     ImageMessage::Shared Main(ImageMessage::Shared iImage, ActiveUsersMessage::Shared iUsers) override;
 
+    void Clear() override
+    {
+      mMinRuntimeMs = (std::numeric_limits<double>::max)();
+      mMaxRuntimeMs = (std::numeric_limits<double>::lowest)();
+    }
+
   private:
     fw::ErrorCode InitializeInternal(const cv::FileNode& iSettings) override;
 
@@ -35,10 +42,14 @@ namespace face
 
     void DrawBoundingBox(const User& iUser, cv::Mat& oImage, int iSegmentWidth = 5, int iThickness = 1) const;
 
-    void DrawGeneral(ImageMessage::Shared iImage, cv::Mat& oImage) const;
+    /// @brief Not const: it tracks the observed runtime range.
+    void DrawGeneral(ImageMessage::Shared iImage, cv::Mat& oImage);
 
     void CreateShapeColorMap(const fw::ocv::VectorPt3D& iShape3D, cv::Mat& oColorMap) const;
 
     std::vector<cv::Scalar> mColorsOfAxes;
+
+    double mMinRuntimeMs = (std::numeric_limits<double>::max)();
+    double mMaxRuntimeMs = (std::numeric_limits<double>::lowest)();
   };
 }

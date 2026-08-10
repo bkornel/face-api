@@ -22,6 +22,8 @@ namespace fw
 
   std::recursive_mutex ProfilerDatabase::sMutex;
 
+  const std::size_t ProfilerDatabase::sMaxSamplesPerName = 20000U;
+
   ProfilerDatabase& ProfilerDatabase::GetInstance()
   {
     static ProfilerDatabase sInstance;
@@ -35,7 +37,12 @@ namespace fw
     if (mNames.empty() || mNames.find(nameHash) == mNames.end())
       mNames[nameHash] = iName;
 
-    mMeasurements[nameHash].emplace_back(mCurrentFrameId, iMilliseconds);
+    auto& samples = mMeasurements[nameHash];
+    samples.emplace_back(mCurrentFrameId, iMilliseconds);
+
+    // Keep the most recent window only, the oldest samples fall out.
+    while (samples.size() > sMaxSamplesPerName)
+      samples.pop_front();
   }
 
   void ProfilerDatabase::Save(const std::string& iPath) const

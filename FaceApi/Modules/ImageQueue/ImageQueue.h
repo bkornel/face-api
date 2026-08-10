@@ -6,6 +6,8 @@
 
 #include "Messages/ImageMessage.h"
 
+#include <atomic>
+#include <mutex>
 #include <string>
 
 namespace face
@@ -33,8 +35,10 @@ namespace face
       mQueue.Clear();
     }
 
-    inline const cv::Size& GetImageSize() const
+    /// @brief Returns by value: mImageSize is guarded by mSizeMutex.
+    inline cv::Size GetImageSize() const
     {
+      std::lock_guard<std::mutex> lock(mSizeMutex);
       return mImageSize;
     }
 
@@ -68,10 +72,17 @@ namespace face
 
     void OnCommand(fw::Message::Shared iMessage) override;
 
-    unsigned mPushFrameId = 0U;
-    unsigned mLastFrameId = 0U;		///< Holds the ID of the last image frame.
-    long long mLastTimestamp = 0;
+    void NotifyPendingSizeChange();
+
+    // Push() runs on the camera thread, Main() on the graph thread.
+    std::atomic<unsigned> mPushFrameId{ 0U };
+    std::atomic<unsigned> mLastFrameId{ 0U };   ///< Holds the ID of the last image frame.
+    std::atomic<long long> mLastTimestamp{ 0 };
+
     MessageQueue mQueue;			    ///< Queue for handling the frames
+
+    mutable std::mutex mSizeMutex;              ///< Guards mImageSize and mPendingSizeChange
     cv::Size mImageSize;
+    bool mPendingSizeChange = false;
   };
 }

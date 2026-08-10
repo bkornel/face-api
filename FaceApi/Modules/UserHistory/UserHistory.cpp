@@ -42,11 +42,11 @@ namespace face
       const long long lastUpdateTs = user->GetLastUpdateTs();
       if (lastUpdateTs == currentTime)
       {
-        UserData::Shared userData = std::dynamic_pointer_cast<UserData>(user);
-        if (userData != nullptr)
-        {
-          mEntryMap[user->GetUserId()].emplace_back(lastUpdateTs, userData);
-        }
+        // Store a snapshot, not the live user. User derives from UserData, so
+        // casting the shared_ptr would make every entry alias the same object
+        // that keeps being updated, and the whole history would read back as
+        // the current state. Slicing to UserData copies the data out.
+        mEntryMap[user->GetUserId()].emplace_back(lastUpdateTs, std::make_shared<UserData>(*user));
       }
     }
 

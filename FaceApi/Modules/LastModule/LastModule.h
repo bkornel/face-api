@@ -4,6 +4,7 @@
 #include "Framework/Port.hpp"
 #include "Messages/ImageMessage.h"
 
+#include <chrono>
 #include <functional>
 
 namespace face
@@ -23,12 +24,25 @@ namespace face
 
     inline bool HasOutput() const
     {
-      return mOutputPort->Get();
+      return mOutputPort && mOutputPort->Ready() && mOutputPort->Get();
     }
 
-    inline void Wait() const
+    /// @brief Output generation of this module, read before ticking the graph.
+    inline unsigned long long GetGeneration() const
     {
-      mOutputPort->Wait();
+      return mOutputPort ? mOutputPort->GetGeneration() : 0ULL;
+    }
+
+    /// @brief Blocks until the graph produced an output newer than iGeneration.
+    /// The output Future is reused for every frame and keeps its last value, so
+    /// waiting for "a value to be present" would return immediately from the
+    /// second frame on. The generation is what identifies the current frame.
+    /// @return false if the timeout elapsed, which means the graph did not finish.
+    inline bool WaitForNewOutput(unsigned long long iGeneration, long long iTimeoutMs) const
+    {
+      return mOutputPort
+        ? mOutputPort->WaitForNewValue(iGeneration, std::chrono::milliseconds(iTimeoutMs))
+        : false;
     }
 
     inline unsigned GetLastFrameId() const

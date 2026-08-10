@@ -70,7 +70,14 @@ namespace face
   void FaceApi::OnFrameProcessed(ImageMessage::Shared iMessage)
   {
     if (!iMessage || iMessage->IsEmpty()) return;
-    mOutputQueue.Push(iMessage);
+
+    // TryPush, not Push: this runs on the worker thread. If the host stops calling
+    // GetResultImage() a blocking push would wedge the worker and StopThread()
+    // would never return. Dropping the newest preview frame is harmless.
+    if (mOutputQueue.TryPush(iMessage) == fw::ErrorCode::OutOfResources)
+    {
+      LOG(DEBUG) << "Output queue is full, dropping the processed frame.";
+    }
   }
 
   void FaceApi::PushCameraFrame(const cv::Mat& iFrame)

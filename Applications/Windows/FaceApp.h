@@ -34,6 +34,8 @@ protected:
 private:
   void showResults();
 
+  void handleKey(int keyPressed);
+
   bool mSaveVideo = false;
 
   cv::Mat mFrame;

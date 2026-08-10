@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <mutex>
 #include <vector>
 
 #define MAKE_DELEGATE(function, callee) (fw::MakeDelegate(function).Bind<function>(callee))
@@ -123,15 +124,24 @@ namespace fw
 
     /// @brief Raising an event
     /// @param iArgument possible arguments which will be forwarded to the captured function
+    /// The subscriber list is copied before invoking, so handlers may subscribe,
+    /// unsubscribe or raise the same event again without invalidating iteration.
     void Raise(ArgumentT... iArgument)
     {
-      for (auto it = mDelegates.begin(); it != mDelegates.end(); ++it)
-        (*it)(iArgument...);
+      std::vector<DelegateT> delegates;
+      {
+        std::lock_guard<std::mutex> lock(mMutex);
+        delegates = mDelegates;
+      }
+
+      for (const auto& delegate : delegates)
+        delegate(iArgument...);
     }
 
     /// @brief Unsubscribing from the event
     void Clear()
     {
+      std::lock_guard<std::mutex> lock(mMutex);
       mDelegates.clear();
     }
 
@@ -139,6 +149,8 @@ namespace fw
     /// @param iDelegate the delegate that is invoked when the event is raised
     Event& operator+=(DelegateT iDelegate)
     {
+      std::lock_guard<std::mutex> lock(mMutex);
+
       if (std::find(mDelegates.begin(), mDelegates.end(), iDelegate) == mDelegates.end())
         mDelegates.emplace_back(iDelegate);
 
@@ -149,6 +161,8 @@ namespace fw
     /// @param iDelegate the delegate to be removed
     Event& operator-=(DelegateT iDelegate)
     {
+      std::lock_guard<std::mutex> lock(mMutex);
+
       auto it = std::find(mDelegates.begin(), mDelegates.end(), iDelegate);
       if (it != mDelegates.end())
         mDelegates.erase(it);
@@ -157,6 +171,7 @@ namespace fw
     }
 
   private:
+    mutable std::mutex mMutex;			///< Guards mDelegates, the event is raised from several threads
     std::vector<DelegateT> mDelegates;	///< Delegates that are subscribed to the current event
   };
 }

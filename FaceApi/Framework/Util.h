@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cmath>
+#include <cstdlib>
 #include <limits>
 #include <memory>
 #include <string>
@@ -40,14 +42,22 @@ namespace fw
   template<typename T>
   T scale_interval(T iValueIn, T iBaseMin, T iBaseMax, T iLimitMin, T iLimitMax)
   {
+    const float baseRange = (float)iBaseMax - (float)iBaseMin;
+
+    // A degenerate input interval carries no information: map it to the lower limit.
+    if (std::fabs(baseRange) <= std::numeric_limits<float>::epsilon())
+      return iLimitMin;
+
     return static_cast<T>((((float)iLimitMax - (float)iLimitMin) * ((float)iValueIn - (float)iBaseMin) /
-      ((float)iBaseMax - (float)iBaseMin)) + (float)iLimitMin);
+      baseRange) + (float)iLimitMin);
   }
 
   template<typename T>
   inline bool equals(T iA, T iB)
   {
-    return abs(iA - iB) <= std::numeric_limits<T>::epsilon();
+    // std::abs, not abs: the unqualified name can resolve to abs(int) and
+    // silently truncate floating point arguments.
+    return std::abs(iA - iB) <= std::numeric_limits<T>::epsilon();
   }
 
   template<typename ContainerT, typename PredicateT>

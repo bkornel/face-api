@@ -5,6 +5,7 @@
 
 #include "Modules/ModuleGraph.h"
 
+#include <atomic>
 #include <string>
 
 namespace face
@@ -59,7 +60,10 @@ namespace face
     void OnFrameProcessed(ImageMessage::Shared iMessage);
 
     ModuleGraph::Shared mModuleGraph = nullptr;
-    unsigned mCameraFrameId = 0U;
+
+    /// @brief Incremented from the camera/JNI thread, reset from Clear().
+    std::atomic<unsigned> mCameraFrameId{ 0U };
+
     MessageQueue mOutputQueue;
   };
 }

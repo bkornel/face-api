@@ -54,18 +54,27 @@ namespace face
 
     const long long timestamp = fw::get_current_time();
 
-    if (mImageSize != iFrame.size())
+    // Only record the size change here. Announcing it makes every module Clear()
+    // its state, and this function runs on the camera thread while the graph
+    // thread is using that state. NotifyPendingSizeChange() does it in Main().
     {
-      mImageSize = iFrame.size();
-      sCommand.Raise(std::make_shared<ImageSizeChangedMessage>(mImageSize, mPushFrameId, timestamp));
+      std::lock_guard<std::mutex> lock(mSizeMutex);
 
-      LOG(INFO) << "Image size has been changed to: " << mImageSize;
+      if (mImageSize != iFrame.size())
+      {
+        mImageSize = iFrame.size();
+        mPendingSizeChange = true;
+
+        LOG(INFO) << "Image size has been changed to: " << mImageSize;
+      }
     }
 
     ImageMessage::Shared message = std::make_shared<ImageMessage>(iFrame, mPushFrameId, timestamp);
     message->SetQueueData(GetQueueSize(), GetSamplingFPS(), GetBound());
 
-    const fw::ErrorCode result = mQueue.Push(message);
+    // TryPush, not Push: this runs on the camera/JNI callback thread. Dropping a
+    // frame is the right answer for a live camera, blocking the capture is not.
+    const fw::ErrorCode result = mQueue.TryPush(message);
 
     if (result == fw::ErrorCode::OK)
     {
@@ -78,7 +87,14 @@ namespace face
   ImageMessage::Shared ImageQueue::Main(unsigned /*iTickNumber*/)
   {
     std::tuple<ImageMessage::Shared> framePool;
-    if (mQueue.TryPop(framePool) != fw::ErrorCode::OK)
+    const bool hasFrame = (mQueue.TryPop(framePool) == fw::ErrorCode::OK);
+
+    // Deferred from Push(). Runs after the pop so the frame that triggered the
+    // change is kept, and before returning so downstream modules are cleared
+    // before they see the first frame of the new size.
+    NotifyPendingSizeChange();
+
+    if (!hasFrame)
     {
       return nullptr;
     }
@@ -88,5 +104,21 @@ namespace face
     mLastTimestamp = image->GetTimestamp();
 
     return image;
+  }
+
+  void ImageQueue::NotifyPendingSizeChange()
+  {
+    cv::Size imageSize;
+
+    {
+      std::lock_guard<std::mutex> lock(mSizeMutex);
+
+      if (!mPendingSizeChange) return;
+
+      mPendingSizeChange = false;
+      imageSize = mImageSize;
+    }
+
+    sCommand.Raise(std::make_shared<ImageSizeChangedMessage>(imageSize, mPushFrameId, fw::get_current_time()));
   }
 }

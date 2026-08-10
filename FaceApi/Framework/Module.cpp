@@ -9,6 +9,15 @@ namespace fw
 {
   Module::CommandEventHandler Module::sCommand;
 
+  Module::~Module()
+  {
+    // sCommand is static and stores a raw pointer to this object. Unsubscribing
+    // only in DeInitialize() is not enough: a module whose initialization failed
+    // never gets there, and the stale delegate would be invoked after the object
+    // is gone. Removing a delegate that is not subscribed is a no-op.
+    sCommand -= MAKE_DELEGATE(&Module::OnCommand, this);
+  }
+
   std::string Module::CreateModuleName(const cv::FileNode& iModuleNode)
   {
     CV_DbgAssert(!iModuleNode.empty() && iModuleNode.isNamed());
@@ -45,7 +54,12 @@ namespace fw
       }
 
       mInitialized = (result == ErrorCode::OK);
-      sCommand += MAKE_DELEGATE(&Module::OnCommand, this);
+
+      // Only listen for commands once the module is actually usable.
+      if (mInitialized)
+      {
+        sCommand += MAKE_DELEGATE(&Module::OnCommand, this);
+      }
     }
 
     return result;

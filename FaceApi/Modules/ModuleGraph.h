@@ -49,6 +49,8 @@ namespace face
     }
 
   private:
+    static const long long sProcessTimeoutMs;   ///< Upper bound for processing one frame
+
     fw::ErrorCode InitializeInternal(const cv::FileNode& iModulesNode) override;
 
     fw::ErrorCode DeInitializeInternal() override;

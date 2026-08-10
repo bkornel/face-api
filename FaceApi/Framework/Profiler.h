@@ -2,12 +2,17 @@
 
 #include "Framework/Stopwatch.h"
 
+#include <deque>
 #include <map>
 #include <vector>
 #include <string>
 #include <mutex>
 
+// Enabled by default. Define FACE_PROFILER_DISABLED from the build system to
+// compile the profiler out completely.
+#if !defined(ENABLE_FACE_PROFILER) && !defined(FACE_PROFILER_DISABLED)
 #define ENABLE_FACE_PROFILER
+#endif
 
 // Profiler is enabled
 #ifdef ENABLE_FACE_PROFILER
@@ -56,6 +61,11 @@ namespace fw
   private:
     static std::recursive_mutex sMutex;
 
+    /// @brief Upper bound of the kept samples per measured scope. The database is
+    /// only written out on shutdown, so without a bound a long running session
+    /// (a mobile app in particular) would grow it for as long as it lives.
+    static const std::size_t sMaxSamplesPerName;
+
     ProfilerDatabase() = default;
 
     ProfilerDatabase(const ProfilerDatabase& iOther) = delete;
@@ -64,6 +74,6 @@ namespace fw
 
     unsigned mCurrentFrameId = 0U;
     std::map<std::size_t, std::string> mNames;
-    std::map<std::size_t, std::vector<Measurement>> mMeasurements;
+    std::map<std::size_t, std::deque<Measurement>> mMeasurements;
   };
 }

@@ -2,11 +2,18 @@
 
 #include "Framework/Util.h"
 
+#include <atomic>
 #include <memory>
 #include <future>
 
 namespace fw
 {
+  /// @brief Base class running Run() on a worker thread.
+  /// IMPORTANT: Run() is virtual, so every derived class must stop the thread in
+  /// its own destructor (directly or through DeInitialize). By the time ~Thread()
+  /// runs, the derived part of the object is already gone and a still-running
+  /// Run() would touch destroyed state. The StopThread() in ~Thread() is only a
+  /// last resort and logs a warning if it actually had to do something.
   class Thread
   {
   public:
@@ -41,7 +48,7 @@ namespace fw
 
   private:
     std::future<ErrorCode> mThread;
-    volatile bool mStopThread = false;
-    volatile bool mFirstRun = true;
+    std::atomic<bool> mStopThread{ false };
+    std::atomic<bool> mFirstRun{ true };
   };
 }

@@ -23,13 +23,14 @@ namespace face
       {
         std::string value;
 
-        if (fw::ocv::get_value(iSettings, "trackerFile", value))
+        // These live under the "shapeModel" node, not under the module node.
+        if (fw::ocv::get_value(shapeModelNode, "trackerFile", value))
           trackerFile = value;
 
-        if (fw::ocv::get_value(iSettings, "triFile", value))
+        if (fw::ocv::get_value(shapeModelNode, "triFile", value))
           triFile = value;
 
-        if (fw::ocv::get_value(iSettings, "conFile", value))
+        if (fw::ocv::get_value(shapeModelNode, "conFile", value))
           conFile = value;
 
         mShapeModelDispatcher.Initialize(shapeModelNode);

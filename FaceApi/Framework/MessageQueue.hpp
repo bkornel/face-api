@@ -5,7 +5,9 @@
 #include <easyloggingpp/easyloggingpp.h>
 #include <opencv2/core/base.hpp>
 
+#include <atomic>
 #include <chrono>
+#include <condition_variable>
 #include <limits>
 #include <mutex>
 #include <queue>
@@ -60,12 +62,18 @@ namespace fw
 
     MessageQueue(const MessageQueue& iOther) = delete;
 
+    /// @brief Blocks until the message could be pushed.
+    /// Prefer TryPush() on threads that must not block, such as a camera callback.
     ErrorCode Push(const MessageTuple& iMessageTuple)
     {
       ErrorCode retCode = ErrorCode::OK;
-      while ((retCode = TryPush(iMessageTuple)) == ErrorCode::OutOfResources)
+      std::unique_lock<std::mutex> lock(mMutex);
+
+      while ((retCode = PushLocked(iMessageTuple)) == ErrorCode::OutOfResources)
       {
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        // A bounded wait: a pop notifies us, but timestamp filtering can also
+        // make room without anybody popping.
+        mCV.wait_for(lock, std::chrono::milliseconds(1));
       }
 
       return retCode;
@@ -78,8 +86,8 @@ namespace fw
 
     ErrorCode TryPush(const MessageTuple& iMessageTuple)
     {
-      int queueSize = GetSize();
-      return queueSize >= mBound ? ErrorCode::OutOfResources : InternalPush(iMessageTuple);
+      std::unique_lock<std::mutex> lock(mMutex);
+      return PushLocked(iMessageTuple);
     }
 
     ErrorCode TryPush(const First& iFirst, const Rest&... iArgs)
@@ -90,9 +98,11 @@ namespace fw
     ErrorCode Pop(MessageTuple& oDestination)
     {
       ErrorCode retCode = ErrorCode::OK;
-      while ((retCode = TryPop(oDestination)) == ErrorCode::NotFound)
+      std::unique_lock<std::mutex> lock(mMutex);
+
+      while ((retCode = PopLocked(oDestination)) == ErrorCode::NotFound)
       {
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        mCV.wait_for(lock, std::chrono::milliseconds(1));
       }
 
       return retCode;
@@ -100,22 +110,18 @@ namespace fw
 
     ErrorCode TryPop(MessageTuple& oDestination)
     {
-      ErrorCode retCode = TryFront(oDestination);
-
-      if (retCode == ErrorCode::OK)
-      {
-        InternalPop();
-      }
-
-      return retCode;
+      std::unique_lock<std::mutex> lock(mMutex);
+      return PopLocked(oDestination);
     }
 
     ErrorCode Front(MessageTuple& oDestination)
     {
       ErrorCode retCode = ErrorCode::OK;
-      while ((retCode = TryFront(oDestination)) == ErrorCode::NotFound)
+      std::unique_lock<std::mutex> lock(mMutex);
+
+      while ((retCode = FrontLocked(oDestination)) == ErrorCode::NotFound)
       {
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        mCV.wait_for(lock, std::chrono::milliseconds(1));
       }
 
       return retCode;
@@ -123,26 +129,25 @@ namespace fw
 
     ErrorCode TryFront(MessageTuple& oDestination)
     {
-      if (IsEmpty())
-      {
-        oDestination = MessageTuple();
-        return ErrorCode::NotFound;
-      }
-
-      return InternalFront(oDestination);
+      std::unique_lock<std::mutex> lock(mMutex);
+      return FrontLocked(oDestination);
     }
 
     void Clear()
     {
-      std::lock_guard<std::mutex> lock(mMutex);
-
-      while (!mQueue.empty())
       {
-        mQueue.pop();
+        std::lock_guard<std::mutex> lock(mMutex);
+
+        while (!mQueue.empty())
+        {
+          mQueue.pop();
+        }
+
+        mTimestampMs = 0LL;
+        mSize = 0;
       }
 
-      mTimestampMs = 0LL;
-      mSize = 0;
+      mCV.notify_all();
     }
 
     inline float GetSamplingFPS() const { return mSamplingFPS; }
@@ -158,8 +163,13 @@ namespace fw
     void SetBound(int iBound)
     {
       CV_DbgAssert(iBound > 0);
-      std::lock_guard<std::mutex> lock(mMutex);
-      mBound = (std::min)((std::max)(iBound, MIN_BOUND), MAX_BOUND);
+      {
+        std::lock_guard<std::mutex> lock(mMutex);
+        mBound = (std::min)((std::max)(iBound, MIN_BOUND), MAX_BOUND);
+      }
+
+      // A larger bound may let a blocked producer through.
+      mCV.notify_all();
     }
 
     void SetSamplingFPS(float iSamplingFPS)
@@ -183,35 +193,32 @@ namespace fw
     const static int MAX_BOUND;
     const static int MIN_BOUND;
 
-    ErrorCode InternalPush(const MessageTuple& iMessageTuple)
+    /// @brief All *Locked helpers below require mMutex to be held by the caller.
+    /// Keeping the bound/emptiness check and the mutation under one single lock
+    /// acquisition is what makes the queue safe against concurrent producers.
+    ErrorCode PushLocked(const MessageTuple& iMessageTuple)
     {
-      if (mThresholdMs > 0LL)
-        InternalFiltering();
+      FilterLocked();
 
-      std::lock_guard<std::mutex> lock(mMutex);
-
-      if (mQueue.size() >= mBound) return ErrorCode::OutOfResources;
+      if (static_cast<int>(mQueue.size()) >= mBound.load()) return ErrorCode::OutOfResources;
 
       const long long currentTimestampMs = fw::get_current_time();
 
-      if (std::llabs(currentTimestampMs - mTimestampMs) <= mSamplingMs)
+      if (std::llabs(currentTimestampMs - mTimestampMs) <= mSamplingMs.load())
         return ErrorCode::BadData;
 
       mTimestampMs = currentTimestampMs;
       mQueue.push(std::make_pair(mTimestampMs, iMessageTuple));
-      mSize++;
+      mSize = static_cast<int>(mQueue.size());
 
-      CV_DbgAssert(mSize == static_cast<int>(mQueue.size()));
+      mCV.notify_all();
 
       return ErrorCode::OK;
     }
 
-    ErrorCode InternalFront(MessageTuple& oDestination)
+    ErrorCode FrontLocked(MessageTuple& oDestination)
     {
-      if (mThresholdMs > 0LL)
-        InternalFiltering();
-
-      std::lock_guard<std::mutex> lock(mMutex);
+      FilterLocked();
 
       if (mQueue.empty())
       {
@@ -224,55 +231,45 @@ namespace fw
       return ErrorCode::OK;
     }
 
-    ErrorCode InternalPop()
+    ErrorCode PopLocked(MessageTuple& oDestination)
     {
-      if (mThresholdMs > 0LL)
-        InternalFiltering();
+      const ErrorCode retCode = FrontLocked(oDestination);
 
-      std::lock_guard<std::mutex> lock(mMutex);
-
-      if (mQueue.empty())
+      if (retCode == ErrorCode::OK)
       {
-        return ErrorCode::NotFound;
+        mQueue.pop();
+        mSize = static_cast<int>(mQueue.size());
+
+        // Popping frees a slot for a blocked producer.
+        mCV.notify_all();
       }
 
-      mQueue.pop();
-      mSize--;
-
-      CV_DbgAssert(mSize == static_cast<int>(mQueue.size()));
-
-      return ErrorCode::OK;
+      return retCode;
     }
 
-    void InternalFiltering()
+    void FilterLocked()
     {
-      CV_DbgAssert(mThresholdMs > 0LL);
+      const long long thresholdMs = mThresholdMs.load();
+      if (thresholdMs <= 0LL) return;
 
       const long long currentTimestampMs = fw::get_current_time();
+      const int startSize = mSize;
 
-      // Lock mQueue
+      while (!mQueue.empty())
       {
-        std::lock_guard<std::mutex> lock(mMutex);
+        const long long createTimestampMs = mQueue.front().first;
 
-        //int startSize = mSize;
+        if (std::llabs(currentTimestampMs - createTimestampMs) <= thresholdMs)
+          break;
 
-        while (!mQueue.empty())
-        {
-          const long long createTimestampMs = mQueue.front().first;
+        mQueue.pop();
+      }
 
-          if (std::llabs(currentTimestampMs - createTimestampMs) <= mThresholdMs)
-            break;
+      mSize = static_cast<int>(mQueue.size());
 
-          mQueue.pop();
-          mSize--;
-
-          CV_DbgAssert(mSize == static_cast<int>(mQueue.size()));
-        }
-
-        //if (startSize != mSize)
-        //{
-        //	LOG(WARNING) << "Number of frames dropped from " << mName << ": " << std::abs(startSize - mSize);
-        //}
+      if (startSize != mSize)
+      {
+        mCV.notify_all();
       }
     }
 
@@ -283,18 +280,21 @@ namespace fw
     }
 
     std::mutex mMutex;
+    std::condition_variable mCV;
     std::queue<std::pair<long long, MessageTuple>> mQueue;
 
     std::string mName;
 
-    int mSize = 0;
-    int mBound = MAX_BOUND;
+    // Read by the getters without holding mMutex, therefore atomic.
+    std::atomic<int> mSize{ 0 };
+    std::atomic<int> mBound{ MAX_BOUND };
 
-    float mSamplingFPS = MAX_SAMPLING_RATE_FPS;
-    long long mSamplingMs = 1LL;
+    std::atomic<float> mSamplingFPS{ MAX_SAMPLING_RATE_FPS };
+    std::atomic<long long> mSamplingMs{ 1LL };
+    std::atomic<long long> mThresholdMs{ -1LL };
 
+    // Only touched while mMutex is held.
     long long mTimestampMs = 0LL;
-    long long mThresholdMs = -1LL;
   };
 
   template<typename First, typename... Rest>

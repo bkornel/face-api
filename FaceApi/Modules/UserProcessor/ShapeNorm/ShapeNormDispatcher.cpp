@@ -64,6 +64,8 @@ namespace face
 
   void ShapeNormDispatcher::GPA(MatVector& ioShapes2D, cv::Mat& ioMeanShape) const
   {
+    if (ioShapes2D.empty()) return;
+
     int counter = 0;
     while (true)
     {
@@ -72,12 +74,20 @@ namespace face
       Normalize(ioShapes2D);
       Align(ioShapes2D, ioMeanShape);
 
-      // Find a new mean shape from all the set of points
+      // Find a new mean shape from all the set of points.
+      // std::accumulate returns the sum, it does not write into the init value,
+      // so the previous version left newMeanShape all zeros. Dividing that by its
+      // own (zero) norm produced NaN, the convergence test never became true and
+      // the loop always ran mMaxCount times to produce a NaN mean shape.
       cv::Mat newMeanShape = cv::Mat::zeros(ioMeanShape.size(), ioMeanShape.type());
-      std::accumulate(ioShapes2D.begin(), ioShapes2D.end(), newMeanShape);
+      for (const auto& shape : ioShapes2D)
+        newMeanShape += shape;
 
-      newMeanShape = newMeanShape / ioShapes2D.size();
-      newMeanShape = newMeanShape / cv::norm(newMeanShape);
+      newMeanShape = newMeanShape / static_cast<double>(ioShapes2D.size());
+
+      const double meanNorm = cv::norm(newMeanShape);
+      if (meanNorm > 0.0)
+        newMeanShape = newMeanShape / meanNorm;
 
       // Perform the loop until convergence
       const double diff = cv::norm(newMeanShape, ioMeanShape);

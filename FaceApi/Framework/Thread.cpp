@@ -1,10 +1,18 @@
 #include "Framework/Thread.h"
 
+#include <easyloggingpp/easyloggingpp.h>
+
 namespace fw
 {
   Thread::~Thread()
   {
-    StopThread();
+    // Derived classes are responsible for stopping the thread while their own
+    // state is still alive. Reaching this with a running thread is a bug.
+    if (IsRunning())
+    {
+      LOG(WARNING) << "Thread was still running in ~Thread(); the derived class should have stopped it.";
+      StopThread();
+    }
   }
 
   ErrorCode Thread::Run()
