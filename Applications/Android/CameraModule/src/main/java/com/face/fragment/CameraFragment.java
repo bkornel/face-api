@@ -1,7 +1,6 @@
 package com.face.fragment;
 
 import android.hardware.Camera;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
@@ -31,7 +30,6 @@ import com.face.event.ZoomChangedArgs;
 import com.face.view.CameraView;
 import com.face.view.FocusView;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,12 +63,43 @@ public class CameraFragment extends BaseFragment {
         super.onCreate(iSavedInstanceState);
 
         mCapturePressed = false;
+
+        openCameraAndInitialize();
+    }
+
+    /**
+     * Opens the camera and reads its capabilities. Every initialize* call below
+     * dereferences mCamera, so a failed open has to stop here. Previously a null
+     * camera (no permission, hardware in use by another app) crashed with an NPE
+     * in initializeFocusMode().
+     */
+    private boolean openCameraAndInitialize() {
         mCamera = getCameraInstance(Configuration.i.useFrontCamera());
+
+        if (mCamera == null) {
+            Toast.makeText(mActivity, getString(R.string.camera_unavailable_caption), Toast.LENGTH_LONG).show();
+            return false;
+        }
 
         initializeFocusMode();
         initializeFlashMode();
-        initializePreviewSize();
+
+        if (!initializePreviewSize()) {
+            Toast.makeText(mActivity, getString(R.string.camera_unavailable_caption), Toast.LENGTH_LONG).show();
+            releaseCamera();
+            return false;
+        }
+
         initializeScreenParams();
+
+        return true;
+    }
+
+    private void releaseCamera() {
+        if (mCamera != null) {
+            mCamera.release();
+            mCamera = null;
+        }
     }
 
     @Override
@@ -109,9 +138,11 @@ public class CameraFragment extends BaseFragment {
     }
 
     private void initializeViewGroup() {
-        if (mViewGroup != null) {
-            mViewGroup.removeAllViews();
+        if (mViewGroup == null || mCamera == null || mPreviewSize == null) {
+            return;
         }
+
+        mViewGroup.removeAllViews();
 
         // Set the camera preview and focus view
         mCameraPreview = new CameraView(mActivity, mCamera, mCameraId);
@@ -182,13 +213,16 @@ public class CameraFragment extends BaseFragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (mCamera != null) {
-            try {
-                mCamera.reconnect();
-            } catch (IOException e) {
-                e.printStackTrace();
+
+        // The camera is released in onPause(), so it has to be reopened here.
+        // Previously it was kept open across the whole lifecycle, which blocked
+        // every other app from using it and made reconnect() pointless.
+        if (mCamera == null) {
+            if (openCameraAndInitialize()) {
+                initializeViewGroup();
             }
         }
+
         if (mOrientationEventListener == null) {
             initOrientationListener();
         }
@@ -207,9 +241,9 @@ public class CameraFragment extends BaseFragment {
 
         if (mCapturePressed) {
             try {
-                mSavePhotoTask = new SavePhotoTask(mCameraPreview.getOutputBitmap());
+                mSavePhotoTask = new SavePhotoTask(mActivity, mCameraPreview.getOutputBitmap());
                 mSavePhotoTask.PhotoSaved.addHandler(this::onPhotoSaved);
-                mSavePhotoTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                mSavePhotoTask.execute();
             } catch (IllegalStateException ex) {
                 Timber.e(ex.getMessage());
             }
@@ -220,19 +254,25 @@ public class CameraFragment extends BaseFragment {
     @Override
     public void onPause() {
         super.onPause();
+
         if (mOrientationEventListener != null) {
             mOrientationEventListener.disable();
             mOrientationEventListener = null;
         }
+
+        // Hand the camera back while we are in the background. The view group is
+        // rebuilt in onResume() once the camera has been reopened.
+        if (mViewGroup != null) {
+            mViewGroup.removeAllViews();
+        }
+
+        releaseCamera();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (mCamera != null) {
-            mCamera.release();
-            mCamera = null;
-        }
+        releaseCamera();
     }
 
     private void onPreviewSizeChanged(Object iSender, EventArgs iArgs) {
@@ -276,18 +316,11 @@ public class CameraFragment extends BaseFragment {
             mViewGroup.removeAllViews();
         }
 
-        if (mCamera != null) {
-            mCamera.release();
-            mCamera = null;
+        releaseCamera();
+
+        if (openCameraAndInitialize()) {
+            initializeViewGroup();
         }
-
-        mCamera = getCameraInstance(Configuration.i.useFrontCamera());
-
-        initializeFocusMode();
-        initializeFlashMode();
-        initializePreviewSize();
-        initializeScreenParams();
-        initializeViewGroup();
     }
 
     public void onCapturePressed() {
@@ -345,10 +378,16 @@ public class CameraFragment extends BaseFragment {
         }
     }
 
-    private void initializePreviewSize() {
+    /** @return false when the camera reports no usable preview size. */
+    private boolean initializePreviewSize() {
         Camera.Parameters parameters = mCamera.getParameters();
         List<Camera.Size> spsizes = parameters.getSupportedPreviewSizes();
         mPreviewSizes.clear();
+
+        if (spsizes == null) {
+            Timber.e("The camera reported no supported preview sizes.");
+            return false;
+        }
 
         // Fill preview sizes
         int idx = 0;
@@ -359,9 +398,17 @@ public class CameraFragment extends BaseFragment {
             }
         }
 
-        // Sort preview sizes
+        // No supported size matched a known aspect ratio. Everything below indexes
+        // into the list, so bail out instead of throwing.
+        if (mPreviewSizes.isEmpty()) {
+            Timber.e("None of the %d supported preview sizes matched a known ratio.", spsizes.size());
+            return false;
+        }
+
+        // Sort preview sizes, largest area first.
+        // The loop used to stop at count > 2, which left the last pair unsorted.
         int count = mPreviewSizes.size();
-        while (count > 2) {
+        while (count > 1) {
             for (int i = 0; i < count - 1; i++) {
                 PictureSize current = mPreviewSizes.get(i);
                 PictureSize next = mPreviewSizes.get(i + 1);
@@ -400,6 +447,8 @@ public class CameraFragment extends BaseFragment {
 
         Configuration.i.setPreviewSizeId(id);
         Configuration.i.setPreviewSizeList(mPreviewSizes);
+
+        return true;
     }
 
     private void onPhotoSaved(Object iSender, EventArgs iArgs) {

@@ -1,3 +1,29 @@
-include ':CameraModule', ':FaceApp', ':OpenCV', ':Dlib'
-project(':OpenCV').projectDir = new File(settingsDir, '../../../3rdparty/opencv-4.1.1/android')
-project(':Dlib').projectDir = new File(settingsDir, '../../../3rdparty/dlib-19.17.99/android')
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+
+    // jcenter() was removed: the service shut down in 2022 and dependency
+    // resolution fails against it.
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.name = 'FaceApp'
+
+include ':CameraModule', ':FaceApp'
+
+// The OpenCV and Dlib Gradle projects are intentionally not included anymore:
+//  - OpenCV is consumed by CMake through find_package(), see CameraModule and
+//    FaceApi CMakeLists.txt. It is linked statically into libFaceNative.so, so
+//    there is no OpenCV shared object left to package.
+//  - Dlib has no Android build in the 3rdparty repository at all, and nothing
+//    in this project references it. Including it broke configuration outright.

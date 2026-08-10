@@ -1,36 +1,34 @@
 apply plugin: 'com.android.application'
 
-repositories {
-    mavenCentral()
-    google()
-    jcenter()
-}
-
 android {
-    compileSdkVersion 28
-    buildToolsVersion '28.0.3'
+    // Distinct from the CameraModule namespace (com.face) so the generated R and
+    // BuildConfig classes of the two modules do not collide. applicationId keeps
+    // the installed package name unchanged.
+    namespace 'com.face.app'
+
+    compileSdk 35
 
     defaultConfig {
-        minSdkVersion 23
-        targetSdkVersion 28
+        applicationId 'com.face'
+        minSdk 24
+        targetSdk 35
         versionCode 1
         versionName "1.0"
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.txt'
         }
     }
 }
 
 dependencies {
     implementation project(':CameraModule')
-    implementation fileTree(include: ['*.jar'], dir: 'libs')
 }

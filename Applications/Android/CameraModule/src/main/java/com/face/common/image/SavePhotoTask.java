@@ -1,102 +1,99 @@
 package com.face.common.image;
 
+import android.content.Context;
 import android.graphics.Bitmap;
-import android.os.AsyncTask;
-import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 
+import com.face.common.AppDirectories;
 import com.face.common.Constants;
 import com.face.event.Event;
 import com.face.event.IEvent;
 import com.face.event.PhotoSavedArgs;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import timber.log.Timber;
 
-public class SavePhotoTask extends AsyncTask<Void, Void, File> {
+/**
+ * Writes a bitmap to app private picture storage on a background thread and
+ * raises PhotoSaved on the main thread.
+ * <p>
+ * This used to be an AsyncTask writing to the public DCIM folder. AsyncTask is
+ * deprecated, and the public folder is not writable under scoped storage.
+ */
+public class SavePhotoTask {
+
+    private static final Executor sExecutor = Executors.newSingleThreadExecutor();
 
     public final IEvent<PhotoSavedArgs> PhotoSaved = new Event<>();
 
-    private Bitmap mBitmap;
-    private String mPath;
-    private boolean mIsSavingInProgress;
+    private final Handler mMainHandler = new Handler(Looper.getMainLooper());
+    private final AtomicBoolean mIsSavingInProgress = new AtomicBoolean(false);
 
-    public SavePhotoTask(Bitmap iBitmap) {
+    private final Bitmap mBitmap;
+    private final File mFile;
+
+    public SavePhotoTask(Context iContext, Bitmap iBitmap) {
         String timeStamp = new SimpleDateFormat(Constants.Time.FORMAT, Locale.getDefault()).format(new Date());
 
         mBitmap = iBitmap;
-        mPath = Constants.Directories.GALLERY + Constants.ImWrite.PREFIX + timeStamp + Constants.ImWrite.POSTFIX;
+        mFile = new File(AppDirectories.pictures(iContext),
+                Constants.ImWrite.PREFIX + timeStamp + Constants.ImWrite.POSTFIX);
     }
 
-    @Override
-    protected File doInBackground(Void... iParams) {
-        mIsSavingInProgress = true;
-
-        if (mBitmap == null) {
-            return null;
-        }
-
-        File photo = getOutputFile();
-        if (photo == null) {
-            Timber.e("Error creating media file, check storage permissions");
-            return null;
-        }
-
-        FileOutputStream stream = null;
-        try {
-            stream = new FileOutputStream(photo);
-
-            mBitmap.compress(Constants.ImWrite.FORMAT, Constants.ImWrite.QUALITY, stream);
-            mBitmap.recycle();
-
-        } catch (FileNotFoundException e) {
-            Timber.e(e, "File not found: " + e.getMessage());
-        } finally {
-            try {
-                if (stream != null) {
-                    stream.close();
-                }
-            } catch (IOException e) {
-                Timber.e(e, e.getMessage());
-            }
-        }
-
-        return photo;
-    }
-
-    @Override
-    protected void onPostExecute(File iFile) {
-        super.onPostExecute(iFile);
-        PhotoSaved.raise(this, iFile != null ? new PhotoSavedArgs(mPath) : null);
-        mIsSavingInProgress = false;
-    }
-
-    private File getOutputFile() {
-        // To be safe, we should check that the SDCard is mounted
-        if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-            Timber.e("External storage state: " + Environment.getExternalStorageState());
-            return null;
-        }
-
-        // Create the storage directory if it doesn't exist
-        File directory = new File(Constants.Directories.GALLERY);
-        if (!directory.exists()) {
-            if (!directory.mkdirs()) {
-                Timber.e("Failed to create directory: " + directory.getAbsolutePath());
-                return null;
-            }
-        }
-
-        return new File(mPath);
+    public void execute() {
+        mIsSavingInProgress.set(true);
+        sExecutor.execute(this::save);
     }
 
     public boolean isSavingInProgress() {
-        return mIsSavingInProgress;
+        return mIsSavingInProgress.get();
+    }
+
+    private void save() {
+        final File saved = write();
+
+        mMainHandler.post(() -> {
+            mIsSavingInProgress.set(false);
+            PhotoSaved.raise(this, saved != null ? new PhotoSavedArgs(saved.getAbsolutePath()) : null);
+        });
+    }
+
+    private File write() {
+        if (mBitmap == null) {
+            Timber.e("There is no bitmap to save.");
+            return null;
+        }
+
+        File directory = mFile.getParentFile();
+        if (directory != null && !directory.exists() && !directory.mkdirs()) {
+            Timber.e("Failed to create directory: %s", directory.getAbsolutePath());
+            return null;
+        }
+
+        // try-with-resources: the stream was leaked on every failure path before.
+        try (OutputStream stream = new FileOutputStream(mFile)) {
+            if (!mBitmap.compress(Constants.ImWrite.FORMAT, Constants.ImWrite.QUALITY, stream)) {
+                Timber.e("Failed to compress the bitmap.");
+                return null;
+            }
+        } catch (IOException e) {
+            Timber.e(e, "Could not write %s", mFile.getAbsolutePath());
+            return null;
+        } finally {
+            mBitmap.recycle();
+        }
+
+        return mFile;
     }
 }

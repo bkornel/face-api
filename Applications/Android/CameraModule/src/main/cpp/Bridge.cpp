@@ -6,7 +6,6 @@
 #include <easyloggingpp/easyloggingpp.h>
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
-#include <opencv2/features2d.hpp>
 
 #include <iomanip>
 #include <sstream>
@@ -29,13 +28,19 @@ namespace face_jni {
         __android_log_print(cLogLevel, cModuleName, "%s", ss.str().c_str());
     }
 
-    cv::Mat ARGB_2_BGRA(const cv::Mat &iImage) {
-        CV_Assert(iImage.channels() == 4);
+    /// @brief Prefix plus value. The FACE_PROFILE call sites used to write
+    /// log("text: " << value), which does not compile: log() takes a single
+    /// argument and there is no operator<< on a string literal.
+    template<typename T>
+    void log(const char *iPrefix, T iValue) {
+        std::stringstream ss;
+        ss << iPrefix << std::fixed << std::setprecision(2) << iValue;
+        __android_log_print(cLogLevel, cModuleName, "%s", ss.str().c_str());
+    }
 
-        cv::Mat converted(iImage.rows, iImage.cols, iImage.type());
-        int fromTo[] = {0, 3, 1, 2, 2, 1, 3, 0};
-        cv::mixChannels(&iImage, 1, &converted, 1, fromTo, 4);
-        return converted;
+    // Number of bytes an NV21 / YUV420sp frame of the given size occupies.
+    inline jsize yuv420sp_size(jint iWidth, jint iHeight) {
+        return static_cast<jsize>(iWidth) * iHeight * 3 / 2;
     }
 }
 
@@ -88,13 +93,35 @@ Java_com_face_common_Native_process(JNIEnv *iEnv, jobject /*iThis*/, jint iRotat
     int retVal = 0;
 
 #ifdef FACE_PROFILE
-    face::Stopwatch stopwatch;
+    fw::Stopwatch stopwatch;
     stopwatch.Start();
 #endif
 
+    if (!iYUV || !iARGB || iWidth <= 0 || iHeight <= 0) {
+        return -1;
+    }
+
+    // Never trust the sizes the Java side passed in: they decide how much of the
+    // array the cv::Mat below reads.
+    if (iEnv->GetArrayLength(iYUV) < face_jni::yuv420sp_size(iWidth, iHeight)) {
+        face_jni::log("- The YUV array is smaller than the given frame size");
+        return -1;
+    }
+
+    if (iEnv->GetArrayLength(iARGB) < static_cast<jsize>(iWidth) * iHeight) {
+        face_jni::log("- The ARGB array is smaller than the given frame size");
+        return -1;
+    }
+
     // YUV420sp to BGR conversion
     jbyte *jni_yuv = iEnv->GetByteArrayElements(iYUV, nullptr);
-    if (!jni_yuv || iEnv->ExceptionOccurred()) {
+    if (!jni_yuv) {
+        return -1;
+    }
+
+    if (iEnv->ExceptionOccurred()) {
+        // The array was pinned, so it has to be released even on this path.
+        iEnv->ReleaseByteArrayElements(iYUV, jni_yuv, JNI_ABORT);
         return -1;
     }
 
@@ -104,7 +131,7 @@ Java_com_face_common_Native_process(JNIEnv *iEnv, jobject /*iThis*/, jint iRotat
         cv::cvtColor(jni_yuv_mat, bgr, cv::COLOR_YUV420sp2BGR, 3);
 
 #ifdef FACE_PROFILE
-        face_jni::log("[FACE_PROFILE] cvtColor: " << stopwatch.GetElapsedTimeMilliSec(false));
+        face_jni::log("[FACE_PROFILE] cvtColor ms: ", stopwatch.GetElapsedTimeMilliSec(false));
         stopwatch.Reset();
 #endif
 
@@ -112,7 +139,7 @@ Java_com_face_common_Native_process(JNIEnv *iEnv, jobject /*iThis*/, jint iRotat
         fw::ocv::rotate_mat(bgr, bgr, iRotation);
 
 #ifdef FACE_PROFILE
-        face_jni::log("[FACE_PROFILE] rotate_mat: " << stopwatch.GetElapsedTimeMilliSec(false));
+        face_jni::log("[FACE_PROFILE] rotate_mat ms: ", stopwatch.GetElapsedTimeMilliSec(false));
         stopwatch.Reset();
 #endif
     }
@@ -127,8 +154,16 @@ Java_com_face_common_Native_process(JNIEnv *iEnv, jobject /*iThis*/, jint iRotat
                 if (jni_argb && !iEnv->ExceptionOccurred()) {
                     cv::Mat jni_argb_mat(bgr.rows, bgr.cols, CV_8UC4, (unsigned char *) jni_argb);
 
+                    // Writes straight into the pinned Java int[]. This is already the
+                    // layout Bitmap.setPixels() expects: an ARGB_8888 int is
+                    // 0xAARRGGBB, which on a little endian device is B,G,R,A in
+                    // memory, exactly what BGR2BGRA produces.
+                    //
+                    // A channel swapping ARGB_2_BGRA() call used to follow this line.
+                    // It assigned a freshly allocated cv::Mat to the local variable,
+                    // so it never wrote anything back into the Java array. It only
+                    // cost a full frame allocation and a mixChannels() per frame.
                     cv::cvtColor(resultImage, jni_argb_mat, cv::COLOR_BGR2BGRA, 4);
-                    jni_argb_mat = face_jni::ARGB_2_BGRA(jni_argb_mat);
 
                     iEnv->ReleaseIntArrayElements(iARGB, jni_argb, 0);
                 } else {
@@ -145,11 +180,13 @@ Java_com_face_common_Native_process(JNIEnv *iEnv, jobject /*iThis*/, jint iRotat
     }
 
 #ifdef FACE_PROFILE
-    face_jni::log("[FACE_PROFILE] ARGB_2_BGRA: " << stopwatch.GetElapsedTimeMilliSec(false));
+    face_jni::log("[FACE_PROFILE] cvtColor to ARGB ms: ", stopwatch.GetElapsedTimeMilliSec(false));
     stopwatch.Reset();
 #endif
 
-    iEnv->ReleaseByteArrayElements(iYUV, jni_yuv, 0);
+    // JNI_ABORT, not 0: the YUV frame is only read here, so there is no reason to
+    // copy the whole buffer back to the Java array on every frame.
+    iEnv->ReleaseByteArrayElements(iYUV, jni_yuv, JNI_ABORT);
 
     return retVal;
 }

@@ -1,7 +1,7 @@
 # For more information about using CMake with Android Studio, read the
 # documentation: https://d.android.com/studio/projects/add-native-code.html
 
-cmake_minimum_required(VERSION 3.6.0)
+cmake_minimum_required(VERSION 3.22)
 
 # The shared library has the name: libnative.so
 set(TARGET_NAME FaceNative)
@@ -13,7 +13,11 @@ message("- Output directory of ${TARGET_NAME}: '${CMAKE_BINARY_DIR}'")
 # Setting some paths to 3rdparties and to the application logic
 set(DEPENDECIES_DIR "${CMAKE_SOURCE_DIR}/../../../../3rdparty")
 set(FACE_API_DIR    "${CMAKE_SOURCE_DIR}/../../../${TARGET_NAME_FACE_API}")
-set(OpenCV_DIR      "${DEPENDECIES_DIR}/opencv-4.1.1/android/src/sdk/native/jni")
+set(OPENCV_VERSION  "opencv-4.5.2" CACHE STRING "OpenCV directory name under 3rdparty")
+set(OpenCV_DIR      "${DEPENDECIES_DIR}/${OPENCV_VERSION}/android/src/sdk/native/jni")
+
+# Static OpenCV, see FaceApi/CMakeLists.txt
+set(OpenCV_STATIC ON)
 
 # Finding 3rparty libraries
 find_package(OpenCV REQUIRED)

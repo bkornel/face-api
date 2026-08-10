@@ -64,15 +64,44 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback, C
     }
 
     public void surfaceCreated(SurfaceHolder iHolder) {
+        // The worker has to exist before the preview starts: onPreviewFrame() can
+        // fire as soon as the callback is installed, and it used to dereference a
+        // still null sNativeTask.
+        ensureWorker();
         startPreview(iHolder);
     }
 
     public void surfaceDestroyed(SurfaceHolder iHolder) {
         stopPreview();
+        stopWorker();
 
         SurfaceHolder holder = getHolder();
         if (holder != null) {
             holder.removeCallback(this);
+        }
+    }
+
+    /** Starts the processing worker if it is not running yet. */
+    private void ensureWorker() {
+        if (sNativeTask == null) {
+            sNativeTask = new ProcessAsyncTask();
+            // executeOnExecutor, not execute(): execute() uses the shared serial
+            // executor, and this task never returns, so it blocked every other
+            // AsyncTask in the app for good.
+            sNativeTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }
+
+        sNativeTask.setCameraView(this);
+    }
+
+    /**
+     * Stops the processing worker. It used to be left running for the whole process
+     * lifetime, spinning on a 1 ms sleep even while the app was in the background.
+     */
+    private void stopWorker() {
+        if (sNativeTask != null) {
+            sNativeTask.cancel(true);
+            sNativeTask = null;
         }
     }
 
@@ -82,12 +111,7 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback, C
             return;
         }
 
-        if (sNativeTask == null) {
-            sNativeTask = new ProcessAsyncTask();
-            sNativeTask.execute();
-        }
-
-        sNativeTask.setCameraView(this);
+        ensureWorker();
 
         Bitmap bitmap = Bitmap.createBitmap(iWidth, iHeight, Bitmap.Config.ARGB_8888);
         mNativeCanvas = new Canvas(bitmap);
@@ -182,10 +206,15 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback, C
             return;
         }
 
-        if (sNativeTask.getStatus() == AsyncTask.Status.RUNNING) {
+        final ProcessAsyncTask task = sNativeTask;
+        if (task == null) {
+            return;
+        }
+
+        if (task.getStatus() == AsyncTask.Status.RUNNING) {
             try {
                 Camera.Size size = iCamera.getParameters().getPreviewSize();
-                sNativeTask.setFrame(iBytes, mImageOrientation, size.width, size.height);
+                task.setFrame(iBytes, mImageOrientation, size.width, size.height);
             } catch (RuntimeException e) {
                 Timber.e(e, "Runtime exception in onPreviewFrame()");
             }
@@ -193,7 +222,8 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback, C
     }
 
     public Bitmap getOutputBitmap() {
-        return sNativeTask.getOutputBitmap();
+        final ProcessAsyncTask task = sNativeTask;
+        return task != null ? task.getOutputBitmap() : null;
     }
 
     public ImageView getNativeImageView() {
@@ -209,7 +239,13 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback, C
 
         public Bitmap getOutputBitmap() {
             synchronized (sOutputBitmapLock) {
-                return mOutputBitmap != null ? mOutputBitmap.copy(mOutputBitmap.getConfig(), true) : null;
+                if (mOutputBitmap == null) {
+                    return null;
+                }
+
+                // getConfig() can be null, and copy(null, ...) throws.
+                Bitmap.Config config = mOutputBitmap.getConfig();
+                return mOutputBitmap.copy(config != null ? config : Bitmap.Config.ARGB_8888, true);
             }
         }
 
@@ -218,7 +254,7 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback, C
         }
 
         protected int NativeCall(int iRotation, int iWidth, int iHeight, byte iYUV[], int[] iRGBA) {
-            CameraView cp = mCameraView.get();
+            CameraView cp = mCameraView != null ? mCameraView.get() : null;
             if (cp == null || cp.mActivity.isFinishing()) return -1;
 
             return Native.i.process(iRotation, iWidth, iHeight, iYUV, iRGBA);
@@ -292,22 +328,35 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback, C
 
         @Override
         protected void onProgressUpdate(Void... iProgress) {
-            if (mOutputBitmap == null) {
-                return;
-            }
+            CameraView cp = mCameraView != null ? mCameraView.get() : null;
 
-            CameraView cp = mCameraView.get();
-
-            if (cp == null || cp.mActivity.isFinishing()) return;
+            if (cp == null || cp.mActivity.isFinishing() || cp.mNativeCanvas == null) return;
 
             int ivWidth = cp.mNativeImageView.getWidth();
             int ivHeight = cp.mNativeImageView.getHeight();
-            Bitmap scaledBitmap = Bitmap.createScaledBitmap(mOutputBitmap, ivWidth, ivHeight, true);
+
+            // createScaledBitmap throws on a zero size, which is what the view
+            // reports until it has been laid out.
+            if (ivWidth <= 0 || ivHeight <= 0) return;
+
+            // Under the lock: the worker thread writes into mOutputBitmap and can
+            // replace it altogether while this runs on the main thread.
+            Bitmap scaledBitmap;
+            synchronized (sOutputBitmapLock) {
+                if (mOutputBitmap == null) return;
+                scaledBitmap = Bitmap.createScaledBitmap(mOutputBitmap, ivWidth, ivHeight, true);
+            }
 
             cp.mNativeCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
             cp.mNativeCanvas.drawBitmap(scaledBitmap, 0, 0, null);
-            cp.mNativeImageView.draw(cp.mNativeCanvas);
+            // No mNativeImageView.draw(mNativeCanvas) here: that canvas is backed by
+            // the very bitmap the view displays, so drawing the view into it was
+            // circular. Invalidating is enough to show the new content.
             cp.mNativeImageView.invalidate();
+
+            // scaledBitmap is deliberately not recycled: createScaledBitmap returns
+            // the source bitmap itself when no scaling is needed, and that would
+            // recycle mOutputBitmap.
         }
 
         @Override

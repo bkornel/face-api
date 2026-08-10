@@ -26,7 +26,7 @@ You should follow the directory structure below during the compilation:
 ```
 [local_path_of_the_project]
 |- 3rdparty
-|-- opencv-4.1.1
+|-- opencv-4.5.2
 |-- ...
 |- face-api
 |-- Applications
@@ -46,15 +46,21 @@ The solution file can be found in [Applications/Windows](https://github.com/bkor
 The Android Studio project can be found in [Applications/Android](https://github.com/bkornel/face-api/tree/master/Applications/Android). The following packages must be installed via SDK manager
 
 ### SDK platforms
-- Min SDK version: API 23 (Android 6.0)
-- Target SDK version: API 28 (Android 9.0)
+- Min SDK version: API 24 (Android 7.0)
+- Compile and target SDK version: API 35 (Android 15)
 
 ### SDK Tools
-- LLDB 3.x or newer
-- CMake 3.6.x or newer
-- NDK 20.x or newer
+- CMake 3.22.x or newer
+- NDK 26.x or newer
+- JDK 17 (bundled with recent Android Studio)
 
-The C++ part (image processing algorithms) is set up as a CMake external native build in the Android Studio project, thus it is built automatically when you make the project.
+The project builds with Android Gradle plugin 8.5 and Gradle 8.7, and uses AndroidX.
+
+The C++ part (image processing algorithms) is set up as a CMake external native build in the Android Studio project, thus it is built automatically when you make the project. OpenCV is linked statically, so no OpenCV shared object has to be packaged into the APK.
+
+Both `armeabi-v7a` and `arm64-v8a` are built. The OpenCV directory name is taken from the `OPENCV_VERSION` CMake cache variable, which defaults to `opencv-4.5.2`; override it if you keep a different version under `3rdparty`.
+
+The app stores its working files (settings, cascade files, shape models, logs) in app private storage, so it needs no storage permission. Only `CAMERA` is requested at runtime.
 
 # Modules
 
