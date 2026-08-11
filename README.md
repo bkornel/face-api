@@ -19,14 +19,17 @@ https://www.youtube.com/watch?v=iS4eDf775GI
 
 # Prerequisites
 
-All dependencies of the compilation in Windows (Visual Studio 2019) and Android can be downloaded (as pre-built libraries) from the following repository:<br>
+All dependencies of the compilation in Windows (Visual Studio 2022) and Android can be downloaded (as pre-built libraries) from the following repository:<br>
 https://github.com/bkornel/3rdparty<br>
+
+The API is built against OpenCV 4.5.2, and the Windows application also uses Poco 1.10.1.
 
 You should follow the directory structure below during the compilation:
 ```
 [local_path_of_the_project]
 |- 3rdparty
-|-- opencv-4.1.1
+|-- opencv-4.5.2
+|-- poco-1.10.1
 |-- ...
 |- face-api
 |-- Applications
@@ -40,6 +43,8 @@ You should follow the directory structure below during the compilation:
 ## Windows
 
 The solution file can be found in [Applications/Windows](https://github.com/bkornel/face-api/tree/master/Applications/Windows). Nothing else should be set up, after building the application the binaries can be found in [Applications/Windows/Bin](https://github.com/bkornel/face-api/tree/master/Applications/Windows/Bin)
+
+A pre-build step ([`Deploy-Dependencies.ps1`](https://github.com/bkornel/face-api/blob/master/Applications/Windows/BuildEvents/Deploy-Dependencies.ps1)) copies the OpenCV and Poco binaries and the test configurations next to the executable, so the application can be started right after building. A missing dependency fails the build instead of producing an executable that cannot start.
 
 ## Android
 
@@ -75,6 +80,8 @@ class UserManager :
 
 This class has the `ActiveUsersMessage::Shared` output and the `ImageMessage::Shared` and `RoiMessage::Shared` inputs. The `Main` member function of the class must defined according to the template arguments of `fw::Port`.
 
+A module that declares no input port at all is a source: it has nothing to wait for, so it is driven by `Trigger()` instead of by a predecessor. This is how [`FirstModule`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/FirstModule/FirstModule.h) starts every frame. Input ports are optional as well: a port that is left out of the settings file is not counted as a dependency, and its argument reaches `Main` default-constructed. A module with declared inputs of which none is connected is rejected, because nothing would ever make it run.
+
 ## Module Graph
 
 The module graph can be defined in the settings file ([`settings.json`](https://github.com/bkornel/face-api/blob/master/Testing/configurations/settings.json) by default). For the [`UserManager`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/UserManager/UserManager.h) module it is:
@@ -88,6 +95,20 @@ The module graph can be defined in the settings file ([`settings.json`](https://
 
 Where the [`ImageQueue`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/ImageQueue/ImageQueue.h) module returns with an `ImageMessage::Shared` and transfers the information to the first inputport of [`UserManager`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/UserManager/UserManager.h) and so does the [`FaceDetection`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/FaceDetection/FaceDetection.h) with `RoiMessage::Shared`.
 
+## Getting the Results
+
+There are two ways to read what the API determined. `FaceApi::GetResultImage` returns the frame the [`Visualizer`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/Visualizer/Visualizer.h) drew the overlay on, which is the simplest way to display something and what the Windows application uses. `FaceApi::GetResults` returns the same information as data instead — the face rectangle, the feature points in 2-D and 3-D, the face box and the head pose — so the host application can draw it with its own canvas or GPU surface. For hosts that cannot take C++ structures across their language boundary, `face::result_buffer` packs the results into a flat float buffer; the Android application reads that from its JNI bridge.
+
+Drawing on the host side is the cheaper path, because the frame is neither composited nor copied back, which matters on a mobile device. It is switched on by leaving the `visualizer` module out of the settings file, in which case `lastModule` takes the frame from the queue directly:
+
+```
+"lastModule": {
+  "port": [ "imageQueue:1", "userProcessor:2" ]
+}
+```
+
+The second port carries the users and is the one `GetResults` reports. It is optional, so a graph that only needs the rendered frame can leave it out.
+
 ## Adding a New Module
 
 The native side must be only extended in case of adding a new module to the system.
@@ -96,6 +117,8 @@ The native side must be only extended in case of adding a new module to the syst
 - Finally the `connect(...)` in the anonymous namespace of [`ModuleConnector.cpp`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/ModuleConnector.cpp) which connects the ith input to a given module
 
 These are just copy-pasting 1-2 line, you should find the `// REMARK: Insert new modules here` comments in the files above.
+
+Beside these, the `Main` of a new module should start with a `DrainCommands()` call. Commands, for example that the image size has changed, are published on a message bus by the thread that raises them, and `DrainCommands` applies them on the thread of the module graph. This is what keeps a module's own state touched from one thread only.
 
 # References
 
