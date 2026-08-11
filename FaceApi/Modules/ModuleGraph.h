@@ -7,6 +7,7 @@
 #include "Messages/ImageMessage.h"
 
 #include "Modules/FirstModule/FirstModule.h"
+#include "Modules/ImageQueue/ImageQueue.h"
 #include "Modules/LastModule/LastModule.h"
 
 #include <map>
@@ -37,6 +38,17 @@ namespace face
 
     fw::ErrorCode Process();
 
+    // The camera path: frames are handed to the queue directly, not broadcast
+    inline ImageQueue::Shared GetImageQueue() const
+    {
+      return mImageQueue;
+    }
+
+    inline LastModule::Shared GetLastModule() const
+    {
+      return mLastModule;
+    }
+
     inline unsigned GetLastFrameId() const
     {
       return mLastModule ? mLastModule->GetLastFrameId() : 0U;
@@ -64,6 +76,7 @@ namespace face
 
     FirstModule::Shared mFirstModule = nullptr;
     LastModule::Shared mLastModule = nullptr;
+    ImageQueue::Shared mImageQueue = nullptr;
     std::vector<fw::Module::Shared> mModules;
   };
 }

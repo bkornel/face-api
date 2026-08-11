@@ -115,7 +115,7 @@ namespace fw
       cv::pow(iMatrix, 2.0, pow);
 
       const cv::Scalar& sum = cv::sum(pow);
-      return sum[0] + sum[1] + sum[3];
+      return sum[0] + sum[1] + sum[2];
     }
 
     cv::Mat get_camera_matrix(const cv::Size& iSize)

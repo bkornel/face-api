@@ -53,6 +53,7 @@ namespace face
     std::vector<User::Shared> mUsers; ///< The vector storing all users
     fw::Stopwatch mRemoveSW;
     long long mTimestamp = 0;
+    int mLastUserID = 0;
 
     cv::Size mMinFaceSize;
     cv::Size mMaxFaceSize;

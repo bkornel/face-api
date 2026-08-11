@@ -7,12 +7,29 @@
 
 namespace fw
 {
-  Module::CommandEventHandler Module::sCommand;
+  const std::size_t Module::sMaxPendingCommands = 64U;
 
   Module::~Module()
   {
-    // sCommand is static and holds a raw this; a failed init never reaches DeInitialize.
-    sCommand -= MAKE_DELEGATE(&Module::OnCommand, this);
+    // A failed init never reaches DeInitialize, so the subscriptions are dropped here too
+    UnsubscribeCommands();
+  }
+
+  void Module::Attach(MessageBus& ioBus, const std::shared_ptr<void>& iSelf)
+  {
+    mBus = &ioBus;
+    mSelf = iSelf;
+  }
+
+  void Module::Publish(const Message::Shared& iMessage)
+  {
+    if (!mBus)
+    {
+      LOG(ERROR) << "Module " << mName << " is not attached to a message bus.";
+      return;
+    }
+
+    mBus->Publish(iMessage);
   }
 
   std::string Module::CreateModuleName(const cv::FileNode& iModuleNode)
@@ -55,11 +72,28 @@ namespace fw
       // Only listen for commands once the module is actually usable.
       if (mInitialized)
       {
-        sCommand += MAKE_DELEGATE(&Module::OnCommand, this);
+        SubscribeCommands();
       }
     }
 
     return result;
+  }
+
+  void Module::SubscribeCommands()
+  {
+    SubscribeCommand<face::CommandMessage>();
+    SubscribeCommand<face::ImageSizeChangedMessage>();
+  }
+
+  void Module::UnsubscribeCommands()
+  {
+    if (mBus)
+    {
+      for (const MessageBus::Token token : mSubscriptions)
+        mBus->Unsubscribe(token);
+    }
+
+    mSubscriptions.clear();
   }
 
   ErrorCode Module::DeInitialize()
@@ -77,7 +111,10 @@ namespace fw
       Clear();
 
       mInitialized = false;
-      sCommand -= MAKE_DELEGATE(&Module::OnCommand, this);
+      UnsubscribeCommands();
+
+      std::lock_guard<std::mutex> lock(mCommandMutex);
+      mPendingCommands.clear();
     }
 
     return result;
@@ -89,6 +126,36 @@ namespace fw
   }
 
   void Module::OnCommand(Message::Shared iMessage)
+  {
+    // Runs on the publishing thread, so the command is only queued here and applied later
+    // from Main(). Module state stays owned by the graph thread this way. No type check is
+    // needed, the bus only delivers the types this module subscribed for.
+    if (!iMessage) return;
+
+    std::lock_guard<std::mutex> lock(mCommandMutex);
+
+    if (mPendingCommands.size() >= sMaxPendingCommands)
+    {
+      LOG(WARNING) << "Command queue of " << mName << " is full, dropping the command.";
+      return;
+    }
+
+    mPendingCommands.emplace_back(iMessage);
+  }
+
+  void Module::DrainCommands()
+  {
+    std::vector<Message::Shared> commands;
+    {
+      std::lock_guard<std::mutex> lock(mCommandMutex);
+      commands.swap(mPendingCommands);
+    }
+
+    for (const auto& command : commands)
+      HandleCommand(command);
+  }
+
+  void Module::HandleCommand(Message::Shared iMessage)
   {
     face::CommandMessage::Shared command = std::dynamic_pointer_cast<face::CommandMessage>(iMessage);
     if (command)

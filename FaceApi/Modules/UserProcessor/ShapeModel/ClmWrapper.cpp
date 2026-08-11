@@ -32,7 +32,7 @@ namespace face
     ShapeUtil::Triangles triangles;
     for (int i = 0; i < trianglesMat.rows; i++)
     {
-      triangles.emplace_back(trianglesMat.at<int>(i, 0), trianglesMat.at<int>(i, 0), trianglesMat.at<int>(i, 2));
+      triangles.emplace_back(trianglesMat.at<int>(i, 0), trianglesMat.at<int>(i, 1), trianglesMat.at<int>(i, 2));
     }
     ShapeUtil::GetInstance().SetTriangles(triangles);
 

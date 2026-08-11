@@ -23,6 +23,8 @@ namespace face
 
     ImageMessage(const cv::Mat& iImage, unsigned iFrameId, long long iTimestamp);
 
+    ImageMessage(cv::Mat&& iImage, unsigned iFrameId, long long iTimestamp);
+
     ~ImageMessage() override = default;
 
     friend inline std::ostream& operator<<(std::ostream& ioStream, const ImageMessage& iMessage);
@@ -37,11 +39,11 @@ namespace face
       return mFrames.first;
     }
 
-    const cv::Mat& GetFrameGray();
+    cv::Mat GetFrameGray();
 
-    const cv::Mat& GetResizedBGR(float iScaleFactor);
+    cv::Mat GetResizedBGR(float iScaleFactor);
 
-    const cv::Mat& GetResizedGray(float iScaleFactor);
+    cv::Mat GetResizedGray(float iScaleFactor);
 
     inline int GetWidth() const
     {

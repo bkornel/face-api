@@ -4,6 +4,8 @@
 
 #include <opencv2/core/base.hpp>
 
+#include <algorithm>
+#include <array>
 #include <atomic>
 #include <chrono>
 #include <condition_variable>
@@ -219,18 +221,33 @@ namespace fw
     const FutureShared<T> mFuture = nullptr;
   };
 
-  /// @brief Returns an action running the provided function with executor and a Future for the result.
-  /// This connect() is a special case, since no dependency is needed. It is provided for convenience.
-  template <typename ReturnT, typename ArgumentT>
-  std::pair<std::function<void()>, FutureShared<ReturnT>> connect(std::function<ReturnT(ArgumentT)> iFunction, Executor::Shared iExecutor)
+  /// @brief Returns the value of a Future, or a default-constructed one when the
+  /// Future is absent. An absent Future is an input that was left unconnected.
+  template <typename T>
+  T get_or_default(const FutureShared<T>& iFuture)
+  {
+    return iFuture ? iFuture->Get() : T();
+  }
+
+  /// @brief Subscribes iContinuation to iFuture, unless the Future is absent.
+  template <typename T>
+  void listen_if_connected(const FutureShared<T>& iFuture, Continuation::Shared iContinuation)
+  {
+    if (iFuture) iFuture->Listen(iContinuation);
+  }
+
+  /// @brief Returns an action running the provided function with executor and a Future
+  /// for the result. This connect() is for source nodes: they have no dependency to
+  /// wait for, so the returned action is what drives them.
+  template <typename ReturnT>
+  std::pair<std::function<void()>, FutureShared<ReturnT>> connect(std::function<ReturnT()> iFunction, Executor::Shared iExecutor)
   {
     // Using shared_ptr, because std::function is copyable, but Promise<R> is not.
     auto promise = std::make_shared<Promise<ReturnT>>();
     auto future = promise->GetFuture();
 
     auto task = [iFunction, promise, iExecutor] {
-      ArgumentT arg{};
-      promise->Put(iFunction(arg), iExecutor);
+      promise->Put(iFunction(), iExecutor);
     };
 
     auto runTask = [task, iExecutor] {
@@ -240,6 +257,13 @@ namespace fw
     return std::make_pair(runTask, future);
   }
 
+  /// @brief Returns a Future for the result of iFunction, run once all of its
+  /// dependencies are ready.
+  ///
+  /// An absent (unconnected) Future in iFutures is an optional input: it never
+  /// produces a value, so it is not counted as a dependency and the corresponding
+  /// argument arrives default-constructed. Passing only absent Futures yields a
+  /// Future that is never satisfied -- callers must reject that case themselves.
   template <typename ReturnT, typename... ArgumentT>
   FutureShared<ReturnT> connect(std::function<ReturnT(ArgumentT...)> iFunction, FutureShared<ArgumentT>... iFutures)
   {
@@ -248,16 +272,19 @@ namespace fw
     auto future = promise->GetFuture();
 
     auto task = [iFunction, promise, iFutures...](Executor::Shared executor) {
-      promise->Put(iFunction(iFutures->Get()...), executor);
+      promise->Put(iFunction(get_or_default(iFutures)...), executor);
     };
 
-    const unsigned count = static_cast<unsigned>(sizeof...(ArgumentT));
+    const std::array<bool, sizeof...(ArgumentT)> connected = { { static_cast<bool>(iFutures)... } };
+    const unsigned count = static_cast<unsigned>(std::count(connected.begin(), connected.end(), true));
+
     auto continuation = std::make_shared<Continuation>(std::move(task), count);
 
-    // Expand it in the initializer
-    int sf_array[] = {
-      (void(iFutures->Listen(continuation)), 0)...
+    // Expand it in the initializer, the leading 0 keeps an empty pack well-formed
+    const int sf_array[] = {
+      0, (void(listen_if_connected(iFutures, continuation)), 0)...
     };
+    (void)sf_array;
 
     return future;
   }

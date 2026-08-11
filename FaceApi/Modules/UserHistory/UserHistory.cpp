@@ -25,6 +25,8 @@ namespace face
 
   UserEntriesMessage::Shared UserHistory::Main(ActiveUsersMessage::Shared iActiveUsers)
   {
+    DrainCommands();
+
     if (!iActiveUsers || iActiveUsers->IsEmpty()) return nullptr;
 
     const long long currentTime = iActiveUsers->GetTimestamp();

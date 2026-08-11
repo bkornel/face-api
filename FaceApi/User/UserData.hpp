@@ -14,11 +14,11 @@ namespace face
 
     UserData() = default;
 
-    UserData(const UserData& iOther) = default;
+    UserData(const UserData& iOther);
 
     virtual ~UserData() = default;
 
-    UserData& operator=(const UserData& iOther) = default;
+    UserData& operator=(const UserData& iOther);
 
     // Get: General & detection
     inline const cv::Rect& GetFaceRect() const
@@ -161,6 +161,8 @@ namespace face
     }
 
   private:
+    void CopyFrom(const UserData& iOther);
+
     // Face
     cv::Rect mFaceRect;
     cv::Mat mFaceTemplate;

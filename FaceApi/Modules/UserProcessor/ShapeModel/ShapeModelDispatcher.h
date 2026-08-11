@@ -3,6 +3,10 @@
 #include "User/UserDispatcher.hpp"
 #include "Modules/UserProcessor/ShapeModel/ShapeModel.h"
 
+#include <map>
+#include <set>
+#include <vector>
+
 namespace face
 {
   class User;
@@ -16,31 +20,23 @@ namespace face
   public:
     ShapeModelDispatcher() = default;
 
-    virtual ~ShapeModelDispatcher();
+    virtual ~ShapeModelDispatcher() = default;
 
     fw::ErrorCode Initialize(const cv::FileNode& iSettings) override;
 
     bool Dispatch(User& ioUser) override;
 
-    inline ShapeModel::Shared GetShapeModel() const
-    {
-      return mShapeModel;
-    }
+    void BeginFrame(const cv::Mat& iFrame);
 
-    inline void SetFrame(const cv::Mat& iFrame)
-    {
-      mFrame = iFrame;
-    }
+    void EndFrame();
 
   private:
-    static ShapeModels sShapeModels;
+    bool Fit(User& ioUser, ShapeModel& ioShapeModel);
 
-    bool Fit(User& ioUser);
+    bool UpdateTemplate(User& ioUser, ShapeModel& ioShapeModel);
 
-    bool UpdateTemplate(User& ioUser);
-
-    ShapeModel::Shared mShapeModel = nullptr;
-    std::vector<int> mUpdatedUserIDs;
+    ShapeModels mShapeModels;
+    std::set<int> mDispatchedUserIDs;
 
     cv::Mat mFrame;
     std::vector<int> mWinDetection = { 11, 9, 7 };

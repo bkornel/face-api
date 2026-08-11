@@ -3,7 +3,6 @@
 #include "Common/Configuration.h"
 #include "Framework/Profiler.h"
 #include "Messages/CommandMessage.h"
-#include "Messages/ImageArrivedMessage.h"
 
 INITIALIZE_EASYLOGGINGPP
 
@@ -22,6 +21,12 @@ namespace face
     mModuleGraph(std::make_shared<ModuleGraph>())
   {
     START_EASYLOGGINGPP(0, static_cast<char**>(nullptr));
+
+    // The singleton is not owned by a shared_ptr, so it gets an untracked subscription and
+    // unsubscribes in DeInitialize(). The bus is a member, it outlives the modules.
+    Attach(mBus, nullptr);
+    mModuleGraph->Attach(mBus, mModuleGraph);
+
     mModuleGraph->sFrameProcessed += MAKE_DELEGATE(&FaceApi::OnFrameProcessed, this);
   }
 
@@ -75,9 +80,22 @@ namespace face
 
   void FaceApi::PushCameraFrame(const cv::Mat& iFrame)
   {
-    const long long timestamp = fw::get_current_time();
+    ImageQueue::Shared imageQueue = mModuleGraph ? mModuleGraph->GetImageQueue() : nullptr;
+    if (!imageQueue) return;
 
-    sCommand.Raise(std::make_shared<ImageArrivedMessage>(iFrame, mCameraFrameId++, timestamp));
+    // Handed straight to the queue. Broadcasting it would call every module for every
+    // frame, and all but one of them only to find out they are not interested.
+    imageQueue->Push(iFrame, mCameraFrameId++, fw::get_current_time());
+  }
+
+  fw::ErrorCode FaceApi::GetResults(FaceResults& oResults) const
+  {
+    oResults.clear();
+
+    LastModule::Shared lastModule = mModuleGraph ? mModuleGraph->GetLastModule() : nullptr;
+    if (!lastModule) return fw::ErrorCode::BadState;
+
+    return lastModule->GetLastResults(oResults);
   }
 
   fw::ErrorCode FaceApi::GetResultImage(cv::Mat& oResultImage)
@@ -107,6 +125,7 @@ namespace face
       }
 
       std::lock_guard<std::recursive_mutex> lock(sAppMutex);
+      DrainCommands();
       FACE_PROFILER_FRAME_ID(GetLastFrameId());
       mModuleGraph->Process();
 
@@ -116,6 +135,7 @@ namespace face
     const std::string& profilerPath =
       Configuration::GetInstance().GetDirectories().output + "profiler." + fw::get_log_stamp() + ".txt";
     FACE_PROFILER_SAVE(profilerPath);
+    FACE_PROFILER_SUMMARY();
 
     return fw::ErrorCode::OK;
   }
@@ -123,7 +143,7 @@ namespace face
   void FaceApi::SetRunFaceDetector()
   {
     const long long timestamp = fw::get_current_time();
-    sCommand.Raise(
+    Publish(
       std::make_shared<CommandMessage>(CommandMessage::Type::RunFaceDetection, mCameraFrameId, timestamp)
     );
   }
@@ -131,7 +151,7 @@ namespace face
   void FaceApi::OnOffVerbose()
   {
     const long long timestamp = fw::get_current_time();
-    sCommand.Raise(
+    Publish(
       std::make_shared<CommandMessage>(CommandMessage::Type::VerboseModeChanged, mCameraFrameId, timestamp)
     );
   }

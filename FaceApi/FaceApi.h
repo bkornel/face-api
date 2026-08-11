@@ -3,6 +3,8 @@
 #include <atomic>
 #include <string>
 
+#include "FaceResult.h"
+#include "Framework/MessageBus.h"
 #include "Framework/MessageQueue.hpp"
 #include "Framework/Module.h"
 #include "Modules/ModuleGraph.h"
@@ -25,6 +27,10 @@ namespace face
     void PushCameraFrame(const cv::Mat& iFrame);
 
     fw::ErrorCode GetResultImage(cv::Mat& oResultImage);
+
+    // The overlay data of the last processed frame, for hosts that draw it themselves.
+    // Needs the users to be wired into lastModule's second port, see settings.json.
+    fw::ErrorCode GetResults(FaceResults& oResults) const;
 
     void Clear() override;
 
@@ -56,6 +62,8 @@ namespace face
     fw::ErrorCode Run() override;
 
     void OnFrameProcessed(ImageMessage::Shared iMessage);
+
+    fw::MessageBus mBus;
 
     ModuleGraph::Shared mModuleGraph = nullptr;
 

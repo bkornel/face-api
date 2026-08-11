@@ -27,6 +27,8 @@ namespace face
   {
     if (!IsInitialized()) return fw::ErrorCode::BadState;
 
+    DrainCommands();
+
     FACE_PROFILER_FRAME_ID(GetLastFrameId());
 
     // Reading the generation before the tick is what makes this a per-frame barrier.
@@ -101,6 +103,15 @@ namespace face
   {
     CV_DbgAssert(!iModulesNode.empty());
 
+    // The aliases below are only ever assigned when empty, so drop the ones a previous
+    // Initialize() left behind - otherwise this graph would tick the old graph's modules.
+    // Done here and not in DeInitialize(): they are read from the app thread, and keeping
+    // every write inside Initialize() keeps those reads safe.
+    mModules.clear();
+    mFirstModule = nullptr;
+    mLastModule = nullptr;
+    mImageQueue = nullptr;
+
     // Loop over the <modules> tag in the settings file
     for (const auto& moduleNode : iModulesNode)
     {
@@ -118,7 +129,7 @@ namespace face
       }
 
       // Extend this function if you add a new module
-      auto newModule = ModuleFactory::Create(moduleNode);
+      auto newModule = ModuleFactory::Create(moduleNode, *mBus);
 
       // Check if the module is not set up in this file
       if (!newModule)
@@ -131,6 +142,8 @@ namespace face
       if (!mFirstModule) mFirstModule = std::dynamic_pointer_cast<FirstModule>(newModule);
 
       if (!mLastModule) mLastModule = std::dynamic_pointer_cast<LastModule>(newModule);
+
+      if (!mImageQueue) mImageQueue = std::dynamic_pointer_cast<ImageQueue>(newModule);
 
       LOG(INFO) << "New module is created: [" << newModule->GetName() << "]";
 
@@ -147,6 +160,12 @@ namespace face
     if (!mLastModule)
     {
       LOG(ERROR) << "Last module is not defined.";
+      return fw::ErrorCode::BadData;
+    }
+
+    if (!mImageQueue)
+    {
+      LOG(ERROR) << "Image queue module is not defined.";
       return fw::ErrorCode::BadData;
     }
 
@@ -184,16 +203,10 @@ namespace face
         return result;
       }
 
-      if (!predecessors.empty())
+      // Source modules have no predecessor but still need their output port built
+      if ((result = ModuleConnector::Connect(module, predecessors)) != fw::ErrorCode::OK)
       {
-        if ((result = ModuleConnector::Connect(module, predecessors)) != fw::ErrorCode::OK)
-        {
-          return result;
-        }
-      }
-      else
-      {
-        LOG(INFO) << "Predecessors of [" << module->GetName() << "]:\t---";
+        return result;
       }
     }
 
@@ -339,7 +352,10 @@ namespace face
       }
     }
 
-    std::sort(modulesPrio.begin(), modulesPrio.end(), [&](const ModulesPrioElem& iFirst, const ModulesPrioElem& iSecond) {
+    // Modules that are equally deep in the graph tie here, and the connection order
+    // decides the order they are notified in. std::sort would break such ties
+    // arbitrarily, so keep the order of the settings file instead.
+    std::stable_sort(modulesPrio.begin(), modulesPrio.end(), [&](const ModulesPrioElem& iFirst, const ModulesPrioElem& iSecond) {
       return iFirst.second > iSecond.second;
     });
 

@@ -3,12 +3,15 @@
 #include "Framework/Event.hpp"
 #include "Framework/FlowGraph.hpp"
 #include "Framework/Message.h"
+#include "Framework/MessageBus.h"
 #include "Framework/Thread.h"
 
 #include <opencv2/core.hpp>
 
+#include <mutex>
 #include <string>
 #include <memory>
+#include <vector>
 
 namespace fw
 {
@@ -22,6 +25,10 @@ namespace fw
     Module() = default;
 
     ~Module() override;
+
+    // Must be called before Initialize(). iSelf may be empty for owners that are not held
+    // by a shared_ptr, they are then responsible for outliving the bus.
+    void Attach(MessageBus& ioBus, const std::shared_ptr<void>& iSelf);
 
     virtual ErrorCode Initialize(const cv::FileNode& iModuleNode);
 
@@ -42,18 +49,52 @@ namespace fw
     }
 
   protected:
-    using CommandEventHandler = Event<void(Message::Shared)>;
-
-    static CommandEventHandler sCommand;
+    static const std::size_t sMaxPendingCommands;
 
     virtual ErrorCode InitializeInternal(const cv::FileNode& iModuleNode);
 
     virtual ErrorCode DeInitializeInternal();
 
+    void Publish(const Message::Shared& iMessage);
+
+    // Subscribes the module for a message type until DeInitialize()
+    template <typename MessageT>
+    void SubscribeCommand()
+    {
+      if (!mBus) return;
+
+      const MessageBus::Token token =
+        mSelf.expired()
+          ? mBus->Subscribe<MessageT>([this](Message::Shared iMessage) { OnCommand(iMessage); })
+          : mBus->Subscribe<MessageT>(mSelf.lock(), [this](Message::Shared iMessage) { OnCommand(iMessage); });
+
+      if (token != MessageBus::sInvalidToken) mSubscriptions.emplace_back(token);
+    }
+
+    // Subscribes for the message types this module wants, called from Initialize()
+    virtual void SubscribeCommands();
+
+    // Called on the publishing thread, only queues the command
     virtual void OnCommand(Message::Shared iMessage);
+
+    // Applies the queued commands, must be called from Main()
+    void DrainCommands();
+
+    // Called by DrainCommands() on the graph thread
+    virtual void HandleCommand(Message::Shared iMessage);
 
     bool mInitialized = false;
     bool mVerboseMode = false;
     std::string mName;
+
+    MessageBus* mBus = nullptr;
+    std::weak_ptr<void> mSelf;
+
+  private:
+    void UnsubscribeCommands();
+
+    std::mutex mCommandMutex;
+    std::vector<Message::Shared> mPendingCommands;
+    std::vector<MessageBus::Token> mSubscriptions;
   };
 }

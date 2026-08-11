@@ -73,9 +73,9 @@ namespace face
     return fw::ErrorCode::OK;
   }
 
-  void FaceDetection::OnCommand(fw::Message::Shared iMessage)
+  void FaceDetection::HandleCommand(fw::Message::Shared iMessage)
   {
-    Module::OnCommand(iMessage);
+    Module::HandleCommand(iMessage);
 
     CommandMessage::Shared command = std::dynamic_pointer_cast<CommandMessage>(iMessage);
     if (command)
@@ -117,6 +117,8 @@ namespace face
 
   RoiMessage::Shared FaceDetection::Main(ImageMessage::Shared iImage)
   {
+    DrainCommands();
+
     CV_DbgAssert(mDetectionSW.IsRunning());
 
     if (!iImage || iImage->IsEmpty() || !RunDetectection())

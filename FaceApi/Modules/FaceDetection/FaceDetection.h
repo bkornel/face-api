@@ -30,7 +30,7 @@ namespace face
 
     fw::ErrorCode InitializeInternal(const cv::FileNode& iSettings) override;
 
-    void OnCommand(fw::Message::Shared iMessage) override;
+    void HandleCommand(fw::Message::Shared iMessage) override;
 
     void RemoveMultipleDetections(std::vector<cv::Rect>& ioDetections);
 

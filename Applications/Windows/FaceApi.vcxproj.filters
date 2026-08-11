@@ -142,6 +142,9 @@
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\User\User.cpp">
       <Filter>User</Filter>
     </ClCompile>
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\User\UserData.cpp">
+      <Filter>User</Filter>
+    </ClCompile>
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\ShapeModel\ClmWrapper.cpp">
       <Filter>Modules\UserProcessor\ShapeModel</Filter>
     </ClCompile>
@@ -189,9 +192,6 @@
     </ClCompile>
     <ClCompile Include="..\..\FaceApi\Modules\ModuleConnector.cpp">
       <Filter>Modules</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\FaceApi\Messages\ImageArrivedMessage.cpp">
-      <Filter>Messages</Filter>
     </ClCompile>
     <ClCompile Include="..\..\FaceApi\Modules\ModuleGraph.cpp">
       <Filter>Modules</Filter>
@@ -345,9 +345,6 @@
     </ClInclude>
     <ClInclude Include="..\..\FaceApi\Modules\ModuleConnector.h">
       <Filter>Modules</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\FaceApi\Messages\ImageArrivedMessage.h">
-      <Filter>Messages</Filter>
     </ClInclude>
     <ClInclude Include="..\..\FaceApi\Modules\ModuleGraph.h">
       <Filter>Modules</Filter>

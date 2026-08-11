@@ -47,6 +47,11 @@ namespace face
       std::stringstream ss;
       ss << "Predecessors of [" << iModule->GetName() << "]:\t";
 
+      if (iPredecessors.empty())
+      {
+        ss << "---";
+      }
+
       for (const auto& predecessor : iPredecessors)
       {
         if (!predecessor.second)
@@ -114,6 +119,7 @@ namespace face
     CV_DbgAssert(iModule);
 
     if (connect<FaceDetection>(iModule, iPredecessors)) return fw::ErrorCode::OK;
+    if (connect<FirstModule>(iModule, iPredecessors)) return fw::ErrorCode::OK;
     if (connect<ImageQueue>(iModule, iPredecessors)) return fw::ErrorCode::OK;
     if (connect<LastModule>(iModule, iPredecessors)) return fw::ErrorCode::OK;
     if (connect<UserHistory>(iModule, iPredecessors)) return fw::ErrorCode::OK;

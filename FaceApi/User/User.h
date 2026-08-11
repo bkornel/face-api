@@ -26,6 +26,8 @@ namespace face
 
     User(const cv::Rect& iFaceRect, int iUserId, long long iTimestamp);
 
+    User(const User& iOther) = default;
+
     virtual ~User() = default;
 
     bool AcceptDispatcher(UserDispatcher& ioDispatcher);

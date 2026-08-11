@@ -45,12 +45,14 @@ namespace face
 
   ActiveUsersMessage::Shared UserProcessor::Main(ImageMessage::Shared iImage, ActiveUsersMessage::Shared iUsers)
   {
+    DrainCommands();
+
     if ((!iImage || iImage->IsEmpty()) || (!iUsers || iUsers->IsEmpty()))
       return nullptr;
 
     FACE_PROFILER(2_User_Processor);
 
-    mShapeModelDispatcher.SetFrame(iImage->GetFrameGray());
+    mShapeModelDispatcher.BeginFrame(iImage->GetFrameGray());
 
     const auto& activeUsers = iUsers->GetActiveUsers();
     for (const auto& user : activeUsers)
@@ -64,8 +66,21 @@ namespace face
       }
     }
 
-    iUsers->RemoveInactiveUsers();
+    mShapeModelDispatcher.EndFrame();
 
-    return (iUsers->GetSize() > 0 ? iUsers : nullptr);
+    // The users above are the live ones UserManager keeps tracking, and writing the
+    // refined face rect back into them is what feeds the next frame's tracking. What
+    // leaves the module is a snapshot though, so nothing downstream can observe a user
+    // being updated, nor is anyone else's view of it changed from here.
+    ActiveUsersMessage::UserVector snapshot;
+    for (const auto& user : activeUsers)
+    {
+      if (user && user->IsActive())
+        snapshot.emplace_back(std::make_shared<User>(*user));
+    }
+
+    if (snapshot.empty()) return nullptr;
+
+    return std::make_shared<ActiveUsersMessage>(snapshot, iUsers->GetFrameId(), iUsers->GetTimestamp());
   }
 }

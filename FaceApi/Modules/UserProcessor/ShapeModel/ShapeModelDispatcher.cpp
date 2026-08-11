@@ -6,17 +6,6 @@
 
 namespace face
 {
-  ShapeModelDispatcher::ShapeModels ShapeModelDispatcher::sShapeModels;
-
-  ShapeModelDispatcher::~ShapeModelDispatcher()
-  {
-    fw::remove_if(sShapeModels, [&](const ShapeModels::value_type& obj) {
-      return std::find_if(mUpdatedUserIDs.begin(), mUpdatedUserIDs.end(), [&](int id) {
-               return obj.first == id;
-             }) == mUpdatedUserIDs.end();
-    });
-  }
-
   fw::ErrorCode ShapeModelDispatcher::Initialize(const cv::FileNode& iSettings)
   {
     if (!iSettings.empty())
@@ -57,29 +46,39 @@ namespace face
     return fw::ErrorCode::OK;
   }
 
+  void ShapeModelDispatcher::BeginFrame(const cv::Mat& iFrame)
+  {
+    mFrame = iFrame;
+    mDispatchedUserIDs.clear();
+  }
+
+  void ShapeModelDispatcher::EndFrame()
+  {
+    // Drop the models of the users that are no longer around. A user that comes back is
+    // Detected again, and Fit() re-initializes its shape from the face rectangle in that
+    // case, so there is nothing in the old model worth keeping.
+    fw::remove_if(mShapeModels, [&](const ShapeModels::value_type& obj) {
+      return mDispatchedUserIDs.find(obj.first) == mDispatchedUserIDs.end();
+    });
+  }
+
   bool ShapeModelDispatcher::Dispatch(User& ioUser)
   {
     CV_DbgAssert(!mFrame.empty() && mFrame.type() == CV_8UC1);
 
     const int userId = ioUser.GetUserId();
-    auto it = sShapeModels.find(userId);
+    mDispatchedUserIDs.insert(userId);
 
-    if (it == sShapeModels.end())
+    auto it = mShapeModels.find(userId);
+    if (it == mShapeModels.end())
     {
-      mShapeModel = std::make_shared<ShapeModel>();
-      sShapeModels.insert(std::make_pair(userId, mShapeModel));
-    }
-    else
-    {
-      mShapeModel = it->second;
+      it = mShapeModels.emplace(userId, std::make_shared<ShapeModel>()).first;
     }
 
-    mUpdatedUserIDs.emplace_back(userId);
-
-    return Fit(ioUser);
+    return Fit(ioUser, *(it->second));
   }
 
-  bool ShapeModelDispatcher::Fit(User& ioUser)
+  bool ShapeModelDispatcher::Fit(User& ioUser, ShapeModel& ioShapeModel)
   {
     const auto& faceRect = ioUser.GetFaceRect();
 
@@ -88,35 +87,33 @@ namespace face
     if (ioUser.IsDetected())
     {
       winSize = mWinDetection;
-      mShapeModel->InitShape(faceRect);
+      ioShapeModel.InitShape(faceRect);
     }
     else
     {
       winSize = mWinTracking;
-      mShapeModel->ShiftShape(ioUser.GetFaceRectOffset());
+      ioShapeModel.ShiftShape(ioUser.GetFaceRectOffset());
     }
 
-    mShapeModel->Fit(mFrame, winSize, mNoIter, mClamp, mFTol);
+    ioShapeModel.Fit(mFrame, winSize, mNoIter, mClamp, mFTol);
 
-    if (mFailureCheck && !mShapeModel->FailureCheck(mFrame)) return false;
+    if (mFailureCheck && !ioShapeModel.FailureCheck(mFrame)) return false;
 
-    if (!UpdateTemplate(ioUser)) return false;
-
-    return true;
+    return UpdateTemplate(ioUser, ioShapeModel);
   }
 
-  bool ShapeModelDispatcher::UpdateTemplate(User& ioUser)
+  bool ShapeModelDispatcher::UpdateTemplate(User& ioUser, ShapeModel& ioShapeModel)
   {
     const cv::Rect screenRect(0, 0, mFrame.cols, mFrame.rows);
 
     cv::Point2d minPt;
     cv::Point2d maxPt;
-    if (!mShapeModel->GetMinMax2D(screenRect, minPt, maxPt)) return false;
+    if (!ioShapeModel.GetMinMax2D(screenRect, minPt, maxPt)) return false;
 
     const cv::Rect newFaceRect(minPt, maxPt);
     if (newFaceRect.area() <= 0) return false;
 
-    const cv::Mat& shape2DMat = mShapeModel->GetShape2D();
+    const cv::Mat& shape2DMat = ioShapeModel.GetShape2D();
     const int count = shape2DMat.rows / 2;
     fw::ocv::VectorPt2D shape2D(count);
 

@@ -18,8 +18,6 @@ namespace face
 
     friend inline std::ostream& operator<<(std::ostream& ioStream, const ActiveUsersMessage& iMessage);
 
-    void RemoveInactiveUsers();
-
     inline bool IsEmpty() const
     {
       return mActiveUsers.empty();

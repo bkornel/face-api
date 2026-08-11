@@ -24,13 +24,12 @@ namespace face
 
     virtual ~ImageQueue() = default;
 
-    fw::ErrorCode Push(const cv::Mat& iFrame);
+    fw::ErrorCode Push(const cv::Mat& iFrame, unsigned iFrameId, long long iTimestamp);
 
     ImageMessage::Shared Main(unsigned iTickNumber) override;
 
     void Clear() override
     {
-      mPushFrameId = 0U;
       mQueue.Clear();
     }
 
@@ -68,11 +67,8 @@ namespace face
   private:
     fw::ErrorCode InitializeInternal(const cv::FileNode& iSettings) override;
 
-    void OnCommand(fw::Message::Shared iMessage) override;
-
     void NotifyPendingSizeChange();
 
-    std::atomic<unsigned> mPushFrameId{ 0U };
     std::atomic<unsigned> mLastFrameId{ 0U }; ///< Holds the ID of the last image frame.
     std::atomic<long long> mLastTimestamp{ 0 };
 

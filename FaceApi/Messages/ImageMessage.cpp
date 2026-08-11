@@ -4,6 +4,7 @@
 
 namespace face
 {
+  // Clones, because the caller usually owns a buffer it keeps writing to - a camera frame
   ImageMessage::ImageMessage(const cv::Mat& iImage, unsigned iFrameId, long long iTimestamp) :
     Message(iFrameId, iTimestamp)
   {
@@ -11,7 +12,18 @@ namespace face
     mFrames.first = iImage.clone();
   }
 
-  const cv::Mat& ImageMessage::GetFrameGray()
+  // Takes the buffer over, for callers that produced it and have no further use for it.
+  // Saves a full frame copy per frame, which is the pipeline's largest single memcpy.
+  ImageMessage::ImageMessage(cv::Mat&& iImage, unsigned iFrameId, long long iTimestamp) :
+    Message(iFrameId, iTimestamp)
+  {
+    CV_DbgAssert(!iImage.empty());
+    mFrames.first = std::move(iImage);
+  }
+
+  // The cached matrices are returned by value: a cv::Mat copy only bumps a refcount, and
+  // handing out a reference to a member would take the caller past the lock protecting it.
+  cv::Mat ImageMessage::GetFrameGray()
   {
     CV_DbgAssert(!IsEmpty());
     std::lock_guard<std::recursive_mutex> lock(mMutex);
@@ -25,7 +37,7 @@ namespace face
     return mFrames.second;
   }
 
-  const cv::Mat& ImageMessage::GetResizedBGR(float iScaleFactor)
+  cv::Mat ImageMessage::GetResizedBGR(float iScaleFactor)
   {
     CV_DbgAssert(!IsEmpty() && iScaleFactor > 0.0F);
 
@@ -47,7 +59,7 @@ namespace face
     return resized;
   }
 
-  const cv::Mat& ImageMessage::GetResizedGray(float iScaleFactor)
+  cv::Mat ImageMessage::GetResizedGray(float iScaleFactor)
   {
     CV_DbgAssert(!IsEmpty() && iScaleFactor > 0.0F);
 

@@ -51,6 +51,8 @@ namespace face
 
   ActiveUsersMessage::Shared UserManager::Main(ImageMessage::Shared iImage, RoiMessage::Shared iDetections)
   {
+    DrainCommands();
+
     if (!iImage || iImage->IsEmpty()) return nullptr;
 
     FACE_PROFILER(User_Manager);
@@ -72,7 +74,7 @@ namespace face
 
     if (GetMaxUsers() != GetActiveUserSize())
     {
-      sCommand.Raise(std::make_shared<CommandMessage>(CommandMessage::Type::RunFaceDetection, frameId, mTimestamp));
+      Publish(std::make_shared<CommandMessage>(CommandMessage::Type::RunFaceDetection, frameId, mTimestamp));
     }
 
     return GetActiveUserSize() > 0 ? std::make_shared<ActiveUsersMessage>(mUsers, frameId, mTimestamp) : nullptr;
@@ -108,8 +110,6 @@ namespace face
   {
     if (!iDetections || iDetections->IsEmpty()) return;
 
-    static int sLastUserID = 0;
-
     std::vector<cv::Rect> faceROIs = iDetections->GetROIs();
     mMinFaceSize = iDetections->GetMinRoiSize();
     mMaxFaceSize = iDetections->GetMaxRoiSize();
@@ -122,9 +122,9 @@ namespace face
     {
       if (GetActiveUserSize() >= mMaxUsers) break;
 
-      mUsers.emplace_back(std::make_shared<User>(r, sLastUserID, mTimestamp));
-      LOG(INFO) << "New user has been recognized, Welcome User(" << sLastUserID << ")!";
-      sLastUserID++;
+      mUsers.emplace_back(std::make_shared<User>(r, mLastUserID, mTimestamp));
+      LOG(INFO) << "New user has been recognized, Welcome User(" << mLastUserID << ")!";
+      mLastUserID++;
     }
   }
 

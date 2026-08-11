@@ -1,16 +1,19 @@
 #pragma once
 
+#include "FaceResult.h"
 #include "Framework/Module.h"
 #include "Framework/Port.hpp"
+#include "Messages/ActiveUsersMessage.h"
 #include "Messages/ImageMessage.h"
 
 #include <chrono>
 #include <functional>
+#include <mutex>
 
 namespace face
 {
   class LastModule : public fw::Module,
-                     public fw::Port<bool(ImageMessage::Shared)>
+                     public fw::Port<bool(ImageMessage::Shared, ActiveUsersMessage::Shared)>
   {
   public:
     FW_DEFINE_SMART_POINTERS(LastModule);
@@ -19,7 +22,9 @@ namespace face
 
     ~LastModule() override = default;
 
-    bool Main(ImageMessage::Shared iImage) override;
+    bool Main(ImageMessage::Shared iImage, ActiveUsersMessage::Shared iUsers) override;
+
+    void Clear() override;
 
     inline bool HasOutput() const
     {
@@ -38,22 +43,17 @@ namespace face
                : false;
     }
 
-    inline unsigned GetLastFrameId() const
-    {
-      return mLastImage ? mLastImage->GetFrameId() : 0U;
-    }
+    unsigned GetLastFrameId() const;
 
-    inline long long GetLastTimestamp() const
-    {
-      return mLastImage ? mLastImage->GetTimestamp() : 0LL;
-    }
+    long long GetLastTimestamp() const;
 
-    inline ImageMessage::Shared GetLastImage() const
-    {
-      return mLastImage;
-    }
+    ImageMessage::Shared GetLastImage() const;
+
+    fw::ErrorCode GetLastResults(FaceResults& oResults) const;
 
   private:
+    mutable std::mutex mLastMutex;
     ImageMessage::Shared mLastImage = nullptr;
+    ActiveUsersMessage::Shared mLastUsers = nullptr;
   };
 }

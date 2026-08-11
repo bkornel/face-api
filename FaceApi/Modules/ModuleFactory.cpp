@@ -15,7 +15,7 @@
 
 namespace face
 {
-  fw::Module::Shared ModuleFactory::Create(const cv::FileNode& iModuleNode)
+  fw::Module::Shared ModuleFactory::Create(const cv::FileNode& iModuleNode, fw::MessageBus& ioBus)
   {
     const std::string& moduleName = fw::str::to_lower(iModuleNode.name());
     fw::Module::Shared newModule = nullptr;
@@ -44,6 +44,10 @@ namespace face
       LOG(ERROR) << "Unknown module is referenced with name: " << iModuleNode.name();
       return nullptr;
     }
+
+    // Attach before Initialize(): that is where the module subscribes. newModule doubles
+    // as the lifetime token, so its subscriptions cannot outlive it.
+    newModule->Attach(ioBus, newModule);
 
     // Initialize the module (this will also load the module's settings)
     if (newModule->Initialize(iModuleNode) != fw::ErrorCode::OK)
