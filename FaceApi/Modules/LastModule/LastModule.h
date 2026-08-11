@@ -26,17 +26,11 @@ namespace face
       return mOutputPort && mOutputPort->Ready() && mOutputPort->Get();
     }
 
-    /// @brief Output generation of this module, read before ticking the graph.
     inline unsigned long long GetGeneration() const
     {
       return mOutputPort ? mOutputPort->GetGeneration() : 0ULL;
     }
 
-    /// @brief Blocks until the graph produced an output newer than iGeneration.
-    /// The output Future is reused for every frame and keeps its last value, so
-    /// waiting for "a value to be present" would return immediately from the
-    /// second frame on. The generation is what identifies the current frame.
-    /// @return false if the timeout elapsed, which means the graph did not finish.
     inline bool WaitForNewOutput(unsigned long long iGeneration, long long iTimeoutMs) const
     {
       return mOutputPort

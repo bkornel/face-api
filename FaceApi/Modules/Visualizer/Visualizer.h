@@ -41,7 +41,6 @@ namespace face
 
     void DrawBoundingBox(const User& iUser, cv::Mat& oImage, int iSegmentWidth = 5, int iThickness = 1) const;
 
-    /// @brief Not const: it tracks the observed runtime range.
     void DrawGeneral(ImageMessage::Shared iImage, cv::Mat& oImage);
 
     void CreateShapeColorMap(const fw::ocv::VectorPt3D& iShape3D, cv::Mat& oColorMap) const;

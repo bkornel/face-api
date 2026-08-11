@@ -74,10 +74,6 @@ namespace face
     using ImagePair = std::pair<cv::Mat, cv::Mat>;  // BGR - Gray
     using ResizedImages = std::map<int, ImagePair>; // Key: width of the image (aspect ratio is fixed)
 
-    /// @brief Per instance, not static: the lazy gray/resized conversions only
-    /// need to be serialized within one frame. A shared static mutex made every
-    /// frame in flight contend on the same lock.
-    /// Recursive because GetResizedGray() calls GetFrameGray() while holding it.
     mutable std::recursive_mutex mMutex;
 
     ImagePair mFrames;

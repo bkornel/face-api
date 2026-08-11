@@ -124,8 +124,6 @@ namespace fw
 
     /// @brief Raising an event
     /// @param iArgument possible arguments which will be forwarded to the captured function
-    /// The subscriber list is copied before invoking, so handlers may subscribe,
-    /// unsubscribe or raise the same event again without invalidating iteration.
     void Raise(ArgumentT... iArgument)
     {
       std::vector<DelegateT> delegates;
@@ -171,7 +169,7 @@ namespace fw
     }
 
   private:
-    mutable std::mutex mMutex;         ///< Guards mDelegates, the event is raised from several threads
+    mutable std::mutex mMutex;
     std::vector<DelegateT> mDelegates; ///< Delegates that are subscribed to the current event
   };
 }

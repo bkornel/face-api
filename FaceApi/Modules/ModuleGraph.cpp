@@ -15,8 +15,7 @@ namespace face
 {
   ModuleGraph::FrameProcessedHandler ModuleGraph::sFrameProcessed;
 
-  // Upper bound for a single frame. Without it a misconfigured or stalled graph
-  // would block the worker thread forever and StopThread() could never return.
+  // Upper bound for one frame, so a stalled graph cannot block the worker forever.
   const long long ModuleGraph::sProcessTimeoutMs = 5000LL;
 
   ModuleGraph::~ModuleGraph()
@@ -30,9 +29,7 @@ namespace face
 
     FACE_PROFILER_FRAME_ID(GetLastFrameId());
 
-    // Remember which output we have already seen, then pop a frame out and wait
-    // until this tick reached the last module. Reading the generation before the
-    // tick is what makes this a real per-frame barrier.
+    // Reading the generation before the tick is what makes this a per-frame barrier.
     const unsigned long long generation = mLastModule->GetGeneration();
 
     mFirstModule->Tick();

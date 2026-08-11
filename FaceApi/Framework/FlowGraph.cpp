@@ -44,9 +44,7 @@ namespace fw
   {
     if (--mCounter == 0U)
     {
-      // Re-arm before running the task. The task may execute the whole downstream
-      // graph synchronously (inline executor), and a notification arriving while
-      // the counter still sits at 0 would underflow it and wedge this node.
+      // Re-arm before running: the inline executor runs the whole graph downstream.
       mCounter = mCount;
 
       auto task = mTask;

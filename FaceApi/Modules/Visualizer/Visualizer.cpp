@@ -25,9 +25,7 @@ namespace face
   {
     if (!iImage || iImage->IsEmpty()) return nullptr;
 
-    // Must be a deep copy: cv::Mat assignment shares the pixel buffer, so drawing
-    // would overwrite the frame that ImageQueue still owns and that the other
-    // modules read from.
+    // Deep copy: assignment shares the buffer with the frame other modules read.
     cv::Mat resultImage = iImage->GetFrameBGR().clone();
 
     if (iUsers && !iUsers->IsEmpty())
@@ -83,8 +81,7 @@ namespace face
     const std::size_t n = iShape3D.size();
 
     float minZ = (std::numeric_limits<float>::max)();
-    // lowest(), not min(): min() is the smallest positive normalized value, which
-    // is larger than every negative z and would break the scaling.
+    // lowest(), not min(): min() is the smallest positive value, not the most negative.
     float maxZ = (std::numeric_limits<float>::lowest)();
 
     for (const auto& pt : iShape3D)
@@ -192,8 +189,7 @@ namespace face
   {
     const double runtimeMs = std::llabs(fw::get_current_time() - iImage->GetTimestamp());
 
-    // Members instead of function statics: this is called from the graph thread
-    // and the range has to be resettable together with the rest of the module.
+    // Members, not function statics: resettable with the rest of the module.
     if (runtimeMs < mMinRuntimeMs) mMinRuntimeMs = runtimeMs;
     if (runtimeMs > mMaxRuntimeMs) mMaxRuntimeMs = runtimeMs;
 

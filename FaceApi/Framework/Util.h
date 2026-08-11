@@ -44,7 +44,6 @@ namespace fw
   {
     const float baseRange = (float)iBaseMax - (float)iBaseMin;
 
-    // A degenerate input interval carries no information: map it to the lower limit.
     if (std::fabs(baseRange) <= std::numeric_limits<float>::epsilon())
       return iLimitMin;
 
@@ -54,8 +53,6 @@ namespace fw
   template <typename T>
   inline bool equals(T iA, T iB)
   {
-    // std::abs, not abs: the unqualified name can resolve to abs(int) and
-    // silently truncate floating point arguments.
     return std::abs(iA - iB) <= std::numeric_limits<T>::epsilon();
   }
 

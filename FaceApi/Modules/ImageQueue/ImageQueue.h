@@ -34,7 +34,6 @@ namespace face
       mQueue.Clear();
     }
 
-    /// @brief Returns by value: mImageSize is guarded by mSizeMutex.
     inline cv::Size GetImageSize() const
     {
       std::lock_guard<std::mutex> lock(mSizeMutex);
@@ -73,14 +72,13 @@ namespace face
 
     void NotifyPendingSizeChange();
 
-    // Push() runs on the camera thread, Main() on the graph thread.
     std::atomic<unsigned> mPushFrameId{ 0U };
     std::atomic<unsigned> mLastFrameId{ 0U }; ///< Holds the ID of the last image frame.
     std::atomic<long long> mLastTimestamp{ 0 };
 
     MessageQueue mQueue; ///< Queue for handling the frames
 
-    mutable std::mutex mSizeMutex; ///< Guards mImageSize and mPendingSizeChange
+    mutable std::mutex mSizeMutex;
     cv::Size mImageSize;
     bool mPendingSizeChange = false;
   };

@@ -11,10 +11,7 @@ namespace fw
 
   Module::~Module()
   {
-    // sCommand is static and stores a raw pointer to this object. Unsubscribing
-    // only in DeInitialize() is not enough: a module whose initialization failed
-    // never gets there, and the stale delegate would be invoked after the object
-    // is gone. Removing a delegate that is not subscribed is a no-op.
+    // sCommand is static and holds a raw this; a failed init never reaches DeInitialize.
     sCommand -= MAKE_DELEGATE(&Module::OnCommand, this);
   }
 

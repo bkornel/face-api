@@ -74,11 +74,7 @@ namespace face
       Normalize(ioShapes2D);
       Align(ioShapes2D, ioMeanShape);
 
-      // Find a new mean shape from all the set of points.
-      // std::accumulate returns the sum, it does not write into the init value,
-      // so the previous version left newMeanShape all zeros. Dividing that by its
-      // own (zero) norm produced NaN, the convergence test never became true and
-      // the loop always ran mMaxCount times to produce a NaN mean shape.
+      // Find a new mean shape: std::accumulate returns the sum, discarding it left zeros.
       cv::Mat newMeanShape = cv::Mat::zeros(ioMeanShape.size(), ioMeanShape.type());
       for (const auto& shape : ioShapes2D)
         newMeanShape += shape;
