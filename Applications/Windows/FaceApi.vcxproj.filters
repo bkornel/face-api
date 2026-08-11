@@ -353,4 +353,7 @@
       <Filter>Modules</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\.clang-format" />
+  </ItemGroup>
 </Project>

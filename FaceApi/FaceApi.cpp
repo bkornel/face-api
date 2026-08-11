@@ -2,7 +2,6 @@
 
 #include "Common/Configuration.h"
 #include "Framework/Profiler.h"
-
 #include "Messages/CommandMessage.h"
 #include "Messages/ImageArrivedMessage.h"
 
@@ -36,19 +35,16 @@ namespace face
   {
     fw::ErrorCode result = fw::ErrorCode::OK;
 
-    if ((result = Configuration::GetInstance().Initialize()) != fw::ErrorCode::OK)
-      return result;
+    if ((result = Configuration::GetInstance().Initialize()) != fw::ErrorCode::OK) return result;
 
     // Create and init modules here
     if ((result = mModuleGraph->Initialize(Configuration::GetInstance().GetModulesNode())) != fw::ErrorCode::OK)
       return result;
 
     // Start worker threads
-    if ((result = StartThread()) != fw::ErrorCode::OK)
-      return result;
+    if ((result = StartThread()) != fw::ErrorCode::OK) return result;
 
-    if (Configuration::GetInstance().GetVerbose())
-      OnOffVerbose();
+    if (Configuration::GetInstance().GetVerbose()) OnOffVerbose();
 
     return fw::ErrorCode::OK;
   }
@@ -71,9 +67,6 @@ namespace face
   {
     if (!iMessage || iMessage->IsEmpty()) return;
 
-    // TryPush, not Push: this runs on the worker thread. If the host stops calling
-    // GetResultImage() a blocking push would wedge the worker and StopThread()
-    // would never return. Dropping the newest preview frame is harmless.
     if (mOutputQueue.TryPush(iMessage) == fw::ErrorCode::OutOfResources)
     {
       LOG(DEBUG) << "Output queue is full, dropping the processed frame.";
@@ -120,8 +113,8 @@ namespace face
       ThreadSleep(1);
     }
 
-    const std::string& profilerPath = Configuration::GetInstance().GetDirectories().output +
-      "profiler." + fw::get_log_stamp() + ".txt";
+    const std::string& profilerPath =
+      Configuration::GetInstance().GetDirectories().output + "profiler." + fw::get_log_stamp() + ".txt";
     FACE_PROFILER_SAVE(profilerPath);
 
     return fw::ErrorCode::OK;
@@ -130,17 +123,21 @@ namespace face
   void FaceApi::SetRunFaceDetector()
   {
     const long long timestamp = fw::get_current_time();
-    sCommand.Raise(std::make_shared<CommandMessage>(CommandMessage::Type::RunFaceDetection, mCameraFrameId, timestamp));
+    sCommand.Raise(
+      std::make_shared<CommandMessage>(CommandMessage::Type::RunFaceDetection, mCameraFrameId, timestamp)
+    );
   }
 
   void FaceApi::OnOffVerbose()
   {
     const long long timestamp = fw::get_current_time();
-    sCommand.Raise(std::make_shared<CommandMessage>(CommandMessage::Type::VerboseModeChanged, mCameraFrameId, timestamp));
+    sCommand.Raise(
+      std::make_shared<CommandMessage>(CommandMessage::Type::VerboseModeChanged, mCameraFrameId, timestamp)
+    );
   }
 
   void FaceApi::SetWorkingDirectory(const std::string& iWorkingDirectory)
   {
     Configuration::GetInstance().SetWorkingDirectory(iWorkingDirectory);
   }
-}
+} // namespace face

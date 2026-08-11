@@ -1,17 +1,17 @@
 #pragma once
 
-#include "Framework/VideoWriter.h"
-
 #include <Poco/Util/Application.h>
+
 #include <opencv2/core/core.hpp>
 #include <vector>
 
-class FaceApp :
-  public Poco::Util::Application
+#include "Framework/VideoWriter.h"
+
+class FaceApp : public Poco::Util::Application
 {
 public:
   FaceApp() = default;
-  
+
   FaceApp(const FaceApp& iOther) = delete;
 
   virtual ~FaceApp() = default;
