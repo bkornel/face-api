@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Framework/Module.h"
+#include "Framework/Graph/Module.h"
 #include <memory>
 #include <opencv2/core.hpp>
 

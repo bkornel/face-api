@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Framework/ErrorCode.h"
-#include "Framework/Event.hpp"
-#include "Framework/Module.h"
-#include "Framework/FlowGraph.hpp"
+#include "Framework/Messaging/Event.hpp"
+#include "Framework/Graph/Module.h"
+#include "Framework/Graph/FlowGraph.hpp"
 
 #include "Messages/ImageMessage.h"
 

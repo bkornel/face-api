@@ -3,7 +3,7 @@
 #include "Modules/UserProcessor/UserProcessor.h"
 #include "Modules/UserProcessor/ShapeModel/ClmWrapper.h"
 
-#include "Common/Configuration.h"
+#include "Configuration.h"
 #include "Framework/Profiler.h"
 
 #include <easyloggingpp/easyloggingpp.h>

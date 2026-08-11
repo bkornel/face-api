@@ -1,8 +1,8 @@
 #include "Framework/ErrorCode.h"
 #include "Modules/UserProcessor/ShapeModel/ClmWrapper.h"
 
-#include "Common/Configuration.h"
-#include "Common/ShapeUtil.h"
+#include "Configuration.h"
+#include "Model/FaceModel.h"
 
 namespace face
 {
@@ -30,22 +30,22 @@ namespace face
     cv::Mat trianglesMat = FACETRACKER::IO::LoadTri((path + iTriFile).c_str());
     CV_DbgAssert(!trianglesMat.empty());
 
-    ShapeUtil::Triangles triangles;
+    FaceModel::Triangles triangles;
     for (int i = 0; i < trianglesMat.rows; i++)
     {
       triangles.emplace_back(trianglesMat.at<int>(i, 0), trianglesMat.at<int>(i, 1), trianglesMat.at<int>(i, 2));
     }
-    ShapeUtil::GetInstance().SetTriangles(triangles);
+    FaceModel::GetInstance().SetTriangles(triangles);
 
     cv::Mat connectionsMat = FACETRACKER::IO::LoadCon((path + iConFile).c_str());
     CV_DbgAssert(!connectionsMat.empty());
 
-    ShapeUtil::Connections connections;
+    FaceModel::Connections connections;
     for (int i = 0; i < connectionsMat.cols; i++)
     {
       connections.emplace_back(connectionsMat.at<int>(0, i), connectionsMat.at<int>(1, i));
     }
-    ShapeUtil::GetInstance().SetConnections(connections);
+    FaceModel::GetInstance().SetConnections(connections);
 
     std::ifstream infile(path + iTrackerFile);
 

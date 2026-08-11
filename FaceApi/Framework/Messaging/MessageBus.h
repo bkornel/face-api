@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Framework/Message.h"
+#include "Framework/Messaging/Message.h"
 
 #include <functional>
 #include <map>

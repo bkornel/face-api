@@ -110,7 +110,7 @@ namespace face
     kMouth17
   };
 
-  class ShapeUtil
+  class FaceModel
   {
   public:
     using Landmarks = std::vector<Landmark>;
@@ -118,9 +118,9 @@ namespace face
     using Connections = std::vector<std::pair<int, int>>;
     using Triangles = std::vector<std::tuple<int, int, int>>;
 
-    static ShapeUtil& GetInstance();
+    static FaceModel& GetInstance();
 
-    ShapeUtil();
+    FaceModel();
 
     const Landmark sFixPointID = Landmark::kNose6;
 
@@ -158,7 +158,7 @@ namespace face
     }
 
   private:
-    ~ShapeUtil() = default;
+    ~FaceModel() = default;
 
     ShapeParts mShapeParts;
     Connections mConnections;

@@ -1,14 +1,14 @@
-#include "Common/ShapeUtil.h"
+#include "Model/FaceModel.h"
 
 namespace face
 {
-  ShapeUtil& ShapeUtil::GetInstance()
+  FaceModel& FaceModel::GetInstance()
   {
-    static ShapeUtil sInstance;
+    static FaceModel sInstance;
     return sInstance;
   }
 
-  ShapeUtil::ShapeUtil()
+  FaceModel::FaceModel()
   {
     mShapeParts = {
       { BodyPart::kContour,
@@ -134,21 +134,21 @@ namespace face
     };
   }
 
-  const std::string& ShapeUtil::PointNameToString(Landmark iLandmark) const
+  const std::string& FaceModel::PointNameToString(Landmark iLandmark) const
   {
     auto it = mShapePoints.find(iLandmark);
     CV_DbgAssert(it != mShapePoints.end());
     return it->second;
   }
 
-  const std::string& ShapeUtil::ShapeClusterToString(BodyPart iShapeCluster) const
+  const std::string& FaceModel::ShapeClusterToString(BodyPart iShapeCluster) const
   {
     auto it = mShapeClusters.find(iShapeCluster);
     CV_DbgAssert(it != mShapeClusters.end());
     return it->second;
   }
 
-  BodyPart ShapeUtil::GetShapeClusterID(Landmark iLandmark) const
+  BodyPart FaceModel::GetShapeClusterID(Landmark iLandmark) const
   {
     for (auto& it : mShapeParts)
       if (std::find(it.second.begin(), it.second.end(), iLandmark) != it.second.end())
@@ -157,7 +157,7 @@ namespace face
     return BodyPart::kUndefined;
   }
 
-  const std::vector<Landmark>& ShapeUtil::GetLandmarks(BodyPart iClusterId) const
+  const std::vector<Landmark>& FaceModel::GetLandmarks(BodyPart iClusterId) const
   {
     auto it = mShapeParts.find(iClusterId);
     CV_DbgAssert(it != mShapeParts.end());

@@ -1,7 +1,7 @@
 #include "Framework/ErrorCode.h"
 #include "Modules/ModuleGraph.h"
 
-#include "Common/Configuration.h"
+#include "Configuration.h"
 
 #include "Framework/Profiler.h"
 #include "Framework/Text.h"

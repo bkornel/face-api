@@ -2,8 +2,8 @@
 
 #include "Framework/ErrorCode.h"
 #include "FaceResult.h"
-#include "Framework/Module.h"
-#include "Framework/Port.hpp"
+#include "Framework/Graph/Module.h"
+#include "Framework/Graph/Port.hpp"
 #include "Messages/ActiveUsersMessage.h"
 #include "Messages/ImageMessage.h"
 

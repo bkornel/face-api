@@ -1,5 +1,5 @@
 #include "Framework/ErrorCode.h"
-#include "Framework/Module.h"
+#include "Framework/Graph/Module.h"
 #include "Framework/Text.h"
 #include "Messages/CommandMessage.h"
 #include "Messages/ImageSizeChangedMessage.h"

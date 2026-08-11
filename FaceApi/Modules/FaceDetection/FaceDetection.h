@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Framework/ErrorCode.h"
-#include "Framework/Module.h"
+#include "Framework/Graph/Module.h"
 #include "Framework/Stopwatch.h"
-#include "Framework/Port.hpp"
+#include "Framework/Graph/Port.hpp"
 #include "Messages/ImageMessage.h"
 #include "Messages/RoiMessage.h"
 

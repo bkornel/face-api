@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Common/ShapeUtil.h"
+#include "Model/FaceModel.h"
 #include "User/UserData.hpp"
 
 #include <clm/CLM.h>

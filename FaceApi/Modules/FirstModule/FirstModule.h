@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Framework/Module.h"
-#include "Framework/Port.hpp"
+#include "Framework/Graph/Module.h"
+#include "Framework/Graph/Port.hpp"
 
 namespace face
 {

@@ -1,4 +1,4 @@
-#include "Framework/FlowGraph.hpp"
+#include "Framework/Graph/FlowGraph.hpp"
 
 #include <future>
 #include <thread>

@@ -8,14 +8,14 @@
 
 namespace face
 {
-  class PoseUtil
+  class PoseGeometry
   {
   public:
     using Connections = std::vector<std::pair<int, int>>;
 
-    static PoseUtil& GetInstance();
+    static PoseGeometry& GetInstance();
 
-    PoseUtil();
+    PoseGeometry();
 
     inline const cv::Point3d& GetOrigin3D() const
     {
@@ -44,7 +44,7 @@ namespace face
     }
 
   private:
-    ~PoseUtil() = default;
+    ~PoseGeometry() = default;
 
     const cv::Point3d mOrigin3D;
 

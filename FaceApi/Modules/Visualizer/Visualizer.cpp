@@ -6,9 +6,9 @@
 #include "Framework/TimeExtensions.h"
 #include "Modules/Visualizer/Visualizer.h"
 
-#include "Common/Configuration.h"
-#include "Common/PoseUtil.h"
-#include "Common/ShapeUtil.h"
+#include "Configuration.h"
+#include "Model/PoseGeometry.h"
+#include "Model/FaceModel.h"
 #include "Framework/Profiler.h"
 
 #include <iomanip>
@@ -65,7 +65,7 @@ namespace face
   {
     const auto& shape2D = iUser.GetShape2D();
     const auto& shape3D = iUser.GetShape3D();
-    const auto& connections = ShapeUtil::GetInstance().GetConnections();
+    const auto& connections = FaceModel::GetInstance().GetConnections();
 
     // A user that has just been detected, or whose fit failed, has no shape yet
     if (shape2D.empty() || shape3D.size() != shape2D.size()) return;
@@ -149,7 +149,7 @@ namespace face
   void Visualizer::DrawBoundingBox(const User& iUser, cv::Mat& oImage, int iSegmentWidth /* = 5*/, int iThickness /* = 1*/) const
   {
     const cv::Scalar color(240, 255, 150);
-    const auto& connections = PoseUtil::GetInstance().GetConnections();
+    const auto& connections = PoseGeometry::GetInstance().GetConnections();
 
     // No pose estimated for this user yet, so there is no box to project
     if (iUser.GetFaceBox().empty() || iUser.GetRvec().empty() || iUser.GetTvec().empty() || iUser.GetCameraMatrix().empty())
@@ -176,7 +176,7 @@ namespace face
 
   void Visualizer::DrawAxes(const User& iUser, cv::Mat& oImage) const
   {
-    static const fw::VectorPt3D sAxes3D = PoseUtil::GetInstance().GetAxes3D();
+    static const fw::VectorPt3D sAxes3D = PoseGeometry::GetInstance().GetAxes3D();
 
     if (iUser.GetRvec().empty() || iUser.GetTvec().empty() || iUser.GetCameraMatrix().empty())
       return;
