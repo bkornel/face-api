@@ -1,5 +1,7 @@
 #include "FaceResultBuffer.h"
 
+#include "Framework/Ocv/Projection.h"
+
 #include <algorithm>
 
 namespace face
