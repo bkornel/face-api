@@ -1,6 +1,6 @@
 #include "FaceResultBuffer.h"
 
-#include "Framework/Ocv/Projection.h"
+#include "Framework/Imaging/Projection.h"
 
 #include <algorithm>
 
@@ -51,8 +51,8 @@ namespace face
 
         if (!result.faceBox.empty() && !result.rvec.empty() && !result.tvec.empty() && !result.cameraMatrix.empty())
         {
-          fw::ocv::VectorPt2D projected;
-          fw::ocv::project_point(result.faceBox, result.rvec, result.tvec, result.cameraMatrix, projected);
+          fw::VectorPt2D projected;
+          fw::project_point(result.faceBox, result.rvec, result.tvec, result.cameraMatrix, projected);
 
           boxPoints = (std::min)(static_cast<int>(projected.size()), cMaxBoxPoints);
           for (int p = 0; p < boxPoints; p++)
