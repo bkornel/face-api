@@ -1,9 +1,9 @@
+#include "Framework/Ocv/Geometry.h"
 #include "Framework/ErrorCode.h"
 #include "FaceApi.h"
 #include "FaceResultBuffer.h"
 #include "Common/Configuration.h"
 #include "Framework/Stopwatch.h"
-#include "Framework/UtilOCV.h"
 
 #include <easyloggingpp/easyloggingpp.h>
 #include <opencv2/core.hpp>

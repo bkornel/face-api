@@ -58,8 +58,23 @@
     <Filter Include="Modules\LastModule">
       <UniqueIdentifier>{7a8b2dd8-8dea-4b94-9fda-9adb687bc8dc}</UniqueIdentifier>
     </Filter>
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\UtilTime.cpp">
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\TimeExtensions.cpp">
       <Filter>Framework</Filter>
+    </ClCompile>
+    <Filter Include="Framework\Ocv">
+      <UniqueIdentifier>{3f1c9a52-6b40-4d1e-9c77-2a5b8e4f0d31}</UniqueIdentifier>
+    </Filter>
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Ocv\Geometry.cpp">
+      <Filter>Framework\Ocv</Filter>
+    </ClCompile>
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Ocv\Drawing.cpp">
+      <Filter>Framework\Ocv</Filter>
+    </ClCompile>
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Ocv\Projection.cpp">
+      <Filter>Framework\Ocv</Filter>
+    </ClCompile>
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Ocv\FileStorage.cpp">
+      <Filter>Framework\Ocv</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -91,10 +106,7 @@
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Exception.cpp">
       <Filter>Framework</Filter>
     </ClCompile>
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\UtilOCV.cpp">
-      <Filter>Framework</Filter>
-    </ClCompile>
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\UtilString.cpp">
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Text.cpp">
       <Filter>Framework</Filter>
     </ClCompile>
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Module.cpp">
@@ -226,10 +238,7 @@
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Exception.h">
       <Filter>Framework</Filter>
     </ClInclude>
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\UtilOCV.h">
-      <Filter>Framework</Filter>
-    </ClInclude>
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\UtilString.h">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Text.h">
       <Filter>Framework</Filter>
     </ClInclude>
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Module.h">
@@ -352,14 +361,26 @@
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\ErrorCode.h">
       <Filter>Framework</Filter>
     </ClInclude>
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\UtilMath.h">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\MathExtensions.h">
       <Filter>Framework</Filter>
     </ClInclude>
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\UtilContainer.h">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Container.h">
       <Filter>Framework</Filter>
     </ClInclude>
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\UtilTime.h">
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\TimeExtensions.h">
       <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Ocv\Geometry.h">
+      <Filter>Framework\Ocv</Filter>
+    </ClInclude>
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Ocv\Drawing.h">
+      <Filter>Framework\Ocv</Filter>
+    </ClInclude>
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Ocv\Projection.h">
+      <Filter>Framework\Ocv</Filter>
+    </ClInclude>
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Ocv\FileStorage.h">
+      <Filter>Framework\Ocv</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

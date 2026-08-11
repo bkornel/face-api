@@ -1,7 +1,7 @@
 #pragma once
 
+#include "Framework/Ocv/Geometry.h"
 #include "Common/ShapeUtil.h"
-#include "Framework/UtilOCV.h"
 
 #include <memory>
 

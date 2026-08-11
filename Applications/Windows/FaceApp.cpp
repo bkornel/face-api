@@ -5,7 +5,7 @@
 #include "Framework/ErrorCode.h"
 #include "Common/Configuration.h"
 #include "FaceApi.h"
-#include "Framework/UtilString.h"
+#include "Framework/Text.h"
 
 namespace
 {
