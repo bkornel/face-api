@@ -119,12 +119,9 @@ The Android application is set up this way. `Native.getResults` fills a reused `
 
 ## Adding a New Module
 
-The native side must be only extended in case of adding a new module to the system.
-- First the `ModuleFactory::Create(...)` in [`ModuleFactory.cpp`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/ModuleFactory.cpp) which creates and initializes every module
-- Then the `ModuleConnector::Connect(...)` in [`ModuleConnector.cpp`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/ModuleConnector.cpp) which connects all the inputs (predecessors) to a given module
-- Finally the `connect(...)` in the anonymous namespace of [`ModuleConnector.cpp`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/ModuleConnector.cpp) which connects the ith input to a given module
+There is one place to extend: `ModuleFactory::Create(...)` in [`ModuleFactory.cpp`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/ModuleFactory.cpp), which maps the name used in the settings file to the class that implements it. Look for the `// REMARK: Insert new modules here` comment; it is one line.
 
-These are just copy-pasting 1-2 line, you should find the `// REMARK: Insert new modules here` comments in the files above.
+Connecting the module is automatic. A module declares its ports by deriving from `fw::Port`, which implements [`IPortConnector`](https://github.com/bkornel/face-api/blob/master/FaceApi/Framework/Graph/IPortConnector.h), and [`ModuleConnector`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/ModuleConnector.cpp) wires the graph through that interface alone, so it never has to know which module it is holding. An output travels between the two as an `fw::IFuture` and the input side casts it back to the type its own port number expects, which means a port wired to a module publishing something else is reported as exactly that, naming the two modules and the port.
 
 Beside these, the `Main` of a new module should start with a `DrainCommands()` call. Commands, for example that the image size has changed, are published on a message bus by the thread that raises them, and `DrainCommands` applies them on the thread of the module graph. This is what keeps a module's own state touched from one thread only.
 

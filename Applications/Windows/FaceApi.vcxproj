@@ -94,6 +94,7 @@
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Model\PoseGeometry.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Model\FaceModel.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Graph\FlowGraph.hpp" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Graph\IPortConnector.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Imaging\VideoWriter.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\FaceApi.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\FaceResult.h" />
