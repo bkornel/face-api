@@ -64,23 +64,19 @@ namespace face
         auto& entries = h.second;
         const std::size_t sizeBefore = entries.size();
 
-        entries.erase(std::remove_if(entries.begin(), entries.end(), [&](const Entry& obj)
-        {
-          return obj.first < diff;
-        }),
-          entries.end()
-          );
+        entries.erase(std::remove_if(entries.begin(), entries.end(), [&](const Entry& obj) {
+                        return obj.first < diff;
+                      }),
+                      entries.end());
 
         const std::size_t count = sizeBefore - entries.size();
         if (count > 0U)
         {
-          LOG(INFO) << "Number of entries deleted from User(" << h.first << "): " <<
-            count << " (" << cvRound((count * sizeof(UserData)) / 1024.0) << " KB).";
+          LOG(INFO) << "Number of entries deleted from User(" << h.first << "): " << count << " (" << cvRound((count * sizeof(UserData)) / 1024.0) << " KB).";
         }
       }
 
-      fw::remove_if(mEntryMap, [&](const EntryMap::value_type& obj)
-      {
+      fw::remove_if(mEntryMap, [&](const EntryMap::value_type& obj) {
         return obj.second.empty();
       });
     }

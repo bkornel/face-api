@@ -11,10 +11,9 @@ namespace fw
 
     bool is_number(const std::string& iValue)
     {
-      return !iValue.empty() && std::find_if(iValue.begin(), iValue.end(), [&](char c)
-      {
-        return !std::isdigit(c);
-      }) == iValue.end();
+      return !iValue.empty() && std::find_if(iValue.begin(), iValue.end(), [&](char c) {
+                                  return !std::isdigit(c);
+                                }) == iValue.end();
     }
 
     bool convert_to_boolean(const std::string& iValue)

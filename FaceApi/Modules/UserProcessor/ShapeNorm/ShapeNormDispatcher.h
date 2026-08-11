@@ -5,8 +5,7 @@
 
 namespace face
 {
-  class ShapeNormDispatcher :
-    public UserDispatcher
+  class ShapeNormDispatcher : public UserDispatcher
   {
     typedef std::vector<cv::Mat> MatVector;
 

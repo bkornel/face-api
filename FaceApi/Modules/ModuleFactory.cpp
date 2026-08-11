@@ -20,14 +20,22 @@ namespace face
     const std::string& moduleName = fw::str::to_lower(iModuleNode.name());
     fw::Module::Shared newModule = nullptr;
 
-    if (moduleName == "facedetection")	    newModule = std::make_shared<FaceDetection>();
-    else if (moduleName == "firstmodule")		newModule = std::make_shared<FirstModule>();
-    else if (moduleName == "imagequeue")	  newModule = std::make_shared<ImageQueue>();
-    else if (moduleName == "lastmodule")		newModule = std::make_shared<LastModule>();
-    else if (moduleName == "userhistory")		newModule = std::make_shared<UserHistory>();
-    else if (moduleName == "usermanager")		newModule = std::make_shared<UserManager>();
-    else if (moduleName == "userprocessor")	newModule = std::make_shared<UserProcessor>();
-    else if (moduleName == "visualizer")		newModule = std::make_shared<Visualizer>();
+    if (moduleName == "facedetection")
+      newModule = std::make_shared<FaceDetection>();
+    else if (moduleName == "firstmodule")
+      newModule = std::make_shared<FirstModule>();
+    else if (moduleName == "imagequeue")
+      newModule = std::make_shared<ImageQueue>();
+    else if (moduleName == "lastmodule")
+      newModule = std::make_shared<LastModule>();
+    else if (moduleName == "userhistory")
+      newModule = std::make_shared<UserHistory>();
+    else if (moduleName == "usermanager")
+      newModule = std::make_shared<UserManager>();
+    else if (moduleName == "userprocessor")
+      newModule = std::make_shared<UserProcessor>();
+    else if (moduleName == "visualizer")
+      newModule = std::make_shared<Visualizer>();
     // REMARK: Insert new modules here
 
     // Check if the module is not set up in this file

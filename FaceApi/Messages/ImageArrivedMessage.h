@@ -6,8 +6,7 @@
 
 namespace face
 {
-  class ImageArrivedMessage :
-    public fw::Message
+  class ImageArrivedMessage : public fw::Message
   {
   public:
     FW_DEFINE_SMART_POINTERS(ImageArrivedMessage);
@@ -42,7 +41,7 @@ namespace face
     cv::Mat mFrame;
   };
 
-  inline std::ostream& operator<< (std::ostream& ioStream, const ImageArrivedMessage& iMessage)
+  inline std::ostream& operator<<(std::ostream& ioStream, const ImageArrivedMessage& iMessage)
   {
     const fw::Message& base(iMessage);
     ioStream << base << ", [Derived] Width: " << iMessage.GetWidth() << ", Height: " << iMessage.GetHeight();

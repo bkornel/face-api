@@ -12,9 +12,8 @@
 
 namespace face
 {
-  class ImageQueue :
-    public fw::Module,
-    public fw::Port<ImageMessage::Shared(unsigned)>
+  class ImageQueue : public fw::Module,
+                     public fw::Port<ImageMessage::Shared(unsigned)>
   {
     using MessageQueue = fw::MessageQueue<ImageMessage::Shared>;
 
@@ -76,12 +75,12 @@ namespace face
 
     // Push() runs on the camera thread, Main() on the graph thread.
     std::atomic<unsigned> mPushFrameId{ 0U };
-    std::atomic<unsigned> mLastFrameId{ 0U };   ///< Holds the ID of the last image frame.
+    std::atomic<unsigned> mLastFrameId{ 0U }; ///< Holds the ID of the last image frame.
     std::atomic<long long> mLastTimestamp{ 0 };
 
-    MessageQueue mQueue;			    ///< Queue for handling the frames
+    MessageQueue mQueue; ///< Queue for handling the frames
 
-    mutable std::mutex mSizeMutex;              ///< Guards mImageSize and mPendingSizeChange
+    mutable std::mutex mSizeMutex; ///< Guards mImageSize and mPendingSizeChange
     cv::Size mImageSize;
     bool mPendingSizeChange = false;
   };

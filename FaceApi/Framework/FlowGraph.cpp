@@ -5,8 +5,7 @@
 
 namespace fw
 {
-  class InlineExecutor :
-    public Executor
+  class InlineExecutor : public Executor
   {
     void run(std::function<void()> iTask) override
     {
@@ -14,8 +13,7 @@ namespace fw
     }
   };
 
-  class ThreadExecutor :
-    public Executor
+  class ThreadExecutor : public Executor
   {
     void run(std::function<void()> iTask) override
     {
@@ -53,8 +51,7 @@ namespace fw
 
       auto task = mTask;
 
-      iExecutor->run([iExecutor, task]
-      {
+      iExecutor->run([iExecutor, task] {
         task(iExecutor);
       });
     }

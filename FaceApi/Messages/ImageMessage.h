@@ -9,8 +9,7 @@
 
 namespace face
 {
-  class ImageMessage :
-    public fw::Message
+  class ImageMessage : public fw::Message
   {
   public:
     FW_DEFINE_SMART_POINTERS(ImageMessage);
@@ -72,7 +71,7 @@ namespace face
     }
 
   private:
-    using ImagePair = std::pair<cv::Mat, cv::Mat>; // BGR - Gray
+    using ImagePair = std::pair<cv::Mat, cv::Mat>;  // BGR - Gray
     using ResizedImages = std::map<int, ImagePair>; // Key: width of the image (aspect ratio is fixed)
 
     /// @brief Per instance, not static: the lazy gray/resized conversions only
@@ -86,7 +85,7 @@ namespace face
     QueueData mQueueData;
   };
 
-  inline std::ostream& operator<< (std::ostream& ioStream, const ImageMessage& iMessage)
+  inline std::ostream& operator<<(std::ostream& ioStream, const ImageMessage& iMessage)
   {
     const fw::Message& base(iMessage);
     ioStream << base << ", [Derived] Width: " << iMessage.GetWidth() << ", Height: " << iMessage.GetHeight();

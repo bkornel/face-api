@@ -7,8 +7,7 @@
 
 namespace fw
 {
-  class Exception :
-    public std::exception
+  class Exception : public std::exception
   {
   public:
     Exception(ErrorCode iErrorCode, const std::string& iInfoText);

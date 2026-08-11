@@ -68,7 +68,8 @@ namespace fw
         for (const auto& d : data)
           outFile << d.first << "\t";
 
-        outFile << std::endl << "runtime_ms:" << "\t";
+        outFile << std::endl
+                << "runtime_ms:" << "\t";
         for (const auto& d : data)
           outFile << cvRound(d.second) << "\t";
       }

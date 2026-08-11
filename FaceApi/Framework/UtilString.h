@@ -30,7 +30,7 @@ namespace fw
 
     std::vector<std::string> split(const std::string& iString, char iDelimiter);
 
-    template<typename T>
+    template <typename T>
     T convert_to_number(const std::string& iValue)
     {
       const std::string& trimmedValue = trim(iValue);

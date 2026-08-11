@@ -15,8 +15,7 @@
 
 namespace face
 {
-  class ModuleGraph :
-    public fw::Module
+  class ModuleGraph : public fw::Module
   {
     using PredecessorMap = std::map<int, fw::Module::Shared>;
     using FrameProcessedHandler = fw::Event<void(ImageMessage::Shared)>;
@@ -49,7 +48,7 @@ namespace face
     }
 
   private:
-    static const long long sProcessTimeoutMs;   ///< Upper bound for processing one frame
+    static const long long sProcessTimeoutMs; ///< Upper bound for processing one frame
 
     fw::ErrorCode InitializeInternal(const cv::FileNode& iModulesNode) override;
 

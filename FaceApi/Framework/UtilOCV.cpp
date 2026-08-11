@@ -10,20 +10,20 @@ namespace fw
   {
     void rotate_mat(const cv::Mat& iInput, cv::Mat& iOutput, int iRotation)
     {
-      if (iRotation == 90)				// transpose + flip(1) = CW
+      if (iRotation == 90) // transpose + flip(1) = CW
       {
-        iOutput = iInput.t();			// Transpose original
-        cv::flip(iOutput, iOutput, 1);	// Flipping around the y axis
+        iOutput = iInput.t();          // Transpose original
+        cv::flip(iOutput, iOutput, 1); // Flipping around the y axis
       }
-      else if (iRotation == 180)			// flip(-1) = 180
+      else if (iRotation == 180) // flip(-1) = 180
       {
-        cv::flip(iInput, iOutput, -1);	// Flipping around both axis
+        cv::flip(iInput, iOutput, -1); // Flipping around both axis
       }
-      else if (iRotation == 270)			// transpose + flip(0) = CCW
+      else if (iRotation == 270) // transpose + flip(0) = CCW
       {
-        iOutput = iInput.t();			// Transpose original
+        iOutput = iInput.t(); // Transpose original
         //cv::flip(output, output, 0);	// Flipping around the x axis
-        cv::flip(iOutput, iOutput, -1);	// Flipping around both axis
+        cv::flip(iOutput, iOutput, -1); // Flipping around both axis
       }
     }
 
@@ -129,7 +129,7 @@ namespace fw
       sImageSize = iSize;
 #if 1
       const double dfov = FW_DEG_TO_RAD(70.0);
-      const double d = std::sqrt(iSize.width*iSize.width + iSize.height*iSize.height);
+      const double d = std::sqrt(iSize.width * iSize.width + iSize.height * iSize.height);
       const double fd = (d / 2.0) / std::tan(dfov / 2.0);
 
       const double hfov = 2.0 * std::atan(iSize.width / (2.0 * fd));
@@ -146,11 +146,7 @@ namespace fw
       const cv::Point2d center((iSize.width - 1.0) * 0.5, (iSize.height - 1.0) * 0.5);
 
       // Camera matrix
-      sCameraMatrix = cv::Mat_<double>({ 3, 3 }, {
-        fx, 0.0, center.x,
-        0.0, fy, center.y,
-        0.0, 0.0, 1.0
-        });
+      sCameraMatrix = cv::Mat_<double>({ 3, 3 }, { fx, 0.0, center.x, 0.0, fy, center.y, 0.0, 0.0, 1.0 });
 
       return sCameraMatrix;
     }

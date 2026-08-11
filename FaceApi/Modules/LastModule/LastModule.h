@@ -9,9 +9,8 @@
 
 namespace face
 {
-  class LastModule :
-    public fw::Module,
-    public fw::Port<bool(ImageMessage::Shared)>
+  class LastModule : public fw::Module,
+                     public fw::Port<bool(ImageMessage::Shared)>
   {
   public:
     FW_DEFINE_SMART_POINTERS(LastModule);
@@ -41,8 +40,8 @@ namespace face
     inline bool WaitForNewOutput(unsigned long long iGeneration, long long iTimeoutMs) const
     {
       return mOutputPort
-        ? mOutputPort->WaitForNewValue(iGeneration, std::chrono::milliseconds(iTimeoutMs))
-        : false;
+               ? mOutputPort->WaitForNewValue(iGeneration, std::chrono::milliseconds(iTimeoutMs))
+               : false;
     }
 
     inline unsigned GetLastFrameId() const

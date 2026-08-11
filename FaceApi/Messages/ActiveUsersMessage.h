@@ -5,8 +5,7 @@
 
 namespace face
 {
-  class ActiveUsersMessage :
-    public fw::Message
+  class ActiveUsersMessage : public fw::Message
   {
   public:
     FW_DEFINE_SMART_POINTERS(ActiveUsersMessage);
@@ -37,10 +36,10 @@ namespace face
     }
 
   private:
-    UserVector mActiveUsers;   ///< The vector storing the active viewers
+    UserVector mActiveUsers; ///< The vector storing the active viewers
   };
 
-  inline std::ostream& operator<< (std::ostream& ioStream, const ActiveUsersMessage& iMessage)
+  inline std::ostream& operator<<(std::ostream& ioStream, const ActiveUsersMessage& iMessage)
   {
     const fw::Message& base(iMessage);
     ioStream << base << ", [Derived] Size of users: " << iMessage.GetSize();

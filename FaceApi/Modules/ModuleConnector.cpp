@@ -17,7 +17,7 @@ namespace face
 {
   namespace
   {
-    template<typename T1, typename T2>
+    template <typename T1, typename T2>
     bool set_input_port(T1 iModule, fw::Module::Shared iPredecessor, int iPortNo)
     {
       CV_DbgAssert(iModule && iPredecessor);
@@ -31,7 +31,7 @@ namespace face
       return iModule->SetInputPort(derived->GetOutputPort(), iPortNo - 1) == fw::ErrorCode::OK;
     }
 
-    template<typename T>
+    template <typename T>
     bool connect(fw::Module::Shared iModule, const ModuleConnector::PredecessorMap& iPredecessors)
     {
       CV_DbgAssert(iModule);

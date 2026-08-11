@@ -110,8 +110,7 @@ namespace face
       if (moduleNode.empty() || !moduleNode.isNamed()) continue;
 
       // Check for duplications
-      auto it = std::find_if(mModules.begin(), mModules.end(), [&](const fw::Module::Shared& obj) 
-      {
+      auto it = std::find_if(mModules.begin(), mModules.end(), [&](const fw::Module::Shared& obj) {
         return obj->GetName() == fw::Module::CreateModuleName(moduleNode);
       });
 
@@ -168,8 +167,7 @@ namespace face
     for (const auto& moduleNode : modules)
     {
       // Find the corresponding module
-      auto it = std::find_if(mModules.begin(), mModules.end(), [&](const fw::Module::Shared& obj)
-      {
+      auto it = std::find_if(mModules.begin(), mModules.end(), [&](const fw::Module::Shared& obj) {
         return obj->GetName() == fw::Module::CreateModuleName(moduleNode);
       });
 
@@ -318,12 +316,11 @@ namespace face
       {
         const std::string& predecessorName = predecessors.front();
 
-        auto it = std::find_if(modulesPrio.begin(), modulesPrio.end(), [&](const ModulesPrioElem& iObj)
-        {
+        auto it = std::find_if(modulesPrio.begin(), modulesPrio.end(), [&](const ModulesPrioElem& iObj) {
           return predecessorName == fw::Module::CreateModuleName(iObj.first);
         });
 
-        if (it != modulesPrio.end()) 
+        if (it != modulesPrio.end())
         {
           it->second++;
 
@@ -345,8 +342,7 @@ namespace face
       }
     }
 
-    std::sort(modulesPrio.begin(), modulesPrio.end(), [&](const ModulesPrioElem& iFirst, const ModulesPrioElem& iSecond)
-    {
+    std::sort(modulesPrio.begin(), modulesPrio.end(), [&](const ModulesPrioElem& iFirst, const ModulesPrioElem& iSecond) {
       return iFirst.second > iSecond.second;
     });
 

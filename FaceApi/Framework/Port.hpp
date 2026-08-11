@@ -13,10 +13,10 @@
 
 namespace fw
 {
-  template<typename ReturnT>
+  template <typename ReturnT>
   class Port;
 
-  template<typename ReturnT, typename... ArgumentT>
+  template <typename ReturnT, typename... ArgumentT>
   class Port<ReturnT(ArgumentT...)>
   {
   public:
@@ -48,7 +48,7 @@ namespace fw
       return mOutputPort ? fw::ErrorCode::OK : fw::ErrorCode::BadState;
     }
 
-    template<typename T>
+    template <typename T>
     inline fw::ErrorCode SetInputPort(T iValue, size_t iIndex)
     {
       static constexpr auto size = std::tuple_size<InputPorts>::value;
@@ -91,7 +91,7 @@ namespace fw
     template <size_t S>
     struct InputPortHelper
     {
-      template<typename T1, typename T2>
+      template <typename T1, typename T2>
       static fw::ErrorCode SetInputPort(const T1& iSource, T2& ioDestination, size_t iIndex)
       {
         if (iIndex == S - 1)
@@ -102,14 +102,14 @@ namespace fw
         return InputPortHelper<S - 1>::SetInputPort(iSource, ioDestination, iIndex);
       }
 
-      template<typename T1, typename T2, typename std::enable_if<std::is_same<T1, T2>::value>::type* = nullptr>
+      template <typename T1, typename T2, typename std::enable_if<std::is_same<T1, T2>::value>::type* = nullptr>
       static fw::ErrorCode SetInputPort(const T1& iSource, T2& ioDestination)
       {
         ioDestination = iSource;
         return fw::ErrorCode::OK;
       }
 
-      template<typename T1, typename T2, typename std::enable_if<!std::is_same<T1, T2>::value>::type* = nullptr>
+      template <typename T1, typename T2, typename std::enable_if<!std::is_same<T1, T2>::value>::type* = nullptr>
       static fw::ErrorCode SetInputPort(const T1& iSource, T2& ioDestination)
       {
         CV_DbgAssert(false);
@@ -120,15 +120,15 @@ namespace fw
     template <>
     struct InputPortHelper<0>
     {
-      template<typename T1, typename T2>
-      static fw::ErrorCode SetInputPort(const T1& iSource, T2& ioDestination, size_t iIndex) 
-      { 
+      template <typename T1, typename T2>
+      static fw::ErrorCode SetInputPort(const T1& iSource, T2& ioDestination, size_t iIndex)
+      {
         CV_DbgAssert(false);
         return fw::ErrorCode::BadParam;
       }
     };
-    
-    template<size_t... Is>
+
+    template <size_t... Is>
     inline void Connect(std::index_sequence<Is...> /*unused*/)
     {
       mOutputPort = fw::connect(FW_BIND(&Port::Main, this), std::get<Is>(mInputPorts)...);

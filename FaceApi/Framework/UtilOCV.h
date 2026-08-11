@@ -22,13 +22,13 @@ namespace fw
       int lineType = cv::LINE_AA;
     };
 
-    template<typename _Tp>
+    template <typename _Tp>
     inline bool equals(const cv::Rect_<_Tp>& a, const cv::Rect_<_Tp>& b)
     {
       return fw::equals(a.x, b.x) && fw::equals(a.y, b.y) && fw::equals(a.width, b.width) && fw::equals(a.height, b.height);
     }
 
-    template<typename _Tp>
+    template <typename _Tp>
     inline cv::Rect_<_Tp> scale_rect(const cv::Rect_<_Tp>& rect, float scale)
     {
       cv::Rect_<float> fr = rect;
@@ -42,7 +42,7 @@ namespace fw
       return rr.area() <= 0 ? rect : rr;
     }
 
-    template<typename _Tp>
+    template <typename _Tp>
     void draw_dotted_line(cv::Mat& ioFrame, const cv::Point_<_Tp>& iPt1, const cv::Point_<_Tp>& iPt2, const cv::Scalar& iColor, int iSegmentWidth = 5, int iThickness = 1)
     {
       cv::LineIterator it(ioFrame, iPt1, iPt2);
@@ -68,7 +68,7 @@ namespace fw
       cv::line(ioFrame, pt1, pt2, iColor, iThickness, cv::LINE_AA);
     }
 
-    template<typename _Tp>
+    template <typename _Tp>
     void draw_dotted_rect(cv::Mat& ioFrame, const cv::Rect_<_Tp>& iRect, const cv::Scalar& iColor, int iSegmentWidth = 5, int iThickness = 1)
     {
       const cv::Point_<_Tp> tl = iRect.tl();

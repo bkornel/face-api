@@ -15,10 +15,9 @@ namespace face
   void ActiveUsersMessage::RemoveInactiveUsers()
   {
     mActiveUsers.erase(
-      std::remove_if(mActiveUsers.begin(), mActiveUsers.end(), [&](const User::Shared& obj)-> bool
-      {
+      std::remove_if(mActiveUsers.begin(), mActiveUsers.end(), [&](const User::Shared& obj) -> bool {
         return !obj->IsActive();
-      }), 
+      }),
       mActiveUsers.end()
     );
   }

@@ -13,9 +13,8 @@
 
 namespace face
 {
-  class FaceDetection :
-    public fw::Module,
-    public fw::Port<RoiMessage::Shared(ImageMessage::Shared)>
+  class FaceDetection : public fw::Module,
+                        public fw::Port<RoiMessage::Shared(ImageMessage::Shared)>
   {
   public:
     FW_DEFINE_SMART_POINTERS(FaceDetection);
@@ -37,7 +36,7 @@ namespace face
 
     bool RunDetectection() const;
 
-    cv::CascadeClassifier mCascadeClassifier;   ///< The OpenCV cascade classifier
+    cv::CascadeClassifier mCascadeClassifier; ///< The OpenCV cascade classifier
     fw::Stopwatch mDetectionSW;
 
     // General parameters

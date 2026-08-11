@@ -186,7 +186,7 @@ namespace fw
     mutable std::condition_variable mCV;
     std::unique_ptr<T> mValue = nullptr;
     unsigned long long mGeneration = 0ULL;
-    std::vector<Continuation::Shared>  mContinuations;
+    std::vector<Continuation::Shared> mContinuations;
   };
 
   template <typename T>
@@ -198,7 +198,9 @@ namespace fw
   class Promise
   {
   public:
-    Promise() : mFuture(new Future<T>()) {}
+    Promise() :
+      mFuture(new Future<T>())
+    { }
 
     Promise(const Promise<T>& iRhs) = delete;
 
@@ -252,8 +254,7 @@ namespace fw
     auto promise = std::make_shared<Promise<ReturnT>>();
     auto future = promise->GetFuture();
 
-    auto task = [iFunction, promise, iFutures...](Executor::Shared executor)
-    {
+    auto task = [iFunction, promise, iFutures...](Executor::Shared executor) {
       promise->Put(iFunction(iFutures->Get()...), executor);
     };
 

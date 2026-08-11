@@ -87,13 +87,13 @@ namespace face
       const bool inactivate =
         // Must be active
         user->IsActive() && (
-          // Minimal resolution
-        (!mMinFaceSize.empty() && ((facerect.width < mMinFaceSize.width) || (facerect.height < mMinFaceSize.height))) ||
-          // Maximal resolution
-          (!mMaxFaceSize.empty() && ((facerect.width > mMaxFaceSize.width) || (facerect.height > mMaxFaceSize.height))) ||
-          // Detected a long time ago
-          ((mTimestamp - user->GetLastDetectionTs()) > mUserAwaySec * 1000.0F)
-          );
+                              // Minimal resolution
+                              (!mMinFaceSize.empty() && ((facerect.width < mMinFaceSize.width) || (facerect.height < mMinFaceSize.height))) ||
+                              // Maximal resolution
+                              (!mMaxFaceSize.empty() && ((facerect.width > mMaxFaceSize.width) || (facerect.height > mMaxFaceSize.height))) ||
+                              // Detected a long time ago
+                              ((mTimestamp - user->GetLastDetectionTs()) > mUserAwaySec * 1000.0F)
+                            );
 
       if (inactivate)
         user->SetStatus(User::Status::Inactive);
@@ -251,8 +251,7 @@ namespace face
 
     for (auto& uid : userIDs)
     {
-      auto itIU = std::find_if(mUsers.begin(), mUsers.end(), [&](const User::Shared& obj)
-      {
+      auto itIU = std::find_if(mUsers.begin(), mUsers.end(), [&](const User::Shared& obj) {
         return obj->GetUserId() == uid;
       });
 

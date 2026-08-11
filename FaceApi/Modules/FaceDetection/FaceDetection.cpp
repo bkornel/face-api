@@ -175,8 +175,7 @@ namespace face
 
     if (scaledFaceROIs.size() > 1)
     {
-      std::sort(scaledFaceROIs.begin(), scaledFaceROIs.end(), [](const cv::Rect& lhs, const cv::Rect& rhs)
-      {
+      std::sort(scaledFaceROIs.begin(), scaledFaceROIs.end(), [](const cv::Rect& lhs, const cv::Rect& rhs) {
         return lhs.area() > rhs.area();
       });
     }

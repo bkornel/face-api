@@ -9,8 +9,7 @@ namespace face
   class ShapeModel;
   class UserData;
 
-  class ShapeModelDispatcher :
-    public UserDispatcher
+  class ShapeModelDispatcher : public UserDispatcher
   {
     typedef std::map<int, ShapeModel::Shared> ShapeModels;
 

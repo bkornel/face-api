@@ -10,21 +10,21 @@ namespace fw
 {
   /// @brief Delegate class for C++ (non specialized template declaration)
   /// Original implementation: http://marcmo.github.io/delegates/
-  template<typename T>
+  template <typename T>
   class Delegate;
 
   /// @brief Event class for C++ (non specialized template declaration)
-  template<typename T>
+  template <typename T>
   class Event;
 
   /// @brief Delegate class for C++ (specialization for member functions)
   /// @param ReturnT return type of the function that is being captured
   /// @param ArgumentT possible arguments of the captured function
-  template<typename ReturnT, typename... ArgumentT>
+  template <typename ReturnT, typename... ArgumentT>
   class Delegate<ReturnT(ArgumentT...)>
   {
     /// @brief FunctionT type of the member function
-    using FunctionT = ReturnT(*)(void*, ArgumentT...);
+    using FunctionT = ReturnT (*)(void*, ArgumentT...);
 
     /// @brief DelegateT alias for the delegate type
     using DelegateT = Delegate<ReturnT(ArgumentT...)>;
@@ -65,15 +65,15 @@ namespace fw
     }
 
   private:
-    void* mCallee = nullptr;		///< pointer to the object who's member will be called
-    FunctionT mFunction = nullptr;	///< pointer to the mCallee's member function
+    void* mCallee = nullptr;       ///< pointer to the object who's member will be called
+    FunctionT mFunction = nullptr; ///< pointer to the mCallee's member function
   };
 
   /// @brief Helper class for creating delegates
   /// @param CalleeT type of the object whose member will be invoked
   /// @param ReturnT return type of the function that is being captured
   /// @param ArgumentT possible arguments of the captured function
-  template<typename CalleeT, typename ReturnT, typename... ArgumentT>
+  template <typename CalleeT, typename ReturnT, typename... ArgumentT>
   struct DelegateMaker
   {
     /// @brief DelegateT alias for the delegate type
@@ -83,7 +83,7 @@ namespace fw
     /// @param iCallee pointer to the object who's member will be called
     /// @param iArgument arguments of the invoked function
     /// @return the value that is determined in the captured function
-    template<ReturnT(CalleeT::*MemberFunction)(ArgumentT...)>
+    template <ReturnT (CalleeT::*MemberFunction)(ArgumentT...)>
     static ReturnT MethodCaller(void* iCallee, ArgumentT... iArgument)
     {
       return (static_cast<CalleeT*>(iCallee)->*MemberFunction)(iArgument...);
@@ -92,7 +92,7 @@ namespace fw
     /// @brief Helper function for binding the object's member function to the delegate
     /// @param iCallee pointer to the object who's member will be called
     /// @return the delegate itself
-    template<ReturnT(CalleeT::*MemberFunction)(ArgumentT...)>
+    template <ReturnT (CalleeT::*MemberFunction)(ArgumentT...)>
     static DelegateT Bind(CalleeT* iCallee)
     {
       return DelegateT(iCallee, &MethodCaller<MemberFunction>);
@@ -100,8 +100,8 @@ namespace fw
   };
 
   /// @brief Helper function for creating delegates
-  template<typename CalleeT, typename ReturnT, typename... ArgumentT>
-  static DelegateMaker<CalleeT, ReturnT, ArgumentT... > MakeDelegate(ReturnT(CalleeT::* /*unused*/)(ArgumentT...))
+  template <typename CalleeT, typename ReturnT, typename... ArgumentT>
+  static DelegateMaker<CalleeT, ReturnT, ArgumentT...> MakeDelegate(ReturnT (CalleeT::* /*unused*/)(ArgumentT...))
   {
     return DelegateMaker<CalleeT, ReturnT, ArgumentT...>();
   }
@@ -109,7 +109,7 @@ namespace fw
   /// @brief Event class for C++ (specialization for member functions)
   /// @param ReturnT return type of the function that is being captured
   /// @param ArgumentT possible arguments of the captured function
-  template<typename ReturnT, typename... ArgumentT>
+  template <typename ReturnT, typename... ArgumentT>
   class Event<ReturnT(ArgumentT...)>
   {
     /// @brief DelegateT alias for the delegate type
@@ -171,7 +171,7 @@ namespace fw
     }
 
   private:
-    mutable std::mutex mMutex;			///< Guards mDelegates, the event is raised from several threads
-    std::vector<DelegateT> mDelegates;	///< Delegates that are subscribed to the current event
+    mutable std::mutex mMutex;         ///< Guards mDelegates, the event is raised from several threads
+    std::vector<DelegateT> mDelegates; ///< Delegates that are subscribed to the current event
   };
 }

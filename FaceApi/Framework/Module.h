@@ -12,8 +12,7 @@
 
 namespace fw
 {
-  class Module :
-    public Thread
+  class Module : public Thread
   {
   public:
     FW_DEFINE_SMART_POINTERS(Module);

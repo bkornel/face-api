@@ -24,7 +24,7 @@ namespace face
 
     void ShiftShape(const cv::Point& iOffset);
 
-    void Fit(const cv::Mat& iFrame, std::vector<int> &iWinSize, int iNoIter, double iClamp, double iFTol);
+    void Fit(const cv::Mat& iFrame, std::vector<int>& iWinSize, int iNoIter, double iClamp, double iFTol);
 
     bool FailureCheck(const cv::Mat& iFrame);
 
@@ -47,10 +47,10 @@ namespace face
 
   private:
     int mNumberOfPts = 0;
-    FACETRACKER::CLM mCLM;					///< Constrained Local Model
-    FACETRACKER::MFCheck mFailureCheck;		///< Checks for Tracking Failure
-    cv::Mat mShape2D;						///< Current 2D shape
-    cv::Mat mRefShape;						///< Reference shape model
-    cv::Scalar mSimilarity;					///< Initialization similarity
+    FACETRACKER::CLM mCLM;              ///< Constrained Local Model
+    FACETRACKER::MFCheck mFailureCheck; ///< Checks for Tracking Failure
+    cv::Mat mShape2D;                   ///< Current 2D shape
+    cv::Mat mRefShape;                  ///< Reference shape model
+    cv::Scalar mSimilarity;             ///< Initialization similarity
   };
 }

@@ -11,9 +11,8 @@
 
 namespace face
 {
-  class UserHistory :
-    public fw::Module,
-    public fw::Port<UserEntriesMessage::Shared(ActiveUsersMessage::Shared)>
+  class UserHistory : public fw::Module,
+                      public fw::Port<UserEntriesMessage::Shared(ActiveUsersMessage::Shared)>
   {
   public:
     FW_DEFINE_SMART_POINTERS(UserHistory);

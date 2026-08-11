@@ -16,14 +16,12 @@
 namespace fw
 {
   template <typename... T>
-  struct is_shared_ptr :
-    std::false_type
+  struct is_shared_ptr : std::false_type
   {
   };
 
   template <typename... T>
-  struct is_shared_ptr<std::shared_ptr<T>... > :
-    std::true_type
+  struct is_shared_ptr<std::shared_ptr<T>...> : std::true_type
   {
   };
 
@@ -150,15 +148,30 @@ namespace fw
       mCV.notify_all();
     }
 
-    inline float GetSamplingFPS() const { return mSamplingFPS; }
+    inline float GetSamplingFPS() const
+    {
+      return mSamplingFPS;
+    }
 
-    inline int GetSize() const { return mSize; }
+    inline int GetSize() const
+    {
+      return mSize;
+    }
 
-    inline int GetBound() const { return mBound; }
+    inline int GetBound() const
+    {
+      return mBound;
+    }
 
-    inline bool IsEmpty() const { return mSize == 0; }
+    inline bool IsEmpty() const
+    {
+      return mSize == 0;
+    }
 
-    inline bool IsFull() const { return mSize >= mBound; }
+    inline bool IsFull() const
+    {
+      return mSize >= mBound;
+    }
 
     void SetBound(int iBound)
     {
@@ -297,15 +310,15 @@ namespace fw
     long long mTimestampMs = 0LL;
   };
 
-  template<typename First, typename... Rest>
+  template <typename First, typename... Rest>
   const float fw::MessageQueue<First, Rest...>::MAX_SAMPLING_RATE_FPS = (std::numeric_limits<float>::max)();
 
-  template<typename First, typename... Rest>
+  template <typename First, typename... Rest>
   const float fw::MessageQueue<First, Rest...>::MIN_SAMPLING_RATE_FPS = 1.0F;
 
-  template<typename First, typename... Rest>
+  template <typename First, typename... Rest>
   const int fw::MessageQueue<First, Rest...>::MAX_BOUND = (std::numeric_limits<int>::max)();
 
-  template<typename First, typename... Rest>
+  template <typename First, typename... Rest>
   const int fw::MessageQueue<First, Rest...>::MIN_BOUND = 1;
 }

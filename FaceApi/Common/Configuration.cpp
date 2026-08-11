@@ -129,10 +129,6 @@ namespace face
     RebuildPaths();
   }
 
-  /// Always composes the absolute paths from the working directory plus the
-  /// relative values, so calling it repeatedly is safe. The previous version
-  /// prepended the working directory to the already resolved path, which
-  /// doubled the prefix whenever it ran twice without a reload in between.
   void Configuration::RebuildPaths()
   {
     FixPathSeparator(mRelativeDirectories.working);

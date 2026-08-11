@@ -132,7 +132,7 @@ namespace face
     ss.str("");
   }
 
-  void Visualizer::DrawBoundingBox(const User& iUser, cv::Mat& oImage, int iSegmentWidth/* = 5*/, int iThickness/* = 1*/) const
+  void Visualizer::DrawBoundingBox(const User& iUser, cv::Mat& oImage, int iSegmentWidth /* = 5*/, int iThickness /* = 1*/) const
   {
     const cv::Scalar color(240, 255, 150);
     const auto& connections = PoseUtil::GetInstance().GetConnections();
@@ -228,8 +228,7 @@ namespace face
       for (auto& m : lastMeasurement)
       {
         std::stringstream ss;
-        ss << "- " << m.first << "(" << (iImage->GetFrameId() - m.second.first) << 
-          "): " << cvRound(m.second.second) << " ms";
+        ss << "- " << m.first << "(" << (iImage->GetFrameId() - m.second.first) << "): " << cvRound(m.second.second) << " ms";
 
         fw::ocv::put_text(ss.str(), { 10, (barHeight * ++idx) + 20 }, oImage);
       }

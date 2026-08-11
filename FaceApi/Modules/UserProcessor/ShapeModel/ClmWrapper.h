@@ -60,15 +60,15 @@ namespace face
   private:
     fw::ErrorCode Load(const std::string& iTrackerFile, const std::string& iTriFile, const std::string& iConFile);
 
-    FACETRACKER::CLM mCLM;				///< The CLM computing model
+    FACETRACKER::CLM mCLM;              ///< The CLM computing model
     FACETRACKER::MFCheck mFailureCheck; ///< Failure checker
 
-    cv::Mat mReferenceShapeMat2D;		///< The 2D reference shape points
-    fw::ocv::VectorPt2D mReferenceShape2D;	///< The 2D reference shape points
-    fw::ocv::VectorPt3D mReferenceShape3D;	///< The 3D reference shape points
-    cv::Scalar mSimil;					///< The similarity map
+    cv::Mat mReferenceShapeMat2D;          ///< The 2D reference shape points
+    fw::ocv::VectorPt2D mReferenceShape2D; ///< The 2D reference shape points
+    fw::ocv::VectorPt3D mReferenceShape3D; ///< The 3D reference shape points
+    cv::Scalar mSimil;                     ///< The similarity map
 
-    bool mInitialized = false;			///< true if the files are loaded properly
-    int mCount = 0;						///< The number of the shape points
+    bool mInitialized = false; ///< true if the files are loaded properly
+    int mCount = 0;            ///< The number of the shape points
   };
 }

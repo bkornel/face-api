@@ -36,13 +36,25 @@ namespace face
 
     fw::ErrorCode Initialize(const std::string& iConfigFile = "settings.json");
 
-    inline const DirectoryParams& GetDirectories() const { return mDirectories; }
+    inline const DirectoryParams& GetDirectories() const
+    {
+      return mDirectories;
+    }
 
-    inline const OutputParams& GetOutput() const { return mOutput; }
+    inline const OutputParams& GetOutput() const
+    {
+      return mOutput;
+    }
 
-    inline const cv::FileNode& GetModulesNode() const { return mModulesNode; }
+    inline const cv::FileNode& GetModulesNode() const
+    {
+      return mModulesNode;
+    }
 
-    inline bool GetVerbose() const { return mVerbose; }
+    inline bool GetVerbose() const
+    {
+      return mVerbose;
+    }
 
     cv::FileNode GetModuleSettings(const std::string& iName) const;
 

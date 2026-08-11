@@ -82,8 +82,7 @@ namespace face
 
     // Get roll-pitch-yaw
     cv::Mat cameraMatrix, rotation, translation;
-    cv::decomposeProjectionMatrix(mExtrinsics({ 0, 0, 4, 3 }), cameraMatrix, rotation, translation,
-      cv::noArray(), cv::noArray(), cv::noArray(), mRPY);
+    cv::decomposeProjectionMatrix(mExtrinsics({ 0, 0, 4, 3 }), cameraMatrix, rotation, translation, cv::noArray(), cv::noArray(), cv::noArray(), mRPY);
 
     mRPY = { FW_DEG_TO_RAD(mRPY[2]), FW_DEG_TO_RAD(mRPY[0]), FW_DEG_TO_RAD(mRPY[1]) };
   }
@@ -124,8 +123,7 @@ namespace face
     }
 
     // See the order in PoseUtil.h
-    mFaceBox =
-    {
+    mFaceBox = {
       // Front face
       { minPt.x - mFaceBoxOffset, minPt.y - mFaceBoxOffset, minPt.z },
       { maxPt.x + mFaceBoxOffset, minPt.y - mFaceBoxOffset, minPt.z },

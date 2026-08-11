@@ -10,12 +10,10 @@ namespace face
 
   ShapeModelDispatcher::~ShapeModelDispatcher()
   {
-    fw::remove_if(sShapeModels, [&](const ShapeModels::value_type& obj)
-    {
-      return std::find_if(mUpdatedUserIDs.begin(), mUpdatedUserIDs.end(), [&](int id)
-      {
-        return obj.first == id;
-      }) == mUpdatedUserIDs.end();
+    fw::remove_if(sShapeModels, [&](const ShapeModels::value_type& obj) {
+      return std::find_if(mUpdatedUserIDs.begin(), mUpdatedUserIDs.end(), [&](int id) {
+               return obj.first == id;
+             }) == mUpdatedUserIDs.end();
     });
   }
 

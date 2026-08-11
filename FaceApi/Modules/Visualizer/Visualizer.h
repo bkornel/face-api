@@ -12,9 +12,8 @@
 
 namespace face
 {
-  class Visualizer :
-    public fw::Module,
-    public fw::Port<ImageMessage::Shared(ImageMessage::Shared, ActiveUsersMessage::Shared)>
+  class Visualizer : public fw::Module,
+                     public fw::Port<ImageMessage::Shared(ImageMessage::Shared, ActiveUsersMessage::Shared)>
   {
   public:
     FW_DEFINE_SMART_POINTERS(Visualizer);

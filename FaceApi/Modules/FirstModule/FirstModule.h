@@ -8,9 +8,8 @@
 
 namespace face
 {
-  class FirstModule :
-    public fw::Module,
-    public fw::Port<unsigned(bool)>
+  class FirstModule : public fw::Module,
+                      public fw::Port<unsigned(bool)>
   {
   public:
     FW_DEFINE_SMART_POINTERS(FirstModule);

@@ -11,19 +11,19 @@
 // Enabled by default. Define FACE_PROFILER_DISABLED from the build system to
 // compile the profiler out completely.
 #if !defined(ENABLE_FACE_PROFILER) && !defined(FACE_PROFILER_DISABLED)
-#define ENABLE_FACE_PROFILER
+  #define ENABLE_FACE_PROFILER
 #endif
 
 // Profiler is enabled
 #ifdef ENABLE_FACE_PROFILER
-#define FACE_PROFILER(name)				fw::Profiler _FaceProfiler_##name##__LINE__(#name)
-#define FACE_PROFILER_FRAME_ID(frameId)	fw::ProfilerDatabase::GetInstance().setCurrentFrameId(frameId)
-#define FACE_PROFILER_SAVE(name)		fw::ProfilerDatabase::GetInstance().Save(name)
+  #define FACE_PROFILER(name) fw::Profiler _FaceProfiler_##name##__LINE__(#name)
+  #define FACE_PROFILER_FRAME_ID(frameId) fw::ProfilerDatabase::GetInstance().setCurrentFrameId(frameId)
+  #define FACE_PROFILER_SAVE(name) fw::ProfilerDatabase::GetInstance().Save(name)
 // Profiler is disabled
 #else
-#define FACE_PROFILER(name)
-#define FACE_PROFILER_FRAME_ID(frameId)
-#define FACE_PROFILER_SAVE(name)
+  #define FACE_PROFILER(name)
+  #define FACE_PROFILER_FRAME_ID(frameId)
+  #define FACE_PROFILER_SAVE(name)
 #endif
 
 namespace fw

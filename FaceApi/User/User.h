@@ -11,8 +11,7 @@ namespace face
 {
   class UserDispatcher;
 
-  class User :
-    public UserData
+  class User : public UserData
   {
   public:
     FW_DEFINE_SMART_POINTERS(User);
@@ -31,15 +30,40 @@ namespace face
 
     bool AcceptDispatcher(UserDispatcher& ioDispatcher);
 
-    inline bool IsActive() const { return mStatus != Status::Inactive; }
-    inline bool IsDetected() const { return mStatus == Status::Detected; }
+    inline bool IsActive() const
+    {
+      return mStatus != Status::Inactive;
+    }
 
-    inline int GetUserId() const { return mUserId; }
-    inline long long GetCreationTs() const { return mCreationTs; }
-    inline long long GetLastUpdateTs() const { return mLastUpdateTs; }
-    inline long long GetLastDetectionTs() const { return mLastDetectionTs; }
+    inline bool IsDetected() const
+    {
+      return mStatus == Status::Detected;
+    }
 
-    inline void SetLastUpdateTs(long long iTimestamp) { mLastUpdateTs = iTimestamp; }
+    inline int GetUserId() const
+    {
+      return mUserId;
+    }
+
+    inline long long GetCreationTs() const
+    {
+      return mCreationTs;
+    }
+
+    inline long long GetLastUpdateTs() const
+    {
+      return mLastUpdateTs;
+    }
+
+    inline long long GetLastDetectionTs() const
+    {
+      return mLastDetectionTs;
+    }
+
+    inline void SetLastUpdateTs(long long iTimestamp)
+    {
+      mLastUpdateTs = iTimestamp;
+    }
 
     void SetDetectionData(const cv::Rect& iFaceRect, long long iTimestamp);
     void SetStatus(Status iStatus);
