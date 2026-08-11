@@ -115,8 +115,8 @@
       <AdditionalDependencies>FaceApi.lib;opencv_calib3d452d.lib;opencv_core452d.lib;opencv_flann452d.lib;opencv_highgui452d.lib;opencv_imgcodecs452d.lib;opencv_imgproc452d.lib;opencv_objdetect452d.lib;opencv_videoio452d.lib;PocoFoundationd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>cd $(SolutionDir)BuildEvents\
-pre_build_event_$(Configuration).bat</Command>
+      <Command>powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$(SolutionDir)BuildEvents\Deploy-Dependencies.ps1" -Configuration $(Configuration) -Platform $(Platform)</Command>
+      <Message>Deploying OpenCV/Poco binaries and configurations</Message>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -158,8 +158,8 @@ pre_build_event_$(Configuration).bat</Command>
       <AdditionalDependencies>FaceApi.lib;opencv_calib3d452.lib;opencv_core452.lib;opencv_flann452.lib;opencv_highgui452.lib;opencv_imgcodecs452.lib;opencv_imgproc452.lib;opencv_objdetect452.lib;opencv_videoio452.lib;PocoFoundation.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>cd $(SolutionDir)BuildEvents\
-pre_build_event_$(Configuration).bat</Command>
+      <Command>powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$(SolutionDir)BuildEvents\Deploy-Dependencies.ps1" -Configuration $(Configuration) -Platform $(Platform)</Command>
+      <Message>Deploying OpenCV/Poco binaries and configurations</Message>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
