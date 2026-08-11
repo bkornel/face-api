@@ -76,15 +76,15 @@ Ports can be defined by implementing the `fw::Port` interface. For example the [
 ```
 class UserManager :
   public fw::Module,
-  public fw::Port<ActiveUsersMessage::Shared(ImageMessage::Shared, RoiMessage::Shared)>
+  public fw::Port<std::shared_ptr<ActiveUsersMessage>(std::shared_ptr<ImageMessage>, std::shared_ptr<RoiMessage>)>
 {
   ...
-  ActiveUsersMessage::Shared Main(ImageMessage::Shared iImage, RoiMessage::Shared iDetections) override;
+  std::shared_ptr<ActiveUsersMessage> Main(std::shared_ptr<ImageMessage> iImage, std::shared_ptr<RoiMessage> iDetections) override;
   ...
 };
 ```
 
-This class has the `ActiveUsersMessage::Shared` output and the `ImageMessage::Shared` and `RoiMessage::Shared` inputs. The `Main` member function of the class must defined according to the template arguments of `fw::Port`.
+This class has the `ActiveUsersMessage` output and the `ImageMessage` and `RoiMessage` inputs. The `Main` member function of the class must defined according to the template arguments of `fw::Port`.
 
 A module that declares no input port at all is a source: it has nothing to wait for, so it is driven by `Trigger()` instead of by a predecessor. This is how [`FirstModule`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/FirstModule/FirstModule.h) starts every frame. Input ports are optional as well: a port that is left out of the settings file is not counted as a dependency, and its argument reaches `Main` default-constructed. A module with declared inputs of which none is connected is rejected, because nothing would ever make it run.
 
