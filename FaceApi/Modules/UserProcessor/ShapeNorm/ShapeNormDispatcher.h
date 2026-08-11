@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Framework/Imaging/Geometry.h"
+#include "Framework/Imaging/Procrustes.h"
 #include "Framework/ErrorCode.h"
 #include "User/UserDispatcher.hpp"
 
@@ -8,8 +9,6 @@ namespace face
 {
   class ShapeNormDispatcher : public UserDispatcher
   {
-    typedef std::vector<cv::Mat> MatVector;
-
   public:
     ShapeNormDispatcher() = default;
 
@@ -24,18 +23,10 @@ namespace face
 
     void NormalizeShape3D(User& ioUser);
 
-    void GPA(MatVector& ioShapes2D, cv::Mat& ioMeanShape) const;
-
-    void Recenter(MatVector& ioShapes) const;
-
-    void Normalize(MatVector& ioShapes) const;
-
-    void Align(MatVector& ioShapes, cv::Mat& ioMeanShape) const;
-
     fw::VectorPt2D mMeanShape2D;
     fw::VectorPt3D mMeanShape3D;
 
-    int mMaxCount = 1000;
+    int mMaxIterations = 1000;
     double mEpsilon = 1e-6;
   };
 }

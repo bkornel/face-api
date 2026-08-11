@@ -18,7 +18,7 @@ namespace face
       std::string value;
 
       if (fw::get_value(iSettings, "maxCount", value))
-        mMaxCount = fw::str::convert_to_number<int>(value);
+        mMaxIterations = fw::str::convert_to_number<int>(value);
 
       if (fw::get_value(iSettings, "epsilon", value))
         mEpsilon = fw::str::convert_to_number<double>(value);
@@ -45,9 +45,9 @@ namespace face
     const auto& userShape2D = cv::Mat(ioUser.GetShape2D());
     const auto& refShape2D = cv::Mat(ClmWrapper::GetInstance().GetReferenceShape2D());
 
-    MatVector shapes2D = { userShape2D.clone(), refShape2D.clone() };
+    fw::ShapeVector shapes2D = { userShape2D.clone(), refShape2D.clone() };
     cv::Mat meanShape2D = refShape2D.clone().reshape(1);
-    GPA(shapes2D, meanShape2D);
+    fw::generalized_procrustes(shapes2D, meanShape2D, mMaxIterations, mEpsilon);
 
     meanShape2D.reshape(2).copyTo(mMeanShape2D);
   }
@@ -57,67 +57,11 @@ namespace face
     const auto& userShape3D = cv::Mat(ioUser.GetShape3D());
     const auto& refShape3D = cv::Mat(ClmWrapper::GetInstance().GetReferenceShape3D());
 
-    MatVector shapes3D = { userShape3D.clone(), refShape3D.clone() };
+    fw::ShapeVector shapes3D = { userShape3D.clone(), refShape3D.clone() };
     cv::Mat meanShape3D = refShape3D.clone().reshape(1);
-    GPA(shapes3D, meanShape3D);
+    fw::generalized_procrustes(shapes3D, meanShape3D, mMaxIterations, mEpsilon);
 
     meanShape3D.reshape(3).copyTo(mMeanShape3D);
   }
 
-  void ShapeNormDispatcher::GPA(MatVector& ioShapes2D, cv::Mat& ioMeanShape) const
-  {
-    if (ioShapes2D.empty()) return;
-
-    int counter = 0;
-    while (true)
-    {
-      // recenter, normalize, align
-      Recenter(ioShapes2D);
-      Normalize(ioShapes2D);
-      Align(ioShapes2D, ioMeanShape);
-
-      // Find a new mean shape: std::accumulate returns the sum, discarding it left zeros.
-      cv::Mat newMeanShape = cv::Mat::zeros(ioMeanShape.size(), ioMeanShape.type());
-      for (const auto& shape : ioShapes2D)
-        newMeanShape += shape;
-
-      newMeanShape = newMeanShape / static_cast<double>(ioShapes2D.size());
-
-      const double meanNorm = cv::norm(newMeanShape);
-      if (meanNorm > 0.0)
-        newMeanShape = newMeanShape / meanNorm;
-
-      // Perform the loop until convergence
-      const double diff = cv::norm(newMeanShape, ioMeanShape);
-      if (counter++ > mMaxCount || diff <= mEpsilon)
-        break;
-
-      ioMeanShape = newMeanShape;
-    }
-  }
-
-  void ShapeNormDispatcher::Recenter(MatVector& ioShapes) const
-  {
-    for (auto& shape : ioShapes)
-    {
-      const cv::Scalar& mean = cv::mean(shape);
-      shape = shape - cv::Mat(shape.size(), shape.type(), mean);
-    }
-  }
-
-  void ShapeNormDispatcher::Normalize(MatVector& ioShapes) const
-  {
-    for (auto& shape : ioShapes)
-      shape = shape / cv::norm(shape);
-  }
-
-  void ShapeNormDispatcher::Align(MatVector& ioShapes, cv::Mat& ioMeanShape) const
-  {
-    cv::Mat w, u, vt;
-    for (auto& shape : ioShapes)
-    {
-      cv::SVDecomp(ioMeanShape.reshape(1).t() * shape.reshape(1), w, u, vt);
-      shape = (shape.reshape(1) * vt.t()) * u.t();
-    }
-  }
 }

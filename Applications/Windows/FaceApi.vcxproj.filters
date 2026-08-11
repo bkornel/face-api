@@ -147,6 +147,9 @@
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Imaging\Projection.cpp">
       <Filter>Framework\Imaging</Filter>
     </ClCompile>
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Imaging\Procrustes.cpp">
+      <Filter>Framework\Imaging</Filter>
+    </ClCompile>
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Settings.cpp">
       <Filter>Framework</Filter>
     </ClCompile>
@@ -313,6 +316,9 @@
       <Filter>Framework\Imaging</Filter>
     </ClInclude>
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Imaging\Projection.h">
+      <Filter>Framework\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Imaging\Procrustes.h">
       <Filter>Framework\Imaging</Filter>
     </ClInclude>
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Settings.h">
