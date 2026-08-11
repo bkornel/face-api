@@ -281,6 +281,9 @@
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Graph\FlowGraph.hpp">
       <Filter>Framework\Graph</Filter>
     </ClInclude>
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Graph\IPortConnector.h">
+      <Filter>Framework\Graph</Filter>
+    </ClInclude>
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Imaging\VideoWriter.h">
       <Filter>Framework\Imaging</Filter>
     </ClInclude>

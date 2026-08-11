@@ -2,6 +2,7 @@
 
 #include "Framework/ErrorCode.h"
 #include "Framework/Graph/FlowGraph.hpp"
+#include "Framework/Graph/IPortConnector.h"
 #include "Framework/Graph/Module.h"
 #include "Framework/Text.h"
 
@@ -16,49 +17,6 @@
 
 namespace fw
 {
-  namespace detail
-  {
-    template <typename T1, typename T2, typename std::enable_if<std::is_same<T1, T2>::value>::type* = nullptr>
-    ErrorCode assign_input(const T1& iSource, T2& ioDestination)
-    {
-      ioDestination = iSource;
-      return ErrorCode::OK;
-    }
-
-    template <typename T1, typename T2, typename std::enable_if<!std::is_same<T1, T2>::value>::type* = nullptr>
-    ErrorCode assign_input(const T1& /*iSource*/, T2& /*ioDestination*/)
-    {
-      return ErrorCode::BadParam;
-    }
-
-    /// @brief Assigns iSource to the iIndex-th element of the ioDestination tuple.
-    /// iIndex is a runtime value, so the slots are walked at compile time and only
-    /// the matching one - if its type matches too - is assigned.
-    /// Kept at namespace scope: an explicit specialization is not allowed in class scope.
-    template <size_t S>
-    struct input_port_setter
-    {
-      template <typename T1, typename T2>
-      static ErrorCode Set(const T1& iSource, T2& ioDestination, size_t iIndex)
-      {
-        if (iIndex == (S - 1))
-          return assign_input(iSource, std::get<S - 1>(ioDestination));
-
-        return input_port_setter<S - 1>::Set(iSource, ioDestination, iIndex);
-      }
-    };
-
-    template <>
-    struct input_port_setter<0>
-    {
-      template <typename T1, typename T2>
-      static ErrorCode Set(const T1& /*iSource*/, T2& /*ioDestination*/, size_t /*iIndex*/)
-      {
-        return ErrorCode::BadParam;
-      }
-    };
-  } // namespace detail
-
   template <typename ReturnT>
   class Port;
 
@@ -73,7 +31,7 @@ namespace fw
   /// @param ReturnT return type of Main(), published on the output port
   /// @param ArgumentT input port types, in port order
   template <typename ReturnT, typename... ArgumentT>
-  class Port<ReturnT(ArgumentT...)>
+  class Port<ReturnT(ArgumentT...)> : public IPortConnector
   {
   public:
     using OutputPort = fw::FutureShared<ReturnT>;
@@ -91,7 +49,7 @@ namespace fw
     /// @brief Builds the output port from the input ports that have been set.
     /// A source port (no input declared) is driven by Trigger(); any other port needs at
     /// least one connected input, otherwise nothing would ever make it run.
-    virtual inline fw::ErrorCode Connect()
+    fw::ErrorCode Connect() override
     {
       return ConnectPort(std::integral_constant<bool, sizeof...(ArgumentT) == 0u>{});
     }
@@ -108,39 +66,42 @@ namespace fw
       mTrigger();
     }
 
-    template <typename T>
-    inline fw::ErrorCode SetInputPort(T iValue, size_t iIndex)
+    ErrorCode SetInput(std::size_t iIndex, const std::shared_ptr<IFuture>& iOutput) override
     {
       static constexpr auto size = std::tuple_size<InputPorts>::value;
 
       if (iIndex >= size)
       {
         LOG(ERROR) << "Trying to set the input port no. " << iIndex << ", however the module has only " << size << " ports.";
-        return fw::ErrorCode::BadParam;
+        return ErrorCode::BadParam;
       }
 
       if (mIsInputSet[iIndex])
       {
         LOG(ERROR) << "Input port " << iIndex << ", has already been set for the module.";
-        return fw::ErrorCode::BadParam;
+        return ErrorCode::BadParam;
       }
 
       // An empty port would be indistinguishable from an input that was left out on
       // purpose, and the module would silently never run. It means the predecessor has
       // not been connected yet, i.e. the connection order is wrong.
-      if (!iValue)
+      if (!iOutput)
       {
         LOG(ERROR) << "Input port " << iIndex << " is set to an empty port, the predecessor is not connected yet.";
-        return fw::ErrorCode::BadParam;
+        return ErrorCode::BadParam;
       }
 
-      if (detail::input_port_setter<size>::Set(iValue, mInputPorts, iIndex) == fw::ErrorCode::OK)
-      {
-        mIsInputSet[iIndex] = true;
-        return fw::ErrorCode::OK;
-      }
+      return SetInput(iIndex, iOutput, std::make_index_sequence<size>{});
+    }
 
-      return fw::ErrorCode::BadParam;
+    std::shared_ptr<IFuture> GetOutput() const override
+    {
+      return mOutputPort;
+    }
+
+    std::size_t GetInputCount() const override
+    {
+      return mIsInputSet.size();
     }
 
     inline std::size_t GetInputPortCount() const
@@ -169,6 +130,35 @@ namespace fw
     }
 
   protected:
+    /// @brief Walks the ports at compile time and lets the one matching iIndex do the cast
+    template <std::size_t... Is>
+    ErrorCode SetInput(std::size_t iIndex, const std::shared_ptr<IFuture>& iOutput, std::index_sequence<Is...>)
+    {
+      ErrorCode result = ErrorCode::BadParam;
+      ((iIndex == Is ? (void)(result = AssignInput<Is>(iOutput)) : void()), ...);
+      return result;
+    }
+
+    /// @brief Casts iOutput to what port I expects. A mismatch here is a producer wired to a
+    /// consumer that wants a different message, which is the error worth reporting.
+    template <std::size_t I>
+    ErrorCode AssignInput(const std::shared_ptr<IFuture>& iOutput)
+    {
+      using Expected = std::tuple_element_t<I, InputPorts>;
+
+      auto typed = std::dynamic_pointer_cast<typename Expected::element_type>(iOutput);
+      if (!typed)
+      {
+        LOG(ERROR) << "Input port " << I << " is connected to a port carrying a different type.";
+        return ErrorCode::BadParam;
+      }
+
+      std::get<I>(mInputPorts) = typed;
+      mIsInputSet[I] = true;
+
+      return ErrorCode::OK;
+    }
+
     // What FW_BIND used to build. connect() deduces ReturnT and ArgumentT... from the
     // std::function, so the type is spelled out here rather than deduced from a lambda.
     std::function<ReturnT(ArgumentT...)> MainAsFunction()

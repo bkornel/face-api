@@ -1,136 +1,65 @@
 #include "Framework/ErrorCode.h"
 #include "Modules/ModuleConnector.h"
 
-#include "Framework/Text.h"
-
-#include "Modules/FaceDetection/FaceDetection.h"
-#include "Modules/FirstModule/FirstModule.h"
-#include "Modules/ImageQueue/ImageQueue.h"
-#include "Modules/LastModule/LastModule.h"
-#include "Modules/UserHistory/UserHistory.h"
-#include "Modules/UserManager/UserManager.h"
-#include "Modules/UserProcessor/UserProcessor.h"
-#include "Modules/Visualizer/Visualizer.h"
+#include "Framework/Graph/IPortConnector.h"
 
 #include <easyloggingpp/easyloggingpp.h>
 
+#include <sstream>
+
 namespace face
 {
-  namespace
-  {
-    template <typename T1, typename T2>
-    bool set_input_port(T1 iModule, std::shared_ptr<fw::Module> iPredecessor, int iPortNo)
-    {
-      CV_DbgAssert(iModule && iPredecessor);
-
-      std::shared_ptr<T2> derived = std::dynamic_pointer_cast<T2>(iPredecessor);
-      if (!derived)
-      {
-        return false;
-      }
-
-      return iModule->SetInputPort(derived->GetOutputPort(), iPortNo - 1) == fw::ErrorCode::OK;
-    }
-
-    template <typename T>
-    bool connect(std::shared_ptr<fw::Module> iModule, const ModuleConnector::PredecessorMap& iPredecessors)
-    {
-      CV_DbgAssert(iModule);
-
-      using TShared = std::shared_ptr<T>;
-
-      TShared derived = std::dynamic_pointer_cast<T>(iModule);
-      if (!derived)
-      {
-        return false;
-      }
-
-      std::stringstream ss;
-      ss << "Predecessors of [" << iModule->GetName() << "]:\t";
-
-      if (iPredecessors.empty())
-      {
-        ss << "---";
-      }
-
-      for (const auto& predecessor : iPredecessors)
-      {
-        if (!predecessor.second)
-        {
-          LOG(ERROR) << "Predecessor is not defined for module: " << iModule->GetName();
-          return false;
-        }
-
-        if (set_input_port<TShared, FaceDetection>(derived, predecessor.second, predecessor.first))
-        {
-          ss << "[" << predecessor.second->GetName() << ":" << predecessor.first << "]\t";
-          continue;
-        }
-
-        if (set_input_port<TShared, FirstModule>(derived, predecessor.second, predecessor.first))
-        {
-          ss << "[" << predecessor.second->GetName() << ":" << predecessor.first << "]\t";
-          continue;
-        }
-
-        if (set_input_port<TShared, ImageQueue>(derived, predecessor.second, predecessor.first))
-        {
-          ss << "[" << predecessor.second->GetName() << ":" << predecessor.first << "]\t";
-          continue;
-        }
-
-        if (set_input_port<TShared, UserHistory>(derived, predecessor.second, predecessor.first))
-        {
-          ss << "[" << predecessor.second->GetName() << ":" << predecessor.first << "]\t";
-          continue;
-        }
-
-        if (set_input_port<TShared, UserManager>(derived, predecessor.second, predecessor.first))
-        {
-          ss << "[" << predecessor.second->GetName() << ":" << predecessor.first << "]\t";
-          continue;
-        }
-
-        if (set_input_port<TShared, UserProcessor>(derived, predecessor.second, predecessor.first))
-        {
-          ss << "[" << predecessor.second->GetName() << ":" << predecessor.first << "]\t";
-          continue;
-        }
-
-        if (set_input_port<TShared, Visualizer>(derived, predecessor.second, predecessor.first))
-        {
-          ss << "[" << predecessor.second->GetName() << ":" << predecessor.first << "]\t";
-          continue;
-        }
-
-        // REMARK: Insert new modules here
-
-        LOG(ERROR) << "Connection cannot be created: " << predecessor.second->GetName() << " -> " << iModule->GetName();
-        return false;
-      }
-
-      LOG(INFO) << ss.str();
-
-      return derived->Connect() == fw::ErrorCode::OK;
-    }
-  }
-
   fw::ErrorCode ModuleConnector::Connect(std::shared_ptr<fw::Module> iModule, const PredecessorMap& iPredecessors)
   {
     CV_DbgAssert(iModule);
 
-    if (connect<FaceDetection>(iModule, iPredecessors)) return fw::ErrorCode::OK;
-    if (connect<FirstModule>(iModule, iPredecessors)) return fw::ErrorCode::OK;
-    if (connect<ImageQueue>(iModule, iPredecessors)) return fw::ErrorCode::OK;
-    if (connect<LastModule>(iModule, iPredecessors)) return fw::ErrorCode::OK;
-    if (connect<UserHistory>(iModule, iPredecessors)) return fw::ErrorCode::OK;
-    if (connect<UserManager>(iModule, iPredecessors)) return fw::ErrorCode::OK;
-    if (connect<UserProcessor>(iModule, iPredecessors)) return fw::ErrorCode::OK;
-    if (connect<Visualizer>(iModule, iPredecessors)) return fw::ErrorCode::OK;
-    // REMARK: Insert new modules here
+    // Every module that takes part in the graph declares its ports through fw::Port, which is
+    // where this interface comes from, so nothing below has to know which module it is holding
+    auto ports = std::dynamic_pointer_cast<fw::IPortConnector>(iModule);
+    if (!ports)
+    {
+      LOG(ERROR) << "Module declares no port: " << iModule->GetName();
+      return fw::ErrorCode::BadState;
+    }
 
-    LOG(ERROR) << "Connection cannot be created: " << iModule->GetName();
+    std::stringstream ss;
+    ss << "Predecessors of [" << iModule->GetName() << "]:\t";
 
-    return fw::ErrorCode::BadState;
+    if (iPredecessors.empty())
+    {
+      ss << "---";
+    }
+
+    for (const auto& [portNumber, predecessor] : iPredecessors)
+    {
+      if (!predecessor)
+      {
+        LOG(ERROR) << "Predecessor is not defined for module: " << iModule->GetName();
+        return fw::ErrorCode::BadData;
+      }
+
+      auto predecessorPorts = std::dynamic_pointer_cast<fw::IPortConnector>(predecessor);
+      if (!predecessorPorts)
+      {
+        LOG(ERROR) << "Predecessor declares no output port: " << predecessor->GetName();
+        return fw::ErrorCode::BadData;
+      }
+
+      // Port numbers start from 1 in the settings file
+      const std::size_t portIndex = static_cast<std::size_t>(portNumber - 1);
+
+      if (ports->SetInput(portIndex, predecessorPorts->GetOutput()) != fw::ErrorCode::OK)
+      {
+        LOG(ERROR) << "Connection cannot be created: " << predecessor->GetName() << " -> "
+                   << iModule->GetName() << " on port " << portNumber;
+        return fw::ErrorCode::BadData;
+      }
+
+      ss << "[" << predecessor->GetName() << ":" << portNumber << "]\t";
+    }
+
+    LOG(INFO) << ss.str();
+
+    return ports->Connect();
   }
 }
