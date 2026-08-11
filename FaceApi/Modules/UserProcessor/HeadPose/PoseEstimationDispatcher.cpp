@@ -3,7 +3,7 @@
 #include "Framework/MathExtensions.h"
 #include "Modules/UserProcessor/HeadPose/PoseEstimationDispatcher.h"
 
-#include "Common/Configuration.h"
+#include "Configuration.h"
 #include "Framework/Text.h"
 #include "User/User.h"
 
@@ -12,7 +12,7 @@
 namespace face
 {
   const PoseEstimationDispatcher::ObjectPts PoseEstimationDispatcher::sObjectPoints =
-    ShapeUtil::GetInstance().GetShape3D();
+    FaceModel::GetInstance().GetShape3D();
 
   fw::ErrorCode PoseEstimationDispatcher::Initialize(const cv::FileNode& iSettings)
   {
@@ -123,7 +123,7 @@ namespace face
       maxPt.z = (std::max)(maxPt.z, pt.z);
     }
 
-    // See the order in PoseUtil.h
+    // See the order in PoseGeometry.h
     mFaceBox = {
       // Front face
       { minPt.x - mFaceBoxOffset, minPt.y - mFaceBoxOffset, minPt.z },

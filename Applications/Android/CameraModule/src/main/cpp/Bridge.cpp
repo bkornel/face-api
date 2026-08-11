@@ -2,7 +2,7 @@
 #include "Framework/ErrorCode.h"
 #include "FaceApi.h"
 #include "FaceResultBuffer.h"
-#include "Common/Configuration.h"
+#include "Configuration.h"
 #include "Framework/Stopwatch.h"
 
 #include <easyloggingpp/easyloggingpp.h>

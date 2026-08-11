@@ -1,7 +1,7 @@
 #include "User/User.h"
 #include "User/UserDispatcher.hpp"
 
-#include "Common/Configuration.h"
+#include "Configuration.h"
 
 #include <easyloggingpp/easyloggingpp.h>
 #include <opencv2/imgproc/types_c.h>

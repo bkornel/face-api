@@ -1,10 +1,10 @@
 #pragma once
 
 #include "Framework/ErrorCode.h"
-#include "Framework/Event.hpp"
-#include "Framework/FlowGraph.hpp"
-#include "Framework/Message.h"
-#include "Framework/MessageBus.h"
+#include "Framework/Messaging/Event.hpp"
+#include "Framework/Graph/FlowGraph.hpp"
+#include "Framework/Messaging/Message.h"
+#include "Framework/Messaging/MessageBus.h"
 #include "Framework/Thread.h"
 
 #include <opencv2/core.hpp>

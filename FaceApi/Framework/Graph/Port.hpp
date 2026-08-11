@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Framework/ErrorCode.h"
-#include "Framework/FlowGraph.hpp"
-#include "Framework/Functional.hpp"
-#include "Framework/Module.h"
+#include "Framework/Graph/FlowGraph.hpp"
+#include "Framework/Graph/Functional.hpp"
+#include "Framework/Graph/Module.h"
 #include "Framework/Text.h"
 
 #include <easyloggingpp/easyloggingpp.h>

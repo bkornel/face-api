@@ -5,7 +5,7 @@
 #include <opencv2/core/core.hpp>
 #include <vector>
 
-#include "Framework/VideoWriter.h"
+#include "Framework/Imaging/VideoWriter.h"
 
 class FaceApp : public Poco::Util::Application
 {

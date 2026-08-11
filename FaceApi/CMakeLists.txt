@@ -48,7 +48,6 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/3rdparty)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/clm)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/easyloggingpp)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Common)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Framework)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Messages)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules)
@@ -76,14 +75,14 @@ set(SOURCES;
   3rdparty/clm/PDM.cc;
   3rdparty/easyloggingpp/easyloggingpp.cpp;
   FaceResultBuffer.cpp;
-  Common/Configuration.cpp;
-  Common/PoseUtil.cpp;
-  Common/ShapeUtil.cpp;
+  Configuration.cpp;
+  Model/PoseGeometry.cpp;
+  Model/FaceModel.cpp;
   Framework/Exception.cpp;
-  Framework/FlowGraph.cpp;
-  Framework/Message.cpp;
-  Framework/MessageBus.cpp;
-  Framework/Module.cpp;
+  Framework/Graph/FlowGraph.cpp;
+  Framework/Messaging/Message.cpp;
+  Framework/Messaging/MessageBus.cpp;
+  Framework/Graph/Module.cpp;
   Framework/Profiler.cpp;
   Framework/Stopwatch.cpp;
   Framework/Thread.cpp;
@@ -94,7 +93,7 @@ set(SOURCES;
   Framework/Imaging/MatExtensions.cpp;
   Framework/Text.cpp;
   Framework/Settings.cpp;
-  Framework/VideoWriter.cpp;
+  Framework/Imaging/VideoWriter.cpp;
   Messages/ActiveUsersMessage.cpp;
   Messages/CommandMessage.cpp;
   Messages/ImageMessage.cpp;

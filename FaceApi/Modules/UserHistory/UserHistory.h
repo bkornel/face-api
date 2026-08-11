@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Framework/ErrorCode.h"
-#include "Framework/Module.h"
-#include "Framework/Port.hpp"
+#include "Framework/Graph/Module.h"
+#include "Framework/Graph/Port.hpp"
 #include "Framework/Stopwatch.h"
 #include "User/User.h"
 #include "Messages/ActiveUsersMessage.h"

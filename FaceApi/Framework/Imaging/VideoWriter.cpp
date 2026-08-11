@@ -1,5 +1,5 @@
 #include "Framework/TimeExtensions.h"
-#include "Framework/VideoWriter.h"
+#include "Framework/Imaging/VideoWriter.h"
 
 #include <iostream>
 

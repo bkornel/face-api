@@ -5,7 +5,7 @@
 #include "Modules/UserProcessor/ShapeModel/ShapeModelDispatcher.h"
 
 #include "Framework/Text.h"
-#include "Common/Configuration.h"
+#include "Configuration.h"
 #include "User/User.h"
 
 namespace face

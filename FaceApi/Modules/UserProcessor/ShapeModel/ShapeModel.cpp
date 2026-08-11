@@ -5,7 +5,7 @@
 #include "Modules/UserProcessor/ShapeModel/ShapeModel.h"
 #include "Modules/UserProcessor/ShapeModel/ClmWrapper.h"
 
-#include "Common/Configuration.h"
+#include "Configuration.h"
 #include "Framework/Text.h"
 
 namespace face

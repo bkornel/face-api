@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Framework/Imaging/Geometry.h"
-#include "Common/ShapeUtil.h"
+#include "Model/FaceModel.h"
 
 #include <memory>
 

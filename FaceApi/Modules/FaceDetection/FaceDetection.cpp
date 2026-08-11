@@ -3,7 +3,7 @@
 #include "Framework/ErrorCode.h"
 #include "Modules/FaceDetection/FaceDetection.h"
 
-#include "Common/Configuration.h"
+#include "Configuration.h"
 #include "Framework/Profiler.h"
 #include "Framework/Text.h"
 #include "Messages/CommandMessage.h"

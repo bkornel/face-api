@@ -1,14 +1,14 @@
-#include "PoseUtil.h"
+#include "PoseGeometry.h"
 
 namespace face
 {
-  PoseUtil& PoseUtil::GetInstance()
+  PoseGeometry& PoseGeometry::GetInstance()
   {
-    static PoseUtil sInstance;
+    static PoseGeometry sInstance;
     return sInstance;
   }
 
-  PoseUtil::PoseUtil() :
+  PoseGeometry::PoseGeometry() :
     mOrigin3D(0.0, 0.0, 0.0)
   {
     mAxes3D = {

@@ -3,7 +3,7 @@
 #include <opencv2/imgcodecs.hpp>
 
 #include "Framework/ErrorCode.h"
-#include "Common/Configuration.h"
+#include "Configuration.h"
 #include "FaceApi.h"
 #include "Framework/Text.h"
 

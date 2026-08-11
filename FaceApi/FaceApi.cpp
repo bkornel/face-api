@@ -2,7 +2,7 @@
 #include "Framework/TimeExtensions.h"
 #include "FaceApi.h"
 
-#include "Common/Configuration.h"
+#include "Configuration.h"
 #include "Framework/Profiler.h"
 #include "Messages/CommandMessage.h"
 

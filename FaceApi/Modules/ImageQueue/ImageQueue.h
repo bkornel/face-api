@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Framework/ErrorCode.h"
-#include "Framework/MessageQueue.hpp"
-#include "Framework/Module.h"
-#include "Framework/Port.hpp"
+#include "Framework/Messaging/MessageQueue.hpp"
+#include "Framework/Graph/Module.h"
+#include "Framework/Graph/Port.hpp"
 
 #include "Messages/ImageMessage.h"
 

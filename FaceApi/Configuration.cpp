@@ -1,7 +1,7 @@
 #include "Framework/Settings.h"
 #include "Framework/ErrorCode.h"
 #include "Framework/TimeExtensions.h"
-#include "Common/Configuration.h"
+#include "Configuration.h"
 #include "Framework/Text.h"
 
 #include <easyloggingpp/easyloggingpp.h>

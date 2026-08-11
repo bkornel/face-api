@@ -6,9 +6,9 @@
 
 #include "Framework/ErrorCode.h"
 #include "FaceResult.h"
-#include "Framework/MessageBus.h"
-#include "Framework/MessageQueue.hpp"
-#include "Framework/Module.h"
+#include "Framework/Messaging/MessageBus.h"
+#include "Framework/Messaging/MessageQueue.hpp"
+#include "Framework/Graph/Module.h"
 #include "Modules/ModuleGraph.h"
 
 namespace face
