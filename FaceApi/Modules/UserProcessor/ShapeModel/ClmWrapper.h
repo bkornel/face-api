@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Framework/Ocv/Geometry.h"
+#include "Framework/Imaging/Geometry.h"
 #include "Framework/ErrorCode.h"
 
 #include <clm/CLM.h>
@@ -42,12 +42,12 @@ namespace face
       return mReferenceShapeMat2D;
     }
 
-    inline const fw::ocv::VectorPt2D& GetReferenceShape2D() const
+    inline const fw::VectorPt2D& GetReferenceShape2D() const
     {
       return mReferenceShape2D;
     }
 
-    inline const fw::ocv::VectorPt3D& GetReferenceShape3D() const
+    inline const fw::VectorPt3D& GetReferenceShape3D() const
     {
       return mReferenceShape3D;
     }
@@ -64,8 +64,8 @@ namespace face
     FACETRACKER::MFCheck mFailureCheck; ///< Failure checker
 
     cv::Mat mReferenceShapeMat2D;          ///< The 2D reference shape points
-    fw::ocv::VectorPt2D mReferenceShape2D; ///< The 2D reference shape points
-    fw::ocv::VectorPt3D mReferenceShape3D; ///< The 3D reference shape points
+    fw::VectorPt2D mReferenceShape2D; ///< The 2D reference shape points
+    fw::VectorPt3D mReferenceShape3D; ///< The 3D reference shape points
     cv::Scalar mSimil;                     ///< The similarity map
 
     bool mInitialized = false; ///< true if the files are loaded properly

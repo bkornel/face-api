@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Framework/Ocv/Geometry.h"
+#include "Framework/Imaging/Geometry.h"
 #include "Framework/ErrorCode.h"
 #include "User/UserDispatcher.hpp"
 
@@ -32,8 +32,8 @@ namespace face
 
     void Align(MatVector& ioShapes, cv::Mat& ioMeanShape) const;
 
-    fw::ocv::VectorPt2D mMeanShape2D;
-    fw::ocv::VectorPt3D mMeanShape3D;
+    fw::VectorPt2D mMeanShape2D;
+    fw::VectorPt3D mMeanShape3D;
 
     int mMaxCount = 1000;
     double mEpsilon = 1e-6;

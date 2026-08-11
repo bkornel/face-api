@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "Framework/Ocv/Geometry.h"
+#include "Framework/Imaging/Geometry.h"
 #include <opencv2/core/core.hpp>
 
 #include <vector>
@@ -22,12 +22,12 @@ namespace face
       return mOrigin3D;
     }
 
-    inline const fw::ocv::VectorPt3D& GetAxes3D() const
+    inline const fw::VectorPt3D& GetAxes3D() const
     {
       return mAxes3D;
     }
 
-    inline const fw::ocv::VectorPt3D& GetUnitBox() const
+    inline const fw::VectorPt3D& GetUnitBox() const
     {
       return mUnitBox;
     }
@@ -48,8 +48,8 @@ namespace face
 
     const cv::Point3d mOrigin3D;
 
-    fw::ocv::VectorPt3D mAxes3D;
-    fw::ocv::VectorPt3D mUnitBox;
+    fw::VectorPt3D mAxes3D;
+    fw::VectorPt3D mUnitBox;
     Connections mConnections;
   };
 }

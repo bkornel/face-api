@@ -1,5 +1,5 @@
-#include "Framework/Ocv/FileStorage.h"
-#include "Framework/Ocv/Geometry.h"
+#include "Framework/Imaging/Geometry.h"
+#include "Framework/Settings.h"
 #include "Framework/ErrorCode.h"
 #include "Framework/TimeExtensions.h"
 #include "Modules/UserManager/UserManager.h"
@@ -19,16 +19,16 @@ namespace face
     {
       std::string value;
 
-      if (fw::ocv::get_value(iSettings, "maxUsers", value))
+      if (fw::get_value(iSettings, "maxUsers", value))
         mMaxUsers = fw::str::convert_to_number<int>(value);
 
-      if (fw::ocv::get_value(iSettings, "userOverlap", value))
+      if (fw::get_value(iSettings, "userOverlap", value))
         mUserOverlap = fw::str::convert_to_number<float>(value);
 
-      if (fw::ocv::get_value(iSettings, "userAwaySec", value))
+      if (fw::get_value(iSettings, "userAwaySec", value))
         mUserAwaySec = fw::str::convert_to_number<float>(value);
 
-      if (fw::ocv::get_value(iSettings, "templateScale", value))
+      if (fw::get_value(iSettings, "templateScale", value))
       {
         mTemplateScale = fw::str::convert_to_number<float>(value);
         mTemplateScale = (std::max)((std::min)(mTemplateScale, 1.0F), 0.2F);
@@ -175,7 +175,7 @@ namespace face
 
       for (auto fr = ioFaceROIs.begin(); fr != ioFaceROIs.end();)
       {
-        if (fw::ocv::overlap_ratio(userFR, *fr) > mUserOverlap)
+        if (fw::overlap_ratio(userFR, *fr) > mUserOverlap)
         {
           // An active user is detected
           if (user->IsActive())
