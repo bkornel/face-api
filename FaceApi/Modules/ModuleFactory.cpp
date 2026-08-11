@@ -15,10 +15,10 @@
 
 namespace face
 {
-  fw::Module::Shared ModuleFactory::Create(const cv::FileNode& iModuleNode, fw::MessageBus& ioBus)
+  std::shared_ptr<fw::Module> ModuleFactory::Create(const cv::FileNode& iModuleNode, fw::MessageBus& ioBus)
   {
     const std::string& moduleName = fw::str::to_lower(iModuleNode.name());
-    fw::Module::Shared newModule = nullptr;
+    std::shared_ptr<fw::Module> newModule = nullptr;
 
     if (moduleName == "facedetection")
       newModule = std::make_shared<FaceDetection>();

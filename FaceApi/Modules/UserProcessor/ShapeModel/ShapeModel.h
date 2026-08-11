@@ -14,8 +14,6 @@ namespace face
   class ShapeModel
   {
   public:
-    typedef std::shared_ptr<ShapeModel> Shared;
-
     ShapeModel();
 
     ~ShapeModel() = default;

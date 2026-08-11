@@ -54,7 +54,7 @@ namespace face
     }
 
     // The id and the timestamp come from the camera, they are not re-stamped here
-    ImageMessage::Shared message = std::make_shared<ImageMessage>(iFrame, iFrameId, iTimestamp);
+    std::shared_ptr<ImageMessage> message = std::make_shared<ImageMessage>(iFrame, iFrameId, iTimestamp);
 
     // Counting this frame in, since after the push the message may already belong to the
     // graph thread and writing to it would race
@@ -64,12 +64,12 @@ namespace face
     return mQueue.TryPush(message);
   }
 
-  ImageMessage::Shared ImageQueue::Main(unsigned /*iTickNumber*/)
+  std::shared_ptr<ImageMessage> ImageQueue::Main(unsigned /*iTickNumber*/)
   {
     DrainCommands();
 
-    std::tuple<ImageMessage::Shared> framePool;
-    ImageMessage::Shared image =
+    std::tuple<std::shared_ptr<ImageMessage>> framePool;
+    std::shared_ptr<ImageMessage> image =
       (mQueue.TryPop(framePool) == fw::ErrorCode::OK) ? std::get<0>(framePool) : nullptr;
 
     if (image)

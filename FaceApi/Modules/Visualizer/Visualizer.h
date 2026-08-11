@@ -6,6 +6,7 @@
 #include "Messages/ImageMessage.h"
 #include "Messages/ActiveUsersMessage.h"
 
+#include <memory>
 #include <opencv2/core/core.hpp>
 #include <limits>
 #include <vector>
@@ -13,16 +14,15 @@
 namespace face
 {
   class Visualizer : public fw::Module,
-                     public fw::Port<ImageMessage::Shared(ImageMessage::Shared, ActiveUsersMessage::Shared)>
+                     public fw::Port<std::shared_ptr<ImageMessage>(std::shared_ptr<ImageMessage>, std::shared_ptr<ActiveUsersMessage>)>
   {
   public:
-    FW_DEFINE_SMART_POINTERS(Visualizer);
 
     Visualizer() = default;
 
     virtual ~Visualizer() = default;
 
-    ImageMessage::Shared Main(ImageMessage::Shared iImage, ActiveUsersMessage::Shared iUsers) override;
+    std::shared_ptr<ImageMessage> Main(std::shared_ptr<ImageMessage> iImage, std::shared_ptr<ActiveUsersMessage> iUsers) override;
 
     void Clear() override
     {
@@ -41,7 +41,7 @@ namespace face
 
     void DrawBoundingBox(const User& iUser, cv::Mat& oImage, int iSegmentWidth = 5, int iThickness = 1) const;
 
-    void DrawGeneral(ImageMessage::Shared iImage, cv::Mat& oImage);
+    void DrawGeneral(std::shared_ptr<ImageMessage> iImage, cv::Mat& oImage);
 
     void CreateShapeColorMap(const fw::ocv::VectorPt3D& iShape3D, cv::Mat& oColorMap) const;
 

@@ -10,7 +10,6 @@ namespace face
   class UserData
   {
   public:
-    FW_DEFINE_SMART_POINTERS(UserData);
 
     UserData() = default;
 

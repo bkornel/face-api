@@ -118,7 +118,7 @@ namespace face
       if (moduleNode.empty() || !moduleNode.isNamed()) continue;
 
       // Check for duplications
-      auto it = std::find_if(mModules.begin(), mModules.end(), [&](const fw::Module::Shared& obj) {
+      auto it = std::find_if(mModules.begin(), mModules.end(), [&](const std::shared_ptr<fw::Module>& obj) {
         return obj->GetName() == fw::Module::CreateModuleName(moduleNode);
       });
 
@@ -183,7 +183,7 @@ namespace face
     for (const auto& moduleNode : modules)
     {
       // Find the corresponding module
-      auto it = std::find_if(mModules.begin(), mModules.end(), [&](const fw::Module::Shared& obj) {
+      auto it = std::find_if(mModules.begin(), mModules.end(), [&](const std::shared_ptr<fw::Module>& obj) {
         return obj->GetName() == fw::Module::CreateModuleName(moduleNode);
       });
 
@@ -194,7 +194,7 @@ namespace face
         return fw::ErrorCode::BadData;
       }
 
-      fw::Module::Shared module = *it;
+      std::shared_ptr<fw::Module> module = *it;
       PredecessorMap predecessors; // Key: port, value: module
 
       // Read the <port> tag of each module

@@ -21,7 +21,7 @@ namespace fw
     mSelf = iSelf;
   }
 
-  void Module::Publish(const Message::Shared& iMessage)
+  void Module::Publish(const std::shared_ptr<Message>& iMessage)
   {
     if (!mBus)
     {
@@ -125,7 +125,7 @@ namespace fw
     // There is nothing to clear here, override the method in the child classes
   }
 
-  void Module::OnCommand(Message::Shared iMessage)
+  void Module::OnCommand(std::shared_ptr<Message> iMessage)
   {
     // Runs on the publishing thread, so the command is only queued here and applied later
     // from Main(). Module state stays owned by the graph thread this way. No type check is
@@ -145,7 +145,7 @@ namespace fw
 
   void Module::DrainCommands()
   {
-    std::vector<Message::Shared> commands;
+    std::vector<std::shared_ptr<Message>> commands;
     {
       std::lock_guard<std::mutex> lock(mCommandMutex);
       commands.swap(mPendingCommands);
@@ -155,9 +155,9 @@ namespace fw
       HandleCommand(command);
   }
 
-  void Module::HandleCommand(Message::Shared iMessage)
+  void Module::HandleCommand(std::shared_ptr<Message> iMessage)
   {
-    face::CommandMessage::Shared command = std::dynamic_pointer_cast<face::CommandMessage>(iMessage);
+    std::shared_ptr<face::CommandMessage> command = std::dynamic_pointer_cast<face::CommandMessage>(iMessage);
     if (command)
     {
       if (command->GetType() == face::CommandMessage::Type::VerboseModeChanged)

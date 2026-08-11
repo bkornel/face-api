@@ -7,6 +7,7 @@
 
 #include <easyloggingpp/easyloggingpp.h>
 
+#include <memory>
 #include <tuple>
 #include <type_traits>
 #include <utility>
@@ -211,7 +212,7 @@ namespace fw
     /// @brief Runs a source port's Main(). Downstream modules inherit the executor from
     /// the value the source publishes, so this single choice decides whether the whole
     /// graph runs inline or on separate threads.
-    Executor::Shared mExecutor = fw::getInlineExecutor();
+    std::shared_ptr<Executor> mExecutor = fw::getInlineExecutor();
 
     std::function<void()> mTrigger = nullptr;
     OutputPort mOutputPort = nullptr;

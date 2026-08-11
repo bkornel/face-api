@@ -9,7 +9,6 @@ namespace face
   class RoiMessage : public fw::Message
   {
   public:
-    FW_DEFINE_SMART_POINTERS(RoiMessage);
 
     RoiMessage(const std::vector<cv::Rect>& iROIs, const cv::Size& iMinRoiSize, const cv::Size& iMaxRoiSize, unsigned iFrameId, long long iTimestamp);
 

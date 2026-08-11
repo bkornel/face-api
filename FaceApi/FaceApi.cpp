@@ -68,7 +68,7 @@ namespace face
     mCameraFrameId = 0U;
   }
 
-  void FaceApi::OnFrameProcessed(ImageMessage::Shared iMessage)
+  void FaceApi::OnFrameProcessed(std::shared_ptr<ImageMessage> iMessage)
   {
     if (!iMessage || iMessage->IsEmpty()) return;
 
@@ -80,7 +80,7 @@ namespace face
 
   void FaceApi::PushCameraFrame(const cv::Mat& iFrame)
   {
-    ImageQueue::Shared imageQueue = mModuleGraph ? mModuleGraph->GetImageQueue() : nullptr;
+    std::shared_ptr<ImageQueue> imageQueue = mModuleGraph ? mModuleGraph->GetImageQueue() : nullptr;
     if (!imageQueue) return;
 
     // Handed straight to the queue. Broadcasting it would call every module for every
@@ -92,7 +92,7 @@ namespace face
   {
     oResults.clear();
 
-    LastModule::Shared lastModule = mModuleGraph ? mModuleGraph->GetLastModule() : nullptr;
+    std::shared_ptr<LastModule> lastModule = mModuleGraph ? mModuleGraph->GetLastModule() : nullptr;
     if (!lastModule) return fw::ErrorCode::BadState;
 
     return lastModule->GetLastResults(oResults);
@@ -100,7 +100,7 @@ namespace face
 
   fw::ErrorCode FaceApi::GetResultImage(cv::Mat& oResultImage)
   {
-    std::tuple<ImageMessage::Shared> framePool;
+    std::tuple<std::shared_ptr<ImageMessage>> framePool;
     const fw::ErrorCode code = mOutputQueue.TryPop(framePool);
 
     if (code != fw::ErrorCode::OK)
@@ -108,7 +108,7 @@ namespace face
       return code;
     }
 
-    ImageMessage::Shared frame = std::get<0>(framePool);
+    std::shared_ptr<ImageMessage> frame = std::get<0>(framePool);
     oResultImage = frame->GetFrameBGR();
 
     return code;

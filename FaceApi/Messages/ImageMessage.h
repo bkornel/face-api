@@ -12,7 +12,6 @@ namespace face
   class ImageMessage : public fw::Message
   {
   public:
-    FW_DEFINE_SMART_POINTERS(ImageMessage);
 
     struct QueueData
     {

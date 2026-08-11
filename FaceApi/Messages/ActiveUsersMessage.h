@@ -2,15 +2,15 @@
 
 #include "Framework/Message.h"
 #include "User/User.h"
+#include <memory>
 
 namespace face
 {
   class ActiveUsersMessage : public fw::Message
   {
   public:
-    FW_DEFINE_SMART_POINTERS(ActiveUsersMessage);
 
-    typedef std::vector<User::Shared> UserVector;
+    typedef std::vector<std::shared_ptr<User>> UserVector;
 
     ActiveUsersMessage(const UserVector& iActiveUsers, unsigned iFrameId, long long iTimestamp);
 

@@ -11,12 +11,6 @@
 #define FW_DEG_TO_RAD(degree) ((degree) * (M_PI / 180.0))
 #define FW_RAD_TO_DEG(radian) ((radian) * (180.0 / M_PI))
 
-#define FW_DEFINE_SMART_POINTERS(C)             \
-  using Unique = std::unique_ptr<C>;            \
-  using ConstUnique = std::unique_ptr<const C>; \
-  using Shared = std::shared_ptr<C>;            \
-  using ConstShared = std::shared_ptr<const C>
-
 namespace fw
 {
   enum class ErrorCode

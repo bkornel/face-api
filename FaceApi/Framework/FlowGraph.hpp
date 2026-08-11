@@ -21,15 +21,14 @@ namespace fw
   class Executor
   {
   public:
-    FW_DEFINE_SMART_POINTERS(Executor);
 
     virtual ~Executor() = default;
     virtual void run(std::function<void()> iTask) = 0;
   };
 
-  Executor::Shared getInlineExecutor();
+  std::shared_ptr<Executor> getInlineExecutor();
 
-  Executor::Shared getThreadExecutor();
+  std::shared_ptr<Executor> getThreadExecutor();
 
   /// @brief Continuation is a task that waits for its dependencies to be ready.
   /// Providers of dependencies should call NotifyAndRun() once they are ready.
@@ -37,18 +36,17 @@ namespace fw
   class Continuation
   {
   public:
-    FW_DEFINE_SMART_POINTERS(Continuation);
 
-    Continuation(std::function<void(Executor::Shared)> iTask, unsigned iCounter);
+    Continuation(std::function<void(std::shared_ptr<Executor>)> iTask, unsigned iCounter);
 
     /// @brief should be called once a dependency of this task is ready.
     /// The task runs, using executor, iff all dependencies are satisfied.
     /// The behavior of NotifyAndRun when called more times than there are
     /// dependencies is undefined.
-    void NotifyAndRun(Executor::Shared iExecutor);
+    void NotifyAndRun(std::shared_ptr<Executor> iExecutor);
 
   private:
-    std::function<void(Executor::Shared)> mTask;
+    std::function<void(std::shared_ptr<Executor>)> mTask;
     std::atomic_uint mCounter;
     const unsigned mCount = 0U;
   };
@@ -59,13 +57,12 @@ namespace fw
   class IFuture
   {
   public:
-    FW_DEFINE_SMART_POINTERS(IFuture);
 
     IFuture() = default;
 
     virtual ~IFuture() = default;
 
-    virtual void Listen(Continuation::Shared iContinuation) = 0;
+    virtual void Listen(std::shared_ptr<Continuation> iContinuation) = 0;
 
     virtual bool Ready() const = 0;
 
@@ -102,7 +99,7 @@ namespace fw
     ///
     /// If ready, the continuation will be notified and run immediately with an
     /// inline executor.
-    void Listen(Continuation::Shared iContinuation) override
+    void Listen(std::shared_ptr<Continuation> iContinuation) override
     {
       bool isValid = false;
       {
@@ -162,9 +159,9 @@ namespace fw
   private:
     Future() = default;
 
-    void Put(const T& iArg, Executor::Shared iExecutor)
+    void Put(const T& iArg, std::shared_ptr<Executor> iExecutor)
     {
-      std::vector<Continuation::Shared> continuationsAux;
+      std::vector<std::shared_ptr<Continuation>> continuationsAux;
       {
         std::unique_lock<std::mutex> lock(mMutex);
         mValue.reset(new T(iArg));
@@ -181,7 +178,7 @@ namespace fw
     mutable std::condition_variable mCV;
     std::unique_ptr<T> mValue = nullptr;
     unsigned long long mGeneration = 0ULL;
-    std::vector<Continuation::Shared> mContinuations;
+    std::vector<std::shared_ptr<Continuation>> mContinuations;
   };
 
   template <typename T>
@@ -212,7 +209,7 @@ namespace fw
     /// dependency tasks that are ready once after this put.
     ///
     /// The behavior of put is undefined if this is called more than once.
-    void Put(const T& iArg, Executor::Shared iExecutor)
+    void Put(const T& iArg, std::shared_ptr<Executor> iExecutor)
     {
       mFuture->Put(iArg, iExecutor);
     }
@@ -231,7 +228,7 @@ namespace fw
 
   /// @brief Subscribes iContinuation to iFuture, unless the Future is absent.
   template <typename T>
-  void listen_if_connected(const FutureShared<T>& iFuture, Continuation::Shared iContinuation)
+  void listen_if_connected(const FutureShared<T>& iFuture, std::shared_ptr<Continuation> iContinuation)
   {
     if (iFuture) iFuture->Listen(iContinuation);
   }
@@ -240,7 +237,7 @@ namespace fw
   /// for the result. This connect() is for source nodes: they have no dependency to
   /// wait for, so the returned action is what drives them.
   template <typename ReturnT>
-  std::pair<std::function<void()>, FutureShared<ReturnT>> connect(std::function<ReturnT()> iFunction, Executor::Shared iExecutor)
+  std::pair<std::function<void()>, FutureShared<ReturnT>> connect(std::function<ReturnT()> iFunction, std::shared_ptr<Executor> iExecutor)
   {
     // Using shared_ptr, because std::function is copyable, but Promise<R> is not.
     auto promise = std::make_shared<Promise<ReturnT>>();
@@ -271,7 +268,7 @@ namespace fw
     auto promise = std::make_shared<Promise<ReturnT>>();
     auto future = promise->GetFuture();
 
-    auto task = [iFunction, promise, iFutures...](Executor::Shared executor) {
+    auto task = [iFunction, promise, iFutures...](std::shared_ptr<Executor> executor) {
       promise->Put(iFunction(get_or_default(iFutures)...), executor);
     };
 

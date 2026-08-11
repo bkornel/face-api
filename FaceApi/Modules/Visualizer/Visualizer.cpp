@@ -21,7 +21,7 @@ namespace face
     return fw::ErrorCode::OK;
   }
 
-  ImageMessage::Shared Visualizer::Main(ImageMessage::Shared iImage, ActiveUsersMessage::Shared iUsers)
+  std::shared_ptr<ImageMessage> Visualizer::Main(std::shared_ptr<ImageMessage> iImage, std::shared_ptr<ActiveUsersMessage> iUsers)
   {
     DrainCommands();
 
@@ -212,7 +212,7 @@ namespace face
     ss.str("");
   }
 
-  void Visualizer::DrawGeneral(ImageMessage::Shared iImage, cv::Mat& oImage)
+  void Visualizer::DrawGeneral(std::shared_ptr<ImageMessage> iImage, cv::Mat& oImage)
   {
     const double runtimeMs = std::llabs(fw::get_current_time() - iImage->GetTimestamp());
 

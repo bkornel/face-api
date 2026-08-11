@@ -14,7 +14,6 @@ namespace face
   class User : public UserData
   {
   public:
-    FW_DEFINE_SMART_POINTERS(User);
 
     enum class Status
     {
