@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Framework/Util.h"
+#include "Framework/ErrorCode.h"
 #include "Framework/UtilOCV.h"
 
 #include <clm/CLM.h>

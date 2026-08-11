@@ -1,5 +1,4 @@
-#define _USE_MATH_DEFINES
-
+#include "Framework/UtilMath.h"
 #include "Framework/UtilOCV.h"
 
 #include <opencv2/calib3d.hpp>
@@ -128,7 +127,7 @@ namespace fw
 
       sImageSize = iSize;
 #if 1
-      const double dfov = FW_DEG_TO_RAD(70.0);
+      const double dfov = fw::deg_to_rad(70.0);
       const double d = std::sqrt(iSize.width * iSize.width + iSize.height * iSize.height);
       const double fd = (d / 2.0) / std::tan(dfov / 2.0);
 

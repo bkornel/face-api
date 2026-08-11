@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 
+#include "Framework/ErrorCode.h"
 #include "FaceResult.h"
 #include "Framework/MessageBus.h"
 #include "Framework/MessageQueue.hpp"

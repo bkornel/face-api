@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Framework/Util.h"
 
+#include "Framework/ErrorCode.h"
 #include <atomic>
 #include <memory>
 #include <future>

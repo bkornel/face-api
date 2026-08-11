@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Framework/ErrorCode.h"
 #include "FaceResult.h"
 #include "Framework/Module.h"
 #include "Framework/Port.hpp"

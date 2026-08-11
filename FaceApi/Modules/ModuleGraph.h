@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Framework/ErrorCode.h"
 #include "Framework/Event.hpp"
 #include "Framework/Module.h"
 #include "Framework/FlowGraph.hpp"

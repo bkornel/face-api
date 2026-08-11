@@ -1,3 +1,4 @@
+#include "Framework/ErrorCode.h"
 #include "Modules/ModuleConnector.h"
 
 #include "Framework/UtilString.h"

@@ -2,9 +2,15 @@
 
 #include <opencv2/imgcodecs.hpp>
 
+#include "Framework/ErrorCode.h"
 #include "Common/Configuration.h"
 #include "FaceApi.h"
 #include "Framework/UtilString.h"
+
+namespace
+{
+  constexpr const char* cWindowName = "Face";
+}
 
 void FaceApp::initialize(Application& self)
 {
@@ -111,7 +117,7 @@ void FaceApp::showResults()
 {
   CV_DbgAssert(!mResultFrame.empty());
 
-  cv::imshow(FW_PLUGIN_NAME, mResultFrame);
+  cv::imshow(cWindowName, mResultFrame);
   handleKey(cv::waitKey(1));
 }
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Framework/ErrorCode.h"
 #include "Framework/UtilOCV.h"
 #include "User/UserDispatcher.hpp"
 

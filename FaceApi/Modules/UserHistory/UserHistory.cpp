@@ -1,3 +1,5 @@
+#include "Framework/UtilContainer.h"
+#include "Framework/ErrorCode.h"
 #include "Modules/UserHistory/UserHistory.h"
 
 #include "Framework/Profiler.h"

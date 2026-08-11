@@ -1,3 +1,4 @@
+#include "Framework/ErrorCode.h"
 #include "Framework/Thread.h"
 
 #include <easyloggingpp/easyloggingpp.h>

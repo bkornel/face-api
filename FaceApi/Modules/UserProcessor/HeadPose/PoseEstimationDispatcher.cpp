@@ -1,5 +1,5 @@
-#define _USE_MATH_DEFINES
-
+#include "Framework/ErrorCode.h"
+#include "Framework/UtilMath.h"
 #include "Modules/UserProcessor/HeadPose/PoseEstimationDispatcher.h"
 
 #include "Common/Configuration.h"
@@ -84,7 +84,7 @@ namespace face
     cv::Mat cameraMatrix, rotation, translation;
     cv::decomposeProjectionMatrix(mExtrinsics({ 0, 0, 4, 3 }), cameraMatrix, rotation, translation, cv::noArray(), cv::noArray(), cv::noArray(), mRPY);
 
-    mRPY = { FW_DEG_TO_RAD(mRPY[2]), FW_DEG_TO_RAD(mRPY[0]), FW_DEG_TO_RAD(mRPY[1]) };
+    mRPY = { fw::deg_to_rad(mRPY[2]), fw::deg_to_rad(mRPY[0]), fw::deg_to_rad(mRPY[1]) };
   }
 
   void PoseEstimationDispatcher::estimateShape3D()

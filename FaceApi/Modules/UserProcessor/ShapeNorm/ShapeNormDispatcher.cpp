@@ -1,3 +1,4 @@
+#include "Framework/ErrorCode.h"
 #include "Modules/UserProcessor/ShapeNorm/ShapeNormDispatcher.h"
 #include "Modules/UserProcessor/ShapeModel/ClmWrapper.h"
 

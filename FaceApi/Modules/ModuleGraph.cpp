@@ -1,3 +1,4 @@
+#include "Framework/ErrorCode.h"
 #include "Modules/ModuleGraph.h"
 
 #include "Common/Configuration.h"

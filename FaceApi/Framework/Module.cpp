@@ -1,3 +1,4 @@
+#include "Framework/ErrorCode.h"
 #include "Framework/Module.h"
 #include "Framework/UtilString.h"
 #include "Messages/CommandMessage.h"

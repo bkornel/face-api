@@ -1,3 +1,5 @@
+#include "Framework/UtilContainer.h"
+#include "Framework/ErrorCode.h"
 #include "Modules/UserProcessor/ShapeModel/ShapeModelDispatcher.h"
 
 #include "Framework/UtilString.h"

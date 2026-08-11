@@ -1,3 +1,4 @@
+#include "Framework/ErrorCode.h"
 #include "Modules/FaceDetection/FaceDetection.h"
 
 #include "Common/Configuration.h"

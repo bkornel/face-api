@@ -1,3 +1,4 @@
+#include "Framework/ErrorCode.h"
 #include "FaceApi.h"
 #include "FaceResultBuffer.h"
 #include "Common/Configuration.h"
