@@ -1,3 +1,4 @@
+#include "Framework/ErrorCode.h"
 #include "Framework/Exception.h"
 
 #include <sstream>

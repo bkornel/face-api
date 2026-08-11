@@ -1,5 +1,6 @@
-#define _USE_MATH_DEFINES
-
+#include "Framework/ErrorCode.h"
+#include "Framework/UtilMath.h"
+#include "Framework/UtilTime.h"
 #include "Modules/Visualizer/Visualizer.h"
 
 #include "Common/Configuration.h"
@@ -199,15 +200,15 @@ namespace face
     fw::ocv::put_text("O", axes2D[0] - shiftPt, oImage);
 
     std::stringstream ss;
-    ss << std::setprecision(2) << std::fixed << "Pitch (" << FW_RAD_TO_DEG(RPY[1]) << ", " << position3D[0] << ")";
+    ss << std::setprecision(2) << std::fixed << "Pitch (" << fw::rad_to_deg(RPY[1]) << ", " << position3D[0] << ")";
     fw::ocv::put_text(ss.str(), axes2D[1] - shiftPt, oImage);
     ss.str("");
 
-    ss << std::setprecision(2) << std::fixed << "Yaw (" << FW_RAD_TO_DEG(RPY[2]) << ", " << position3D[1] << ")";
+    ss << std::setprecision(2) << std::fixed << "Yaw (" << fw::rad_to_deg(RPY[2]) << ", " << position3D[1] << ")";
     fw::ocv::put_text(ss.str(), axes2D[2] - shiftPt, oImage);
     ss.str("");
 
-    ss << std::setprecision(2) << std::fixed << "Roll (" << FW_RAD_TO_DEG(RPY[0]) << ", " << position3D[2] << ")";
+    ss << std::setprecision(2) << std::fixed << "Roll (" << fw::rad_to_deg(RPY[0]) << ", " << position3D[2] << ")";
     fw::ocv::put_text(ss.str(), axes2D[3] - shiftPt, oImage);
     ss.str("");
   }

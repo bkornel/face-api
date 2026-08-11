@@ -27,9 +27,9 @@
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\PDM.cc" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\3rdparty\easyloggingpp\easyloggingpp.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Profiler.cpp" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Util.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Stopwatch.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Thread.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\UtilTime.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Common\Configuration.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Common\PoseUtil.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Common\ShapeUtil.cpp" />
@@ -76,11 +76,14 @@
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\PDM.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\3rdparty\easyloggingpp\easyloggingpp.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Profiler.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Util.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Event.hpp" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\MessageQueue.hpp" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Stopwatch.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Thread.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\ErrorCode.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\UtilMath.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\UtilContainer.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\UtilTime.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Common\Configuration.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Common\PoseUtil.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Common\ShapeUtil.h" />

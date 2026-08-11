@@ -1,3 +1,4 @@
+#include "Framework/ErrorCode.h"
 #include "Modules/ImageQueue/ImageQueue.h"
 #include "Messages/ImageSizeChangedMessage.h"
 

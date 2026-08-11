@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Framework/ErrorCode.h"
 #include "User/UserDispatcher.hpp"
 #include "Modules/UserProcessor/ShapeModel/ShapeModel.h"
 

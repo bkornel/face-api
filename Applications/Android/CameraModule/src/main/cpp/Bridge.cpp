@@ -1,3 +1,4 @@
+#include "Framework/ErrorCode.h"
 #include "FaceApi.h"
 #include "Common/Configuration.h"
 #include "Framework/Stopwatch.h"

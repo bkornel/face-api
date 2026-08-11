@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Framework/Util.h"
 
+#include "Framework/ErrorCode.h"
 #include <opencv2/core.hpp>
 
 namespace face

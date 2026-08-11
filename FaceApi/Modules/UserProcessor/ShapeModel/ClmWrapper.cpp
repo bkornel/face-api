@@ -1,3 +1,4 @@
+#include "Framework/ErrorCode.h"
 #include "Modules/UserProcessor/ShapeModel/ClmWrapper.h"
 
 #include "Common/Configuration.h"

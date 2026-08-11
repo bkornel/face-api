@@ -1,10 +1,7 @@
-#include "Framework/Util.h"
+#include "Framework/UtilTime.h"
 
-#if defined(__ANDROID__)
-  #include <android/log.h>
-#endif
-#include <ctime>
 #include <chrono>
+#include <ctime>
 
 namespace fw
 {
@@ -35,6 +32,7 @@ namespace fw
     return ms.count();
   }
 
+  // One stamp per process run: it names the log and the profiler file of this run
   std::string& get_log_stamp()
   {
     static std::string sLogStamp = generate_log_stamp();

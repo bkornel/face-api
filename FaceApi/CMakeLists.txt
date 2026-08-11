@@ -80,7 +80,7 @@ set(SOURCES;
   Framework/Profiler.cpp;
   Framework/Stopwatch.cpp;
   Framework/Thread.cpp;
-  Framework/Util.cpp;
+  Framework/UtilTime.cpp;
   Framework/UtilOCV.cpp;
   Framework/UtilString.cpp;
   Framework/VideoWriter.cpp;

@@ -1,5 +1,5 @@
-#define _USE_MATH_DEFINES
-
+#include "Framework/ErrorCode.h"
+#include "Framework/UtilTime.h"
 #include "Common/Configuration.h"
 #include "Framework/UtilString.h"
 #include "Framework/UtilOCV.h"
