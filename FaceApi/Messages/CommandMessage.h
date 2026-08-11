@@ -17,7 +17,7 @@ namespace face
       VerboseModeChanged
     };
 
-    CommandMessage(Type iType, unsigned iFrameId, long long iTimestamp);
+    CommandMessage(Type iType, unsigned iFrameId, fw::Timestamp iTimestamp);
 
     virtual ~CommandMessage() = default;
 

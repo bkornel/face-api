@@ -1,10 +1,5 @@
 #include "Framework/Stopwatch.h"
 
-#include <opencv2/core/core.hpp>
-
-#define TICK_COUNT (cv::getTickCount())
-#define TICK_FREQUENCY (cv::getTickFrequency())
-
 namespace fw
 {
   Stopwatch::Stopwatch(bool iStart /*= false*/)
@@ -16,41 +11,51 @@ namespace fw
 
   void Stopwatch::Start()
   {
-    mStartTime = TICK_COUNT;
+    mStartTime = Clock::now();
     mIsRunning = true;
   }
 
   void Stopwatch::Stop()
   {
-    mStopTime = TICK_COUNT;
+    mStopTime = Clock::now();
     mIsRunning = false;
   }
 
   void Stopwatch::Reset()
   {
-    mConstructionTime = mStartTime = mStopTime = TICK_COUNT;
+    mConstructionTime = mStartTime = mStopTime = Clock::now();
+  }
+
+  Stopwatch::Milliseconds Stopwatch::GetElapsed(bool iStopped) const
+  {
+    const Clock::time_point end = iStopped ? mStopTime : Clock::now();
+    const Milliseconds elapsed = end - mStartTime;
+
+    // steady_clock cannot go backwards, but Stop() may predate the last Start()
+    return elapsed.count() < 0.0 ? Milliseconds::zero() : elapsed;
   }
 
   double Stopwatch::GetFPS(bool iStopped) const
   {
-    const long long diff = std::abs(iStopped ? mStopTime - mStartTime : TICK_COUNT - mStartTime);
-    return diff > 0 ? 1.0 / (diff / TICK_FREQUENCY) : 0.0;
+    const double seconds = GetElapsedTimeSec(iStopped);
+    return seconds > 0.0 ? 1.0 / seconds : 0.0;
   }
 
   double Stopwatch::GetElapsedTimeSec(bool iStopped) const
   {
-    const long long diff = std::abs(iStopped ? mStopTime - mStartTime : TICK_COUNT - mStartTime);
-    return diff > 0 ? (diff / TICK_FREQUENCY) : 0.0;
+    return std::chrono::duration_cast<Seconds>(GetElapsed(iStopped)).count();
   }
 
   double Stopwatch::GetElapsedTimeMilliSec(bool iStopped) const
   {
-    return GetElapsedTimeSec(iStopped) * 1000.0;
+    return GetElapsed(iStopped).count();
   }
 
   double Stopwatch::GetElapsedTimeFromConstructionSec(bool iStopped) const
   {
-    const long long diff = std::abs(iStopped ? mStopTime - mConstructionTime : TICK_COUNT - mConstructionTime);
-    return diff > 0 ? (diff / TICK_FREQUENCY) : 0.0;
+    const Clock::time_point end = iStopped ? mStopTime : Clock::now();
+    const Seconds elapsed = end - mConstructionTime;
+
+    return elapsed.count() < 0.0 ? 0.0 : elapsed.count();
   }
 }

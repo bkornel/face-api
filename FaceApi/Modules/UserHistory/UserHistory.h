@@ -32,7 +32,7 @@ namespace face
 
     fw::ErrorCode InitializeInternal(const cv::FileNode& iSettings) override;
 
-    void RemoveOldEntries(long long iTimestamp);
+    void RemoveOldEntries(fw::Timestamp iTimestamp);
 
     EntryMap mEntryMap;
     fw::Stopwatch mRemoveSW;

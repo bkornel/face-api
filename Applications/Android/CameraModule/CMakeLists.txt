@@ -7,6 +7,9 @@ cmake_minimum_required(VERSION 3.22)
 set(TARGET_NAME FaceNative)
 set(TARGET_NAME_FACE_API FaceApi)
 
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 message("Building native shared library")
 message("- Output directory of ${TARGET_NAME}: '${CMAKE_BINARY_DIR}'")
 

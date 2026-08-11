@@ -20,9 +20,9 @@ namespace face
       int bound = 0;
     };
 
-    ImageMessage(const cv::Mat& iImage, unsigned iFrameId, long long iTimestamp);
+    ImageMessage(const cv::Mat& iImage, unsigned iFrameId, fw::Timestamp iTimestamp);
 
-    ImageMessage(cv::Mat&& iImage, unsigned iFrameId, long long iTimestamp);
+    ImageMessage(cv::Mat&& iImage, unsigned iFrameId, fw::Timestamp iTimestamp);
 
     ~ImageMessage() override = default;
 

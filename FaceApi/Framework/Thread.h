@@ -1,10 +1,10 @@
 #pragma once
 
-
 #include "Framework/ErrorCode.h"
+
 #include <atomic>
-#include <memory>
-#include <future>
+#include <chrono>
+#include <thread>
 
 namespace fw
 {
@@ -27,22 +27,20 @@ namespace fw
 
     bool IsRunning() const;
 
-    inline bool GetThreadStopSignal() const
-    {
-      return mStopThread;
-    }
+    bool GetThreadStopSignal() const;
 
-    inline void StopSignalThread()
-    {
-      mStopThread = true;
-    }
+    void StopSignalThread();
 
   protected:
     virtual ErrorCode Run();
 
   private:
-    std::future<ErrorCode> mThread;
-    std::atomic<bool> mStopThread{ false };
-    std::atomic<bool> mFirstRun{ true };
+    // std::jthread carries the stop token and joins in its own destructor, which is what the
+    // stop flag plus the future and its wait() were doing by hand.
+    std::jthread mThread;
+
+    // jthread cannot say whether the thread function has returned, only whether a thread
+    // object is attached, and Run() may finish on its own without a stop being requested
+    std::atomic<bool> mRunning{ false };
   };
 }

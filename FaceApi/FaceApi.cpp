@@ -87,7 +87,7 @@ namespace face
 
     // Handed straight to the queue. Broadcasting it would call every module for every
     // frame, and all but one of them only to find out they are not interested.
-    imageQueue->Push(iFrame, mCameraFrameId++, fw::get_current_time());
+    imageQueue->Push(iFrame, mCameraFrameId++, fw::now());
   }
 
   fw::ErrorCode FaceApi::GetResults(FaceResults& oResults) const
@@ -144,7 +144,7 @@ namespace face
 
   void FaceApi::SetRunFaceDetector()
   {
-    const long long timestamp = fw::get_current_time();
+    const fw::Timestamp timestamp = fw::now();
     Publish(
       std::make_shared<CommandMessage>(CommandMessage::Type::RunFaceDetection, mCameraFrameId, timestamp)
     );
@@ -152,7 +152,7 @@ namespace face
 
   void FaceApi::OnOffVerbose()
   {
-    const long long timestamp = fw::get_current_time();
+    const fw::Timestamp timestamp = fw::now();
     Publish(
       std::make_shared<CommandMessage>(CommandMessage::Type::VerboseModeChanged, mCameraFrameId, timestamp)
     );

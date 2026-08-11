@@ -8,7 +8,7 @@
 
 namespace face
 {
-  User::User(const cv::Rect& iFaceRect, int iUserId, long long iTimestamp) :
+  User::User(const cv::Rect& iFaceRect, int iUserId, fw::Timestamp iTimestamp) :
     mUserId(iUserId),
     mCreationTs(iTimestamp)
   {
@@ -20,7 +20,7 @@ namespace face
     return ioDispatcher.Dispatch(*this);
   }
 
-  void User::SetDetectionData(const cv::Rect& iFaceRect, long long iTimestamp)
+  void User::SetDetectionData(const cv::Rect& iFaceRect, fw::Timestamp iTimestamp)
   {
     mLastDetectionTs = iTimestamp;
     SetFaceRect(iFaceRect);

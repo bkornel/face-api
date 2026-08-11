@@ -97,7 +97,7 @@ namespace face
                               // Maximal resolution
                               (!mMaxFaceSize.empty() && ((facerect.width > mMaxFaceSize.width) || (facerect.height > mMaxFaceSize.height))) ||
                               // Detected a long time ago
-                              ((mTimestamp - user->GetLastDetectionTs()) > mUserAwaySec * 1000.0F)
+                              (fw::elapsed(user->GetLastDetectionTs(), mTimestamp) > fw::Milliseconds(mUserAwaySec * 1000.0F))
                             );
 
       if (inactivate)
@@ -246,8 +246,8 @@ namespace face
     {
       if (!user->IsActive())
       {
-        const long long diff = std::llabs(fw::get_current_time() - user->GetLastUpdateTs());
-        if (iForceToDelete || (diff > mUserAwaySec * 1000.0F))
+        const fw::Milliseconds idle = fw::elapsed_since(user->GetLastUpdateTs());
+        if (iForceToDelete || (idle > fw::Milliseconds(mUserAwaySec * 1000.0F)))
           userIDs.emplace_back(user->GetUserId());
       }
     }

@@ -1,5 +1,4 @@
 #include "Framework/Settings.h"
-#include "Framework/Container.h"
 #include "Framework/ErrorCode.h"
 #include "Modules/UserHistory/UserHistory.h"
 
@@ -31,8 +30,8 @@ namespace face
 
     if (!iActiveUsers || iActiveUsers->IsEmpty()) return nullptr;
 
-    const long long currentTime = iActiveUsers->GetTimestamp();
-    if (mRemoveSW.GetElapsedTimeMilliSec(false) > mRemoveFreqMs)
+    const fw::Timestamp currentTime = iActiveUsers->GetTimestamp();
+    if (mRemoveSW.GetElapsedTimeMilliSec(false) > static_cast<double>(mRemoveFreqMs))
     {
       RemoveOldEntries(currentTime);
       mRemoveSW.Reset();
@@ -43,7 +42,7 @@ namespace face
     for (auto& user : activeUsers)
     {
       // Push only the current entries
-      const long long lastUpdateTs = user->GetLastUpdateTs();
+      const fw::Timestamp lastUpdateTs = user->GetLastUpdateTs();
       if (lastUpdateTs == currentTime)
       {
         // Snapshot, not the live User: a cast would alias the same mutating object.
@@ -54,11 +53,10 @@ namespace face
     return std::make_shared<UserEntriesMessage>(mEntryMap, iActiveUsers->GetFrameId(), currentTime);
   }
 
-  void UserHistory::RemoveOldEntries(long long iTimestamp)
+  void UserHistory::RemoveOldEntries(fw::Timestamp iTimestamp)
   {
-    const long long diff = iTimestamp - mRemoveFreqMs;
+    const fw::Timestamp cutoff = iTimestamp - std::chrono::milliseconds(mRemoveFreqMs);
 
-    if (diff > 0LL)
     {
       for (auto& h : mEntryMap)
       {
@@ -66,7 +64,7 @@ namespace face
         const std::size_t sizeBefore = entries.size();
 
         entries.erase(std::remove_if(entries.begin(), entries.end(), [&](const Entry& obj) {
-                        return obj.first < diff;
+                        return obj.first < cutoff;
                       }),
                       entries.end());
 
@@ -77,7 +75,7 @@ namespace face
         }
       }
 
-      fw::remove_if(mEntryMap, [&](const EntryMap::value_type& obj) {
+      std::erase_if(mEntryMap, [&](const EntryMap::value_type& obj) {
         return obj.second.empty();
       });
     }

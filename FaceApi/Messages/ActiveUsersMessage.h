@@ -12,7 +12,7 @@ namespace face
 
     typedef std::vector<std::shared_ptr<User>> UserVector;
 
-    ActiveUsersMessage(const UserVector& iActiveUsers, unsigned iFrameId, long long iTimestamp);
+    ActiveUsersMessage(const UserVector& iActiveUsers, unsigned iFrameId, fw::Timestamp iTimestamp);
 
     virtual ~ActiveUsersMessage() = default;
 

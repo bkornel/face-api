@@ -136,12 +136,12 @@ namespace face
     ss.str("");
 
     textPt.y += 15;
-    ss << "Detected: " << cvRound((iUser.GetLastUpdateTs() - iUser.GetLastDetectionTs()) / 1000.0) << " sec";
+    ss << "Detected: " << cvRound(fw::elapsed(iUser.GetLastDetectionTs(), iUser.GetLastUpdateTs()).count() / 1000.0) << " sec";
     fw::put_text(ss.str(), textPt, oImage);
     ss.str("");
 
     textPt.y += 15;
-    ss << "Alive: " << cvRound((iUser.GetLastUpdateTs() - iUser.GetCreationTs()) / 1000.0) << " sec";
+    ss << "Alive: " << cvRound(fw::elapsed(iUser.GetCreationTs(), iUser.GetLastUpdateTs()).count() / 1000.0) << " sec";
     fw::put_text(ss.str(), textPt, oImage);
     ss.str("");
   }
@@ -218,7 +218,7 @@ namespace face
 
   void Visualizer::DrawGeneral(std::shared_ptr<ImageMessage> iImage, cv::Mat& oImage)
   {
-    const double runtimeMs = std::llabs(fw::get_current_time() - iImage->GetTimestamp());
+    const double runtimeMs = fw::elapsed_since(iImage->GetTimestamp()).count();
 
     // Members, not function statics: resettable with the rest of the module.
     if (runtimeMs < mMinRuntimeMs) mMinRuntimeMs = runtimeMs;

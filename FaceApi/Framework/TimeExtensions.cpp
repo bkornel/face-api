@@ -1,6 +1,5 @@
 #include "Framework/TimeExtensions.h"
 
-#include <chrono>
 #include <ctime>
 
 namespace fw
@@ -25,11 +24,28 @@ namespace fw
     }
   }
 
-  long long get_current_time()
+  Milliseconds elapsed(Timestamp iFrom, Timestamp iTo)
   {
-    using namespace std::chrono;
-    milliseconds ms = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
-    return ms.count();
+    const Milliseconds difference = iTo - iFrom;
+
+    // A frame stamped slightly in the future is possible when the host supplies the stamp,
+    // and every caller here wants a length rather than a direction
+    return difference.count() < 0.0 ? Milliseconds::zero() : difference;
+  }
+
+  Milliseconds elapsed_since(Timestamp iFrom)
+  {
+    return elapsed(iFrom, now());
+  }
+
+  long long to_epoch_ms(Timestamp iTimestamp)
+  {
+    return std::chrono::duration_cast<std::chrono::milliseconds>(iTimestamp.time_since_epoch()).count();
+  }
+
+  Timestamp from_epoch_ms(long long iMilliseconds)
+  {
+    return Timestamp(std::chrono::milliseconds(iMilliseconds));
   }
 
   // One stamp per process run: it names the log and the profiler file of this run

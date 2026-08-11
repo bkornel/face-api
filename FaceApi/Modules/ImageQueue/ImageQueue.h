@@ -25,7 +25,7 @@ namespace face
 
     virtual ~ImageQueue() = default;
 
-    fw::ErrorCode Push(const cv::Mat& iFrame, unsigned iFrameId, long long iTimestamp);
+    fw::ErrorCode Push(const cv::Mat& iFrame, unsigned iFrameId, fw::Timestamp iTimestamp);
 
     std::shared_ptr<ImageMessage> Main(unsigned iTickNumber) override;
 
@@ -45,7 +45,7 @@ namespace face
       return mLastFrameId;
     }
 
-    inline long long GetLastTimestamp() const
+    inline fw::Timestamp GetLastTimestamp() const
     {
       return mLastTimestamp;
     }
@@ -71,7 +71,7 @@ namespace face
     void NotifyPendingSizeChange();
 
     std::atomic<unsigned> mLastFrameId{ 0U }; ///< Holds the ID of the last image frame.
-    std::atomic<long long> mLastTimestamp{ 0 };
+    std::atomic<fw::Timestamp> mLastTimestamp{};
 
     MessageQueue mQueue; ///< Queue for handling the frames
 

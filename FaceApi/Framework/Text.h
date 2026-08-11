@@ -12,10 +12,6 @@ namespace fw
 
     bool convert_to_boolean(const std::string& iValue);
 
-    bool ends_with(const std::string& iString, const std::string& iEnding);
-
-    bool starts_with(const std::string& iString, const std::string& iStarting);
-
     std::string trim_left(const std::string& iString);
 
     std::string trim_right(const std::string& iString);
