@@ -22,16 +22,6 @@ namespace fw
       return trimmedValue == "true" || trimmedValue == "t" || trimmedValue == "1";
     }
 
-    bool starts_with(const std::string& iString, const std::string& iStarting)
-    {
-      return !iStarting.empty() ? iString.substr(0, iStarting.size()) == iStarting : false;
-    }
-
-    bool ends_with(const std::string& iString, const std::string& iEnding)
-    {
-      return iString.length() >= iEnding.length() ? iString.compare(iString.length() - iEnding.length(), iEnding.length(), iEnding) == 0 : false;
-    }
-
     std::string trim_left(const std::string& iString)
     {
       const size_t startpos = iString.find_first_not_of(sWhiteSpaces);

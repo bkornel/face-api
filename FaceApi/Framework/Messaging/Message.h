@@ -1,6 +1,7 @@
 #pragma once
 
 
+#include "Framework/TimeExtensions.h"
 #include <iostream>
 #include <memory>
 
@@ -10,7 +11,7 @@ namespace fw
   {
   public:
 
-    Message(unsigned iFrameId, long long iTimestamp);
+    Message(unsigned iFrameId, Timestamp iTimestamp);
 
     Message(const Message& iOther) = delete;
 
@@ -25,19 +26,19 @@ namespace fw
       return mFrameId;
     }
 
-    inline long long GetTimestamp() const
+    inline Timestamp GetTimestamp() const
     {
       return mTimestamp;
     }
 
   private:
     unsigned mFrameId = 0U;
-    long long mTimestamp = 0;
+    Timestamp mTimestamp;
   };
 
   inline std::ostream& operator<<(std::ostream& ioStream, const Message& iMessage)
   {
-    ioStream << "[Base] Frame ID: " << iMessage.mFrameId << ", timestamp: " << iMessage.mTimestamp;
+    ioStream << "[Base] Frame ID: " << iMessage.mFrameId << ", timestamp: " << to_epoch_ms(iMessage.mTimestamp);
     return ioStream;
   }
 }

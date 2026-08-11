@@ -36,21 +36,21 @@ namespace fw
 
   public:
     explicit MessageQueue(const std::string& iName) :
-      MessageQueue(iName, MAX_SAMPLING_RATE_FPS, MAX_BOUND, -1LL)
+      MessageQueue(iName, MAX_SAMPLING_RATE_FPS, MAX_BOUND, Milliseconds(-1.0))
     {
     }
 
     MessageQueue(const std::string& iName, float iSamplingFPS, int iBound) :
-      MessageQueue(iName, iSamplingFPS, iBound, -1LL)
+      MessageQueue(iName, iSamplingFPS, iBound, Milliseconds(-1.0))
     {
     }
 
-    MessageQueue(const std::string& iName, float iSamplingFPS, int iBound, long long iThresholdMs) :
+    MessageQueue(const std::string& iName, float iSamplingFPS, int iBound, Milliseconds iThreshold) :
       mName(iName)
     {
       SetBound(iBound);
       SetSamplingFPS(iSamplingFPS);
-      SetTimestampFiltering(iThresholdMs);
+      SetTimestampFiltering(iThreshold);
     }
 
     MessageQueue& operator=(const MessageQueue& iOther) = delete;
@@ -139,7 +139,7 @@ namespace fw
           mQueue.pop();
         }
 
-        mTimestampMs = 0LL;
+        mTimestamp = Timestamp{};
         mSize = 0;
       }
 
@@ -187,13 +187,13 @@ namespace fw
       CV_DbgAssert(iSamplingFPS > 0.0F);
       std::lock_guard<std::mutex> lock(mMutex);
       mSamplingFPS = (std::min)((std::max)(iSamplingFPS, MIN_SAMPLING_RATE_FPS), MAX_SAMPLING_RATE_FPS);
-      mSamplingMs = ConvertFpsToMs(mSamplingFPS);
+      mSampling = ConvertFpsToDuration(mSamplingFPS);
     }
 
-    void SetTimestampFiltering(long long iThresholdMs)
+    void SetTimestampFiltering(Milliseconds iThreshold)
     {
       std::lock_guard<std::mutex> lock(mMutex);
-      mThresholdMs = iThresholdMs;
+      mThreshold = iThreshold;
     }
 
   private:
@@ -209,13 +209,13 @@ namespace fw
 
       if (static_cast<int>(mQueue.size()) >= mBound.load()) return ErrorCode::OutOfResources;
 
-      const long long currentTimestampMs = fw::get_current_time();
+      const Timestamp currentTimestamp = now();
 
-      if (std::llabs(currentTimestampMs - mTimestampMs) <= mSamplingMs.load())
+      if (elapsed(mTimestamp, currentTimestamp) <= mSampling.load())
         return ErrorCode::BadData;
 
-      mTimestampMs = currentTimestampMs;
-      mQueue.push(std::make_pair(mTimestampMs, iMessageTuple));
+      mTimestamp = currentTimestamp;
+      mQueue.push(std::make_pair(mTimestamp, iMessageTuple));
       mSize = static_cast<int>(mQueue.size());
 
       mCV.notify_all();
@@ -255,17 +255,17 @@ namespace fw
 
     void FilterLocked()
     {
-      const long long thresholdMs = mThresholdMs.load();
-      if (thresholdMs <= 0LL) return;
+      const Milliseconds threshold = mThreshold.load();
+      if (threshold.count() <= 0.0) return;
 
-      const long long currentTimestampMs = fw::get_current_time();
+      const Timestamp currentTimestamp = now();
       const int startSize = mSize;
 
       while (!mQueue.empty())
       {
-        const long long createTimestampMs = mQueue.front().first;
+        const Timestamp createTimestamp = mQueue.front().first;
 
-        if (std::llabs(currentTimestampMs - createTimestampMs) <= thresholdMs)
+        if (elapsed(createTimestamp, currentTimestamp) <= threshold)
           break;
 
         mQueue.pop();
@@ -279,15 +279,15 @@ namespace fw
       }
     }
 
-    inline long long ConvertFpsToMs(float iFPS) const
+    inline Milliseconds ConvertFpsToDuration(float iFPS) const
     {
       CV_DbgAssert(iFPS > 0.0F);
-      return static_cast<long long>((1.0F / iFPS) * 1000.0F);
+      return Milliseconds((1.0 / iFPS) * 1000.0);
     }
 
     std::mutex mMutex;
     std::condition_variable mCV;
-    std::queue<std::pair<long long, MessageTuple>> mQueue;
+    std::queue<std::pair<Timestamp, MessageTuple>> mQueue;
 
     std::string mName;
 
@@ -295,10 +295,10 @@ namespace fw
     std::atomic<int> mBound{ MAX_BOUND };
 
     std::atomic<float> mSamplingFPS{ MAX_SAMPLING_RATE_FPS };
-    std::atomic<long long> mSamplingMs{ 1LL };
-    std::atomic<long long> mThresholdMs{ -1LL };
+    std::atomic<Milliseconds> mSampling{ Milliseconds(1.0) };
+    std::atomic<Milliseconds> mThreshold{ Milliseconds(-1.0) };
 
-    long long mTimestampMs = 0LL;
+    Timestamp mTimestamp;
   };
 
   template <typename First, typename... Rest>

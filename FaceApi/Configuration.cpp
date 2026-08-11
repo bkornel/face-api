@@ -148,7 +148,7 @@ namespace face
   void Configuration::FixPathSeparator(std::string& ioPath)
   {
     std::replace(ioPath.begin(), ioPath.end(), '\\', '/');
-    if (!fw::str::ends_with(ioPath, "/") && !fw::str::ends_with(ioPath, "\\"))
+    if (!ioPath.ends_with("/") && !ioPath.ends_with("\\"))
       ioPath += "/";
   }
 }

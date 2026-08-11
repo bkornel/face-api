@@ -3,21 +3,18 @@
 #include <cmath>
 #include <cstdlib>
 #include <limits>
+#include <numbers>
 
 namespace fw
 {
-  // Spelled out rather than taken from <cmath>: M_PI is not standard, and on MSVC it only
-  // appears if _USE_MATH_DEFINES was defined before the include
-  constexpr double cPi = 3.14159265358979323846;
-
   constexpr double deg_to_rad(double iDegree)
   {
-    return iDegree * (cPi / 180.0);
+    return iDegree * (std::numbers::pi / 180.0);
   }
 
   constexpr double rad_to_deg(double iRadian)
   {
-    return iRadian * (180.0 / cPi);
+    return iRadian * (180.0 / std::numbers::pi);
   }
 
   template <typename T>
@@ -30,16 +27,13 @@ namespace fw
   template <typename T>
   T scale_interval(T iValueIn, T iBaseMin, T iBaseMax, T iLimitMin, T iLimitMax)
   {
-    const float baseRange = static_cast<float>(iBaseMax) - static_cast<float>(iBaseMin);
+    const double baseRange = static_cast<double>(iBaseMax) - static_cast<double>(iBaseMin);
 
-    if (std::fabs(baseRange) <= std::numeric_limits<float>::epsilon())
+    if (std::abs(baseRange) <= std::numeric_limits<double>::epsilon())
       return iLimitMin;
 
-    const float scaled =
-      (static_cast<float>(iLimitMax) - static_cast<float>(iLimitMin)) *
-        (static_cast<float>(iValueIn) - static_cast<float>(iBaseMin)) / baseRange +
-      static_cast<float>(iLimitMin);
+    const double ratio = (static_cast<double>(iValueIn) - static_cast<double>(iBaseMin)) / baseRange;
 
-    return static_cast<T>(scaled);
+    return static_cast<T>(std::lerp(static_cast<double>(iLimitMin), static_cast<double>(iLimitMax), ratio));
   }
 }

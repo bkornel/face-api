@@ -2,13 +2,13 @@
 
 #include "Framework/ErrorCode.h"
 #include "Framework/Graph/FlowGraph.hpp"
-#include "Framework/Graph/Functional.hpp"
 #include "Framework/Graph/Module.h"
 #include "Framework/Text.h"
 
 #include <easyloggingpp/easyloggingpp.h>
 
 #include <memory>
+#include <functional>
 #include <tuple>
 #include <type_traits>
 #include <utility>
@@ -169,10 +169,17 @@ namespace fw
     }
 
   protected:
+    // What FW_BIND used to build. connect() deduces ReturnT and ArgumentT... from the
+    // std::function, so the type is spelled out here rather than deduced from a lambda.
+    std::function<ReturnT(ArgumentT...)> MainAsFunction()
+    {
+      return [this](ArgumentT... iArgs) { return Main(iArgs...); };
+    }
+
     /// @brief Connects a source port: no dependency to wait for, so Trigger() drives it.
     inline fw::ErrorCode ConnectPort(std::true_type /*iIsSource*/)
     {
-      auto source = fw::connect(FW_BIND(&Port::Main, this), mExecutor);
+      auto source = fw::connect(MainAsFunction(), mExecutor);
 
       mTrigger = source.first;
       mOutputPort = source.second;
@@ -207,7 +214,7 @@ namespace fw
     template <size_t... Is>
     inline void ConnectPort(std::index_sequence<Is...> /*unused*/)
     {
-      mOutputPort = fw::connect(FW_BIND(&Port::Main, this), std::get<Is>(mInputPorts)...);
+      mOutputPort = fw::connect(MainAsFunction(), std::get<Is>(mInputPorts)...);
     }
 
     /// @brief Runs a source port's Main(). Downstream modules inherit the executor from

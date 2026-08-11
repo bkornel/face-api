@@ -265,9 +265,6 @@
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\MathExtensions.h">
       <Filter>Framework</Filter>
     </ClInclude>
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Container.h">
-      <Filter>Framework</Filter>
-    </ClInclude>
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\TimeExtensions.h">
       <Filter>Framework</Filter>
     </ClInclude>
@@ -279,9 +276,6 @@
       <Filter>Model</Filter>
     </ClInclude>
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Graph\FlowGraph.hpp">
-      <Filter>Framework\Graph</Filter>
-    </ClInclude>
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Graph\Functional.hpp">
       <Filter>Framework\Graph</Filter>
     </ClInclude>
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Imaging\VideoWriter.h">

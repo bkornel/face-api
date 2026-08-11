@@ -7,7 +7,9 @@ namespace fw
 {
   Thread::~Thread()
   {
-    // Derived classes must stop the thread while their own state is still alive.
+    // Derived classes must stop the thread while their own state is still alive. jthread
+    // would join here by itself, but by then Run() would be working against a destroyed
+    // derived object, so the warning still earns its place.
     if (IsRunning())
     {
       LOG(WARNING) << "Thread was still running in ~Thread(); the derived class should have stopped it.";
@@ -22,24 +24,27 @@ namespace fw
 
   ErrorCode Thread::StartThread()
   {
-    if (!mFirstRun) StopThread();
+    if (mThread.joinable()) StopThread();
 
-    mStopThread = mFirstRun = false;
-    mThread = std::async(std::launch::async, &Thread::Run, this);
+    mRunning = true;
+
+    // Assigning over a jthread requests a stop on the previous one and joins it
+    mThread = std::jthread([this](std::stop_token /*iStopToken*/) {
+      Run();
+      mRunning = false;
+    });
 
     return ErrorCode::OK;
   }
 
-  fw::ErrorCode Thread::StopThread()
+  ErrorCode Thread::StopThread()
   {
-    if (IsRunning())
-    {
-      StopSignalThread();
-      mThread.wait();
-      return ErrorCode::OK;
-    }
+    if (!mThread.joinable()) return ErrorCode::BadState;
 
-    return ErrorCode::BadState;
+    StopSignalThread();
+    mThread.join();
+
+    return ErrorCode::OK;
   }
 
   void Thread::ThreadSleep(long long iMilliseconds)
@@ -49,6 +54,16 @@ namespace fw
 
   bool Thread::IsRunning() const
   {
-    return !mFirstRun && mThread.wait_for(std::chrono::seconds(0)) != std::future_status::ready;
+    return mRunning && !mThread.get_stop_token().stop_requested();
+  }
+
+  bool Thread::GetThreadStopSignal() const
+  {
+    return mThread.get_stop_token().stop_requested();
+  }
+
+  void Thread::StopSignalThread()
+  {
+    mThread.request_stop();
   }
 }

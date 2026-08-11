@@ -3,6 +3,9 @@ cmake_minimum_required(VERSION 3.6.0)
 # The shared library has the name: libFaceApi.so
 set(TARGET_NAME FaceApi)
 
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 message("Building FaceApi shared library")
 message("- Output directory of ${TARGET_NAME}: '${CMAKE_BINARY_DIR}/${TARGET_NAME}'")
 

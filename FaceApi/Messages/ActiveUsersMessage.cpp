@@ -2,7 +2,7 @@
 
 namespace face
 {
-  ActiveUsersMessage::ActiveUsersMessage(const UserVector& iActiveUsers, unsigned iFrameId, long long iTimestamp) :
+  ActiveUsersMessage::ActiveUsersMessage(const UserVector& iActiveUsers, unsigned iFrameId, fw::Timestamp iTimestamp) :
     Message(iFrameId, iTimestamp)
   {
     for (const auto& user : iActiveUsers)

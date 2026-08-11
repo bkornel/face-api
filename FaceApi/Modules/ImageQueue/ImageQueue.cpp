@@ -11,7 +11,7 @@
 namespace face
 {
   ImageQueue::ImageQueue() :
-    mQueue("ImageQueue", 12.0F, 10, 500)
+    mQueue("ImageQueue", 12.0F, 10, fw::Milliseconds(500.0))
   {
   }
 
@@ -28,13 +28,13 @@ namespace face
         mQueue.SetBound(fw::str::convert_to_number<int>(value));
 
       if (fw::get_value(iSettings, "thresholdMS", value))
-        mQueue.SetTimestampFiltering(fw::str::convert_to_number<int>(value));
+        mQueue.SetTimestampFiltering(fw::Milliseconds(fw::str::convert_to_number<double>(value)));
     }
 
     return fw::ErrorCode::OK;
   }
 
-  fw::ErrorCode ImageQueue::Push(const cv::Mat& iFrame, unsigned iFrameId, long long iTimestamp)
+  fw::ErrorCode ImageQueue::Push(const cv::Mat& iFrame, unsigned iFrameId, fw::Timestamp iTimestamp)
   {
     if (iFrame.empty())
     {

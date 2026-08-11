@@ -1,10 +1,18 @@
 #pragma once
 
+#include <chrono>
+
 namespace fw
 {
   class Stopwatch
   {
   public:
+    // Measuring elapsed time is what steady_clock is for: it cannot be moved by the system
+    // clock being corrected, and it never runs backwards
+    using Clock = std::chrono::steady_clock;
+    using Seconds = std::chrono::duration<double>;
+    using Milliseconds = std::chrono::duration<double, std::milli>;
+
     explicit Stopwatch(bool iStart = false);
 
     ~Stopwatch() = default;
@@ -28,15 +36,18 @@ namespace fw
     //! Returns the elapsed time between the declaration of object and current time in millisecond.
     double GetElapsedTimeFromConstructionSec(bool iStopped = true) const;
 
+    //! The measured interval, for callers that would rather keep the unit in the type
+    Milliseconds GetElapsed(bool iStopped = true) const;
+
     inline bool IsRunning() const
     {
       return mIsRunning;
     }
 
   private:
-    long long mConstructionTime = 0;
-    long long mStopTime = 0;
-    long long mStartTime = 0;
+    Clock::time_point mConstructionTime = Clock::now();
+    Clock::time_point mStopTime = Clock::now();
+    Clock::time_point mStartTime = Clock::now();
     bool mIsRunning = false;
   };
 }

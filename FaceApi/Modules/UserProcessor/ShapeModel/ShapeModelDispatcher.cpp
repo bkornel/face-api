@@ -1,6 +1,5 @@
 #include "Framework/Imaging/Geometry.h"
 #include "Framework/Settings.h"
-#include "Framework/Container.h"
 #include "Framework/ErrorCode.h"
 #include "Modules/UserProcessor/ShapeModel/ShapeModelDispatcher.h"
 
@@ -61,7 +60,7 @@ namespace face
     // Drop the models of the users that are no longer around. A user that comes back is
     // Detected again, and Fit() re-initializes its shape from the face rectangle in that
     // case, so there is nothing in the old model worth keeping.
-    fw::remove_if(mShapeModels, [&](const ShapeModels::value_type& obj) {
+    std::erase_if(mShapeModels, [&](const ShapeModels::value_type& obj) {
       return mDispatchedUserIDs.find(obj.first) == mDispatchedUserIDs.end();
     });
   }

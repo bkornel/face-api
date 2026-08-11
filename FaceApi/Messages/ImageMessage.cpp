@@ -5,7 +5,7 @@
 namespace face
 {
   // Clones, because the caller usually owns a buffer it keeps writing to - a camera frame
-  ImageMessage::ImageMessage(const cv::Mat& iImage, unsigned iFrameId, long long iTimestamp) :
+  ImageMessage::ImageMessage(const cv::Mat& iImage, unsigned iFrameId, fw::Timestamp iTimestamp) :
     Message(iFrameId, iTimestamp)
   {
     CV_DbgAssert(!iImage.empty());
@@ -14,7 +14,7 @@ namespace face
 
   // Takes the buffer over, for callers that produced it and have no further use for it.
   // Saves a full frame copy per frame, which is the pipeline's largest single memcpy.
-  ImageMessage::ImageMessage(cv::Mat&& iImage, unsigned iFrameId, long long iTimestamp) :
+  ImageMessage::ImageMessage(cv::Mat&& iImage, unsigned iFrameId, fw::Timestamp iTimestamp) :
     Message(iFrameId, iTimestamp)
   {
     CV_DbgAssert(!iImage.empty());

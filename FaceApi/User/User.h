@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Framework/TimeExtensions.h"
 #include "Model/FaceModel.h"
 #include "User/UserData.hpp"
 
@@ -23,7 +24,7 @@ namespace face
       Inactive
     };
 
-    User(const cv::Rect& iFaceRect, int iUserId, long long iTimestamp);
+    User(const cv::Rect& iFaceRect, int iUserId, fw::Timestamp iTimestamp);
 
     User(const User& iOther) = default;
 
@@ -46,35 +47,35 @@ namespace face
       return mUserId;
     }
 
-    inline long long GetCreationTs() const
+    inline fw::Timestamp GetCreationTs() const
     {
       return mCreationTs;
     }
 
-    inline long long GetLastUpdateTs() const
+    inline fw::Timestamp GetLastUpdateTs() const
     {
       return mLastUpdateTs;
     }
 
-    inline long long GetLastDetectionTs() const
+    inline fw::Timestamp GetLastDetectionTs() const
     {
       return mLastDetectionTs;
     }
 
-    inline void SetLastUpdateTs(long long iTimestamp)
+    inline void SetLastUpdateTs(fw::Timestamp iTimestamp)
     {
       mLastUpdateTs = iTimestamp;
     }
 
-    void SetDetectionData(const cv::Rect& iFaceRect, long long iTimestamp);
+    void SetDetectionData(const cv::Rect& iFaceRect, fw::Timestamp iTimestamp);
     void SetStatus(Status iStatus);
 
   private:
     const int mUserId = 0;
-    const long long mCreationTs = 0;
+    const fw::Timestamp mCreationTs;
 
-    long long mLastUpdateTs = 0;
-    long long mLastDetectionTs = 0;
+    fw::Timestamp mLastUpdateTs;
+    fw::Timestamp mLastDetectionTs;
 
     Status mStatus = Status::Detected;
   };

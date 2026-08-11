@@ -10,7 +10,7 @@ namespace face
   {
   public:
 
-    RoiMessage(const std::vector<cv::Rect>& iROIs, const cv::Size& iMinRoiSize, const cv::Size& iMaxRoiSize, unsigned iFrameId, long long iTimestamp);
+    RoiMessage(const std::vector<cv::Rect>& iROIs, const cv::Size& iMinRoiSize, const cv::Size& iMaxRoiSize, unsigned iFrameId, fw::Timestamp iTimestamp);
 
     virtual ~RoiMessage() = default;
 

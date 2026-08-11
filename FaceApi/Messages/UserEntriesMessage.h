@@ -10,10 +10,10 @@ namespace face
   {
   public:
 
-    using Entry = std::pair<long long, std::shared_ptr<UserData>>;
+    using Entry = std::pair<fw::Timestamp, std::shared_ptr<UserData>>;
     using EntryMap = std::map<int, std::vector<Entry>>;
 
-    UserEntriesMessage(const EntryMap& iEntryMap, unsigned iFrameId, long long iTimestamp);
+    UserEntriesMessage(const EntryMap& iEntryMap, unsigned iFrameId, fw::Timestamp iTimestamp);
 
     virtual ~UserEntriesMessage() = default;
 

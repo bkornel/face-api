@@ -2,7 +2,7 @@
 
 namespace face
 {
-  CommandMessage::CommandMessage(Type iType, unsigned iFrameId, long long iTimestamp) :
+  CommandMessage::CommandMessage(Type iType, unsigned iFrameId, fw::Timestamp iTimestamp) :
     fw::Message(iFrameId, iTimestamp),
     mType(iType)
   {

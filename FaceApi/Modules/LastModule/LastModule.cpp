@@ -48,7 +48,7 @@ namespace face
   long long LastModule::GetLastTimestamp() const
   {
     std::shared_ptr<ImageMessage> lastImage = GetLastImage();
-    return lastImage ? lastImage->GetTimestamp() : 0LL;
+    return lastImage ? fw::to_epoch_ms(lastImage->GetTimestamp()) : 0LL;
   }
 
   fw::ErrorCode LastModule::GetLastResults(FaceResults& oResults) const
@@ -74,7 +74,7 @@ namespace face
       FaceResult result;
       result.userId = user->GetUserId();
       result.frameId = users->GetFrameId();
-      result.timestamp = users->GetTimestamp();
+      result.timestamp = fw::to_epoch_ms(users->GetTimestamp());
       result.faceRect = user->GetFaceRect();
       result.shape2D = user->GetShape2D();
       result.shape3D = user->GetShape3D();
