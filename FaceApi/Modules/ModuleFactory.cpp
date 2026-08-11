@@ -15,19 +15,27 @@
 
 namespace face
 {
-  fw::Module::Shared ModuleFactory::Create(const cv::FileNode& iModuleNode)
+  fw::Module::Shared ModuleFactory::Create(const cv::FileNode& iModuleNode, fw::MessageBus& ioBus)
   {
     const std::string& moduleName = fw::str::to_lower(iModuleNode.name());
     fw::Module::Shared newModule = nullptr;
 
-    if (moduleName == "facedetection")	    newModule = std::make_shared<FaceDetection>();
-    else if (moduleName == "firstmodule")		newModule = std::make_shared<FirstModule>();
-    else if (moduleName == "imagequeue")	  newModule = std::make_shared<ImageQueue>();
-    else if (moduleName == "lastmodule")		newModule = std::make_shared<LastModule>();
-    else if (moduleName == "userhistory")		newModule = std::make_shared<UserHistory>();
-    else if (moduleName == "usermanager")		newModule = std::make_shared<UserManager>();
-    else if (moduleName == "userprocessor")	newModule = std::make_shared<UserProcessor>();
-    else if (moduleName == "visualizer")		newModule = std::make_shared<Visualizer>();
+    if (moduleName == "facedetection")
+      newModule = std::make_shared<FaceDetection>();
+    else if (moduleName == "firstmodule")
+      newModule = std::make_shared<FirstModule>();
+    else if (moduleName == "imagequeue")
+      newModule = std::make_shared<ImageQueue>();
+    else if (moduleName == "lastmodule")
+      newModule = std::make_shared<LastModule>();
+    else if (moduleName == "userhistory")
+      newModule = std::make_shared<UserHistory>();
+    else if (moduleName == "usermanager")
+      newModule = std::make_shared<UserManager>();
+    else if (moduleName == "userprocessor")
+      newModule = std::make_shared<UserProcessor>();
+    else if (moduleName == "visualizer")
+      newModule = std::make_shared<Visualizer>();
     // REMARK: Insert new modules here
 
     // Check if the module is not set up in this file
@@ -36,6 +44,10 @@ namespace face
       LOG(ERROR) << "Unknown module is referenced with name: " << iModuleNode.name();
       return nullptr;
     }
+
+    // Attach before Initialize(): that is where the module subscribes. newModule doubles
+    // as the lifetime token, so its subscriptions cannot outlive it.
+    newModule->Attach(ioBus, newModule);
 
     // Initialize the module (this will also load the module's settings)
     if (newModule->Initialize(iModuleNode) != fw::ErrorCode::OK)

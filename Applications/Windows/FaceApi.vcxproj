@@ -38,6 +38,7 @@
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\FaceApi.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Exception.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Message.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\MessageBus.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Module.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\UtilOCV.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\UtilString.cpp" />
@@ -57,8 +58,8 @@
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\UserProcessor.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\Visualizer\Visualizer.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\User\User.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\User\UserData.cpp" />
     <ClCompile Include="..\..\FaceApi\Messages\CommandMessage.cpp" />
-    <ClCompile Include="..\..\FaceApi\Messages\ImageArrivedMessage.cpp" />
     <ClCompile Include="..\..\FaceApi\Messages\ImageSizeChangedMessage.cpp" />
     <ClCompile Include="..\..\FaceApi\Modules\FirstModule\FirstModule.cpp" />
     <ClCompile Include="..\..\FaceApi\Modules\LastModule\LastModule.cpp" />
@@ -87,8 +88,10 @@
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Functional.hpp" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\VideoWriter.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\FaceApi.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\FaceResult.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Exception.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Message.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\MessageBus.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Module.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\UtilOCV.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\UtilString.h" />
@@ -110,7 +113,6 @@
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\User\User.h" />
     <ClInclude Include="..\..\FaceApi\Framework\Port.hpp" />
     <ClInclude Include="..\..\FaceApi\Messages\CommandMessage.h" />
-    <ClInclude Include="..\..\FaceApi\Messages\ImageArrivedMessage.h" />
     <ClInclude Include="..\..\FaceApi\Modules\FirstModule\FirstModule.h" />
     <ClInclude Include="..\..\FaceApi\Modules\LastModule\LastModule.h" />
     <ClInclude Include="..\..\FaceApi\Modules\ModuleConnector.h" />
@@ -119,6 +121,9 @@
     <ClInclude Include="..\..\FaceApi\User\UserData.hpp" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\User\UserDispatcher.hpp" />
     <ClInclude Include="..\..\FaceApi\Messages\ImageSizeChangedMessage.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\.clang-format" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{3416DE23-C794-4DD7-B3CA-5BFAF7649D6D}</ProjectGuid>
@@ -130,26 +135,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -206,7 +211,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;ELPP_THREAD_SAFE;ELPP_FORCE_USE_STD_THREAD;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\FaceApi;$(ProjectDir)..\..\FaceApi\3rdparty;$(ProjectDir)..\..\..\3rdParty\opencv-4.1.1\windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\FaceApi;$(ProjectDir)..\..\FaceApi\3rdparty;$(ProjectDir)..\..\..\3rdParty\opencv-4.5.2\windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
@@ -250,7 +255,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;ELPP_THREAD_SAFE;ELPP_FORCE_USE_STD_THREAD;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\FaceApi;$(ProjectDir)..\..\FaceApi\3rdparty;$(ProjectDir)..\..\..\3rdParty\opencv-4.1.1\windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\FaceApi;$(ProjectDir)..\..\FaceApi\3rdparty;$(ProjectDir)..\..\..\3rdParty\opencv-4.5.2\windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>

@@ -16,14 +16,12 @@
 namespace fw
 {
   template <typename... T>
-  struct is_shared_ptr :
-    std::false_type
+  struct is_shared_ptr : std::false_type
   {
   };
 
   template <typename... T>
-  struct is_shared_ptr<std::shared_ptr<T>... > :
-    std::true_type
+  struct is_shared_ptr<std::shared_ptr<T>...> : std::true_type
   {
   };
 
@@ -62,8 +60,6 @@ namespace fw
 
     MessageQueue(const MessageQueue& iOther) = delete;
 
-    /// @brief Blocks until the message could be pushed.
-    /// Prefer TryPush() on threads that must not block, such as a camera callback.
     ErrorCode Push(const MessageTuple& iMessageTuple)
     {
       ErrorCode retCode = ErrorCode::OK;
@@ -71,8 +67,6 @@ namespace fw
 
       while ((retCode = PushLocked(iMessageTuple)) == ErrorCode::OutOfResources)
       {
-        // A bounded wait: a pop notifies us, but timestamp filtering can also
-        // make room without anybody popping.
         mCV.wait_for(lock, std::chrono::milliseconds(1));
       }
 
@@ -150,15 +144,30 @@ namespace fw
       mCV.notify_all();
     }
 
-    inline float GetSamplingFPS() const { return mSamplingFPS; }
+    inline float GetSamplingFPS() const
+    {
+      return mSamplingFPS;
+    }
 
-    inline int GetSize() const { return mSize; }
+    inline int GetSize() const
+    {
+      return mSize;
+    }
 
-    inline int GetBound() const { return mBound; }
+    inline int GetBound() const
+    {
+      return mBound;
+    }
 
-    inline bool IsEmpty() const { return mSize == 0; }
+    inline bool IsEmpty() const
+    {
+      return mSize == 0;
+    }
 
-    inline bool IsFull() const { return mSize >= mBound; }
+    inline bool IsFull() const
+    {
+      return mSize >= mBound;
+    }
 
     void SetBound(int iBound)
     {
@@ -168,7 +177,6 @@ namespace fw
         mBound = (std::min)((std::max)(iBound, MIN_BOUND), MAX_BOUND);
       }
 
-      // A larger bound may let a blocked producer through.
       mCV.notify_all();
     }
 
@@ -193,9 +201,6 @@ namespace fw
     const static int MAX_BOUND;
     const static int MIN_BOUND;
 
-    /// @brief All *Locked helpers below require mMutex to be held by the caller.
-    /// Keeping the bound/emptiness check and the mutation under one single lock
-    /// acquisition is what makes the queue safe against concurrent producers.
     ErrorCode PushLocked(const MessageTuple& iMessageTuple)
     {
       FilterLocked();
@@ -240,7 +245,6 @@ namespace fw
         mQueue.pop();
         mSize = static_cast<int>(mQueue.size());
 
-        // Popping frees a slot for a blocked producer.
         mCV.notify_all();
       }
 
@@ -285,7 +289,6 @@ namespace fw
 
     std::string mName;
 
-    // Read by the getters without holding mMutex, therefore atomic.
     std::atomic<int> mSize{ 0 };
     std::atomic<int> mBound{ MAX_BOUND };
 
@@ -293,19 +296,18 @@ namespace fw
     std::atomic<long long> mSamplingMs{ 1LL };
     std::atomic<long long> mThresholdMs{ -1LL };
 
-    // Only touched while mMutex is held.
     long long mTimestampMs = 0LL;
   };
 
-  template<typename First, typename... Rest>
+  template <typename First, typename... Rest>
   const float fw::MessageQueue<First, Rest...>::MAX_SAMPLING_RATE_FPS = (std::numeric_limits<float>::max)();
 
-  template<typename First, typename... Rest>
+  template <typename First, typename... Rest>
   const float fw::MessageQueue<First, Rest...>::MIN_SAMPLING_RATE_FPS = 1.0F;
 
-  template<typename First, typename... Rest>
+  template <typename First, typename... Rest>
   const int fw::MessageQueue<First, Rest...>::MAX_BOUND = (std::numeric_limits<int>::max)();
 
-  template<typename First, typename... Rest>
+  template <typename First, typename... Rest>
   const int fw::MessageQueue<First, Rest...>::MIN_BOUND = 1;
 }

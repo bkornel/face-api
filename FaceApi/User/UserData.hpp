@@ -14,29 +14,61 @@ namespace face
 
     UserData() = default;
 
-    UserData(const UserData& iOther) = default;
+    UserData(const UserData& iOther);
 
     virtual ~UserData() = default;
 
-    UserData& operator=(const UserData& iOther) = default;
+    UserData& operator=(const UserData& iOther);
 
     // Get: General & detection
-    inline const cv::Rect& GetFaceRect() const { return mFaceRect; }
-    inline const cv::Mat& GetFaceTemplate() const { return mFaceTemplate; }
-    inline const cv::Vec2i& GetFaceRectOffset() const { return mFaceRectOffset; }
-    inline const fw::ocv::VectorPt3D& GetFaceBox() const { return mFaceBox; }
+    inline const cv::Rect& GetFaceRect() const
+    {
+      return mFaceRect;
+    }
+
+    inline const cv::Mat& GetFaceTemplate() const
+    {
+      return mFaceTemplate;
+    }
+
+    inline const cv::Vec2i& GetFaceRectOffset() const
+    {
+      return mFaceRectOffset;
+    }
+
+    inline const fw::ocv::VectorPt3D& GetFaceBox() const
+    {
+      return mFaceBox;
+    }
 
     // Get: Shape
-    inline const fw::ocv::VectorPt2D& GetShape2D() const { return mShape2D; }
-    inline const fw::ocv::VectorPt3D& GetShape3D() const { return mShape3D; }
-    inline const fw::ocv::VectorPt2D& GetNormShape2D() const { return mNormShape2D; }
-    inline const fw::ocv::VectorPt3D& GetNormShape3D() const { return mNormShape3D; }
+    inline const fw::ocv::VectorPt2D& GetShape2D() const
+    {
+      return mShape2D;
+    }
+
+    inline const fw::ocv::VectorPt3D& GetShape3D() const
+    {
+      return mShape3D;
+    }
+
+    inline const fw::ocv::VectorPt2D& GetNormShape2D() const
+    {
+      return mNormShape2D;
+    }
+
+    inline const fw::ocv::VectorPt3D& GetNormShape3D() const
+    {
+      return mNormShape3D;
+    }
+
     inline const cv::Point2d& GetPoint2d(Landmark iIdx) const
     {
       const int idx = static_cast<int>(iIdx);
       CV_DbgAssert(idx >= 0 && idx < mShape2D.size());
       return mShape2D[idx];
     }
+
     inline const cv::Point3d& GetPoint3d(Landmark iIdx) const
     {
       const int idx = static_cast<int>(iIdx);
@@ -45,12 +77,35 @@ namespace face
     }
 
     // Get: Pose
-    inline const cv::Vec3d& GetRPY() const { return mRPY; }
-    inline const cv::Vec3d& GetPosition3D() const { return mPosition3D; }
-    inline const cv::Mat& GetCameraMatrix() const { return mCameraMatrix; }
-    inline const cv::Mat& GetExtrinsics() const { return mExtrinsics; }
-    inline const cv::Mat& GetRvec() const { return mRvec; }
-    inline const cv::Mat& GetTvec() const { return mTvec; }
+    inline const cv::Vec3d& GetRPY() const
+    {
+      return mRPY;
+    }
+
+    inline const cv::Vec3d& GetPosition3D() const
+    {
+      return mPosition3D;
+    }
+
+    inline const cv::Mat& GetCameraMatrix() const
+    {
+      return mCameraMatrix;
+    }
+
+    inline const cv::Mat& GetExtrinsics() const
+    {
+      return mExtrinsics;
+    }
+
+    inline const cv::Mat& GetRvec() const
+    {
+      return mRvec;
+    }
+
+    inline const cv::Mat& GetTvec() const
+    {
+      return mTvec;
+    }
 
     // Set: General & detection
     inline void SetFaceRect(const cv::Rect& iFaceRect)
@@ -58,12 +113,28 @@ namespace face
       mFaceRectOffset = (iFaceRect.tl() - mFaceRect.tl());
       mFaceRect = iFaceRect;
     }
-    inline void SetFaceTemplate(const cv::Mat& iFaceTemplate) { mFaceTemplate = iFaceTemplate.clone(); }
-    inline void SetFaceBox(const fw::ocv::VectorPt3D& iFaceBox) { mFaceBox = iFaceBox; }
+
+    inline void SetFaceTemplate(const cv::Mat& iFaceTemplate)
+    {
+      mFaceTemplate = iFaceTemplate.clone();
+    }
+
+    inline void SetFaceBox(const fw::ocv::VectorPt3D& iFaceBox)
+    {
+      mFaceBox = iFaceBox;
+    }
 
     // Set: Shape
-    inline void SetShape3D(const fw::ocv::VectorPt3D& iShape3D) { mShape3D = iShape3D; }
-    inline void SetShape2D(const fw::ocv::VectorPt2D& iShape2D) { mShape2D = iShape2D; }
+    inline void SetShape3D(const fw::ocv::VectorPt3D& iShape3D)
+    {
+      mShape3D = iShape3D;
+    }
+
+    inline void SetShape2D(const fw::ocv::VectorPt2D& iShape2D)
+    {
+      mShape2D = iShape2D;
+    }
+
     inline void SetNormShapes(const fw::ocv::VectorPt2D& iNormShape2D, const fw::ocv::VectorPt3D& iNormShape3D)
     {
       mNormShape2D = iNormShape2D;
@@ -76,7 +147,12 @@ namespace face
       mRPY = iRPY;
       mPosition3D = iPosition3D;
     }
-    inline void SetCameraMatrix(const cv::Mat& iCameraMatrix) { mCameraMatrix = iCameraMatrix.clone(); }
+
+    inline void SetCameraMatrix(const cv::Mat& iCameraMatrix)
+    {
+      mCameraMatrix = iCameraMatrix.clone();
+    }
+
     inline void SetExtrinsics(const cv::Mat& iExtrinsics, const cv::Mat& iRvec, const cv::Mat& iTvec)
     {
       mExtrinsics = iExtrinsics.clone();
@@ -85,6 +161,8 @@ namespace face
     }
 
   private:
+    void CopyFrom(const UserData& iOther);
+
     // Face
     cv::Rect mFaceRect;
     cv::Mat mFaceTemplate;

@@ -7,8 +7,7 @@ namespace face
 {
   class User;
 
-  class PoseEstimationDispatcher :
-    public UserDispatcher
+  class PoseEstimationDispatcher : public UserDispatcher
   {
     using ImagePts = fw::ocv::VectorPt2D;
     using ObjectPts = fw::ocv::VectorPt3D;

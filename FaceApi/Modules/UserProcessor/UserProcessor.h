@@ -13,9 +13,8 @@
 
 namespace face
 {
-  class UserProcessor :
-    public fw::Module,
-    public fw::Port<ActiveUsersMessage::Shared(ImageMessage::Shared, ActiveUsersMessage::Shared)>
+  class UserProcessor : public fw::Module,
+                        public fw::Port<ActiveUsersMessage::Shared(ImageMessage::Shared, ActiveUsersMessage::Shared)>
   {
   public:
     FW_DEFINE_SMART_POINTERS(UserProcessor);

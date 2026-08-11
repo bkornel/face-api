@@ -8,22 +8,22 @@
 #include <string>
 #include <mutex>
 
-// Enabled by default. Define FACE_PROFILER_DISABLED from the build system to
-// compile the profiler out completely.
 #if !defined(ENABLE_FACE_PROFILER) && !defined(FACE_PROFILER_DISABLED)
-#define ENABLE_FACE_PROFILER
+  #define ENABLE_FACE_PROFILER
 #endif
 
 // Profiler is enabled
 #ifdef ENABLE_FACE_PROFILER
-#define FACE_PROFILER(name)				fw::Profiler _FaceProfiler_##name##__LINE__(#name)
-#define FACE_PROFILER_FRAME_ID(frameId)	fw::ProfilerDatabase::GetInstance().setCurrentFrameId(frameId)
-#define FACE_PROFILER_SAVE(name)		fw::ProfilerDatabase::GetInstance().Save(name)
+  #define FACE_PROFILER(name) fw::Profiler _FaceProfiler_##name##__LINE__(#name)
+  #define FACE_PROFILER_FRAME_ID(frameId) fw::ProfilerDatabase::GetInstance().setCurrentFrameId(frameId)
+  #define FACE_PROFILER_SAVE(name) fw::ProfilerDatabase::GetInstance().Save(name)
+  #define FACE_PROFILER_SUMMARY() fw::ProfilerDatabase::GetInstance().LogStatistics()
 // Profiler is disabled
 #else
-#define FACE_PROFILER(name)
-#define FACE_PROFILER_FRAME_ID(frameId)
-#define FACE_PROFILER_SAVE(name)
+  #define FACE_PROFILER(name)
+  #define FACE_PROFILER_FRAME_ID(frameId)
+  #define FACE_PROFILER_SAVE(name)
+  #define FACE_PROFILER_SUMMARY()
 #endif
 
 namespace fw
@@ -45,6 +45,17 @@ namespace fw
   public:
     using Measurement = std::pair<unsigned, double>;
 
+    struct Statistics
+    {
+      std::size_t count = 0U;
+      double min = 0.0;
+      double max = 0.0;
+      double mean = 0.0;
+      double median = 0.0;
+      double p95 = 0.0;
+      double total = 0.0;
+    };
+
     static ProfilerDatabase& GetInstance();
 
     void Push(const std::string& iName, double iMilliseconds);
@@ -53,17 +64,17 @@ namespace fw
 
     std::map<std::string, Measurement> GetLastMeasurement() const;
 
-    inline void setCurrentFrameId(unsigned iCurrentFrameId)
-    {
-      mCurrentFrameId = iCurrentFrameId;
-    }
+    std::map<std::string, Statistics> GetStatistics() const;
+
+    std::string FormatStatistics() const;
+
+    void LogStatistics() const;
+
+    void setCurrentFrameId(unsigned iCurrentFrameId);
 
   private:
     static std::recursive_mutex sMutex;
 
-    /// @brief Upper bound of the kept samples per measured scope. The database is
-    /// only written out on shutdown, so without a bound a long running session
-    /// (a mobile app in particular) would grow it for as long as it lives.
     static const std::size_t sMaxSamplesPerName;
 
     ProfilerDatabase() = default;

@@ -7,6 +7,7 @@
 #include "Messages/ImageMessage.h"
 
 #include "Modules/FirstModule/FirstModule.h"
+#include "Modules/ImageQueue/ImageQueue.h"
 #include "Modules/LastModule/LastModule.h"
 
 #include <map>
@@ -15,8 +16,7 @@
 
 namespace face
 {
-  class ModuleGraph :
-    public fw::Module
+  class ModuleGraph : public fw::Module
   {
     using PredecessorMap = std::map<int, fw::Module::Shared>;
     using FrameProcessedHandler = fw::Event<void(ImageMessage::Shared)>;
@@ -38,6 +38,17 @@ namespace face
 
     fw::ErrorCode Process();
 
+    // The camera path: frames are handed to the queue directly, not broadcast
+    inline ImageQueue::Shared GetImageQueue() const
+    {
+      return mImageQueue;
+    }
+
+    inline LastModule::Shared GetLastModule() const
+    {
+      return mLastModule;
+    }
+
     inline unsigned GetLastFrameId() const
     {
       return mLastModule ? mLastModule->GetLastFrameId() : 0U;
@@ -49,7 +60,7 @@ namespace face
     }
 
   private:
-    static const long long sProcessTimeoutMs;   ///< Upper bound for processing one frame
+    static const long long sProcessTimeoutMs;
 
     fw::ErrorCode InitializeInternal(const cv::FileNode& iModulesNode) override;
 
@@ -65,6 +76,7 @@ namespace face
 
     FirstModule::Shared mFirstModule = nullptr;
     LastModule::Shared mLastModule = nullptr;
+    ImageQueue::Shared mImageQueue = nullptr;
     std::vector<fw::Module::Shared> mModules;
   };
 }

@@ -1,10 +1,10 @@
 ﻿#include "FaceApp.h"
-#include "FaceApi.h"
-
-#include "Common/Configuration.h"
-#include "Framework/UtilString.h"
 
 #include <opencv2/imgcodecs.hpp>
+
+#include "Common/Configuration.h"
+#include "FaceApi.h"
+#include "Framework/UtilString.h"
 
 void FaceApp::initialize(Application& self)
 {
@@ -100,8 +100,6 @@ int FaceApp::main(const std::vector<std::string>& args)
     }
     else
     {
-      // Keep pumping the window even when no frame came out, otherwise the
-      // OpenCV window stops responding and the keys below are never read.
       handleKey(cv::waitKey(1));
     }
   }
@@ -133,7 +131,8 @@ void FaceApp::handleKey(int keyPressed)
       return;
     }
 
-    const std::string& name = "result_frame_" + std::to_string(face::FaceApi::GetInstance().GetLastFrameId()) + ".png";
+    const std::string& name =
+      "result_frame_" + std::to_string(face::FaceApi::GetInstance().GetLastFrameId()) + ".png";
     const std::string& path = face::Configuration::GetInstance().GetDirectories().output + name;
     cv::imwrite(path, mResultFrame);
     LOG(INFO) << "Saving frame to: " << path;
@@ -164,14 +163,14 @@ void FaceApp::printProperties(const std::vector<std::string>& args)
 {
   LOG(INFO) << "Command line: ";
   std::ostringstream ostr;
-  for (const auto & it : argv())
+  for (const auto& it : argv())
   {
     ostr << it << ' ';
   }
   LOG(INFO) << ostr.str();
 
   LOG(INFO) << "Arguments to main(): ";
-  for (const auto & arg : args)
+  for (const auto& arg : args)
   {
     LOG(INFO) << arg;
   }
@@ -198,7 +197,7 @@ void FaceApp::printProperties(const std::string& base)
   }
   else
   {
-    for (auto & key : keys)
+    for (auto& key : keys)
     {
       std::string fullKey = base;
       if (!fullKey.empty())

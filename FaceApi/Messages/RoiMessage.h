@@ -6,8 +6,7 @@
 
 namespace face
 {
-  class RoiMessage :
-    public fw::Message
+  class RoiMessage : public fw::Message
   {
   public:
     FW_DEFINE_SMART_POINTERS(RoiMessage);
@@ -49,12 +48,10 @@ namespace face
     cv::Size mMaxRoiSize;
   };
 
-  inline std::ostream& operator<< (std::ostream& ioStream, const RoiMessage& iMessage)
+  inline std::ostream& operator<<(std::ostream& ioStream, const RoiMessage& iMessage)
   {
     const fw::Message& base(iMessage);
-    ioStream << base << ", [Derived] Number of ROIs: " << iMessage.GetSize() <<
-      ", min ROI size: " << iMessage.GetMinRoiSize() <<
-      ", max ROI size: " << iMessage.GetMaxRoiSize();
+    ioStream << base << ", [Derived] Number of ROIs: " << iMessage.GetSize() << ", min ROI size: " << iMessage.GetMinRoiSize() << ", max ROI size: " << iMessage.GetMaxRoiSize();
     return ioStream;
   }
 }

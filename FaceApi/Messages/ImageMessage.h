@@ -9,8 +9,7 @@
 
 namespace face
 {
-  class ImageMessage :
-    public fw::Message
+  class ImageMessage : public fw::Message
   {
   public:
     FW_DEFINE_SMART_POINTERS(ImageMessage);
@@ -23,6 +22,8 @@ namespace face
     };
 
     ImageMessage(const cv::Mat& iImage, unsigned iFrameId, long long iTimestamp);
+
+    ImageMessage(cv::Mat&& iImage, unsigned iFrameId, long long iTimestamp);
 
     ~ImageMessage() override = default;
 
@@ -38,11 +39,11 @@ namespace face
       return mFrames.first;
     }
 
-    const cv::Mat& GetFrameGray();
+    cv::Mat GetFrameGray();
 
-    const cv::Mat& GetResizedBGR(float iScaleFactor);
+    cv::Mat GetResizedBGR(float iScaleFactor);
 
-    const cv::Mat& GetResizedGray(float iScaleFactor);
+    cv::Mat GetResizedGray(float iScaleFactor);
 
     inline int GetWidth() const
     {
@@ -72,13 +73,9 @@ namespace face
     }
 
   private:
-    using ImagePair = std::pair<cv::Mat, cv::Mat>; // BGR - Gray
+    using ImagePair = std::pair<cv::Mat, cv::Mat>;  // BGR - Gray
     using ResizedImages = std::map<int, ImagePair>; // Key: width of the image (aspect ratio is fixed)
 
-    /// @brief Per instance, not static: the lazy gray/resized conversions only
-    /// need to be serialized within one frame. A shared static mutex made every
-    /// frame in flight contend on the same lock.
-    /// Recursive because GetResizedGray() calls GetFrameGray() while holding it.
     mutable std::recursive_mutex mMutex;
 
     ImagePair mFrames;
@@ -86,7 +83,7 @@ namespace face
     QueueData mQueueData;
   };
 
-  inline std::ostream& operator<< (std::ostream& ioStream, const ImageMessage& iMessage)
+  inline std::ostream& operator<<(std::ostream& ioStream, const ImageMessage& iMessage)
   {
     const fw::Message& base(iMessage);
     ioStream << base << ", [Derived] Width: " << iMessage.GetWidth() << ", Height: " << iMessage.GetHeight();

@@ -12,9 +12,8 @@
 
 namespace face
 {
-  class UserManager :
-    public fw::Module,
-    public fw::Port<ActiveUsersMessage::Shared(ImageMessage::Shared, RoiMessage::Shared)>
+  class UserManager : public fw::Module,
+                      public fw::Port<ActiveUsersMessage::Shared(ImageMessage::Shared, RoiMessage::Shared)>
   {
   public:
     FW_DEFINE_SMART_POINTERS(UserManager);
@@ -51,9 +50,10 @@ namespace face
 
     void RemoveInactiveUsers(bool forceToDelete = false);
 
-    std::vector<User::Shared> mUsers;   ///< The vector storing all users
+    std::vector<User::Shared> mUsers; ///< The vector storing all users
     fw::Stopwatch mRemoveSW;
     long long mTimestamp = 0;
+    int mLastUserID = 0;
 
     cv::Size mMinFaceSize;
     cv::Size mMaxFaceSize;

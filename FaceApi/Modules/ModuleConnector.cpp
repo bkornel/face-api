@@ -17,7 +17,7 @@ namespace face
 {
   namespace
   {
-    template<typename T1, typename T2>
+    template <typename T1, typename T2>
     bool set_input_port(T1 iModule, fw::Module::Shared iPredecessor, int iPortNo)
     {
       CV_DbgAssert(iModule && iPredecessor);
@@ -31,7 +31,7 @@ namespace face
       return iModule->SetInputPort(derived->GetOutputPort(), iPortNo - 1) == fw::ErrorCode::OK;
     }
 
-    template<typename T>
+    template <typename T>
     bool connect(fw::Module::Shared iModule, const ModuleConnector::PredecessorMap& iPredecessors)
     {
       CV_DbgAssert(iModule);
@@ -46,6 +46,11 @@ namespace face
 
       std::stringstream ss;
       ss << "Predecessors of [" << iModule->GetName() << "]:\t";
+
+      if (iPredecessors.empty())
+      {
+        ss << "---";
+      }
 
       for (const auto& predecessor : iPredecessors)
       {
@@ -114,6 +119,7 @@ namespace face
     CV_DbgAssert(iModule);
 
     if (connect<FaceDetection>(iModule, iPredecessors)) return fw::ErrorCode::OK;
+    if (connect<FirstModule>(iModule, iPredecessors)) return fw::ErrorCode::OK;
     if (connect<ImageQueue>(iModule, iPredecessors)) return fw::ErrorCode::OK;
     if (connect<LastModule>(iModule, iPredecessors)) return fw::ErrorCode::OK;
     if (connect<UserHistory>(iModule, iPredecessors)) return fw::ErrorCode::OK;

@@ -37,7 +37,7 @@ namespace fw
     long long mTimestamp = 0;
   };
 
-  inline std::ostream& operator<< (std::ostream& ioStream, const Message& iMessage)
+  inline std::ostream& operator<<(std::ostream& ioStream, const Message& iMessage)
   {
     ioStream << "[Base] Frame ID: " << iMessage.mFrameId << ", timestamp: " << iMessage.mTimestamp;
     return ioStream;

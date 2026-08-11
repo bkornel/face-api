@@ -6,8 +6,7 @@
 
 namespace face
 {
-  class CommandMessage :
-    public fw::Message
+  class CommandMessage : public fw::Message
   {
   public:
     FW_DEFINE_SMART_POINTERS(CommandMessage);
@@ -39,7 +38,7 @@ namespace face
     Type mType = Type::Invalid;
   };
 
-  inline std::ostream& operator<< (std::ostream& ioStream, const CommandMessage& iMessage)
+  inline std::ostream& operator<<(std::ostream& ioStream, const CommandMessage& iMessage)
   {
     const fw::Message& base(iMessage);
     ioStream << base << ", [Derived] Type: " << static_cast<int>(iMessage.GetType());

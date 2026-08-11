@@ -5,8 +5,7 @@
 
 namespace face
 {
-  class UserEntriesMessage :
-    public fw::Message
+  class UserEntriesMessage : public fw::Message
   {
   public:
     FW_DEFINE_SMART_POINTERS(UserEntriesMessage);
@@ -43,11 +42,10 @@ namespace face
     EntryMap mEntryMap;
   };
 
-  inline std::ostream& operator<< (std::ostream& ioStream, const UserEntriesMessage& iMessage)
+  inline std::ostream& operator<<(std::ostream& ioStream, const UserEntriesMessage& iMessage)
   {
     const fw::Message& base(iMessage);
-    ioStream << base << ", [Derived] Number of users: " << iMessage.GetSize() <<
-      ", numer of entries: " << iMessage.GetNumberOfEntries();
+    ioStream << base << ", [Derived] Number of users: " << iMessage.GetSize() << ", numer of entries: " << iMessage.GetNumberOfEntries();
     return ioStream;
   }
 }

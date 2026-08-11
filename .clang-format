@@ -1,0 +1,65 @@
+Language: Cpp
+Standard: c++20
+
+# Indents
+ColumnLimit: 0
+IndentWidth: 2
+UseTab: Never
+NamespaceIndentation: All
+IndentAccessModifiers: false
+ContinuationIndentWidth: 2
+AccessModifierOffset: -2
+ConstructorInitializerIndentWidth: 2
+IndentPPDirectives: BeforeHash
+LambdaBodyIndentation: Signature
+AlignAfterOpenBracket: BlockIndent
+
+# Brace
+Cpp11BracedListStyle: false
+BracedInitializerIndentWidth: 2
+BreakBeforeBraces: Custom
+BraceWrapping:
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  AfterControlStatement: Always
+  AfterExternBlock: false
+  AfterEnum: true
+  AfterFunction: true
+  AfterNamespace: true
+  AfterStruct: true
+  AfterClass: true
+  AfterUnion: true
+  AfterCaseLabel: true
+  BeforeCatch: true
+  BeforeElse: true
+  BeforeWhile: true
+
+AllowShortIfStatementsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: false
+AllowAllArgumentsOnNextLine: true
+
+EmptyLineAfterAccessModifier: Never
+EmptyLineBeforeAccessModifier: Always
+
+# Blocks
+SpaceInEmptyBlock: true
+SeparateDefinitionBlocks: Always
+
+# Comments
+CommentPragmas: '^[^ ]'
+FixNamespaceComments: false
+
+# Includes
+SortIncludes: false
+SortUsingDeclarations: Lexicographic
+
+# Initialization lists
+BreakConstructorInitializers: AfterColon
+
+# Alignments
+QualifierAlignment: Left
+PointerAlignment: Left
+ReferenceAlignment: Left
+
+PackConstructorInitializers: Never
+AlwaysBreakTemplateDeclarations: Yes

@@ -18,8 +18,7 @@ namespace std
   /// @brief partially specializations of std::is_placeholder for a custom template
   /// in order the generate placeholders via the int_sequence technique
   template <int N>
-  struct is_placeholder<fw::variadic_placeholder<N>> :
-    integral_constant<int, N + 1>
+  struct is_placeholder<fw::variadic_placeholder<N>> : integral_constant<int, N + 1>
   {
   };
 }
@@ -27,22 +26,25 @@ namespace std
 namespace fw
 {
   /// @brief represents a compile-time sequence of integers
-  template<int...>
-  struct int_sequence {};
+  template <int...>
+  struct int_sequence
+  { };
 
   /// @brief represents a compile-time sequence of integers
-  template<int N, int... Is>
-  struct make_int_sequence : make_int_sequence<N - 1, N - 1, Is...> {};
+  template <int N, int... Is>
+  struct make_int_sequence : make_int_sequence<N - 1, N - 1, Is...>
+  { };
 
   /// @brief represents a compile-time sequence of integers
-  template<int... Is>
-  struct make_int_sequence<0, Is...> : int_sequence<Is...> {};
+  template <int... Is>
+  struct make_int_sequence<0, Is...> : int_sequence<Is...>
+  { };
 
   /// @brief Helper class for creating variadic binders
   /// @param CalleeT type of the object whose member will be invoked
   /// @param ReturnT return type of the function that is being captured
   /// @param ArgumentT possible arguments of the captured function
-  template<typename CalleeT, typename ReturnT, typename... ArgumentT>
+  template <typename CalleeT, typename ReturnT, typename... ArgumentT>
   struct Binder
   {
     /// @brief BinderT alias for the binder type
@@ -52,7 +54,7 @@ namespace fw
     /// @param iCallee pointer to the object who's member will be called
     /// @param iArgument arguments of the invoked function
     /// @return the value of the captured member function
-    template<ReturnT(CalleeT::*MemberFunction)(ArgumentT...)>
+    template <ReturnT (CalleeT::*MemberFunction)(ArgumentT...)>
     static ReturnT MethodCaller(CalleeT* iCallee, ArgumentT... iArgument)
     {
       return (iCallee->*MemberFunction)(iArgument...);
@@ -62,7 +64,7 @@ namespace fw
     /// @param iCallee pointer to the object who's member will be called
     /// @param iSequence the placeholders
     /// @return the binder object (std::function)
-    template<ReturnT(CalleeT::*MemberFunction)(ArgumentT...), int... Is>
+    template <ReturnT (CalleeT::*MemberFunction)(ArgumentT...), int... Is>
     static BinderT Bind(CalleeT* iCallee, int_sequence<Is...> iSequence)
     {
       return std::bind(&MethodCaller<MemberFunction>, iCallee, variadic_placeholder<Is>{}...);
@@ -71,7 +73,7 @@ namespace fw
     /// @brief Helper function for creating the variadic binder
     /// @param iCallee pointer to the object who's member will be called
     /// @return the binder object (std::function)
-    template<ReturnT(CalleeT::*MemberFunction)(ArgumentT...)>
+    template <ReturnT (CalleeT::*MemberFunction)(ArgumentT...)>
     static BinderT Create(CalleeT* iCallee)
     {
       auto placeholders = make_int_sequence<sizeof...(ArgumentT)>{};
@@ -80,8 +82,8 @@ namespace fw
   };
 
   /// @brief Helper function for creating binder objects
-  template<typename CalleeT, typename ReturnT, typename... ArgumentT>
-  static Binder<CalleeT, ReturnT, ArgumentT...> create_binder(ReturnT(CalleeT::* /*unused*/)(ArgumentT...))
+  template <typename CalleeT, typename ReturnT, typename... ArgumentT>
+  static Binder<CalleeT, ReturnT, ArgumentT...> create_binder(ReturnT (CalleeT::* /*unused*/)(ArgumentT...))
   {
     return Binder<CalleeT, ReturnT, ArgumentT...>();
   }

@@ -25,6 +25,8 @@ namespace face
 
   UserEntriesMessage::Shared UserHistory::Main(ActiveUsersMessage::Shared iActiveUsers)
   {
+    DrainCommands();
+
     if (!iActiveUsers || iActiveUsers->IsEmpty()) return nullptr;
 
     const long long currentTime = iActiveUsers->GetTimestamp();
@@ -42,10 +44,7 @@ namespace face
       const long long lastUpdateTs = user->GetLastUpdateTs();
       if (lastUpdateTs == currentTime)
       {
-        // Store a snapshot, not the live user. User derives from UserData, so
-        // casting the shared_ptr would make every entry alias the same object
-        // that keeps being updated, and the whole history would read back as
-        // the current state. Slicing to UserData copies the data out.
+        // Snapshot, not the live User: a cast would alias the same mutating object.
         mEntryMap[user->GetUserId()].emplace_back(lastUpdateTs, std::make_shared<UserData>(*user));
       }
     }
@@ -64,23 +63,19 @@ namespace face
         auto& entries = h.second;
         const std::size_t sizeBefore = entries.size();
 
-        entries.erase(std::remove_if(entries.begin(), entries.end(), [&](const Entry& obj)
-        {
-          return obj.first < diff;
-        }),
-          entries.end()
-          );
+        entries.erase(std::remove_if(entries.begin(), entries.end(), [&](const Entry& obj) {
+                        return obj.first < diff;
+                      }),
+                      entries.end());
 
         const std::size_t count = sizeBefore - entries.size();
         if (count > 0U)
         {
-          LOG(INFO) << "Number of entries deleted from User(" << h.first << "): " <<
-            count << " (" << cvRound((count * sizeof(UserData)) / 1024.0) << " KB).";
+          LOG(INFO) << "Number of entries deleted from User(" << h.first << "): " << count << " (" << cvRound((count * sizeof(UserData)) / 1024.0) << " KB).";
         }
       }
 
-      fw::remove_if(mEntryMap, [&](const EntryMap::value_type& obj)
-      {
+      fw::remove_if(mEntryMap, [&](const EntryMap::value_type& obj) {
         return obj.second.empty();
       });
     }

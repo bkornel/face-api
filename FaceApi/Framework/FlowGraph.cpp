@@ -5,8 +5,7 @@
 
 namespace fw
 {
-  class InlineExecutor :
-    public Executor
+  class InlineExecutor : public Executor
   {
     void run(std::function<void()> iTask) override
     {
@@ -14,8 +13,7 @@ namespace fw
     }
   };
 
-  class ThreadExecutor :
-    public Executor
+  class ThreadExecutor : public Executor
   {
     void run(std::function<void()> iTask) override
     {
@@ -46,15 +44,12 @@ namespace fw
   {
     if (--mCounter == 0U)
     {
-      // Re-arm before running the task. The task may execute the whole downstream
-      // graph synchronously (inline executor), and a notification arriving while
-      // the counter still sits at 0 would underflow it and wedge this node.
+      // Re-arm before running: the inline executor runs the whole graph downstream.
       mCounter = mCount;
 
       auto task = mTask;
 
-      iExecutor->run([iExecutor, task]
-      {
+      iExecutor->run([iExecutor, task] {
         task(iExecutor);
       });
     }

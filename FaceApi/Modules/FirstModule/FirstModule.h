@@ -1,31 +1,25 @@
 #pragma once
 
-#include "Framework/FlowGraph.hpp"
 #include "Framework/Module.h"
 #include "Framework/Port.hpp"
 
-#include <functional>
-
 namespace face
 {
-  class FirstModule :
-    public fw::Module,
-    public fw::Port<unsigned(bool)>
+  /// @brief The source of the module graph: it has no predecessor, so every frame starts
+  /// with a Tick() rather than with an incoming message.
+  class FirstModule : public fw::Module,
+                      public fw::Port<unsigned()>
   {
   public:
     FW_DEFINE_SMART_POINTERS(FirstModule);
 
-    FirstModule();
+    FirstModule() = default;
 
     ~FirstModule() override = default;
 
-    fw::ErrorCode Connect() override;
-
-    unsigned Main(bool iParam) override;
+    unsigned Main() override;
 
     void Tick();
-
-    void RunFaceDetector();
 
     void Clear() override
     {
@@ -34,7 +28,5 @@ namespace face
 
   private:
     unsigned mTickCounter = 0U;
-    std::function<void()> mFunction;
-    fw::Executor::Shared mExecutor = nullptr;
   };
 }

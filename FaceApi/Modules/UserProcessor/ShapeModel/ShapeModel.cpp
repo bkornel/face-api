@@ -1,7 +1,7 @@
 #define _USE_MATH_DEFINES
 
 #ifdef _MSC_VER
-#define _CRT_SECURE_NO_WARNINGS
+  #define _CRT_SECURE_NO_WARNINGS
 #endif
 
 #include "Modules/UserProcessor/ShapeModel/ShapeModel.h"
@@ -52,7 +52,7 @@ namespace face
     mCLM._pglobl.at<double>(5, 0) += iOffset.y;
   }
 
-  void ShapeModel::Fit(const cv::Mat& iFrame, std::vector<int> &iWinSize, int iNoIter, double iClamp, double iFTol)
+  void ShapeModel::Fit(const cv::Mat& iFrame, std::vector<int>& iWinSize, int iNoIter, double iClamp, double iFTol)
   {
     mCLM.Fit(iFrame, iWinSize, iNoIter, iClamp, iFTol);
     mCLM._pdm.CalcShape2D(mShape2D, mCLM._plocal, mCLM._pglobl);
@@ -82,7 +82,7 @@ namespace face
     }
 
     return (iRect.contains(oMin) && iRect.contains(oMax)) &&
-      (!cvIsNaN(oMin.x) && !cvIsInf(oMin.x) && !cvIsNaN(oMin.y) && !cvIsInf(oMin.y) &&
-        !cvIsNaN(oMax.x) && !cvIsInf(oMax.x) && !cvIsNaN(oMax.y) && !cvIsInf(oMax.y));
+           (!cvIsNaN(oMin.x) && !cvIsInf(oMin.x) && !cvIsNaN(oMin.y) && !cvIsInf(oMin.y) &&
+            !cvIsNaN(oMax.x) && !cvIsInf(oMax.x) && !cvIsNaN(oMax.y) && !cvIsInf(oMax.y));
   }
 }

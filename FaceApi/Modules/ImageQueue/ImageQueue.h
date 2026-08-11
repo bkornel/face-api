@@ -12,9 +12,8 @@
 
 namespace face
 {
-  class ImageQueue :
-    public fw::Module,
-    public fw::Port<ImageMessage::Shared(unsigned)>
+  class ImageQueue : public fw::Module,
+                     public fw::Port<ImageMessage::Shared(unsigned)>
   {
     using MessageQueue = fw::MessageQueue<ImageMessage::Shared>;
 
@@ -25,17 +24,15 @@ namespace face
 
     virtual ~ImageQueue() = default;
 
-    fw::ErrorCode Push(const cv::Mat& iFrame);
+    fw::ErrorCode Push(const cv::Mat& iFrame, unsigned iFrameId, long long iTimestamp);
 
     ImageMessage::Shared Main(unsigned iTickNumber) override;
 
     void Clear() override
     {
-      mPushFrameId = 0U;
       mQueue.Clear();
     }
 
-    /// @brief Returns by value: mImageSize is guarded by mSizeMutex.
     inline cv::Size GetImageSize() const
     {
       std::lock_guard<std::mutex> lock(mSizeMutex);
@@ -70,18 +67,14 @@ namespace face
   private:
     fw::ErrorCode InitializeInternal(const cv::FileNode& iSettings) override;
 
-    void OnCommand(fw::Message::Shared iMessage) override;
-
     void NotifyPendingSizeChange();
 
-    // Push() runs on the camera thread, Main() on the graph thread.
-    std::atomic<unsigned> mPushFrameId{ 0U };
-    std::atomic<unsigned> mLastFrameId{ 0U };   ///< Holds the ID of the last image frame.
+    std::atomic<unsigned> mLastFrameId{ 0U }; ///< Holds the ID of the last image frame.
     std::atomic<long long> mLastTimestamp{ 0 };
 
-    MessageQueue mQueue;			    ///< Queue for handling the frames
+    MessageQueue mQueue; ///< Queue for handling the frames
 
-    mutable std::mutex mSizeMutex;              ///< Guards mImageSize and mPendingSizeChange
+    mutable std::mutex mSizeMutex;
     cv::Size mImageSize;
     bool mPendingSizeChange = false;
   };

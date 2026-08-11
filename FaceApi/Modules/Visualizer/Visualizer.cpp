@@ -23,11 +23,11 @@ namespace face
 
   ImageMessage::Shared Visualizer::Main(ImageMessage::Shared iImage, ActiveUsersMessage::Shared iUsers)
   {
+    DrainCommands();
+
     if (!iImage || iImage->IsEmpty()) return nullptr;
 
-    // Must be a deep copy: cv::Mat assignment shares the pixel buffer, so drawing
-    // would overwrite the frame that ImageQueue still owns and that the other
-    // modules read from.
+    // Deep copy: assignment shares the buffer with the frame other modules read.
     cv::Mat resultImage = iImage->GetFrameBGR().clone();
 
     if (iUsers && !iUsers->IsEmpty())
@@ -52,7 +52,9 @@ namespace face
 
     DrawGeneral(iImage, resultImage);
 
-    return std::make_shared<ImageMessage>(resultImage, iImage->GetFrameId(), iImage->GetTimestamp());
+    // Moved in: the buffer was drawn here and is not touched afterwards, so there is no
+    // reason for the message to clone it again
+    return std::make_shared<ImageMessage>(std::move(resultImage), iImage->GetFrameId(), iImage->GetTimestamp());
   }
 
   void Visualizer::DrawShapeModel(const User& iUser, cv::Mat& oImage) const
@@ -61,18 +63,27 @@ namespace face
     const auto& shape3D = iUser.GetShape3D();
     const auto& connections = ShapeUtil::GetInstance().GetConnections();
 
+    // A user that has just been detected, or whose fit failed, has no shape yet
+    if (shape2D.empty() || shape3D.size() != shape2D.size()) return;
+
     cv::Mat colorMap;
     CreateShapeColorMap(shape3D, colorMap);
+
+    const int pointCount = static_cast<int>(shape2D.size());
 
     // draw connections
     for (const auto& c : connections)
     {
+      // The connection list comes from the model file, it may not match this shape
+      if (c.first < 0 || c.first >= pointCount || c.second < 0 || c.second >= pointCount)
+        continue;
+
       cv::Vec3b color((colorMap.at<cv::Vec3b>(c.first, 0) + colorMap.at<cv::Vec3b>(c.second, 0)) / 2);
       cv::line(oImage, shape2D[c.first], shape2D[c.second], cv::Scalar(color), 2, cv::LINE_AA);
     }
 
     // draw points
-    for (int i = 0; i < shape2D.size(); i++)
+    for (int i = 0; i < pointCount; i++)
     {
       cv::drawMarker(oImage, shape2D[i], colorMap.at<cv::Vec3b>(i, 0), cv::MarkerTypes::MARKER_CROSS, 5, 1, cv::LINE_AA);
     }
@@ -83,8 +94,7 @@ namespace face
     const std::size_t n = iShape3D.size();
 
     float minZ = (std::numeric_limits<float>::max)();
-    // lowest(), not min(): min() is the smallest positive normalized value, which
-    // is larger than every negative z and would break the scaling.
+    // lowest(), not min(): min() is the smallest positive value, not the most negative.
     float maxZ = (std::numeric_limits<float>::lowest)();
 
     for (const auto& pt : iShape3D)
@@ -132,16 +142,25 @@ namespace face
     ss.str("");
   }
 
-  void Visualizer::DrawBoundingBox(const User& iUser, cv::Mat& oImage, int iSegmentWidth/* = 5*/, int iThickness/* = 1*/) const
+  void Visualizer::DrawBoundingBox(const User& iUser, cv::Mat& oImage, int iSegmentWidth /* = 5*/, int iThickness /* = 1*/) const
   {
     const cv::Scalar color(240, 255, 150);
     const auto& connections = PoseUtil::GetInstance().GetConnections();
 
+    // No pose estimated for this user yet, so there is no box to project
+    if (iUser.GetFaceBox().empty() || iUser.GetRvec().empty() || iUser.GetTvec().empty() || iUser.GetCameraMatrix().empty())
+      return;
+
     fw::ocv::VectorPt2D faceBoxProj;
     fw::ocv::project_point(iUser.GetFaceBox(), iUser.GetRvec(), iUser.GetTvec(), iUser.GetCameraMatrix(), faceBoxProj);
 
+    const int cornerCount = static_cast<int>(faceBoxProj.size());
+
     for (const auto& c : connections)
     {
+      if (c.first < 0 || c.first >= cornerCount || c.second < 0 || c.second >= cornerCount)
+        continue;
+
       fw::ocv::draw_dotted_line(oImage, faceBoxProj[c.first], faceBoxProj[c.second], color, iSegmentWidth, iThickness);
     }
 
@@ -155,8 +174,13 @@ namespace face
   {
     static const fw::ocv::VectorPt3D sAxes3D = PoseUtil::GetInstance().GetAxes3D();
 
+    if (iUser.GetRvec().empty() || iUser.GetTvec().empty() || iUser.GetCameraMatrix().empty())
+      return;
+
     fw::ocv::VectorPt2D axes2D;
     fw::ocv::project_point(sAxes3D, iUser.GetRvec(), iUser.GetTvec(), iUser.GetCameraMatrix(), axes2D);
+
+    if (axes2D.size() < sAxes3D.size() || axes2D.size() > mColorsOfAxes.size()) return;
 
     const cv::Point2d minPt = iUser.GetFaceRect().tl() - cv::Point(10, 10);
     cv::Point2d shiftPt(axes2D[0] - minPt);
@@ -192,8 +216,7 @@ namespace face
   {
     const double runtimeMs = std::llabs(fw::get_current_time() - iImage->GetTimestamp());
 
-    // Members instead of function statics: this is called from the graph thread
-    // and the range has to be resettable together with the rest of the module.
+    // Members, not function statics: resettable with the rest of the module.
     if (runtimeMs < mMinRuntimeMs) mMinRuntimeMs = runtimeMs;
     if (runtimeMs > mMaxRuntimeMs) mMaxRuntimeMs = runtimeMs;
 
@@ -228,8 +251,7 @@ namespace face
       for (auto& m : lastMeasurement)
       {
         std::stringstream ss;
-        ss << "- " << m.first << "(" << (iImage->GetFrameId() - m.second.first) << 
-          "): " << cvRound(m.second.second) << " ms";
+        ss << "- " << m.first << "(" << (iImage->GetFrameId() - m.second.first) << "): " << cvRound(m.second.second) << " ms";
 
         fw::ocv::put_text(ss.str(), { 10, (barHeight * ++idx) + 20 }, oImage);
       }

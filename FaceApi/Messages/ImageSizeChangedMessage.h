@@ -6,8 +6,7 @@
 
 namespace face
 {
-  class ImageSizeChangedMessage :
-    public fw::Message
+  class ImageSizeChangedMessage : public fw::Message
   {
   public:
     FW_DEFINE_SMART_POINTERS(ImageSizeChangedMessage);
@@ -42,7 +41,7 @@ namespace face
     cv::Size mSize;
   };
 
-  inline std::ostream& operator<< (std::ostream& ioStream, const ImageSizeChangedMessage& iMessage)
+  inline std::ostream& operator<<(std::ostream& ioStream, const ImageSizeChangedMessage& iMessage)
   {
     const fw::Message& base(iMessage);
     ioStream << base << ", [Derived] Width: " << iMessage.GetWidth() << ", Height: " << iMessage.GetHeight();

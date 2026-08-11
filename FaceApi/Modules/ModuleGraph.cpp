@@ -15,8 +15,7 @@ namespace face
 {
   ModuleGraph::FrameProcessedHandler ModuleGraph::sFrameProcessed;
 
-  // Upper bound for a single frame. Without it a misconfigured or stalled graph
-  // would block the worker thread forever and StopThread() could never return.
+  // Upper bound for one frame, so a stalled graph cannot block the worker forever.
   const long long ModuleGraph::sProcessTimeoutMs = 5000LL;
 
   ModuleGraph::~ModuleGraph()
@@ -28,11 +27,11 @@ namespace face
   {
     if (!IsInitialized()) return fw::ErrorCode::BadState;
 
+    DrainCommands();
+
     FACE_PROFILER_FRAME_ID(GetLastFrameId());
 
-    // Remember which output we have already seen, then pop a frame out and wait
-    // until this tick reached the last module. Reading the generation before the
-    // tick is what makes this a real per-frame barrier.
+    // Reading the generation before the tick is what makes this a per-frame barrier.
     const unsigned long long generation = mLastModule->GetGeneration();
 
     mFirstModule->Tick();
@@ -104,14 +103,22 @@ namespace face
   {
     CV_DbgAssert(!iModulesNode.empty());
 
+    // The aliases below are only ever assigned when empty, so drop the ones a previous
+    // Initialize() left behind - otherwise this graph would tick the old graph's modules.
+    // Done here and not in DeInitialize(): they are read from the app thread, and keeping
+    // every write inside Initialize() keeps those reads safe.
+    mModules.clear();
+    mFirstModule = nullptr;
+    mLastModule = nullptr;
+    mImageQueue = nullptr;
+
     // Loop over the <modules> tag in the settings file
     for (const auto& moduleNode : iModulesNode)
     {
       if (moduleNode.empty() || !moduleNode.isNamed()) continue;
 
       // Check for duplications
-      auto it = std::find_if(mModules.begin(), mModules.end(), [&](const fw::Module::Shared& obj) 
-      {
+      auto it = std::find_if(mModules.begin(), mModules.end(), [&](const fw::Module::Shared& obj) {
         return obj->GetName() == fw::Module::CreateModuleName(moduleNode);
       });
 
@@ -122,7 +129,7 @@ namespace face
       }
 
       // Extend this function if you add a new module
-      auto newModule = ModuleFactory::Create(moduleNode);
+      auto newModule = ModuleFactory::Create(moduleNode, *mBus);
 
       // Check if the module is not set up in this file
       if (!newModule)
@@ -135,6 +142,8 @@ namespace face
       if (!mFirstModule) mFirstModule = std::dynamic_pointer_cast<FirstModule>(newModule);
 
       if (!mLastModule) mLastModule = std::dynamic_pointer_cast<LastModule>(newModule);
+
+      if (!mImageQueue) mImageQueue = std::dynamic_pointer_cast<ImageQueue>(newModule);
 
       LOG(INFO) << "New module is created: [" << newModule->GetName() << "]";
 
@@ -154,6 +163,12 @@ namespace face
       return fw::ErrorCode::BadData;
     }
 
+    if (!mImageQueue)
+    {
+      LOG(ERROR) << "Image queue module is not defined.";
+      return fw::ErrorCode::BadData;
+    }
+
     return fw::ErrorCode::OK;
   }
 
@@ -168,8 +183,7 @@ namespace face
     for (const auto& moduleNode : modules)
     {
       // Find the corresponding module
-      auto it = std::find_if(mModules.begin(), mModules.end(), [&](const fw::Module::Shared& obj)
-      {
+      auto it = std::find_if(mModules.begin(), mModules.end(), [&](const fw::Module::Shared& obj) {
         return obj->GetName() == fw::Module::CreateModuleName(moduleNode);
       });
 
@@ -189,16 +203,10 @@ namespace face
         return result;
       }
 
-      if (!predecessors.empty())
+      // Source modules have no predecessor but still need their output port built
+      if ((result = ModuleConnector::Connect(module, predecessors)) != fw::ErrorCode::OK)
       {
-        if ((result = ModuleConnector::Connect(module, predecessors)) != fw::ErrorCode::OK)
-        {
-          return result;
-        }
-      }
-      else
-      {
-        LOG(INFO) << "Predecessors of [" << module->GetName() << "]:\t---";
+        return result;
       }
     }
 
@@ -318,12 +326,11 @@ namespace face
       {
         const std::string& predecessorName = predecessors.front();
 
-        auto it = std::find_if(modulesPrio.begin(), modulesPrio.end(), [&](const ModulesPrioElem& iObj)
-        {
+        auto it = std::find_if(modulesPrio.begin(), modulesPrio.end(), [&](const ModulesPrioElem& iObj) {
           return predecessorName == fw::Module::CreateModuleName(iObj.first);
         });
 
-        if (it != modulesPrio.end()) 
+        if (it != modulesPrio.end())
         {
           it->second++;
 
@@ -345,8 +352,10 @@ namespace face
       }
     }
 
-    std::sort(modulesPrio.begin(), modulesPrio.end(), [&](const ModulesPrioElem& iFirst, const ModulesPrioElem& iSecond)
-    {
+    // Modules that are equally deep in the graph tie here, and the connection order
+    // decides the order they are notified in. std::sort would break such ties
+    // arbitrarily, so keep the order of the settings file instead.
+    std::stable_sort(modulesPrio.begin(), modulesPrio.end(), [&](const ModulesPrioElem& iFirst, const ModulesPrioElem& iSecond) {
       return iFirst.second > iSecond.second;
     });
 

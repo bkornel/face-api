@@ -13,9 +13,8 @@
 
 namespace face
 {
-  class FaceDetection :
-    public fw::Module,
-    public fw::Port<RoiMessage::Shared(ImageMessage::Shared)>
+  class FaceDetection : public fw::Module,
+                        public fw::Port<RoiMessage::Shared(ImageMessage::Shared)>
   {
   public:
     FW_DEFINE_SMART_POINTERS(FaceDetection);
@@ -31,13 +30,13 @@ namespace face
 
     fw::ErrorCode InitializeInternal(const cv::FileNode& iSettings) override;
 
-    void OnCommand(fw::Message::Shared iMessage) override;
+    void HandleCommand(fw::Message::Shared iMessage) override;
 
     void RemoveMultipleDetections(std::vector<cv::Rect>& ioDetections);
 
     bool RunDetectection() const;
 
-    cv::CascadeClassifier mCascadeClassifier;   ///< The OpenCV cascade classifier
+    cv::CascadeClassifier mCascadeClassifier; ///< The OpenCV cascade classifier
     fw::Stopwatch mDetectionSW;
 
     // General parameters
