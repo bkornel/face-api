@@ -6,8 +6,7 @@
 #include "Modules/UserProcessor/ShapeModel/ClmWrapper.h"
 
 #include "Common/Configuration.h"
-#include "Framework/UtilOCV.h"
-#include "Framework/UtilString.h"
+#include "Framework/Text.h"
 
 namespace face
 {

@@ -1,10 +1,11 @@
+#include "Framework/Ocv/FileStorage.h"
+#include "Framework/Ocv/Geometry.h"
 #include "Framework/ErrorCode.h"
 #include "Modules/FaceDetection/FaceDetection.h"
 
 #include "Common/Configuration.h"
 #include "Framework/Profiler.h"
-#include "Framework/UtilOCV.h"
-#include "Framework/UtilString.h"
+#include "Framework/Text.h"
 #include "Messages/CommandMessage.h"
 #include "Messages/ImageSizeChangedMessage.h"
 

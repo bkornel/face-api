@@ -1,6 +1,6 @@
 #include "Framework/ErrorCode.h"
 #include "Framework/Module.h"
-#include "Framework/UtilString.h"
+#include "Framework/Text.h"
 #include "Messages/CommandMessage.h"
 #include "Messages/ImageSizeChangedMessage.h"
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Framework/Ocv/Geometry.h"
 #include "Framework/ErrorCode.h"
 #include "Framework/Port.hpp"
 #include "Framework/Stopwatch.h"

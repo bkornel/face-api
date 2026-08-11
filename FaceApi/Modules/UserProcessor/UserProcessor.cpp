@@ -1,3 +1,4 @@
+#include "Framework/Ocv/FileStorage.h"
 #include "Framework/ErrorCode.h"
 #include "Modules/UserProcessor/UserProcessor.h"
 #include "Modules/UserProcessor/ShapeModel/ClmWrapper.h"

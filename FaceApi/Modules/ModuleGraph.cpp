@@ -4,7 +4,7 @@
 #include "Common/Configuration.h"
 
 #include "Framework/Profiler.h"
-#include "Framework/UtilString.h"
+#include "Framework/Text.h"
 
 #include "Modules/ModuleFactory.h"
 #include "Modules/ModuleConnector.h"

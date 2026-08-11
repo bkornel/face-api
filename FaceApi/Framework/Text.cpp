@@ -1,4 +1,4 @@
-#include "Framework/UtilString.h"
+#include "Framework/Text.h"
 
 #include <algorithm>
 #include <cctype>

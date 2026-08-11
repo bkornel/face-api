@@ -1,7 +1,8 @@
 #pragma once
 
+#include "Framework/Ocv/Geometry.h"
+#include "Framework/Ocv/Projection.h"
 #include "Framework/ErrorCode.h"
-#include "Framework/UtilOCV.h"
 #include "User/UserDispatcher.hpp"
 
 namespace face

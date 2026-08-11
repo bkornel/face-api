@@ -1,7 +1,7 @@
 #include "Framework/ErrorCode.h"
 #include "Modules/ModuleConnector.h"
 
-#include "Framework/UtilString.h"
+#include "Framework/Text.h"
 
 #include "Modules/FaceDetection/FaceDetection.h"
 #include "Modules/FirstModule/FirstModule.h"
