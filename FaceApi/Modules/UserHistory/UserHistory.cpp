@@ -23,7 +23,7 @@ namespace face
     return fw::ErrorCode::OK;
   }
 
-  UserEntriesMessage::Shared UserHistory::Main(ActiveUsersMessage::Shared iActiveUsers)
+  std::shared_ptr<UserEntriesMessage> UserHistory::Main(std::shared_ptr<ActiveUsersMessage> iActiveUsers)
   {
     DrainCommands();
 

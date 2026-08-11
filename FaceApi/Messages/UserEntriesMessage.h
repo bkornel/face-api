@@ -2,15 +2,15 @@
 
 #include "Framework/Message.h"
 #include "User/User.h"
+#include <memory>
 
 namespace face
 {
   class UserEntriesMessage : public fw::Message
   {
   public:
-    FW_DEFINE_SMART_POINTERS(UserEntriesMessage);
 
-    using Entry = std::pair<long long, UserData::Shared>;
+    using Entry = std::pair<long long, std::shared_ptr<UserData>>;
     using EntryMap = std::map<int, std::vector<Entry>>;
 
     UserEntriesMessage(const EntryMap& iEntryMap, unsigned iFrameId, long long iTimestamp);

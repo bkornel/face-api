@@ -4,7 +4,7 @@
 
 namespace face
 {
-  bool LastModule::Main(ImageMessage::Shared iImage, ActiveUsersMessage::Shared iUsers)
+  bool LastModule::Main(std::shared_ptr<ImageMessage> iImage, std::shared_ptr<ActiveUsersMessage> iUsers)
   {
     DrainCommands();
 
@@ -32,7 +32,7 @@ namespace face
     mLastUsers = nullptr;
   }
 
-  ImageMessage::Shared LastModule::GetLastImage() const
+  std::shared_ptr<ImageMessage> LastModule::GetLastImage() const
   {
     std::lock_guard<std::mutex> lock(mLastMutex);
     return mLastImage;
@@ -40,13 +40,13 @@ namespace face
 
   unsigned LastModule::GetLastFrameId() const
   {
-    ImageMessage::Shared lastImage = GetLastImage();
+    std::shared_ptr<ImageMessage> lastImage = GetLastImage();
     return lastImage ? lastImage->GetFrameId() : 0U;
   }
 
   long long LastModule::GetLastTimestamp() const
   {
-    ImageMessage::Shared lastImage = GetLastImage();
+    std::shared_ptr<ImageMessage> lastImage = GetLastImage();
     return lastImage ? lastImage->GetTimestamp() : 0LL;
   }
 
@@ -54,7 +54,7 @@ namespace face
   {
     oResults.clear();
 
-    ActiveUsersMessage::Shared users;
+    std::shared_ptr<ActiveUsersMessage> users;
     {
       std::lock_guard<std::mutex> lock(mLastMutex);
       users = mLastUsers;

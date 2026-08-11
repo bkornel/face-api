@@ -3,6 +3,7 @@
 #include "Framework/Util.h"
 
 #include <easyloggingpp/easyloggingpp.h>
+#include <memory>
 #include <opencv2/core/base.hpp>
 
 #include <atomic>

@@ -11,7 +11,6 @@ namespace face
                       public fw::Port<unsigned()>
   {
   public:
-    FW_DEFINE_SMART_POINTERS(FirstModule);
 
     FirstModule() = default;
 

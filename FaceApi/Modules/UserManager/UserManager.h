@@ -9,20 +9,20 @@
 #include "Messages/ActiveUsersMessage.h"
 
 #include "User/User.h"
+#include <memory>
 
 namespace face
 {
   class UserManager : public fw::Module,
-                      public fw::Port<ActiveUsersMessage::Shared(ImageMessage::Shared, RoiMessage::Shared)>
+                      public fw::Port<std::shared_ptr<ActiveUsersMessage>(std::shared_ptr<ImageMessage>, std::shared_ptr<RoiMessage>)>
   {
   public:
-    FW_DEFINE_SMART_POINTERS(UserManager);
 
     UserManager() = default;
 
     virtual ~UserManager() = default;
 
-    ActiveUsersMessage::Shared Main(ImageMessage::Shared iImage, RoiMessage::Shared iDetections) override;
+    std::shared_ptr<ActiveUsersMessage> Main(std::shared_ptr<ImageMessage> iImage, std::shared_ptr<RoiMessage> iDetections) override;
 
     void Clear() override;
 
@@ -38,19 +38,19 @@ namespace face
 
     void PreprocessUsers();
 
-    void ProcessDetections(RoiMessage::Shared iDetections);
+    void ProcessDetections(std::shared_ptr<RoiMessage> iDetections);
 
-    void TrackUsers(ImageMessage::Shared iImage);
+    void TrackUsers(std::shared_ptr<ImageMessage> iImage);
 
     void PostprocessUsers();
 
     void MergeDetectionsAndUsers(std::vector<cv::Rect>& ioFaceROIs);
 
-    bool MatchTemplate(ImageMessage::Shared iImage, User::Shared ioUser, cv::Rect& oFaceRect);
+    bool MatchTemplate(std::shared_ptr<ImageMessage> iImage, std::shared_ptr<User> ioUser, cv::Rect& oFaceRect);
 
     void RemoveInactiveUsers(bool forceToDelete = false);
 
-    std::vector<User::Shared> mUsers; ///< The vector storing all users
+    std::vector<std::shared_ptr<User>> mUsers; ///< The vector storing all users
     fw::Stopwatch mRemoveSW;
     long long mTimestamp = 0;
     int mLastUserID = 0;

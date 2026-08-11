@@ -11,6 +11,7 @@
 #include "Modules/LastModule/LastModule.h"
 
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -18,11 +19,10 @@ namespace face
 {
   class ModuleGraph : public fw::Module
   {
-    using PredecessorMap = std::map<int, fw::Module::Shared>;
-    using FrameProcessedHandler = fw::Event<void(ImageMessage::Shared)>;
+    using PredecessorMap = std::map<int, std::shared_ptr<fw::Module>>;
+    using FrameProcessedHandler = fw::Event<void(std::shared_ptr<ImageMessage>)>;
 
   public:
-    FW_DEFINE_SMART_POINTERS(ModuleGraph);
 
     static FrameProcessedHandler sFrameProcessed;
 
@@ -39,12 +39,12 @@ namespace face
     fw::ErrorCode Process();
 
     // The camera path: frames are handed to the queue directly, not broadcast
-    inline ImageQueue::Shared GetImageQueue() const
+    inline std::shared_ptr<ImageQueue> GetImageQueue() const
     {
       return mImageQueue;
     }
 
-    inline LastModule::Shared GetLastModule() const
+    inline std::shared_ptr<LastModule> GetLastModule() const
     {
       return mLastModule;
     }
@@ -74,9 +74,9 @@ namespace face
 
     std::vector<cv::FileNode> GetConnectionOrder(const cv::FileNode& iModulesNode);
 
-    FirstModule::Shared mFirstModule = nullptr;
-    LastModule::Shared mLastModule = nullptr;
-    ImageQueue::Shared mImageQueue = nullptr;
-    std::vector<fw::Module::Shared> mModules;
+    std::shared_ptr<FirstModule> mFirstModule = nullptr;
+    std::shared_ptr<LastModule> mLastModule = nullptr;
+    std::shared_ptr<ImageQueue> mImageQueue = nullptr;
+    std::vector<std::shared_ptr<fw::Module>> mModules;
   };
 }

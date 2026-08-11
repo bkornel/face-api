@@ -7,18 +7,18 @@
 #include "Messages/ImageMessage.h"
 
 #include <atomic>
+#include <memory>
 #include <mutex>
 #include <string>
 
 namespace face
 {
   class ImageQueue : public fw::Module,
-                     public fw::Port<ImageMessage::Shared(unsigned)>
+                     public fw::Port<std::shared_ptr<ImageMessage>(unsigned)>
   {
-    using MessageQueue = fw::MessageQueue<ImageMessage::Shared>;
+    using MessageQueue = fw::MessageQueue<std::shared_ptr<ImageMessage>>;
 
   public:
-    FW_DEFINE_SMART_POINTERS(ImageQueue);
 
     ImageQueue();
 
@@ -26,7 +26,7 @@ namespace face
 
     fw::ErrorCode Push(const cv::Mat& iFrame, unsigned iFrameId, long long iTimestamp);
 
-    ImageMessage::Shared Main(unsigned iTickNumber) override;
+    std::shared_ptr<ImageMessage> Main(unsigned iTickNumber) override;
 
     void Clear() override
     {

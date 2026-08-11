@@ -6,6 +6,7 @@
 #include "Messages/ImageMessage.h"
 #include "Messages/RoiMessage.h"
 
+#include <memory>
 #include <opencv2/core/core.hpp>
 #include <opencv2/objdetect/objdetect.hpp>
 
@@ -14,23 +15,22 @@
 namespace face
 {
   class FaceDetection : public fw::Module,
-                        public fw::Port<RoiMessage::Shared(ImageMessage::Shared)>
+                        public fw::Port<std::shared_ptr<RoiMessage>(std::shared_ptr<ImageMessage>)>
   {
   public:
-    FW_DEFINE_SMART_POINTERS(FaceDetection);
 
     FaceDetection() = default;
 
     virtual ~FaceDetection() = default;
 
-    RoiMessage::Shared Main(ImageMessage::Shared iImage) override;
+    std::shared_ptr<RoiMessage> Main(std::shared_ptr<ImageMessage> iImage) override;
 
   protected:
     const static float sForceDetectionSec;
 
     fw::ErrorCode InitializeInternal(const cv::FileNode& iSettings) override;
 
-    void HandleCommand(fw::Message::Shared iMessage) override;
+    void HandleCommand(std::shared_ptr<fw::Message> iMessage) override;
 
     void RemoveMultipleDetections(std::vector<cv::Rect>& ioDetections);
 

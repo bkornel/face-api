@@ -73,11 +73,11 @@ namespace face
     return fw::ErrorCode::OK;
   }
 
-  void FaceDetection::HandleCommand(fw::Message::Shared iMessage)
+  void FaceDetection::HandleCommand(std::shared_ptr<fw::Message> iMessage)
   {
     Module::HandleCommand(iMessage);
 
-    CommandMessage::Shared command = std::dynamic_pointer_cast<CommandMessage>(iMessage);
+    std::shared_ptr<CommandMessage> command = std::dynamic_pointer_cast<CommandMessage>(iMessage);
     if (command)
     {
       if (command->GetType() == CommandMessage::Type::RunFaceDetection && !mForceRun)
@@ -91,7 +91,7 @@ namespace face
       return;
     }
 
-    ImageSizeChangedMessage::Shared imageSizeChanged = std::dynamic_pointer_cast<ImageSizeChangedMessage>(iMessage);
+    std::shared_ptr<ImageSizeChangedMessage> imageSizeChanged = std::dynamic_pointer_cast<ImageSizeChangedMessage>(iMessage);
     if (imageSizeChanged)
     {
       if (mMinSizeFactor > 0.0F && mMinSizeFactor < 1.0F)
@@ -115,7 +115,7 @@ namespace face
     }
   }
 
-  RoiMessage::Shared FaceDetection::Main(ImageMessage::Shared iImage)
+  std::shared_ptr<RoiMessage> FaceDetection::Main(std::shared_ptr<ImageMessage> iImage)
   {
     DrainCommands();
 

@@ -18,7 +18,6 @@ namespace fw
   class Module : public Thread
   {
   public:
-    FW_DEFINE_SMART_POINTERS(Module);
 
     static std::string CreateModuleName(const cv::FileNode& iModuleNode);
 
@@ -55,7 +54,7 @@ namespace fw
 
     virtual ErrorCode DeInitializeInternal();
 
-    void Publish(const Message::Shared& iMessage);
+    void Publish(const std::shared_ptr<Message>& iMessage);
 
     // Subscribes the module for a message type until DeInitialize()
     template <typename MessageT>
@@ -65,8 +64,8 @@ namespace fw
 
       const MessageBus::Token token =
         mSelf.expired()
-          ? mBus->Subscribe<MessageT>([this](Message::Shared iMessage) { OnCommand(iMessage); })
-          : mBus->Subscribe<MessageT>(mSelf.lock(), [this](Message::Shared iMessage) { OnCommand(iMessage); });
+          ? mBus->Subscribe<MessageT>([this](std::shared_ptr<Message> iMessage) { OnCommand(iMessage); })
+          : mBus->Subscribe<MessageT>(mSelf.lock(), [this](std::shared_ptr<Message> iMessage) { OnCommand(iMessage); });
 
       if (token != MessageBus::sInvalidToken) mSubscriptions.emplace_back(token);
     }
@@ -75,13 +74,13 @@ namespace fw
     virtual void SubscribeCommands();
 
     // Called on the publishing thread, only queues the command
-    virtual void OnCommand(Message::Shared iMessage);
+    virtual void OnCommand(std::shared_ptr<Message> iMessage);
 
     // Applies the queued commands, must be called from Main()
     void DrainCommands();
 
     // Called by DrainCommands() on the graph thread
-    virtual void HandleCommand(Message::Shared iMessage);
+    virtual void HandleCommand(std::shared_ptr<Message> iMessage);
 
     bool mInitialized = false;
     bool mVerboseMode = false;
@@ -94,7 +93,7 @@ namespace fw
     void UnsubscribeCommands();
 
     std::mutex mCommandMutex;
-    std::vector<Message::Shared> mPendingCommands;
+    std::vector<std::shared_ptr<Message>> mPendingCommands;
     std::vector<MessageBus::Token> mSubscriptions;
   };
 }

@@ -4,6 +4,7 @@
 #include "Modules/UserProcessor/ShapeModel/ShapeModel.h"
 
 #include <map>
+#include <memory>
 #include <set>
 #include <vector>
 
@@ -15,7 +16,7 @@ namespace face
 
   class ShapeModelDispatcher : public UserDispatcher
   {
-    typedef std::map<int, ShapeModel::Shared> ShapeModels;
+    typedef std::map<int, std::shared_ptr<ShapeModel>> ShapeModels;
 
   public:
     ShapeModelDispatcher() = default;

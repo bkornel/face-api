@@ -8,21 +8,21 @@
 
 #include <chrono>
 #include <functional>
+#include <memory>
 #include <mutex>
 
 namespace face
 {
   class LastModule : public fw::Module,
-                     public fw::Port<bool(ImageMessage::Shared, ActiveUsersMessage::Shared)>
+                     public fw::Port<bool(std::shared_ptr<ImageMessage>, std::shared_ptr<ActiveUsersMessage>)>
   {
   public:
-    FW_DEFINE_SMART_POINTERS(LastModule);
 
     LastModule() = default;
 
     ~LastModule() override = default;
 
-    bool Main(ImageMessage::Shared iImage, ActiveUsersMessage::Shared iUsers) override;
+    bool Main(std::shared_ptr<ImageMessage> iImage, std::shared_ptr<ActiveUsersMessage> iUsers) override;
 
     void Clear() override;
 
@@ -47,13 +47,13 @@ namespace face
 
     long long GetLastTimestamp() const;
 
-    ImageMessage::Shared GetLastImage() const;
+    std::shared_ptr<ImageMessage> GetLastImage() const;
 
     fw::ErrorCode GetLastResults(FaceResults& oResults) const;
 
   private:
     mutable std::mutex mLastMutex;
-    ImageMessage::Shared mLastImage = nullptr;
-    ActiveUsersMessage::Shared mLastUsers = nullptr;
+    std::shared_ptr<ImageMessage> mLastImage = nullptr;
+    std::shared_ptr<ActiveUsersMessage> mLastUsers = nullptr;
   };
 }

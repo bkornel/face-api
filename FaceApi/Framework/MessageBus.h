@@ -26,9 +26,8 @@ namespace fw
   class MessageBus
   {
   public:
-    FW_DEFINE_SMART_POINTERS(MessageBus);
 
-    using Handler = std::function<void(Message::Shared)>;
+    using Handler = std::function<void(std::shared_ptr<Message>)>;
     using Token = unsigned long long;
 
     static const Token sInvalidToken;
@@ -58,7 +57,7 @@ namespace fw
 
     void Unsubscribe(Token iToken);
 
-    void Publish(const Message::Shared& iMessage);
+    void Publish(const std::shared_ptr<Message>& iMessage);
 
     std::size_t GetSubscriptionCount() const;
 

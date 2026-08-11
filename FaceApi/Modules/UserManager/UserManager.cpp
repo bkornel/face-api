@@ -49,7 +49,7 @@ namespace face
     mMinFaceSize = mMaxFaceSize = { 0, 0 };
   }
 
-  ActiveUsersMessage::Shared UserManager::Main(ImageMessage::Shared iImage, RoiMessage::Shared iDetections)
+  std::shared_ptr<ActiveUsersMessage> UserManager::Main(std::shared_ptr<ImageMessage> iImage, std::shared_ptr<RoiMessage> iDetections)
   {
     DrainCommands();
 
@@ -106,7 +106,7 @@ namespace face
     }
   }
 
-  void UserManager::ProcessDetections(RoiMessage::Shared iDetections)
+  void UserManager::ProcessDetections(std::shared_ptr<RoiMessage> iDetections)
   {
     if (!iDetections || iDetections->IsEmpty()) return;
 
@@ -128,7 +128,7 @@ namespace face
     }
   }
 
-  void UserManager::TrackUsers(ImageMessage::Shared iImage)
+  void UserManager::TrackUsers(std::shared_ptr<ImageMessage> iImage)
   {
     FACE_PROFILER(Track_Users);
 
@@ -199,7 +199,7 @@ namespace face
     }
   }
 
-  bool UserManager::MatchTemplate(ImageMessage::Shared iImage, User::Shared ioUser, cv::Rect& oFaceRect)
+  bool UserManager::MatchTemplate(std::shared_ptr<ImageMessage> iImage, std::shared_ptr<User> ioUser, cv::Rect& oFaceRect)
   {
     CV_DbgAssert(mTemplateScale > 0.0F && mTemplateScale <= 1.0F);
 
@@ -251,7 +251,7 @@ namespace face
 
     for (auto& uid : userIDs)
     {
-      auto itIU = std::find_if(mUsers.begin(), mUsers.end(), [&](const User::Shared& obj) {
+      auto itIU = std::find_if(mUsers.begin(), mUsers.end(), [&](const std::shared_ptr<User>& obj) {
         return obj->GetUserId() == uid;
       });
 

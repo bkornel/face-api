@@ -21,26 +21,26 @@ namespace fw
     }
   };
 
-  Executor::Shared getInlineExecutor()
+  std::shared_ptr<Executor> getInlineExecutor()
   {
-    static Executor::Shared sExecutor = std::make_shared<InlineExecutor>();
+    static std::shared_ptr<Executor> sExecutor = std::make_shared<InlineExecutor>();
     return sExecutor;
   }
 
-  Executor::Shared getThreadExecutor()
+  std::shared_ptr<Executor> getThreadExecutor()
   {
-    static Executor::Shared sExecutor = std::make_shared<ThreadExecutor>();
+    static std::shared_ptr<Executor> sExecutor = std::make_shared<ThreadExecutor>();
     return sExecutor;
   }
 
-  Continuation::Continuation(std::function<void(Executor::Shared)> iTask, unsigned iCounter) :
+  Continuation::Continuation(std::function<void(std::shared_ptr<Executor>)> iTask, unsigned iCounter) :
     mTask(iTask),
     mCounter(iCounter),
     mCount(iCounter)
   {
   }
 
-  void Continuation::NotifyAndRun(Executor::Shared iExecutor)
+  void Continuation::NotifyAndRun(std::shared_ptr<Executor> iExecutor)
   {
     if (--mCounter == 0U)
     {

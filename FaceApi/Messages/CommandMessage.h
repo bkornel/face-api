@@ -9,7 +9,6 @@ namespace face
   class CommandMessage : public fw::Message
   {
   public:
-    FW_DEFINE_SMART_POINTERS(CommandMessage);
 
     enum class Type
     {

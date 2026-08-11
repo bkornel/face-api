@@ -1,6 +1,7 @@
 #pragma once
 
 #include <atomic>
+#include <memory>
 #include <string>
 
 #include "FaceResult.h"
@@ -13,7 +14,7 @@ namespace face
 {
   class FaceApi : public fw::Module
   {
-    using MessageQueue = fw::MessageQueue<ImageMessage::Shared>;
+    using MessageQueue = fw::MessageQueue<std::shared_ptr<ImageMessage>>;
 
   public:
     static FaceApi& GetInstance();
@@ -61,11 +62,11 @@ namespace face
 
     fw::ErrorCode Run() override;
 
-    void OnFrameProcessed(ImageMessage::Shared iMessage);
+    void OnFrameProcessed(std::shared_ptr<ImageMessage> iMessage);
 
     fw::MessageBus mBus;
 
-    ModuleGraph::Shared mModuleGraph = nullptr;
+    std::shared_ptr<ModuleGraph> mModuleGraph = nullptr;
 
     std::atomic<unsigned> mCameraFrameId{ 0U };
 

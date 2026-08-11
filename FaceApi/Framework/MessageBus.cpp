@@ -44,7 +44,7 @@ namespace fw
     }
   }
 
-  void MessageBus::Publish(const Message::Shared& iMessage)
+  void MessageBus::Publish(const std::shared_ptr<Message>& iMessage)
   {
     if (!iMessage) return;
 

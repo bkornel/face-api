@@ -10,7 +10,6 @@ namespace fw
   class Message
   {
   public:
-    FW_DEFINE_SMART_POINTERS(Message);
 
     Message(unsigned iFrameId, long long iTimestamp);
 

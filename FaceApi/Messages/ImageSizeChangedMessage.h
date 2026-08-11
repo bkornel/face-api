@@ -9,7 +9,6 @@ namespace face
   class ImageSizeChangedMessage : public fw::Message
   {
   public:
-    FW_DEFINE_SMART_POINTERS(ImageSizeChangedMessage);
 
     ImageSizeChangedMessage(const cv::Size& iSize, unsigned iFrameId, long long iTimestamp);
 

@@ -43,7 +43,7 @@ namespace face
     return ClmWrapper::GetInstance().Initialize(trackerFile, triFile, conFile);
   }
 
-  ActiveUsersMessage::Shared UserProcessor::Main(ImageMessage::Shared iImage, ActiveUsersMessage::Shared iUsers)
+  std::shared_ptr<ActiveUsersMessage> UserProcessor::Main(std::shared_ptr<ImageMessage> iImage, std::shared_ptr<ActiveUsersMessage> iUsers)
   {
     DrainCommands();
 

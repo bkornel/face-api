@@ -8,20 +8,20 @@
 #include "Messages/UserEntriesMessage.h"
 
 #include <map>
+#include <memory>
 
 namespace face
 {
   class UserHistory : public fw::Module,
-                      public fw::Port<UserEntriesMessage::Shared(ActiveUsersMessage::Shared)>
+                      public fw::Port<std::shared_ptr<UserEntriesMessage>(std::shared_ptr<ActiveUsersMessage>)>
   {
   public:
-    FW_DEFINE_SMART_POINTERS(UserHistory);
 
     UserHistory() = default;
 
     virtual ~UserHistory() = default;
 
-    UserEntriesMessage::Shared Main(ActiveUsersMessage::Shared iActiveUsers) override;
+    std::shared_ptr<UserEntriesMessage> Main(std::shared_ptr<ActiveUsersMessage> iActiveUsers) override;
 
     void Clear() override;
 
