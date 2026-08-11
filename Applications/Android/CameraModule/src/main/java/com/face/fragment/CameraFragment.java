@@ -149,7 +149,9 @@ public class CameraFragment extends BaseFragment {
         mFocusView = new FocusView(mActivity, mCamera);
         mViewGroup.addView(mCameraPreview);
         mViewGroup.addView(mFocusView);
-        mViewGroup.addView(mCameraPreview.getNativeImageView());
+        // A transparent overlay instead of an ImageView showing a composited frame: the live
+        // preview stays visible underneath and only the geometry comes back from native.
+        mViewGroup.addView(mCameraPreview.getOverlayView());
         mViewGroup.addView(mFocusView.getFocusImageView());
 
         // Set preview container size
@@ -333,6 +335,13 @@ public class CameraFragment extends BaseFragment {
             }
 
             mCapturePressed = true;
+
+            // The rendered frame is not produced per frame any more, so ask for one now.
+            // Focusing takes long enough for it to be ready by the time onFocused() fires.
+            if (mCameraPreview != null) {
+                mCameraPreview.requestCaptureFrame();
+            }
+
             mFocusView.startFocusing();
         }
     }

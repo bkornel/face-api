@@ -36,6 +36,7 @@
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\FlowGraph.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\VideoWriter.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\FaceApi.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\FaceResultBuffer.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Exception.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Message.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\MessageBus.cpp" />
@@ -89,6 +90,7 @@
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\VideoWriter.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\FaceApi.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\FaceResult.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\FaceResultBuffer.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Exception.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Message.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\MessageBus.h" />

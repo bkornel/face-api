@@ -1,4 +1,5 @@
 #include "FaceApi.h"
+#include "FaceResultBuffer.h"
 #include "Common/Configuration.h"
 #include "Framework/Stopwatch.h"
 #include "Framework/UtilOCV.h"
@@ -46,6 +47,7 @@ namespace face_jni
   {
     return static_cast<jsize>(iWidth) * iHeight * 3 / 2;
   }
+
 }
 
 extern "C" {
@@ -92,6 +94,43 @@ Java_com_face_common_Native_reset(JNIEnv* /*iEnv*/, jobject /*iThis*/)
   return 0;
 }
 
+/// @brief Copies the overlay data of the last processed frame into iBuffer.
+/// @return the number of faces written, 0 when there is nothing to draw, negative on error.
+///
+/// This is the path to use for drawing the overlay with Canvas or OpenGL: it moves a couple
+/// of kilobytes of geometry per frame instead of a full ARGB frame, and the camera preview
+/// never has to make a round trip through the CPU to be displayed. The layout is defined by
+/// face::result_buffer, and FaceOverlayData on the Java side reads it back.
+JNIEXPORT jint JNICALL
+Java_com_face_common_Native_getResults(JNIEnv* iEnv, jobject /*iThis*/, jfloatArray iBuffer)
+{
+  if (!iEnv || !iBuffer) return -1;
+
+  const jsize capacity = iEnv->GetArrayLength(iBuffer);
+
+  face::FaceResults results;
+  if (face::FaceApi::GetInstance().GetResults(results) != fw::ErrorCode::OK)
+  {
+    results.clear();
+  }
+
+  std::vector<jfloat> buffer(static_cast<std::size_t>(capacity), 0.0F);
+  const int faceCount = face::result_buffer::pack(results, buffer.data(), static_cast<int>(capacity));
+
+  if (faceCount < 0)
+  {
+    face_jni::log("- The result buffer is too small for a single face");
+    return -1;
+  }
+
+  const jsize written =
+    static_cast<jsize>(face::result_buffer::cHeaderFloats + (faceCount * face::result_buffer::cFaceStride));
+
+  iEnv->SetFloatArrayRegion(iBuffer, 0, written, buffer.data());
+
+  return faceCount;
+}
+
 JNIEXPORT jint JNICALL
 Java_com_face_common_Native_process(JNIEnv* iEnv, jobject /*iThis*/, jint iRotation, jint iWidth, jint iHeight, jbyteArray iYUV, jintArray iARGB)
 {
@@ -104,7 +143,7 @@ Java_com_face_common_Native_process(JNIEnv* iEnv, jobject /*iThis*/, jint iRotat
   stopwatch.Start();
 #endif
 
-  if (!iYUV || !iARGB || iWidth <= 0 || iHeight <= 0)
+  if (!iYUV || iWidth <= 0 || iHeight <= 0)
   {
     return -1;
   }
@@ -117,7 +156,9 @@ Java_com_face_common_Native_process(JNIEnv* iEnv, jobject /*iThis*/, jint iRotat
     return -1;
   }
 
-  if (iEnv->GetArrayLength(iARGB) < static_cast<jsize>(iWidth) * iHeight)
+  // iARGB is optional. Leaving it out skips the rendered frame altogether, which is what
+  // a host that draws the overlay itself wants: no full frame crosses the JNI boundary.
+  if (iARGB && iEnv->GetArrayLength(iARGB) < static_cast<jsize>(iWidth) * iHeight)
   {
     face_jni::log("- The ARGB array is smaller than the given frame size");
     return -1;
@@ -162,7 +203,11 @@ Java_com_face_common_Native_process(JNIEnv* iEnv, jobject /*iThis*/, jint iRotat
     face::FaceApi::GetInstance().PushCameraFrame(bgr);
 
     cv::Mat resultImage;
-    if (face::FaceApi::GetInstance().GetResultImage(resultImage) == fw::ErrorCode::OK)
+    if (!iARGB)
+    {
+      // Nothing to hand back, the caller draws from getResults()
+    }
+    else if (face::FaceApi::GetInstance().GetResultImage(resultImage) == fw::ErrorCode::OK)
     {
       if (!resultImage.empty() && bgr.size() == resultImage.size())
       {

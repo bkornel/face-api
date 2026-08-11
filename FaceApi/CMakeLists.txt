@@ -75,6 +75,7 @@ set(SOURCES;
   3rdparty/clm/PAW.cc;
   3rdparty/clm/PDM.cc;
   3rdparty/easyloggingpp/easyloggingpp.cpp;
+  FaceResultBuffer.cpp;
   Common/Configuration.cpp;
   Common/PoseUtil.cpp;
   Common/ShapeUtil.cpp;
