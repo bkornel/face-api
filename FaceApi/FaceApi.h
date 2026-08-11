@@ -67,6 +67,8 @@ namespace face
 
     fw::MessageBus mBus;
 
+    ModuleGraph::FrameProcessedToken mFrameProcessedToken = 0ULL;
+
     std::shared_ptr<ModuleGraph> mModuleGraph = nullptr;
 
     std::atomic<unsigned> mCameraFrameId{ 0U };

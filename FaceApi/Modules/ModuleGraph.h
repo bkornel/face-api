@@ -25,6 +25,8 @@ namespace face
 
   public:
 
+    using FrameProcessedToken = FrameProcessedHandler::Token;
+
     static FrameProcessedHandler sFrameProcessed;
 
     ModuleGraph() = default;

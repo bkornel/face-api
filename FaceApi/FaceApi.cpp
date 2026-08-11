@@ -29,13 +29,14 @@ namespace face
     Attach(mBus, nullptr);
     mModuleGraph->Attach(mBus, mModuleGraph);
 
-    mModuleGraph->sFrameProcessed += MAKE_DELEGATE(&FaceApi::OnFrameProcessed, this);
+    mFrameProcessedToken = mModuleGraph->sFrameProcessed.Subscribe(
+      [this](std::shared_ptr<ImageMessage> iMessage) { OnFrameProcessed(iMessage); });
   }
 
   FaceApi::~FaceApi()
   {
     DeInitialize();
-    mModuleGraph->sFrameProcessed -= MAKE_DELEGATE(&FaceApi::OnFrameProcessed, this);
+    mModuleGraph->sFrameProcessed.Unsubscribe(mFrameProcessedToken);
   }
 
   fw::ErrorCode FaceApi::InitializeInternal(const cv::FileNode& /*iSettingsNode*/)

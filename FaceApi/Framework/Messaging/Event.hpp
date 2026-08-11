@@ -1,175 +1,95 @@
 #pragma once
 
 #include <algorithm>
+#include <functional>
 #include <mutex>
+#include <utility>
 #include <vector>
-
-#define MAKE_DELEGATE(function, callee) (fw::MakeDelegate(function).Bind<function>(callee))
 
 namespace fw
 {
-  /// @brief Delegate class for C++ (non specialized template declaration)
-  /// Original implementation: http://marcmo.github.io/delegates/
-  template <typename T>
-  class Delegate;
-
-  /// @brief Event class for C++ (non specialized template declaration)
   template <typename T>
   class Event;
 
-  /// @brief Delegate class for C++ (specialization for member functions)
-  /// @param ReturnT return type of the function that is being captured
-  /// @param ArgumentT possible arguments of the captured function
-  template <typename ReturnT, typename... ArgumentT>
-  class Delegate<ReturnT(ArgumentT...)>
+  /// @brief A typed, direct callback list: whoever raises it knows exactly who listens for
+  /// what, unlike fw::MessageBus where the sender does not know its audience.
+  ///
+  /// Subscribing hands back a token and unsubscribing takes it. The previous version stored
+  /// std::function-like delegates and removed them by comparing the pair of pointers inside,
+  /// which is why it needed a hand-written Delegate class and the MAKE_DELEGATE macro: a
+  /// std::function cannot be compared. A token needs no comparison, so a subscriber can be a
+  /// lambda that captures whatever it likes.
+  ///
+  /// This class is thread-safe. Handlers run on the raising thread.
+  template <typename... ArgumentT>
+  class Event<void(ArgumentT...)>
   {
-    /// @brief FunctionT type of the member function
-    using FunctionT = ReturnT (*)(void*, ArgumentT...);
-
-    /// @brief DelegateT alias for the delegate type
-    using DelegateT = Delegate<ReturnT(ArgumentT...)>;
-
   public:
-    /// @brief Constructor
-    /// @param iCallee pointer to the object who's member will be called
-    /// @param iFunction pointer to the member function
-    Delegate(void* iCallee, FunctionT iFunction) :
-      mCallee(iCallee),
-      mFunction(iFunction)
-    {
-    }
+    using Handler = std::function<void(ArgumentT...)>;
+    using Token = unsigned long long;
 
-    /// @brief Destructor
-    ~Delegate() = default;
+    static constexpr Token cInvalidToken = 0ULL;
 
-    /// @brief Ellipsis operator for invoking the delegate
-    /// @param iArgument arguments of the invoked function
-    /// @return the value that is determined in the invoked function
-    ReturnT operator()(ArgumentT... iArgument) const
-    {
-      return (*mFunction)(mCallee, iArgument...);
-    }
-
-    /// @brief Operator for comparing two delegates
-    /// @param iOther the delegate that is compared to the current instance
-    /// @return true if the two delegates are equal; otherwise false
-    bool operator==(const DelegateT& iOther) const
-    {
-      return (mCallee == iOther.mCallee) && (mFunction == iOther.mFunction);
-    }
-
-    /// @brief opposite of operator==
-    bool operator!=(const DelegateT& iOther) const
-    {
-      return !(*this == iOther);
-    }
-
-  private:
-    void* mCallee = nullptr;       ///< pointer to the object who's member will be called
-    FunctionT mFunction = nullptr; ///< pointer to the mCallee's member function
-  };
-
-  /// @brief Helper class for creating delegates
-  /// @param CalleeT type of the object whose member will be invoked
-  /// @param ReturnT return type of the function that is being captured
-  /// @param ArgumentT possible arguments of the captured function
-  template <typename CalleeT, typename ReturnT, typename... ArgumentT>
-  struct DelegateMaker
-  {
-    /// @brief DelegateT alias for the delegate type
-    using DelegateT = Delegate<ReturnT(ArgumentT...)>;
-
-    /// @brief Helper method of calling the captured function
-    /// @param iCallee pointer to the object who's member will be called
-    /// @param iArgument arguments of the invoked function
-    /// @return the value that is determined in the captured function
-    template <ReturnT (CalleeT::*MemberFunction)(ArgumentT...)>
-    static ReturnT MethodCaller(void* iCallee, ArgumentT... iArgument)
-    {
-      return (static_cast<CalleeT*>(iCallee)->*MemberFunction)(iArgument...);
-    }
-
-    /// @brief Helper function for binding the object's member function to the delegate
-    /// @param iCallee pointer to the object who's member will be called
-    /// @return the delegate itself
-    template <ReturnT (CalleeT::*MemberFunction)(ArgumentT...)>
-    static DelegateT Bind(CalleeT* iCallee)
-    {
-      return DelegateT(iCallee, &MethodCaller<MemberFunction>);
-    }
-  };
-
-  /// @brief Helper function for creating delegates
-  template <typename CalleeT, typename ReturnT, typename... ArgumentT>
-  static DelegateMaker<CalleeT, ReturnT, ArgumentT...> MakeDelegate(ReturnT (CalleeT::* /*unused*/)(ArgumentT...))
-  {
-    return DelegateMaker<CalleeT, ReturnT, ArgumentT...>();
-  }
-
-  /// @brief Event class for C++ (specialization for member functions)
-  /// @param ReturnT return type of the function that is being captured
-  /// @param ArgumentT possible arguments of the captured function
-  template <typename ReturnT, typename... ArgumentT>
-  class Event<ReturnT(ArgumentT...)>
-  {
-    /// @brief DelegateT alias for the delegate type
-    using DelegateT = Delegate<ReturnT(ArgumentT...)>;
-
-  public:
-    /// @brief Constructor
     Event() = default;
 
-    /// @brief Destructor
-    ~Event() = default;
+    Event(const Event& iOther) = delete;
 
-    /// @brief Raising an event
-    /// @param iArgument possible arguments which will be forwarded to the captured function
-    void Raise(ArgumentT... iArgument)
+    Event& operator=(const Event& iOther) = delete;
+
+    /// @return the token to unsubscribe with, or cInvalidToken if iHandler is empty
+    Token Subscribe(Handler iHandler)
     {
-      std::vector<DelegateT> delegates;
-      {
-        std::lock_guard<std::mutex> lock(mMutex);
-        delegates = mDelegates;
-      }
+      if (!iHandler) return cInvalidToken;
 
-      for (const auto& delegate : delegates)
-        delegate(iArgument...);
+      std::lock_guard<std::mutex> lock(mMutex);
+
+      const Token token = mNextToken++;
+      mSubscribers.emplace_back(token, std::move(iHandler));
+
+      return token;
     }
 
-    /// @brief Unsubscribing from the event
+    void Unsubscribe(Token iToken)
+    {
+      if (iToken == cInvalidToken) return;
+
+      std::lock_guard<std::mutex> lock(mMutex);
+
+      std::erase_if(mSubscribers, [iToken](const Subscriber& iObj) {
+        return iObj.first == iToken;
+      });
+    }
+
+    void Raise(ArgumentT... iArgument)
+    {
+      std::vector<Subscriber> subscribers;
+      {
+        std::lock_guard<std::mutex> lock(mMutex);
+        subscribers = mSubscribers;
+      }
+
+      // Called with the lock released: a handler may subscribe or unsubscribe in turn
+      for (const auto& subscriber : subscribers)
+        subscriber.second(iArgument...);
+    }
+
     void Clear()
     {
       std::lock_guard<std::mutex> lock(mMutex);
-      mDelegates.clear();
+      mSubscribers.clear();
     }
 
-    /// @brief Operator for subscribing to the event
-    /// @param iDelegate the delegate that is invoked when the event is raised
-    Event& operator+=(DelegateT iDelegate)
+    std::size_t GetSubscriberCount() const
     {
       std::lock_guard<std::mutex> lock(mMutex);
-
-      if (std::find(mDelegates.begin(), mDelegates.end(), iDelegate) == mDelegates.end())
-        mDelegates.emplace_back(iDelegate);
-
-      return *this;
-    }
-
-    /// @brief Operator for unsubscribing to the event
-    /// @param iDelegate the delegate to be removed
-    Event& operator-=(DelegateT iDelegate)
-    {
-      std::lock_guard<std::mutex> lock(mMutex);
-
-      auto it = std::find(mDelegates.begin(), mDelegates.end(), iDelegate);
-      if (it != mDelegates.end())
-        mDelegates.erase(it);
-
-      return *this;
+      return mSubscribers.size();
     }
 
   private:
+    using Subscriber = std::pair<Token, Handler>;
+
     mutable std::mutex mMutex;
-    std::vector<DelegateT> mDelegates; ///< Delegates that are subscribed to the current event
+    std::vector<Subscriber> mSubscribers;
+    Token mNextToken = cInvalidToken + 1ULL;
   };
 }

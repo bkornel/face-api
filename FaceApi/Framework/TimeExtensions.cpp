@@ -1,6 +1,6 @@
 #include "Framework/TimeExtensions.h"
 
-#include <ctime>
+#include <format>
 
 namespace fw
 {
@@ -8,19 +8,17 @@ namespace fw
   {
     std::string generate_log_stamp()
     {
-      char buffer[100] = { 0 };
-      time_t rawtime = std::time(nullptr);
+      // std::format over chrono, which replaces the strftime call that needed one branch for
+      // localtime_s and another for localtime.
+      //
+      // REMARK: current_zone() reads the time zone database. MSVC ships it, and libc++ only
+      // gained it recently, so an older NDK may not build this. Formatting the time point
+      // directly instead of the zoned_time drops the requirement, at the cost of the stamp
+      // being UTC rather than local.
+      const auto seconds = std::chrono::floor<std::chrono::seconds>(now());
+      const std::chrono::zoned_time local{ std::chrono::current_zone(), seconds };
 
-#if defined(__ANDROID__)
-      struct tm* timeinfo = localtime(&rawtime);
-      std::strftime(buffer, 100, "%Y_%m_%d-%H_%M_%S", timeinfo);
-#else
-      struct tm timeinfo = { 0 };
-      localtime_s(&timeinfo, &rawtime);
-      std::strftime(buffer, 100, "%Y_%m_%d-%H_%M_%S", &timeinfo);
-#endif
-
-      return std::string(buffer);
+      return std::format("{:%Y_%m_%d-%H_%M_%S}", local);
     }
   }
 

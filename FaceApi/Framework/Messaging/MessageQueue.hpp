@@ -9,6 +9,7 @@
 
 #include <atomic>
 #include <chrono>
+#include <concepts>
 #include <condition_variable>
 #include <limits>
 #include <mutex>
@@ -17,21 +18,17 @@
 
 namespace fw
 {
-  template <typename... T>
-  struct is_shared_ptr : std::false_type
-  {
-  };
+  /// @brief Satisfied by std::shared_ptr<T> and nothing else. A type without element_type
+  /// fails the requirement rather than the same_as check, so it does not have to be a pointer.
+  template <typename T>
+  concept SharedPointer = requires { typename T::element_type; } &&
+                          std::same_as<T, std::shared_ptr<typename T::element_type>>;
 
-  template <typename... T>
-  struct is_shared_ptr<std::shared_ptr<T>...> : std::true_type
-  {
-  };
-
-  template <typename First, typename... Rest>
+  /// @brief A queue is only ever asked to carry messages, and messages travel as shared_ptr.
+  /// The constraint says so in the signature, where a static_assert said it in the body.
+  template <SharedPointer First, SharedPointer... Rest>
   class MessageQueue
   {
-    static_assert(is_shared_ptr<First, Rest...>::value, "Template parameter must be std::shared_ptr<T>");
-
     using MessageTuple = std::tuple<First, Rest...>;
 
   public:
@@ -301,15 +298,15 @@ namespace fw
     Timestamp mTimestamp;
   };
 
-  template <typename First, typename... Rest>
+  template <SharedPointer First, SharedPointer... Rest>
   const float fw::MessageQueue<First, Rest...>::MAX_SAMPLING_RATE_FPS = (std::numeric_limits<float>::max)();
 
-  template <typename First, typename... Rest>
+  template <SharedPointer First, SharedPointer... Rest>
   const float fw::MessageQueue<First, Rest...>::MIN_SAMPLING_RATE_FPS = 1.0F;
 
-  template <typename First, typename... Rest>
+  template <SharedPointer First, SharedPointer... Rest>
   const int fw::MessageQueue<First, Rest...>::MAX_BOUND = (std::numeric_limits<int>::max)();
 
-  template <typename First, typename... Rest>
+  template <SharedPointer First, SharedPointer... Rest>
   const int fw::MessageQueue<First, Rest...>::MIN_BOUND = 1;
 }

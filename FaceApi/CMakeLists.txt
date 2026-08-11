@@ -86,6 +86,7 @@ set(SOURCES;
   Framework/Imaging/Geometry.cpp;
   Framework/Imaging/Drawing.cpp;
   Framework/Imaging/Projection.cpp;
+  Framework/Imaging/Procrustes.cpp;
   Framework/Imaging/Transform.cpp;
   Framework/Imaging/Statistics.cpp;
   Framework/Text.cpp;
