@@ -1,6 +1,6 @@
-#include "Framework/Ocv/Drawing.h"
-#include "Framework/Ocv/Geometry.h"
-#include "Framework/Ocv/Projection.h"
+#include "Framework/Imaging/Drawing.h"
+#include "Framework/Imaging/Geometry.h"
+#include "Framework/Imaging/Projection.h"
 #include "Framework/ErrorCode.h"
 #include "Framework/MathExtensions.h"
 #include "Framework/TimeExtensions.h"
@@ -93,7 +93,7 @@ namespace face
     }
   }
 
-  void Visualizer::CreateShapeColorMap(const fw::ocv::VectorPt3D& iShape3D, cv::Mat& oColorMap) const
+  void Visualizer::CreateShapeColorMap(const fw::VectorPt3D& iShape3D, cv::Mat& oColorMap) const
   {
     const std::size_t n = iShape3D.size();
 
@@ -132,17 +132,17 @@ namespace face
     std::stringstream ss;
 
     ss << "UserID: " << iUser.GetUserId();
-    fw::ocv::put_text(ss.str(), textPt, oImage);
+    fw::put_text(ss.str(), textPt, oImage);
     ss.str("");
 
     textPt.y += 15;
     ss << "Detected: " << cvRound((iUser.GetLastUpdateTs() - iUser.GetLastDetectionTs()) / 1000.0) << " sec";
-    fw::ocv::put_text(ss.str(), textPt, oImage);
+    fw::put_text(ss.str(), textPt, oImage);
     ss.str("");
 
     textPt.y += 15;
     ss << "Alive: " << cvRound((iUser.GetLastUpdateTs() - iUser.GetCreationTs()) / 1000.0) << " sec";
-    fw::ocv::put_text(ss.str(), textPt, oImage);
+    fw::put_text(ss.str(), textPt, oImage);
     ss.str("");
   }
 
@@ -155,8 +155,8 @@ namespace face
     if (iUser.GetFaceBox().empty() || iUser.GetRvec().empty() || iUser.GetTvec().empty() || iUser.GetCameraMatrix().empty())
       return;
 
-    fw::ocv::VectorPt2D faceBoxProj;
-    fw::ocv::project_point(iUser.GetFaceBox(), iUser.GetRvec(), iUser.GetTvec(), iUser.GetCameraMatrix(), faceBoxProj);
+    fw::VectorPt2D faceBoxProj;
+    fw::project_point(iUser.GetFaceBox(), iUser.GetRvec(), iUser.GetTvec(), iUser.GetCameraMatrix(), faceBoxProj);
 
     const int cornerCount = static_cast<int>(faceBoxProj.size());
 
@@ -165,7 +165,7 @@ namespace face
       if (c.first < 0 || c.first >= cornerCount || c.second < 0 || c.second >= cornerCount)
         continue;
 
-      fw::ocv::draw_dotted_line(oImage, faceBoxProj[c.first], faceBoxProj[c.second], color, iSegmentWidth, iThickness);
+      fw::draw_dotted_line(oImage, faceBoxProj[c.first], faceBoxProj[c.second], color, iSegmentWidth, iThickness);
     }
 
     for (const auto& pt : faceBoxProj)
@@ -176,13 +176,13 @@ namespace face
 
   void Visualizer::DrawAxes(const User& iUser, cv::Mat& oImage) const
   {
-    static const fw::ocv::VectorPt3D sAxes3D = PoseUtil::GetInstance().GetAxes3D();
+    static const fw::VectorPt3D sAxes3D = PoseUtil::GetInstance().GetAxes3D();
 
     if (iUser.GetRvec().empty() || iUser.GetTvec().empty() || iUser.GetCameraMatrix().empty())
       return;
 
-    fw::ocv::VectorPt2D axes2D;
-    fw::ocv::project_point(sAxes3D, iUser.GetRvec(), iUser.GetTvec(), iUser.GetCameraMatrix(), axes2D);
+    fw::VectorPt2D axes2D;
+    fw::project_point(sAxes3D, iUser.GetRvec(), iUser.GetTvec(), iUser.GetCameraMatrix(), axes2D);
 
     if (axes2D.size() < sAxes3D.size() || axes2D.size() > mColorsOfAxes.size()) return;
 
@@ -200,19 +200,19 @@ namespace face
     const cv::Vec3d& RPY = iUser.GetRPY();
     const cv::Vec3d& position3D = iUser.GetPosition3D();
 
-    fw::ocv::put_text("O", axes2D[0] - shiftPt, oImage);
+    fw::put_text("O", axes2D[0] - shiftPt, oImage);
 
     std::stringstream ss;
     ss << std::setprecision(2) << std::fixed << "Pitch (" << fw::rad_to_deg(RPY[1]) << ", " << position3D[0] << ")";
-    fw::ocv::put_text(ss.str(), axes2D[1] - shiftPt, oImage);
+    fw::put_text(ss.str(), axes2D[1] - shiftPt, oImage);
     ss.str("");
 
     ss << std::setprecision(2) << std::fixed << "Yaw (" << fw::rad_to_deg(RPY[2]) << ", " << position3D[1] << ")";
-    fw::ocv::put_text(ss.str(), axes2D[2] - shiftPt, oImage);
+    fw::put_text(ss.str(), axes2D[2] - shiftPt, oImage);
     ss.str("");
 
     ss << std::setprecision(2) << std::fixed << "Roll (" << fw::rad_to_deg(RPY[0]) << ", " << position3D[2] << ")";
-    fw::ocv::put_text(ss.str(), axes2D[3] - shiftPt, oImage);
+    fw::put_text(ss.str(), axes2D[3] - shiftPt, oImage);
     ss.str("");
   }
 
@@ -226,7 +226,7 @@ namespace face
 
     const int h = 5;
 
-    cv::Scalar c = fw::ocv::get_color(runtimeMs, mMinRuntimeMs, mMaxRuntimeMs);
+    cv::Scalar c = fw::get_color(runtimeMs, mMinRuntimeMs, mMaxRuntimeMs);
     cv::Rect r(1, oImage.rows - h, oImage.cols - 1, h);
 
     cv::rectangle(oImage, r, c, 2);
@@ -243,7 +243,7 @@ namespace face
 
     ss << " FPS) - Queue size: " << iImage->GetQueueData().size;
 
-    fw::ocv::put_text(ss.str(), { 10, oImage.rows - 15 }, oImage);
+    fw::put_text(ss.str(), { 10, oImage.rows - 15 }, oImage);
 
 #ifdef ENABLE_FACE_PROFILER
     if (mVerboseMode)
@@ -257,7 +257,7 @@ namespace face
         std::stringstream ss;
         ss << "- " << m.first << "(" << (iImage->GetFrameId() - m.second.first) << "): " << cvRound(m.second.second) << " ms";
 
-        fw::ocv::put_text(ss.str(), { 10, (barHeight * ++idx) + 20 }, oImage);
+        fw::put_text(ss.str(), { 10, (barHeight * ++idx) + 20 }, oImage);
       }
     }
 #endif

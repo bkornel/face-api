@@ -1,4 +1,4 @@
-#include "Framework/Ocv/FileStorage.h"
+#include "Framework/Settings.h"
 #include "Framework/ErrorCode.h"
 #include "Framework/TimeExtensions.h"
 #include "Common/Configuration.h"
@@ -69,29 +69,29 @@ namespace face
     const cv::FileNode& outputNode = iGeneralNode["output"];
     if (!outputNode.empty())
     {
-      if (fw::ocv::get_value(outputNode, "verbose", value))
+      if (fw::get_value(outputNode, "verbose", value))
         mVerbose = fw::str::convert_to_boolean(value);
 
-      if (fw::ocv::get_value(outputNode, "video", value))
+      if (fw::get_value(outputNode, "video", value))
         mOutput.video = fw::str::convert_to_boolean(value);
 
-      if (fw::ocv::get_value(outputNode, "videoFPS", value))
+      if (fw::get_value(outputNode, "videoFPS", value))
         mOutput.videoFPS = fw::str::convert_to_number<float>(value);
 
-      if (fw::ocv::get_value(outputNode, "videoFourCC", value) && (value.size() == 4))
+      if (fw::get_value(outputNode, "videoFourCC", value) && (value.size() == 4))
         mOutput.videoFourCC = cv::VideoWriter::fourcc(value[0], value[1], value[2], value[3]);
     }
 
     const cv::FileNode& dirNode = iGeneralNode["directories"];
     if (!dirNode.empty())
     {
-      if (fw::ocv::get_value(dirNode, "faceDetector", value))
+      if (fw::get_value(dirNode, "faceDetector", value))
         mRelativeDirectories.faceDetector = value;
 
-      if (fw::ocv::get_value(dirNode, "shapeModel", value))
+      if (fw::get_value(dirNode, "shapeModel", value))
         mRelativeDirectories.shapeModel = value;
 
-      if (fw::ocv::get_value(dirNode, "output", value))
+      if (fw::get_value(dirNode, "output", value))
         mRelativeDirectories.output = value;
     }
 

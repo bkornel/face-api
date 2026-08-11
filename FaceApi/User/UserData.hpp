@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Framework/Ocv/Geometry.h"
+#include "Framework/Imaging/Geometry.h"
 #include "Common/ShapeUtil.h"
 
 #include <memory>
@@ -35,28 +35,28 @@ namespace face
       return mFaceRectOffset;
     }
 
-    inline const fw::ocv::VectorPt3D& GetFaceBox() const
+    inline const fw::VectorPt3D& GetFaceBox() const
     {
       return mFaceBox;
     }
 
     // Get: Shape
-    inline const fw::ocv::VectorPt2D& GetShape2D() const
+    inline const fw::VectorPt2D& GetShape2D() const
     {
       return mShape2D;
     }
 
-    inline const fw::ocv::VectorPt3D& GetShape3D() const
+    inline const fw::VectorPt3D& GetShape3D() const
     {
       return mShape3D;
     }
 
-    inline const fw::ocv::VectorPt2D& GetNormShape2D() const
+    inline const fw::VectorPt2D& GetNormShape2D() const
     {
       return mNormShape2D;
     }
 
-    inline const fw::ocv::VectorPt3D& GetNormShape3D() const
+    inline const fw::VectorPt3D& GetNormShape3D() const
     {
       return mNormShape3D;
     }
@@ -118,23 +118,23 @@ namespace face
       mFaceTemplate = iFaceTemplate.clone();
     }
 
-    inline void SetFaceBox(const fw::ocv::VectorPt3D& iFaceBox)
+    inline void SetFaceBox(const fw::VectorPt3D& iFaceBox)
     {
       mFaceBox = iFaceBox;
     }
 
     // Set: Shape
-    inline void SetShape3D(const fw::ocv::VectorPt3D& iShape3D)
+    inline void SetShape3D(const fw::VectorPt3D& iShape3D)
     {
       mShape3D = iShape3D;
     }
 
-    inline void SetShape2D(const fw::ocv::VectorPt2D& iShape2D)
+    inline void SetShape2D(const fw::VectorPt2D& iShape2D)
     {
       mShape2D = iShape2D;
     }
 
-    inline void SetNormShapes(const fw::ocv::VectorPt2D& iNormShape2D, const fw::ocv::VectorPt3D& iNormShape3D)
+    inline void SetNormShapes(const fw::VectorPt2D& iNormShape2D, const fw::VectorPt3D& iNormShape3D)
     {
       mNormShape2D = iNormShape2D;
       mNormShape3D = iNormShape3D;
@@ -166,7 +166,7 @@ namespace face
     cv::Rect mFaceRect;
     cv::Mat mFaceTemplate;
     cv::Vec2i mFaceRectOffset;
-    fw::ocv::VectorPt3D mFaceBox;
+    fw::VectorPt3D mFaceBox;
 
     // Pose
     cv::Vec3d mRPY;
@@ -177,9 +177,9 @@ namespace face
     cv::Mat mTvec;
 
     // Shape
-    fw::ocv::VectorPt2D mShape2D;
-    fw::ocv::VectorPt2D mNormShape2D;
-    fw::ocv::VectorPt3D mShape3D;
-    fw::ocv::VectorPt3D mNormShape3D;
+    fw::VectorPt2D mShape2D;
+    fw::VectorPt2D mNormShape2D;
+    fw::VectorPt3D mShape3D;
+    fw::VectorPt3D mNormShape3D;
   };
 }

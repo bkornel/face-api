@@ -1,4 +1,4 @@
-#include "Framework/Ocv/FileStorage.h"
+#include "Framework/Settings.h"
 #include "Framework/ErrorCode.h"
 #include "Framework/MathExtensions.h"
 #include "Modules/UserProcessor/HeadPose/PoseEstimationDispatcher.h"
@@ -20,10 +20,10 @@ namespace face
     {
       std::string value;
 
-      if (fw::ocv::get_value(iSettings, "faceBoxOffset", value))
+      if (fw::get_value(iSettings, "faceBoxOffset", value))
         mFaceBoxOffset = fw::str::convert_to_number<double>(value);
 
-      if (fw::ocv::get_value(iSettings, "estimateReprojection", value))
+      if (fw::get_value(iSettings, "estimateReprojection", value))
         mEstimateReprojection = fw::str::convert_to_boolean(value);
     }
 

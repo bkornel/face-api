@@ -1,5 +1,5 @@
-#include "Framework/Ocv/FileStorage.h"
-#include "Framework/Ocv/Geometry.h"
+#include "Framework/Imaging/Geometry.h"
+#include "Framework/Settings.h"
 #include "Framework/Container.h"
 #include "Framework/ErrorCode.h"
 #include "Modules/UserProcessor/ShapeModel/ShapeModelDispatcher.h"
@@ -16,7 +16,7 @@ namespace face
     {
       std::string value;
 
-      if (fw::ocv::get_value(iSettings, "winDetection", value))
+      if (fw::get_value(iSettings, "winDetection", value))
       {
         mWinDetection.clear();
 
@@ -25,7 +25,7 @@ namespace face
           mWinDetection.emplace_back(fw::str::convert_to_number<int>(itToken));
       }
 
-      if (fw::ocv::get_value(iSettings, "winTracking", value))
+      if (fw::get_value(iSettings, "winTracking", value))
       {
         mWinTracking.clear();
 
@@ -34,16 +34,16 @@ namespace face
           mWinTracking.emplace_back(fw::str::convert_to_number<int>(itToken));
       }
 
-      if (fw::ocv::get_value(iSettings, "nIter", value))
+      if (fw::get_value(iSettings, "nIter", value))
         mNoIter = fw::str::convert_to_number<int>(value);
 
-      if (fw::ocv::get_value(iSettings, "clamp", value))
+      if (fw::get_value(iSettings, "clamp", value))
         mClamp = fw::str::convert_to_number<float>(value);
 
-      if (fw::ocv::get_value(iSettings, "fTol", value))
+      if (fw::get_value(iSettings, "fTol", value))
         mFTol = fw::str::convert_to_number<float>(value);
 
-      if (fw::ocv::get_value(iSettings, "failureCheck", value))
+      if (fw::get_value(iSettings, "failureCheck", value))
         mFailureCheck = fw::str::convert_to_boolean(value);
     }
 
@@ -119,7 +119,7 @@ namespace face
 
     const cv::Mat& shape2DMat = ioShapeModel.GetShape2D();
     const int count = shape2DMat.rows / 2;
-    fw::ocv::VectorPt2D shape2D(count);
+    fw::VectorPt2D shape2D(count);
 
     for (int i = 0; i < count; i++)
       shape2D[i] = { shape2DMat.at<double>(i, 0), shape2DMat.at<double>(i + count, 0) };

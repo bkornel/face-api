@@ -1,4 +1,4 @@
-#include "Framework/Ocv/FileStorage.h"
+#include "Framework/Settings.h"
 #include "Framework/ErrorCode.h"
 #include "Modules/UserProcessor/UserProcessor.h"
 #include "Modules/UserProcessor/ShapeModel/ClmWrapper.h"
@@ -26,13 +26,13 @@ namespace face
         std::string value;
 
         // These live under the "shapeModel" node, not under the module node.
-        if (fw::ocv::get_value(shapeModelNode, "trackerFile", value))
+        if (fw::get_value(shapeModelNode, "trackerFile", value))
           trackerFile = value;
 
-        if (fw::ocv::get_value(shapeModelNode, "triFile", value))
+        if (fw::get_value(shapeModelNode, "triFile", value))
           triFile = value;
 
-        if (fw::ocv::get_value(shapeModelNode, "conFile", value))
+        if (fw::get_value(shapeModelNode, "conFile", value))
           conFile = value;
 
         mShapeModelDispatcher.Initialize(shapeModelNode);

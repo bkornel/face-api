@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Framework/Ocv/Geometry.h"
+#include "Framework/Imaging/Geometry.h"
 #include "Framework/ErrorCode.h"
 #include "Framework/Port.hpp"
 #include "Framework/Stopwatch.h"
@@ -45,7 +45,7 @@ namespace face
 
     void DrawGeneral(std::shared_ptr<ImageMessage> iImage, cv::Mat& oImage);
 
-    void CreateShapeColorMap(const fw::ocv::VectorPt3D& iShape3D, cv::Mat& oColorMap) const;
+    void CreateShapeColorMap(const fw::VectorPt3D& iShape3D, cv::Mat& oColorMap) const;
 
     std::vector<cv::Scalar> mColorsOfAxes;
 

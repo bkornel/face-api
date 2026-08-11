@@ -1,4 +1,4 @@
-#include "Framework/Ocv/FileStorage.h"
+#include "Framework/Settings.h"
 #include "Framework/ErrorCode.h"
 #include "Modules/UserProcessor/ShapeNorm/ShapeNormDispatcher.h"
 #include "Modules/UserProcessor/ShapeModel/ClmWrapper.h"
@@ -17,10 +17,10 @@ namespace face
     {
       std::string value;
 
-      if (fw::ocv::get_value(iSettings, "maxCount", value))
+      if (fw::get_value(iSettings, "maxCount", value))
         mMaxCount = fw::str::convert_to_number<int>(value);
 
-      if (fw::ocv::get_value(iSettings, "epsilon", value))
+      if (fw::get_value(iSettings, "epsilon", value))
         mEpsilon = fw::str::convert_to_number<double>(value);
     }
 

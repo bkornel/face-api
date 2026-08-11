@@ -1,4 +1,4 @@
-#include "Framework/Ocv/Geometry.h"
+#include "Framework/Imaging/MatExtensions.h"
 #include "Framework/ErrorCode.h"
 #include "FaceApi.h"
 #include "Common/Configuration.h"
@@ -118,7 +118,7 @@ Java_com_face_common_Native_process(JNIEnv* iEnv, jobject /*iThis*/, jint iRotat
 #endif
 
     // Rotate image regarding the display orientation
-    fw::ocv::rotate_mat(bgr, bgr, iRotation);
+    fw::rotate_mat(bgr, bgr, iRotation);
 
 #ifdef FACE_PROFILE
     face_jni::log("[FACE_PROFILE] rotate_mat: " << stopwatch.GetElapsedTimeMilliSec(false));

@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "Framework/Ocv/Geometry.h"
+#include "Framework/Imaging/Geometry.h"
 #include <opencv2/core/core.hpp>
 
 #include <map>
@@ -142,7 +142,7 @@ namespace face
       return mTriangles;
     }
 
-    inline const fw::ocv::VectorPt3D& GetShape3D() const
+    inline const fw::VectorPt3D& GetShape3D() const
     {
       return mShape3D;
     }
@@ -163,7 +163,7 @@ namespace face
     ShapeParts mShapeParts;
     Connections mConnections;
     Triangles mTriangles;
-    fw::ocv::VectorPt3D mShape3D;
+    fw::VectorPt3D mShape3D;
 
     std::map<Landmark, std::string> mShapePoints;
     std::map<BodyPart, std::string> mShapeClusters;

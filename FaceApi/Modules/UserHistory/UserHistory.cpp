@@ -1,4 +1,4 @@
-#include "Framework/Ocv/FileStorage.h"
+#include "Framework/Settings.h"
 #include "Framework/Container.h"
 #include "Framework/ErrorCode.h"
 #include "Modules/UserHistory/UserHistory.h"
@@ -16,7 +16,7 @@ namespace face
     if (!iSettings.empty())
     {
       std::string value;
-      if (fw::ocv::get_value(iSettings, "removeFreqMs", value))
+      if (fw::get_value(iSettings, "removeFreqMs", value))
         mRemoveFreqMs = fw::str::convert_to_number<int>(value);
     }
 

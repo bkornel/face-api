@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "Framework/Ocv/Geometry.h"
+#include "Framework/Imaging/Geometry.h"
 #include <opencv2/core/core.hpp>
 
 #include <vector>
@@ -23,13 +23,13 @@ namespace face
     cv::Rect faceRect;
 
     /// @brief Facial feature points in 2-D pixel coordinates
-    fw::ocv::VectorPt2D shape2D;
+    fw::VectorPt2D shape2D;
 
     /// @brief Facial feature points in the 3-D camera coordinate system
-    fw::ocv::VectorPt3D shape3D;
+    fw::VectorPt3D shape3D;
 
     /// @brief The 8 corners of the face box in the 3-D camera coordinate system
-    fw::ocv::VectorPt3D faceBox;
+    fw::VectorPt3D faceBox;
 
     /// @brief Head orientation as roll-pitch-yaw in radians
     cv::Vec3d rpy;

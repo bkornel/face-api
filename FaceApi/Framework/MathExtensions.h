@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cmath>
+#include <cstdlib>
 #include <limits>
 
 namespace fw
@@ -17,6 +18,12 @@ namespace fw
   constexpr double rad_to_deg(double iRadian)
   {
     return iRadian * (180.0 / cPi);
+  }
+
+  template <typename T>
+  inline bool equals(T iA, T iB)
+  {
+    return std::abs(iA - iB) <= std::numeric_limits<T>::epsilon();
   }
 
   // Maps iValueIn from the [iBaseMin, iBaseMax] interval onto [iLimitMin, iLimitMax]

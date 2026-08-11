@@ -1,5 +1,5 @@
-#include "Framework/Ocv/FileStorage.h"
-#include "Framework/Ocv/Geometry.h"
+#include "Framework/Imaging/Geometry.h"
+#include "Framework/Settings.h"
 #include "Framework/ErrorCode.h"
 #include "Modules/FaceDetection/FaceDetection.h"
 
@@ -26,38 +26,38 @@ namespace face
     {
       std::string value;
 
-      if (fw::ocv::get_value(iSettings, "fileName", value))
+      if (fw::get_value(iSettings, "fileName", value))
         mCascadeFile = value;
 
-      if (fw::ocv::get_value(iSettings, "imageScale", value))
+      if (fw::get_value(iSettings, "imageScale", value))
       {
         mImageScaleFactor = fw::str::convert_to_number<float>(value);
         mImageScaleFactor = (std::max)((std::min)(mImageScaleFactor, 1.0F), 0.2F);
         mImageScaleFactorInv = (1.0F / mImageScaleFactor);
       }
 
-      if (fw::ocv::get_value(iSettings, "detectionSec", value))
+      if (fw::get_value(iSettings, "detectionSec", value))
         mDetectionSec = fw::str::convert_to_number<float>(value);
 
-      if (fw::ocv::get_value(iSettings, "detectionOverlap", value))
+      if (fw::get_value(iSettings, "detectionOverlap", value))
         mDetectionOverlap = fw::str::convert_to_number<float>(value);
 
       const cv::FileNode& dmsNode = iSettings["detectMultiScale"];
       if (!dmsNode.empty())
       {
-        if (fw::ocv::get_value(dmsNode, "scaleFactor", value))
+        if (fw::get_value(dmsNode, "scaleFactor", value))
           mScaleFactor = fw::str::convert_to_number<float>(value);
 
-        if (fw::ocv::get_value(dmsNode, "minNeighbors", value))
+        if (fw::get_value(dmsNode, "minNeighbors", value))
           mMinNeighbors = fw::str::convert_to_number<int>(value);
 
-        if (fw::ocv::get_value(dmsNode, "minSize", value))
+        if (fw::get_value(dmsNode, "minSize", value))
           mMinSizeFactor = fw::str::convert_to_number<float>(value);
 
-        if (fw::ocv::get_value(dmsNode, "maxSize", value))
+        if (fw::get_value(dmsNode, "maxSize", value))
           mMaxSizeFactor = fw::str::convert_to_number<float>(value);
 
-        if (fw::ocv::get_value(dmsNode, "flags", value))
+        if (fw::get_value(dmsNode, "flags", value))
           mFlags = fw::str::convert_to_number<int>(value);
       }
     }
@@ -197,7 +197,7 @@ namespace face
     {
       for (auto fr2 = std::next(fr1); fr2 != ioDetections.end();)
       {
-        if (fw::ocv::overlap_ratio(*fr1, *fr2) > mDetectionOverlap)
+        if (fw::overlap_ratio(*fr1, *fr2) > mDetectionOverlap)
         {
           fr2 = ioDetections.erase(fr2);
         }

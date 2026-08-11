@@ -1,4 +1,4 @@
-#include "Framework/Ocv/FileStorage.h"
+#include "Framework/Settings.h"
 #include "Framework/ErrorCode.h"
 #include "Modules/ImageQueue/ImageQueue.h"
 #include "Messages/ImageSizeChangedMessage.h"
@@ -21,13 +21,13 @@ namespace face
     {
       std::string value;
 
-      if (fw::ocv::get_value(iSettings, "samplingFPS", value))
+      if (fw::get_value(iSettings, "samplingFPS", value))
         mQueue.SetSamplingFPS(fw::str::convert_to_number<float>(value));
 
-      if (fw::ocv::get_value(iSettings, "bound", value))
+      if (fw::get_value(iSettings, "bound", value))
         mQueue.SetBound(fw::str::convert_to_number<int>(value));
 
-      if (fw::ocv::get_value(iSettings, "thresholdMS", value))
+      if (fw::get_value(iSettings, "thresholdMS", value))
         mQueue.SetTimestampFiltering(fw::str::convert_to_number<int>(value));
     }
 

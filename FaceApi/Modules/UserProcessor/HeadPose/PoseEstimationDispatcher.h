@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Framework/Ocv/Geometry.h"
-#include "Framework/Ocv/Projection.h"
+#include "Framework/Imaging/Geometry.h"
+#include "Framework/Imaging/Projection.h"
 #include "Framework/ErrorCode.h"
 #include "User/UserDispatcher.hpp"
 
@@ -11,8 +11,8 @@ namespace face
 
   class PoseEstimationDispatcher : public UserDispatcher
   {
-    using ImagePts = fw::ocv::VectorPt2D;
-    using ObjectPts = fw::ocv::VectorPt3D;
+    using ImagePts = fw::VectorPt2D;
+    using ObjectPts = fw::VectorPt3D;
 
   public:
     PoseEstimationDispatcher() = default;
@@ -25,7 +25,7 @@ namespace face
 
     inline void EstimateCameraMatrix(const cv::Size& iSize)
     {
-      mCameraMatrix = fw::ocv::get_camera_matrix(iSize);
+      mCameraMatrix = fw::get_camera_matrix(iSize);
     }
 
   private:
