@@ -11,7 +11,8 @@ message("- Output directory of ${TARGET_NAME}: '${CMAKE_BINARY_DIR}/${TARGET_NAM
 
 # Setting some paths to 3rdparties and to the application logic
 set(DEPENDECIES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../3rdparty")
-set(OpenCV_DIR      "${DEPENDECIES_DIR}/opencv-4.1.1")
+set(OPENCV_VERSION  "opencv-4.14.0" CACHE STRING "OpenCV directory name under 3rdparty")
+set(OpenCV_DIR      "${DEPENDECIES_DIR}/${OPENCV_VERSION}")
 
 # Libraries have to determined based on the platform
 set(LIBRARIES "")
@@ -28,7 +29,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Android")
   add_definitions(-DELPP_THREAD_SAFE -DELPP_FORCE_USE_STD_THREAD)
   message("- Checking CMAKE_ANDROID_ARCH_ABI: '${CMAKE_ANDROID_ARCH_ABI}'")
   
-  set(OpenCV_DIR "${OpenCV_DIR}/android/src/sdk/native/jni")
+  set(OpenCV_DIR "${OpenCV_DIR}/android/native/jni")
 
   # Finding 3rparty libraries
   find_package(OpenCV REQUIRED)

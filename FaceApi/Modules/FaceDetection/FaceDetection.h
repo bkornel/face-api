@@ -9,12 +9,18 @@
 
 #include <memory>
 #include <opencv2/core/core.hpp>
-#include <opencv2/objdetect/objdetect.hpp>
+#include <opencv2/objdetect/face.hpp>
 
 #include <string>
 
 namespace face
 {
+  /// @brief Finds the faces on the frame with YuNet, a small convolutional detector that
+  /// keeps working when the head is turned well away from the camera, where the cascade it
+  /// replaced used to lose the face entirely.
+  ///
+  /// It does not run on every frame: the tracker follows the faces in between and asks for a
+  /// detection when it wants one, which is what the command handling below is for.
   class FaceDetection : public fw::Module,
                         public fw::Port<std::shared_ptr<RoiMessage>(std::shared_ptr<ImageMessage>)>
   {
@@ -33,28 +39,30 @@ namespace face
 
     void HandleCommand(std::shared_ptr<fw::Message> iMessage) override;
 
-    void RemoveMultipleDetections(std::vector<cv::Rect>& ioDetections);
-
     bool RunDetectection() const;
 
-    cv::CascadeClassifier mCascadeClassifier; ///< The OpenCV cascade classifier
+    cv::Ptr<cv::FaceDetectorYN> mDetector;
     fw::Stopwatch mDetectionSW;
 
     // General parameters
-    std::string mCascadeFile = "haarcascade_frontalface_alt2.xml";
+    std::string mModelFile = "face_detection_yunet_2023mar.onnx";
     float mImageScaleFactor = 1.0F;
     float mImageScaleFactorInv = 1.0F;
-    float mDetectionOverlap = 0.2F;
     float mDetectionSec = 10.0F;
     bool mForceRun = false;
 
-    // Parameter of detectMultiScale(...)
+    // Parameters of the detector
+    float mScoreThreshold = 0.7F;
+    float mNmsThreshold = 0.3F;
+    int mTopK = 50;
+
+    // The size range a face has to fall into, as a fraction of the shorter side
     cv::Size mMinSize;
     cv::Size mMaxSize;
-    float mScaleFactor = 1.1F;
-    int mMinNeighbors = 3;
-    float mMinSizeFactor = 0.05f;
+    float mMinSizeFactor = 0.05F;
     float mMaxSizeFactor = 1.0F;
-    int mFlags = 0;
+
+    // What the detector was last configured for; it needs the exact frame size
+    cv::Size mDetectorSize;
   };
 }

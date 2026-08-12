@@ -29,23 +29,20 @@ $outDir = Join-Path $windowsDir "Bin\$Configuration"
 $configSrc = Join-Path $repoRoot 'Testing\configurations'
 $configDst = Join-Path $outDir 'configurations'
 
-$opencvBin = Join-Path $thirdParty "opencv-4.5.2\windows\$Platform\vc16\bin"
+$opencvVersion = 'opencv-4.14.0'
+$opencvAbi = '4140'
+$opencvBin = Join-Path $thirdParty "$opencvVersion\windows\$Platform\vc16\bin"
 $pocoBin = Join-Path $thirdParty "poco-1.10.1\windows\$Platform\vc16\bin"
 
 # Debug builds of OpenCV and Poco carry a 'd' suffix
 $suffix = ''
 if ($Configuration -eq 'Debug') { $suffix = 'd' }
 
-$opencvModules = @(
-  'calib3d', 'core', 'features2d', 'flann', 'highgui',
-  'dnn', 'imgcodecs', 'imgproc', 'ml', 'objdetect', 'videoio'
-)
-
-$libraries = @()
-foreach ($m in $opencvModules) { $libraries += (Join-Path $opencvBin "opencv_$m$('452')$suffix.dll") }
+# One 'world' library carries every module in this distribution
+$libraries = @(Join-Path $opencvBin "opencv_world$opencvAbi$suffix.dll")
 
 # The ffmpeg backend is not built per configuration, there is only one flavour of it
-$libraries += (Join-Path $opencvBin 'opencv_videoio_ffmpeg452_64.dll')
+$libraries += (Join-Path $opencvBin "opencv_videoio_ffmpeg${opencvAbi}_64.dll")
 
 foreach ($p in @('PocoFoundation', 'PocoUtil', 'PocoXML', 'PocoJSON')) {
   $libraries += (Join-Path $pocoBin "$p$suffix.dll")
