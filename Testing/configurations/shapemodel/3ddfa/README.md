@@ -15,3 +15,8 @@ from the basis data next to it.
 
 Everything is little-endian float32. Upstream project and weights are MIT licensed
 (github.com/cleardusk/3DDFA_V2).
+
+`FaceModel::mShape3D` is derived from `u_base.bin` as well, so the head that
+`solvePnP` fits is the same one the network regresses. `Testing/tools/GenerateFaceModel.cpp`
+performs that derivation - y and z flipped to image orientation, origin at the nose tip,
+scaled to a 54.56 mm rms radius - and prints the table ready to paste.
