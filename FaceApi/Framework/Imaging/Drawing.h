@@ -20,6 +20,21 @@ namespace fw
   // Maps iV onto a blue-to-red ramp, clamped to the [iMin, iMax] interval
   cv::Scalar get_color(double iV, double iMin, double iMax);
 
+  /// @brief Fills a rectangle with rounded corners, clipped to the frame
+  void fill_rounded_rect(cv::Mat& ioFrame, const cv::Rect& iRect, const cv::Scalar& iColor, int iRadius);
+
+  /// @brief Mixes iColor into the frame inside a rounded rectangle, iAlpha of it at full
+  /// strength. What panels are made of: readable over any frame without hiding it.
+  void blend_rounded_rect(cv::Mat& ioFrame, const cv::Rect& iRect, const cv::Scalar& iColor, int iRadius, double iAlpha);
+
+  /// @brief Adds a blurred copy of iLayer onto the frame, which turns whatever was drawn
+  /// into iLayer into a halo around itself. Restricted to iRoi, so the cost follows the
+  /// area that was actually drawn on rather than the frame size.
+  void add_glow(cv::Mat& ioFrame, const cv::Mat& iLayer, const cv::Rect& iRoi, double iStrength, int iBlurSize);
+
+  /// @brief A line with a dark pass underneath, so it reads on a light and a dark frame alike
+  void draw_contrast_polyline(cv::Mat& ioFrame, const std::vector<cv::Point>& iPoints, bool iClosed, const cv::Scalar& iColor, int iThickness);
+
   template <typename _Tp>
   void draw_dotted_line(cv::Mat& ioFrame, const cv::Point_<_Tp>& iPt1, const cv::Point_<_Tp>& iPt2, const cv::Scalar& iColor, int iSegmentWidth = 5, int iThickness = 1)
   {
