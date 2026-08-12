@@ -49,18 +49,7 @@ namespace face
     return fw::ErrorCode::OK;
   }
 
-  ShapeModelDispatcher::TrackModel& ShapeModelDispatcher::GetModel(const TrackedFace& iTrack)
-  {
-    auto it = mModels.find(iTrack.trackId);
-    if (it == mModels.end())
-    {
-      it = mModels.emplace(iTrack.trackId, TrackModel{ std::make_shared<ShapeModel>(), {}, false }).first;
-    }
-
-    return it->second;
-  }
-
-  void ShapeModelDispatcher::RetainModels(const std::vector<TrackedFace>& iTracks)
+  void ShapeModelDispatcher::BeginFrame(const std::vector<TrackedFace>& iTracks)
   {
     // Drop the models of the tracks that are no longer around. A track that comes back is
     // Detected again, and Fit() re-initializes its shape from the face rectangle then.
@@ -69,6 +58,13 @@ namespace face
         return iTrack.trackId == iEntry.first;
       });
     });
+
+    // Every track gets its entry here, so the concurrent fits below only ever read the map
+    for (const auto& track : iTracks)
+    {
+      if (mModels.find(track.trackId) == mModels.end())
+        mModels.emplace(track.trackId, TrackModel{ std::make_shared<ShapeModel>(), {}, false });
+    }
   }
 
   void ShapeModelDispatcher::Clear()
@@ -76,8 +72,14 @@ namespace face
     mModels.clear();
   }
 
-  bool ShapeModelDispatcher::Fit(const TrackedFace& iTrack, TrackModel& ioModel, const cv::Mat& iFrame, ShapeDescriptor& oShape) const
+  bool ShapeModelDispatcher::Fit(const TrackedFace& iTrack, const cv::Mat& iFrameGray, const cv::Mat& iFrameBGR, ShapeDescriptor& oShape)
   {
+    const cv::Mat& iFrame = iFrameGray;
+
+    auto it = mModels.find(iTrack.trackId);
+    if (it == mModels.end()) return false;
+
+    TrackModel& ioModel = it->second;
     ShapeModel& shapeModel = *ioModel.model;
 
     // Copied because the fit takes a mutable reference; the members stay read-only, which

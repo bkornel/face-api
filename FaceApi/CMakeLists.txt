@@ -116,6 +116,7 @@ set(SOURCES;
   Modules/ShapeModel/ShapeModel.cpp;
   Modules/ShapeModel/ShapeModelDispatcher.cpp;
   Modules/ShapeModel/ShapeModelModule.cpp;
+  Modules/ShapeModel/TddfaDispatcher.cpp;
   Modules/ShapeNorm/ShapeNormDispatcher.cpp;
   Modules/ShapeNorm/ShapeNormModule.cpp;
   Modules/UserHistory/UserHistory.cpp;
