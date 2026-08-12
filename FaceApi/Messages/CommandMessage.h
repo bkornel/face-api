@@ -15,10 +15,12 @@ namespace face
     {
       Invalid = -1,
       RunFaceDetection,
-      VerboseModeChanged
+      SetVerboseMode
     };
 
     CommandMessage(Type iType, uint32_t iFrameId, fw::Timestamp iTimestamp);
+
+    CommandMessage(Type iType, bool iFlag, uint32_t iFrameId, fw::Timestamp iTimestamp);
 
     virtual ~CommandMessage() = default;
 
@@ -29,6 +31,11 @@ namespace face
       return mType;
     }
 
+    inline bool GetFlag() const
+    {
+      return mFlag;
+    }
+
     inline bool IsValid() const
     {
       return mType != Type::Invalid;
@@ -36,6 +43,7 @@ namespace face
 
   private:
     Type mType = Type::Invalid;
+    bool mFlag = false;
   };
 
   inline std::ostream& operator<<(std::ostream& ioStream, const CommandMessage& iMessage)

@@ -3,6 +3,7 @@
 #include <atomic>
 #include <cstdint>
 #include <memory>
+#include <mutex>
 #include <string>
 
 #include "Framework/ErrorCode.h"
@@ -41,6 +42,8 @@ namespace face
 
     void SetRunFaceDetector();
 
+    void SetVerbose(bool iVerbose);
+
     void OnOffVerbose();
 
     inline uint32_t GetLastFrameId() const
@@ -56,8 +59,6 @@ namespace face
     void SetWorkingDirectory(const std::string& iWorkingDirectory);
 
   private:
-    static std::recursive_mutex sAppMutex; ///< The mutex to lock critical sections
-
     FaceApi();
 
     fw::ErrorCode InitializeInternal(const cv::FileNode& iSettingsNode) override;
@@ -68,6 +69,9 @@ namespace face
 
     void OnFrameProcessed(std::shared_ptr<ImageMessage> iMessage);
 
+    /// @brief Serialises one frame of the graph against the calls that reset it
+    std::mutex mProcessMutex;
+
     fw::MessageBus mBus;
 
     ModuleGraph::FrameProcessedToken mFrameProcessedToken = 0ULL;
@@ -75,6 +79,8 @@ namespace face
     std::shared_ptr<ModuleGraph> mModuleGraph = nullptr;
 
     std::atomic<uint32_t> mCameraFrameId{ 0U };
+
+    std::atomic<bool> mVerbose{ false };
 
     MessageQueue mOutputQueue;
   };

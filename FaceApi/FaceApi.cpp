@@ -10,7 +10,6 @@ INITIALIZE_EASYLOGGINGPP
 
 namespace face
 {
-  std::recursive_mutex FaceApi::sAppMutex;
 
   FaceApi& FaceApi::GetInstance()
   {
@@ -52,7 +51,7 @@ namespace face
     // Start worker threads
     if ((result = StartThread()) != fw::ErrorCode::OK) return result;
 
-    if (Configuration::GetInstance().GetVerbose()) OnOffVerbose();
+    SetVerbose(Configuration::GetInstance().GetVerbose());
 
     return fw::ErrorCode::OK;
   }
@@ -69,7 +68,7 @@ namespace face
 
   void FaceApi::Clear()
   {
-    std::lock_guard<std::recursive_mutex> lock(sAppMutex);
+    std::lock_guard<std::mutex> lock(mProcessMutex);
     mModuleGraph->Clear();
     mOutputQueue.Clear();
     mCameraFrameId = 0U;
@@ -131,10 +130,14 @@ namespace face
         continue;
       }
 
-      std::lock_guard<std::recursive_mutex> lock(sAppMutex);
+      // Outside the lock: a queued command may be the one that calls Clear(), which takes it
       DrainCommands();
-      FACE_PROFILER_FRAME_ID(GetLastFrameId());
-      mModuleGraph->Process();
+
+      {
+        std::lock_guard<std::mutex> lock(mProcessMutex);
+        FACE_PROFILER_FRAME_ID(GetLastFrameId());
+        mModuleGraph->Process();
+      }
 
       ThreadSleep(1);
     }
@@ -155,12 +158,21 @@ namespace face
     );
   }
 
-  void FaceApi::OnOffVerbose()
+  void FaceApi::SetVerbose(bool iVerbose)
   {
+    // The message carries the value rather than asking for a flip: a module that misses one
+    // or handles it twice would otherwise be left inverted for the rest of the run.
+    mVerbose = iVerbose;
+
     const fw::Timestamp timestamp = fw::now();
     Publish(
-      std::make_shared<CommandMessage>(CommandMessage::Type::VerboseModeChanged, mCameraFrameId, timestamp)
+      std::make_shared<CommandMessage>(CommandMessage::Type::SetVerboseMode, iVerbose, mCameraFrameId, timestamp)
     );
+  }
+
+  void FaceApi::OnOffVerbose()
+  {
+    SetVerbose(!mVerbose);
   }
 
   void FaceApi::SetWorkingDirectory(const std::string& iWorkingDirectory)

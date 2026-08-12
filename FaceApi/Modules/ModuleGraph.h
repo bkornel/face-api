@@ -83,7 +83,7 @@ namespace face
 
     fw::ErrorCode CreateConnections(const cv::FileNode& iModulesNode);
 
-    fw::ErrorCode GetPredecessors(const cv::FileNode& iModule, const cv::FileNode& iModules, PredecessorMap& oPredecessors);
+    fw::ErrorCode GetPredecessors(const cv::FileNode& iModule, PredecessorMap& oPredecessors);
 
     std::vector<cv::FileNode> GetConnectionOrder(const cv::FileNode& iModulesNode);
 

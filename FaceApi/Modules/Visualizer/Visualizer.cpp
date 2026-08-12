@@ -15,12 +15,16 @@
 
 namespace face
 {
-  fw::ErrorCode Visualizer::InitializeInternal(const cv::FileNode& iSettings)
+  fw::ErrorCode Visualizer::InitializeInternal(const cv::FileNode& /*iSettings*/)
   {
-    mColorsOfAxes.emplace_back(255, 255, 255);
-    mColorsOfAxes.emplace_back(255, 0, 0);
-    mColorsOfAxes.emplace_back(0, 255, 0);
-    mColorsOfAxes.emplace_back(0, 0, 255);
+    // Assigned, not appended: a second Initialize() used to grow the list and shift every
+    // axis onto the wrong colour.
+    mColorsOfAxes = {
+      { 255, 255, 255 },
+      { 255, 0, 0 },
+      { 0, 255, 0 },
+      { 0, 0, 255 }
+    };
 
     return fw::ErrorCode::OK;
   }
