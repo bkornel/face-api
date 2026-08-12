@@ -3,7 +3,7 @@
 This cross-platform face API is about achieving facial information driven development (e.g. gesture-based control) in mobile environment. The scheme is purely based on the user's face or more precisely on the following data:
 
 - Face rectangle in the 2-D pixel-, and the face box in the 3-D camera coordinate system
-- 66 pieces of facial feature points in the 2-D pixel-, and 3-D camera coordinate system
+- 68 pieces of facial feature points in the 2-D pixel-, and 3-D camera coordinate system
 - 6DoF head pose (to the camera) in the 3-D camera coordinate system
 
 All the information is determined on monocular images therefore there is no need for a special hardware or sensor during the calculations. If you are interested in the technical background then feel free to read in the following publications: [1], [2] and [3]
@@ -22,13 +22,13 @@ https://www.youtube.com/watch?v=iS4eDf775GI
 All dependencies of the compilation in Windows (Visual Studio 2022) and Android can be downloaded (as pre-built libraries) from the following repository:<br>
 https://github.com/bkornel/3rdparty<br>
 
-The API is built against OpenCV 4.5.2, and the Windows application also uses Poco 1.10.1.
+The API is built against OpenCV 4.14.0, and the Windows application also uses Poco 1.10.1.
 
 You should follow the directory structure below during the compilation:
 ```
 [local_path_of_the_project]
 |- 3rdparty
-|-- opencv-4.5.2
+|-- opencv-4.14.0
 |-- poco-1.10.1
 |-- ...
 |- face-api

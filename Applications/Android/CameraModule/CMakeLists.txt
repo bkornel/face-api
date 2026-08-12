@@ -16,8 +16,8 @@ message("- Output directory of ${TARGET_NAME}: '${CMAKE_BINARY_DIR}'")
 # Setting some paths to 3rdparties and to the application logic
 set(DEPENDECIES_DIR "${CMAKE_SOURCE_DIR}/../../../../3rdparty")
 set(FACE_API_DIR    "${CMAKE_SOURCE_DIR}/../../../${TARGET_NAME_FACE_API}")
-set(OPENCV_VERSION  "opencv-4.5.2" CACHE STRING "OpenCV directory name under 3rdparty")
-set(OpenCV_DIR      "${DEPENDECIES_DIR}/${OPENCV_VERSION}/android/src/sdk/native/jni")
+set(OPENCV_VERSION  "opencv-4.14.0" CACHE STRING "OpenCV directory name under 3rdparty")
+set(OpenCV_DIR      "${DEPENDECIES_DIR}/${OPENCV_VERSION}/android/native/jni")
 
 # Static OpenCV, see FaceApi/CMakeLists.txt
 set(OpenCV_STATIC ON)

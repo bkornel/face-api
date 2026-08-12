@@ -28,11 +28,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "configurations", "configura
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "facedetector", "facedetector", "{E550A3B6-9A2D-4F7A-9F60-4D9DF7AAA71E}"
 	ProjectSection(SolutionItems) = preProject
-		..\..\Testing\configurations\facedetector\haarcascade_frontalface_alt.xml = ..\..\Testing\configurations\facedetector\haarcascade_frontalface_alt.xml
-		..\..\Testing\configurations\facedetector\haarcascade_frontalface_alt2.xml = ..\..\Testing\configurations\facedetector\haarcascade_frontalface_alt2.xml
-		..\..\Testing\configurations\facedetector\haarcascade_frontalface_alt_tree.xml = ..\..\Testing\configurations\facedetector\haarcascade_frontalface_alt_tree.xml
-		..\..\Testing\configurations\facedetector\haarcascade_frontalface_default.xml = ..\..\Testing\configurations\facedetector\haarcascade_frontalface_default.xml
-		..\..\Testing\configurations\facedetector\lbpcascade_frontalface.xml = ..\..\Testing\configurations\facedetector\lbpcascade_frontalface.xml
+		..\..\Testing\configurations\facedetector\face_detection_yunet_2023mar.onnx = ..\..\Testing\configurations\facedetector\face_detection_yunet_2023mar.onnx
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "output", "output", "{3BED97B8-C243-47DE-A294-42D344875740}"
