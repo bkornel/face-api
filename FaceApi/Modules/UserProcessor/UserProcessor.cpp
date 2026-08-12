@@ -45,7 +45,7 @@ namespace face
     return ClmWrapper::GetInstance().Initialize(trackerFile, triFile, conFile);
   }
 
-  std::shared_ptr<ActiveUsersMessage> UserProcessor::Main(std::shared_ptr<ImageMessage> iImage, std::shared_ptr<ActiveUsersMessage> iUsers)
+  std::shared_ptr<UserSnapshotMessage> UserProcessor::Main(std::shared_ptr<ImageMessage> iImage, std::shared_ptr<ActiveUsersMessage> iUsers)
   {
     DrainCommands();
 
@@ -70,19 +70,11 @@ namespace face
 
     mShapeModelDispatcher.EndFrame();
 
-    // The users above are the live ones UserManager keeps tracking, and writing the
-    // refined face rect back into them is what feeds the next frame's tracking. What
-    // leaves the module is a snapshot though, so nothing downstream can observe a user
-    // being updated, nor is anyone else's view of it changed from here.
-    ActiveUsersMessage::UserVector snapshot;
-    for (const auto& user : activeUsers)
-    {
-      if (user && user->IsActive())
-        snapshot.emplace_back(std::make_shared<User>(*user));
-    }
+    // The users above are the live ones UserManager keeps tracking, and writing the refined
+    // face rect back into them is what feeds the next frame. What leaves the module is a
+    // snapshot, which is the message doing the copying.
+    auto snapshot = std::make_shared<UserSnapshotMessage>(activeUsers, iUsers->GetFrameId(), iUsers->GetTimestamp());
 
-    if (snapshot.empty()) return nullptr;
-
-    return std::make_shared<ActiveUsersMessage>(snapshot, iUsers->GetFrameId(), iUsers->GetTimestamp());
+    return snapshot->IsEmpty() ? nullptr : snapshot;
   }
 }

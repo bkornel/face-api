@@ -164,6 +164,9 @@
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Messages\UserEntriesMessage.cpp">
       <Filter>Messages</Filter>
     </ClCompile>
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Messages\UserSnapshotMessage.cpp">
+      <Filter>Messages</Filter>
+    </ClCompile>
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\FaceDetection\FaceDetection.cpp">
       <Filter>Modules\FaceDetection</Filter>
     </ClCompile>
@@ -335,6 +338,9 @@
       <Filter>Messages</Filter>
     </ClInclude>
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\UserEntriesMessage.h">
+      <Filter>Messages</Filter>
+    </ClInclude>
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\UserSnapshotMessage.h">
       <Filter>Messages</Filter>
     </ClInclude>
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\FaceDetection\FaceDetection.h">

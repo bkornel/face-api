@@ -52,6 +52,7 @@
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Messages\ImageMessage.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Messages\RoiMessage.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Messages\UserEntriesMessage.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Messages\UserSnapshotMessage.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\FaceDetection\FaceDetection.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ImageQueue\ImageQueue.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserHistory\UserHistory.cpp" />
@@ -113,6 +114,7 @@
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\ImageMessage.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\RoiMessage.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\UserEntriesMessage.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\UserSnapshotMessage.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\FaceDetection\FaceDetection.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ImageQueue\ImageQueue.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\UserHistory\UserHistory.h" />

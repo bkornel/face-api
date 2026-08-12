@@ -5,7 +5,7 @@
 
 namespace face
 {
-  bool LastModule::Main(std::shared_ptr<ImageMessage> iImage, std::shared_ptr<ActiveUsersMessage> iUsers)
+  bool LastModule::Main(std::shared_ptr<ImageMessage> iImage, std::shared_ptr<UserSnapshotMessage> iUsers)
   {
     DrainCommands();
 
@@ -55,7 +55,7 @@ namespace face
   {
     oResults.clear();
 
-    std::shared_ptr<ActiveUsersMessage> users;
+    std::shared_ptr<UserSnapshotMessage> users;
     {
       std::lock_guard<std::mutex> lock(mLastMutex);
       users = mLastUsers;
@@ -64,7 +64,7 @@ namespace face
     // The input port carrying the users is optional, so it may simply not be connected
     if (!users || users->IsEmpty()) return fw::ErrorCode::NotFound;
 
-    const auto& activeUsers = users->GetActiveUsers();
+    const auto& activeUsers = users->GetUsers();
     oResults.reserve(activeUsers.size());
 
     for (const auto& user : activeUsers)

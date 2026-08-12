@@ -4,7 +4,7 @@
 #include "FaceResult.h"
 #include "Framework/Graph/Module.h"
 #include "Framework/Graph/Port.hpp"
-#include "Messages/ActiveUsersMessage.h"
+#include "Messages/UserSnapshotMessage.h"
 #include "Messages/ImageMessage.h"
 
 #include <chrono>
@@ -16,7 +16,7 @@
 namespace face
 {
   class LastModule : public fw::Module,
-                     public fw::Port<bool(std::shared_ptr<ImageMessage>, std::shared_ptr<ActiveUsersMessage>)>
+                     public fw::Port<bool(std::shared_ptr<ImageMessage>, std::shared_ptr<UserSnapshotMessage>)>
   {
   public:
 
@@ -24,7 +24,7 @@ namespace face
 
     ~LastModule() override = default;
 
-    bool Main(std::shared_ptr<ImageMessage> iImage, std::shared_ptr<ActiveUsersMessage> iUsers) override;
+    bool Main(std::shared_ptr<ImageMessage> iImage, std::shared_ptr<UserSnapshotMessage> iUsers) override;
 
     void Clear() override;
 
@@ -56,6 +56,6 @@ namespace face
   private:
     mutable std::mutex mLastMutex;
     std::shared_ptr<ImageMessage> mLastImage = nullptr;
-    std::shared_ptr<ActiveUsersMessage> mLastUsers = nullptr;
+    std::shared_ptr<UserSnapshotMessage> mLastUsers = nullptr;
   };
 }

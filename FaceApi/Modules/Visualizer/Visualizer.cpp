@@ -29,7 +29,7 @@ namespace face
     return fw::ErrorCode::OK;
   }
 
-  std::shared_ptr<ImageMessage> Visualizer::Main(std::shared_ptr<ImageMessage> iImage, std::shared_ptr<ActiveUsersMessage> iUsers)
+  std::shared_ptr<ImageMessage> Visualizer::Main(std::shared_ptr<ImageMessage> iImage, std::shared_ptr<UserSnapshotMessage> iUsers)
   {
     DrainCommands();
 
@@ -42,7 +42,7 @@ namespace face
     {
       FACE_PROFILER(4_Draw);
 
-      const auto& activeUsers = iUsers->GetActiveUsers();
+      const auto& activeUsers = iUsers->GetUsers();
       for (auto& user : activeUsers)
       {
         if (!user) continue;
