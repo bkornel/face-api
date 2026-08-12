@@ -92,12 +92,6 @@ namespace face
       return result;
     }
 
-    // Start worker threads
-    if ((result = StartThread()) != fw::ErrorCode::OK)
-    {
-      return result;
-    }
-
     return fw::ErrorCode::OK;
   }
 

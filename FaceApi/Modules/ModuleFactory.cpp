@@ -1,6 +1,8 @@
 #include "Framework/ErrorCode.h"
 #include "Modules/ModuleFactory.h"
 
+#include "Framework/Graph/IPortConnector.h"
+#include "Framework/Settings.h"
 #include "Framework/Text.h"
 
 #include "Modules/FaceDetection/FaceDetection.h"
@@ -54,6 +56,17 @@ namespace face
     if (newModule->Initialize(iModuleNode) != fw::ErrorCode::OK)
     {
       return nullptr;
+    }
+
+    // Still before Connect(), which the graph does once every module exists
+    if (auto ports = std::dynamic_pointer_cast<fw::IPortConnector>(newModule))
+    {
+      std::string executor;
+      if (fw::get_value(iModuleNode, "executor", executor))
+      {
+        ports->SetExecutor(fw::get_executor_by_name(executor));
+        LOG(INFO) << "Module [" << newModule->GetName() << "] runs on the " << executor << " executor";
+      }
     }
 
     return newModule;

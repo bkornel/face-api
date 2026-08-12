@@ -103,12 +103,7 @@ namespace fw
 
     if (mInitialized)
     {
-      if (IsRunning())
-      {
-        result = StopThread();
-      }
-
-      DeInitializeInternal();
+      result = DeInitializeInternal();
       Clear();
 
       mInitialized = false;

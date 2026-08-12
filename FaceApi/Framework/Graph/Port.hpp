@@ -66,6 +66,11 @@ namespace fw
       mTrigger();
     }
 
+    void SetExecutor(const std::shared_ptr<Executor>& iExecutor) override
+    {
+      if (iExecutor) mExecutor = iExecutor;
+    }
+
     ErrorCode SetInput(std::size_t iIndex, const std::shared_ptr<IFuture>& iOutput) override
     {
       static constexpr auto size = std::tuple_size<InputPorts>::value;
@@ -204,13 +209,12 @@ namespace fw
     template <size_t... Is>
     inline void ConnectPort(std::index_sequence<Is...> /*unused*/)
     {
-      mOutputPort = fw::connect(MainAsFunction(), std::get<Is>(mInputPorts)...);
+      mOutputPort = fw::connect(MainAsFunction(), mExecutor, std::get<Is>(mInputPorts)...);
     }
 
-    /// @brief Runs a source port's Main(). Downstream modules inherit the executor from
-    /// the value the source publishes, so this single choice decides whether the whole
-    /// graph runs inline or on separate threads.
-    std::shared_ptr<Executor> mExecutor = fw::getInlineExecutor();
+    /// @brief Where this module's Main() runs. Per module, so putting one on the pool does not
+    /// drag the rest of the graph off the calling thread with it.
+    std::shared_ptr<Executor> mExecutor = fw::get_inline_executor();
 
     std::function<void()> mTrigger = nullptr;
     OutputPort mOutputPort = nullptr;

@@ -1,7 +1,6 @@
 #include "Framework/Profiler.h"
 
 #include <easyloggingpp/easyloggingpp.h>
-#include <opencv2/core/core.hpp>
 
 #include <algorithm>
 #include <fstream>

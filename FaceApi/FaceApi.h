@@ -9,11 +9,13 @@
 #include "Framework/Messaging/MessageBus.h"
 #include "Framework/Messaging/MessageQueue.hpp"
 #include "Framework/Graph/Module.h"
+#include "Framework/Thread.h"
 #include "Modules/ModuleGraph.h"
 
 namespace face
 {
-  class FaceApi : public fw::Module
+  class FaceApi : public fw::Module,
+                  public fw::Thread
   {
     using MessageQueue = fw::MessageQueue<std::shared_ptr<ImageMessage>>;
 

@@ -59,7 +59,11 @@ namespace face
 
   fw::ErrorCode FaceApi::DeInitializeInternal()
   {
+    // Before Clear(): Run() works on the graph this is about to reset
+    StopThread();
+
     Clear();
+
     return fw::ErrorCode::OK;
   }
 
