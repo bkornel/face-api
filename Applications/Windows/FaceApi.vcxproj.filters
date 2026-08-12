@@ -49,7 +49,7 @@
     <Filter Include="Modules\UserManager">
       <UniqueIdentifier>{33d93459-9a07-4aeb-8bce-1cfc5c1b1f4e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Modules\UserSnapshot">
+    <Filter Include="Modules\FaceTracker">
       <UniqueIdentifier>{09f80b2a-209d-442a-9ad1-cb4c1f376815}</UniqueIdentifier>
     </Filter>
     <Filter Include="Modules\HeadPose">
@@ -152,9 +152,6 @@
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Settings.cpp">
       <Filter>Framework</Filter>
     </ClCompile>
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Messages\ActiveUsersMessage.cpp">
-      <Filter>Messages</Filter>
-    </ClCompile>
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Messages\ImageMessage.cpp">
       <Filter>Messages</Filter>
     </ClCompile>
@@ -162,9 +159,6 @@
       <Filter>Messages</Filter>
     </ClCompile>
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Messages\UserEntriesMessage.cpp">
-      <Filter>Messages</Filter>
-    </ClCompile>
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Messages\UserSnapshotMessage.cpp">
       <Filter>Messages</Filter>
     </ClCompile>
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\FaceDetection\FaceDetection.cpp">
@@ -200,9 +194,6 @@
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\Visualizer\Visualizer.cpp">
       <Filter>Modules\Visualizer</Filter>
     </ClCompile>
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\User\User.cpp">
-      <Filter>User</Filter>
-    </ClCompile>
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\User\UserData.cpp">
       <Filter>User</Filter>
     </ClCompile>
@@ -227,9 +218,6 @@
     <ClCompile Include="..\..\FaceApi\Modules\ModuleGraph.cpp">
       <Filter>Modules</Filter>
     </ClCompile>
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserSnapshot\UserSnapshot.cpp">
-      <Filter>Modules\UserSnapshot</Filter>
-    </ClCompile>
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\ShapeModelModule.cpp">
       <Filter>Modules\ShapeModel</Filter>
     </ClCompile>
@@ -241,6 +229,9 @@
     </ClCompile>
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeNorm\ShapeNormModule.cpp">
       <Filter>Modules\ShapeNorm</Filter>
+    </ClCompile>
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\FaceTracker\FaceTracker.cpp">
+      <Filter>Modules\FaceTracker</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -343,9 +334,6 @@
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Settings.h">
       <Filter>Framework</Filter>
     </ClInclude>
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\ActiveUsersMessage.h">
-      <Filter>Messages</Filter>
-    </ClInclude>
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\ImageMessage.h">
       <Filter>Messages</Filter>
     </ClInclude>
@@ -430,11 +418,20 @@
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeNorm\ShapeNormModule.h">
       <Filter>Modules\ShapeNorm</Filter>
     </ClInclude>
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\UserSnapshot\UserSnapshot.h">
-      <Filter>Modules\UserSnapshot</Filter>
-    </ClInclude>
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Parallel.h">
       <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\FaceDataMessage.h">
+      <Filter>Messages</Filter>
+    </ClInclude>
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\FaceTracker\FaceTracker.h">
+      <Filter>Modules\FaceTracker</Filter>
+    </ClInclude>
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\FaceTrackMessage.h">
+      <Filter>Messages</Filter>
+    </ClInclude>
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\User\TrackedFace.h">
+      <Filter>User</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

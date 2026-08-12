@@ -65,35 +65,37 @@ The C++ part (image processing algorithms) is set up as a CMake external native 
 
 The whole module graph can be created from the settings file (defined in [`settings.json`](https://github.com/bkornel/face-api/blob/master/Testing/configurations/settings.json) by default). Modules can interact and exchange information whith each others via ports. Every module must have one output port and can have any input ports (zero or more).
 
-Ports can be defined by implementing the `fw::Port` interface. For example the [`UserManager`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/UserManager/UserManager.h) class:
+Ports can be defined by implementing the `fw::Port` interface. For example the [`FaceTracker`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/FaceTracker/FaceTracker.h) class:
 
 ```
-class UserManager :
+class FaceTracker :
   public fw::Module,
-  public fw::Port<ActiveUsersMessage::Shared(ImageMessage::Shared, RoiMessage::Shared)>
+  public fw::Port<std::shared_ptr<FaceTrackMessage>(std::shared_ptr<ImageMessage>, std::shared_ptr<RoiMessage>)>
 {
   ...
-  ActiveUsersMessage::Shared Main(ImageMessage::Shared iImage, RoiMessage::Shared iDetections) override;
+  std::shared_ptr<FaceTrackMessage> Main(std::shared_ptr<ImageMessage> iImage, std::shared_ptr<RoiMessage> iDetections) override;
   ...
 };
 ```
 
-This class has the `ActiveUsersMessage::Shared` output and the `ImageMessage::Shared` and `RoiMessage::Shared` inputs. The `Main` member function of the class must defined according to the template arguments of `fw::Port`.
+This class has the `FaceTrackMessage` output and the `ImageMessage` and `RoiMessage` inputs. The `Main` member function of the class must defined according to the template arguments of `fw::Port`.
 
 A module that declares no input port at all is a source: it has nothing to wait for, so it is driven by `Trigger()` instead of by a predecessor. This is how [`FirstModule`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/FirstModule/FirstModule.h) starts every frame. Input ports are optional as well: a port that is left out of the settings file is not counted as a dependency, and its argument reaches `Main` default-constructed. A module with declared inputs of which none is connected is rejected, because nothing would ever make it run.
 
 ## Module Graph
 
-The module graph can be defined in the settings file ([`settings.json`](https://github.com/bkornel/face-api/blob/master/Testing/configurations/settings.json) by default). For the [`UserManager`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/UserManager/UserManager.h) module it is:
+The module graph can be defined in the settings file ([`settings.json`](https://github.com/bkornel/face-api/blob/master/Testing/configurations/settings.json) by default). For the [`FaceTracker`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/FaceTracker/FaceTracker.h) module it is:
 
 ```
-"userManager": {
+"faceTracker": {
   "port": [ "imageQueue:1", "faceDetection:2" ],
   ...
 }
 ```
 
-Where the [`ImageQueue`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/ImageQueue/ImageQueue.h) module returns with an `ImageMessage::Shared` and transfers the information to the first inputport of [`UserManager`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/UserManager/UserManager.h) and so does the [`FaceDetection`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/FaceDetection/FaceDetection.h) with `RoiMessage::Shared`.
+Where the [`ImageQueue`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/ImageQueue/ImageQueue.h) module returns with an `ImageMessage` and transfers the information to the first input port of [`FaceTracker`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/FaceTracker/FaceTracker.h) and so does the [`FaceDetection`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/FaceDetection/FaceDetection.h) with `RoiMessage`.
+
+The pipeline itself is a chain of value messages: the tracker owns the identity of every face and publishes plain track records; `shapeModel`, `headPose` and `shapeNorm` enrich a per-face result record without touching any shared state; `userManager` at the end composes the records into immutable users. No module ever writes into an object another module holds.
 
 ## Getting the Results
 
@@ -103,7 +105,7 @@ Drawing on the host side is the cheaper path, because the frame is neither compo
 
 ```
 "lastModule": {
-  "port": [ "imageQueue:1", "userSnapshot:2" ]
+  "port": [ "imageQueue:1", "userManager:2" ]
 }
 ```
 

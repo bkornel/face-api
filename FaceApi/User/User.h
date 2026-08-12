@@ -1,28 +1,27 @@
 #pragma once
 
 #include "Framework/TimeExtensions.h"
-#include "Model/FaceModel.h"
+#include "User/TrackedFace.h"
 #include "User/UserData.hpp"
 
-#include <clm/CLM.h>
 #include <opencv2/core/core.hpp>
-#include <map>
 
 namespace face
 {
+  /// @brief One user of one finished frame: the tracker's view of the face and the results
+  /// computed for it, composed into a single record. Built once by the user manager and
+  /// read-only afterwards - nothing in the pipeline writes to a User.
   class User : public UserData
   {
   public:
 
-    enum class Status
-    {
-      Detected = 0,
-      ToBeTracked,
-      Tracked,
-      Inactive
-    };
+    using Status = TrackStatus;
 
-    User(const cv::Rect& iFaceRect, int iUserId, fw::Timestamp iTimestamp);
+    User(const TrackedFace& iTrack, const UserData& iData) :
+      UserData(iData),
+      mTrack(iTrack)
+    {
+    }
 
     User(const User& iOther) = default;
 
@@ -30,49 +29,40 @@ namespace face
 
     inline bool IsActive() const
     {
-      return mStatus != Status::Inactive;
+      return mTrack.status != TrackStatus::Inactive;
     }
 
     inline bool IsDetected() const
     {
-      return mStatus == Status::Detected;
+      return mTrack.status == TrackStatus::Detected;
     }
 
     inline int GetUserId() const
     {
-      return mUserId;
+      return mTrack.trackId;
+    }
+
+    inline TrackStatus GetStatus() const
+    {
+      return mTrack.status;
     }
 
     inline fw::Timestamp GetCreationTs() const
     {
-      return mCreationTs;
+      return mTrack.creationTs;
     }
 
     inline fw::Timestamp GetLastUpdateTs() const
     {
-      return mLastUpdateTs;
+      return mTrack.lastUpdateTs;
     }
 
     inline fw::Timestamp GetLastDetectionTs() const
     {
-      return mLastDetectionTs;
+      return mTrack.lastDetectionTs;
     }
-
-    inline void SetLastUpdateTs(fw::Timestamp iTimestamp)
-    {
-      mLastUpdateTs = iTimestamp;
-    }
-
-    void SetDetectionData(const cv::Rect& iFaceRect, fw::Timestamp iTimestamp);
-    void SetStatus(Status iStatus);
 
   private:
-    const int mUserId = 0;
-    const fw::Timestamp mCreationTs;
-
-    fw::Timestamp mLastUpdateTs;
-    fw::Timestamp mLastDetectionTs;
-
-    Status mStatus = Status::Detected;
+    TrackedFace mTrack;
   };
 }

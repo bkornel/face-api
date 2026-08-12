@@ -8,7 +8,7 @@
 
 namespace face
 {
-  class User;
+  class UserData;
 
   /// @brief Aligns a user's shapes with the reference shape. After Initialize() every member
   /// is read-only, so different users may be normalized concurrently.
@@ -23,12 +23,12 @@ namespace face
 
     fw::ErrorCode Initialize(const cv::FileNode& iSettings);
 
-    bool Normalize(User& ioUser) const;
+    bool Normalize(UserData& ioData) const;
 
   private:
-    fw::VectorPt2D NormalizeShape2D(const User& iUser) const;
+    fw::VectorPt2D NormalizeShape2D(const UserData& iData) const;
 
-    fw::VectorPt3D NormalizeShape3D(const User& iUser) const;
+    fw::VectorPt3D NormalizeShape3D(const UserData& iData) const;
 
     int mMaxIterations = 1000;
     double mEpsilon = 1e-6;

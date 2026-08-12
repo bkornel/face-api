@@ -4,7 +4,7 @@
 #include "Modules/ShapeModel/ClmWrapper.h"
 
 #include "Framework/Text.h"
-#include "User/User.h"
+#include "User/UserData.hpp"
 
 #include <opencv2/core/core.hpp>
 
@@ -26,16 +26,16 @@ namespace face
     return fw::ErrorCode::OK;
   }
 
-  bool ShapeNormDispatcher::Normalize(User& ioUser) const
+  bool ShapeNormDispatcher::Normalize(UserData& ioData) const
   {
-    ioUser.SetNormShapes(NormalizeShape2D(ioUser), NormalizeShape3D(ioUser));
+    ioData.SetNormShapes(NormalizeShape2D(ioData), NormalizeShape3D(ioData));
 
     return true;
   }
 
-  fw::VectorPt2D ShapeNormDispatcher::NormalizeShape2D(const User& iUser) const
+  fw::VectorPt2D ShapeNormDispatcher::NormalizeShape2D(const UserData& iData) const
   {
-    const auto& userShape2D = cv::Mat(iUser.GetShape2D());
+    const auto& userShape2D = cv::Mat(iData.GetShape2D());
     const auto& refShape2D = cv::Mat(ClmWrapper::GetInstance().GetReferenceShape2D());
 
     fw::ShapeVector shapes2D = { userShape2D.clone(), refShape2D.clone() };
@@ -47,9 +47,9 @@ namespace face
     return result;
   }
 
-  fw::VectorPt3D ShapeNormDispatcher::NormalizeShape3D(const User& iUser) const
+  fw::VectorPt3D ShapeNormDispatcher::NormalizeShape3D(const UserData& iData) const
   {
-    const auto& userShape3D = cv::Mat(iUser.GetShape3D());
+    const auto& userShape3D = cv::Mat(iData.GetShape3D());
     const auto& refShape3D = cv::Mat(ClmWrapper::GetInstance().GetReferenceShape3D());
 
     fw::ShapeVector shapes3D = { userShape3D.clone(), refShape3D.clone() };

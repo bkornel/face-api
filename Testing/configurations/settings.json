@@ -37,15 +37,15 @@
         "fileName": "haarcascade_frontalface_alt2.xml",
         "imageScale": "1.0"
       },
-      "userManager": {
+      "faceTracker": {
         "port": [ "imageQueue:1", "faceDetection:2" ],
-        "maxUsers": "1",
-        "userAwaySec": "15.0",
-        "userOverlap": "0.2",
+        "maxTracks": "1",
+        "trackAwaySec": "15.0",
+        "trackOverlap": "0.2",
         "templateScale": "0.3"
       },
       "shapeModel": {
-        "port": [ "imageQueue:1", "userManager:2" ],
+        "port": [ "imageQueue:1", "faceTracker:2" ],
         "clamp": "3.0",
         "conFile": "face.con",
         "failureCheck": "FALSE",
@@ -69,18 +69,18 @@
         "epsilon": "1e-6",
         "parallelUsers": "TRUE"
       },
-      "userSnapshot": {
+      "userManager": {
         "port": [ "shapeNorm:1" ]
       },
       "userHistory": {
-        "port": [ "userSnapshot:1" ],
+        "port": [ "userManager:1" ],
         "removeFreqMs": "10000"
       },
       "visualizer": {
-        "port": [ "imageQueue:1", "userSnapshot:2" ]
+        "port": [ "imageQueue:1", "userManager:2" ]
       },
       "lastModule": {
-        "port": [ "visualizer:1", "userSnapshot:2" ]
+        "port": [ "visualizer:1", "userManager:2" ]
       }
     }
   }

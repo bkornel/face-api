@@ -8,7 +8,7 @@
 
 namespace face
 {
-  class User;
+  class UserData;
 
   /// @brief Estimates the head pose of one user from its fitted 2-D shape. After Initialize()
   /// every member is read-only, so different users may be estimated concurrently.
@@ -26,7 +26,7 @@ namespace face
 
     fw::ErrorCode Initialize(const cv::FileNode& iSettings);
 
-    bool Estimate(User& ioUser, const cv::Mat& iCameraMatrix) const;
+    bool Estimate(UserData& ioData, const cv::Mat& iCameraMatrix) const;
 
   private:
     struct Pose
