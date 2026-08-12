@@ -2,6 +2,7 @@
 
 #include "Framework/Imaging/Geometry.h"
 #include "Framework/ErrorCode.h"
+#include "Framework/Graph/Module.h"
 #include "Framework/Graph/Port.hpp"
 #include "Framework/Stopwatch.h"
 

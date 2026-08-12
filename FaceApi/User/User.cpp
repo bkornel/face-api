@@ -1,5 +1,4 @@
 #include "User/User.h"
-#include "User/UserDispatcher.hpp"
 
 #include "Configuration.h"
 
@@ -13,11 +12,6 @@ namespace face
     mCreationTs(iTimestamp)
   {
     SetDetectionData(iFaceRect, iTimestamp);
-  }
-
-  bool User::AcceptDispatcher(UserDispatcher& ioDispatcher)
-  {
-    return ioDispatcher.Dispatch(*this);
   }
 
   void User::SetDetectionData(const cv::Rect& iFaceRect, fw::Timestamp iTimestamp)

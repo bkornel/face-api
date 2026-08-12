@@ -49,16 +49,16 @@
     <Filter Include="Modules\UserManager">
       <UniqueIdentifier>{33d93459-9a07-4aeb-8bce-1cfc5c1b1f4e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Modules\UserProcessor">
+    <Filter Include="Modules\UserSnapshot">
       <UniqueIdentifier>{09f80b2a-209d-442a-9ad1-cb4c1f376815}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Modules\UserProcessor\HeadPose">
+    <Filter Include="Modules\HeadPose">
       <UniqueIdentifier>{f44a0c4e-a9e5-4f43-b8f5-d2f7bb3522ce}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Modules\UserProcessor\ShapeModel">
+    <Filter Include="Modules\ShapeModel">
       <UniqueIdentifier>{9f63a73c-0bda-4db5-80b7-cfbd2bb26589}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Modules\UserProcessor\ShapeNorm">
+    <Filter Include="Modules\ShapeNorm">
       <UniqueIdentifier>{df6e3ea0-3892-400e-b64e-efdf250856f8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Modules\Visualizer">
@@ -179,23 +179,23 @@
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserManager\UserManager.cpp">
       <Filter>Modules\UserManager</Filter>
     </ClCompile>
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\HeadPose\PoseEstimationDispatcher.cpp">
-      <Filter>Modules\UserProcessor\HeadPose</Filter>
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\HeadPose\HeadPoseModule.cpp">
+      <Filter>Modules\HeadPose</Filter>
     </ClCompile>
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\ShapeModel\ClmWrapper.cpp">
-      <Filter>Modules\UserProcessor\ShapeModel</Filter>
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\HeadPose\PoseEstimationDispatcher.cpp">
+      <Filter>Modules\HeadPose</Filter>
     </ClCompile>
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\ShapeModel\ShapeModel.cpp">
-      <Filter>Modules\UserProcessor\ShapeModel</Filter>
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\ClmWrapper.cpp">
+      <Filter>Modules\ShapeModel</Filter>
     </ClCompile>
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\ShapeModel\ShapeModelDispatcher.cpp">
-      <Filter>Modules\UserProcessor\ShapeModel</Filter>
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\ShapeModel.cpp">
+      <Filter>Modules\ShapeModel</Filter>
     </ClCompile>
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\ShapeNorm\ShapeNormDispatcher.cpp">
-      <Filter>Modules\UserProcessor\ShapeNorm</Filter>
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\ShapeModelDispatcher.cpp">
+      <Filter>Modules\ShapeModel</Filter>
     </ClCompile>
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\UserProcessor.cpp">
-      <Filter>Modules\UserProcessor</Filter>
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeNorm\ShapeNormDispatcher.cpp">
+      <Filter>Modules\ShapeNorm</Filter>
     </ClCompile>
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\Visualizer\Visualizer.cpp">
       <Filter>Modules\Visualizer</Filter>
@@ -226,6 +226,21 @@
     </ClCompile>
     <ClCompile Include="..\..\FaceApi\Modules\ModuleGraph.cpp">
       <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserSnapshot\UserSnapshot.cpp">
+      <Filter>Modules\UserSnapshot</Filter>
+    </ClCompile>
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\ShapeModelModule.cpp">
+      <Filter>Modules\ShapeModel</Filter>
+    </ClCompile>
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Parallel.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Graph\ModuleGraph.cpp">
+      <Filter>Framework\Graph</Filter>
+    </ClCompile>
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeNorm\ShapeNormModule.cpp">
+      <Filter>Modules\ShapeNorm</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -355,23 +370,23 @@
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\UserManager\UserManager.h">
       <Filter>Modules\UserManager</Filter>
     </ClInclude>
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\HeadPose\PoseEstimationDispatcher.h">
-      <Filter>Modules\UserProcessor\HeadPose</Filter>
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\HeadPose\HeadPoseModule.h">
+      <Filter>Modules\HeadPose</Filter>
     </ClInclude>
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\ShapeModel\ClmWrapper.h">
-      <Filter>Modules\UserProcessor\ShapeModel</Filter>
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\HeadPose\PoseEstimationDispatcher.h">
+      <Filter>Modules\HeadPose</Filter>
     </ClInclude>
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\ShapeModel\ShapeModel.h">
-      <Filter>Modules\UserProcessor\ShapeModel</Filter>
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\ClmWrapper.h">
+      <Filter>Modules\ShapeModel</Filter>
     </ClInclude>
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\ShapeModel\ShapeModelDispatcher.h">
-      <Filter>Modules\UserProcessor\ShapeModel</Filter>
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\ShapeModel.h">
+      <Filter>Modules\ShapeModel</Filter>
     </ClInclude>
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\ShapeNorm\ShapeNormDispatcher.h">
-      <Filter>Modules\UserProcessor\ShapeNorm</Filter>
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\ShapeModelDispatcher.h">
+      <Filter>Modules\ShapeModel</Filter>
     </ClInclude>
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\UserProcessor.h">
-      <Filter>Modules\UserProcessor</Filter>
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeNorm\ShapeNormDispatcher.h">
+      <Filter>Modules\ShapeNorm</Filter>
     </ClInclude>
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\Visualizer\Visualizer.h">
       <Filter>Modules\Visualizer</Filter>
@@ -403,11 +418,23 @@
     <ClInclude Include="..\..\FaceApi\User\UserData.hpp">
       <Filter>User</Filter>
     </ClInclude>
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\User\UserDispatcher.hpp">
-      <Filter>User</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\FaceApi\Messages\ImageSizeChangedMessage.h">
       <Filter>Messages</Filter>
+    </ClInclude>
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Graph\ModuleGraph.h">
+      <Filter>Framework\Graph</Filter>
+    </ClInclude>
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\ShapeModelModule.h">
+      <Filter>Modules\ShapeModel</Filter>
+    </ClInclude>
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeNorm\ShapeNormModule.h">
+      <Filter>Modules\ShapeNorm</Filter>
+    </ClInclude>
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\UserSnapshot\UserSnapshot.h">
+      <Filter>Modules\UserSnapshot</Filter>
+    </ClInclude>
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Parallel.h">
+      <Filter>Framework</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

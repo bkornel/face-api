@@ -3,8 +3,6 @@
 #include "Framework/ErrorCode.h"
 #include "Framework/Graph/FlowGraph.hpp"
 #include "Framework/Graph/IPortConnector.h"
-#include "Framework/Graph/Module.h"
-#include "Framework/Text.h"
 
 #include <easyloggingpp/easyloggingpp.h>
 

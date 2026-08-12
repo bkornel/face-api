@@ -1,9 +1,9 @@
 #include "Framework/Settings.h"
 #include "Framework/ErrorCode.h"
 #include "Framework/MathExtensions.h"
-#include "Modules/UserProcessor/HeadPose/PoseEstimationDispatcher.h"
+#include "Modules/HeadPose/PoseEstimationDispatcher.h"
 
-#include "Configuration.h"
+#include "Model/FaceModel.h"
 #include "Framework/Text.h"
 #include "User/User.h"
 
@@ -27,45 +27,39 @@ namespace face
         mEstimateReprojection = fw::str::convert_to_boolean(value);
     }
 
+    mFaceBox = CreateFaceBox();
+
     return fw::ErrorCode::OK;
   }
 
-  bool PoseEstimationDispatcher::Dispatch(User& ioUser)
+  bool PoseEstimationDispatcher::Estimate(User& ioUser, const cv::Mat& iCameraMatrix) const
   {
-    // 1. Estimate the head pose
-    estimatePose(ioUser.GetShape2D());
+    const Pose pose = EstimatePose(ioUser.GetShape2D(), iCameraMatrix);
 
-    // 2. Estimate the rotated 3-D shape points
-    estimateShape3D();
-
-    // 3. Estimate the bounding box of the rotated face
-    estimateFaceBox();
-
-    // 3. Set all user data
-    ioUser.SetPose(mRPY, mPosition);
-    ioUser.SetCameraMatrix(mCameraMatrix);
-    ioUser.SetExtrinsics(mExtrinsics, mRvec, mTvec);
-    ioUser.SetShape3D(mShape3D);
+    ioUser.SetPose(pose.rpy, pose.position);
+    ioUser.SetCameraMatrix(iCameraMatrix);
+    ioUser.SetExtrinsics(pose.extrinsics, pose.rvec, pose.tvec);
+    ioUser.SetShape3D(EstimateShape3D(pose.extrinsics));
     ioUser.SetFaceBox(mFaceBox);
 
     return true;
   }
 
-  void PoseEstimationDispatcher::estimatePose(const ImagePts& iImagePts)
+  PoseEstimationDispatcher::Pose PoseEstimationDispatcher::EstimatePose(const ImagePts& iImagePts, const cv::Mat& iCameraMatrix) const
   {
     static const cv::Mat sDistCoeffs = cv::Mat::zeros(4, 1, CV_64FC1);
 
-    mExtrinsics = cv::Mat::eye(4, 4, CV_64FC1);
+    Pose pose;
+    pose.extrinsics = cv::Mat::eye(4, 4, CV_64FC1);
 
     // Solve for pose
-    cv::solvePnP(sObjectPoints, iImagePts, mCameraMatrix, sDistCoeffs, mRvec, mTvec, false, cv::SOLVEPNP_EPNP);
-    cv::Rodrigues(mRvec, mExtrinsics({ 0, 0, 3, 3 }));
+    cv::solvePnP(sObjectPoints, iImagePts, iCameraMatrix, sDistCoeffs, pose.rvec, pose.tvec, false, cv::SOLVEPNP_EPNP);
+    cv::Rodrigues(pose.rvec, pose.extrinsics({ 0, 0, 3, 3 }));
 
     if (mEstimateReprojection)
     {
-      // Testing:
       ImagePts imagePointsRP;
-      cv::projectPoints(sObjectPoints, mRvec, mTvec, mCameraMatrix, sDistCoeffs, imagePointsRP);
+      cv::projectPoints(sObjectPoints, pose.rvec, pose.tvec, iCameraMatrix, sDistCoeffs, imagePointsRP);
 
       double totalErr = 0.0;
       for (size_t i = 0; i < iImagePts.size(); i++)
@@ -79,35 +73,39 @@ namespace face
     }
 
     for (int i = 0; i < 3; ++i)
-      mPosition[i] = mExtrinsics.at<double>(i, 3) = mTvec.at<double>(i, 0);
+      pose.position[i] = pose.extrinsics.at<double>(i, 3) = pose.tvec.at<double>(i, 0);
 
     // Get roll-pitch-yaw
     cv::Mat cameraMatrix, rotation, translation;
-    cv::decomposeProjectionMatrix(mExtrinsics({ 0, 0, 4, 3 }), cameraMatrix, rotation, translation, cv::noArray(), cv::noArray(), cv::noArray(), mRPY);
+    cv::decomposeProjectionMatrix(pose.extrinsics({ 0, 0, 4, 3 }), cameraMatrix, rotation, translation, cv::noArray(), cv::noArray(), cv::noArray(), pose.rpy);
 
-    mRPY = { fw::deg_to_rad(mRPY[2]), fw::deg_to_rad(mRPY[0]), fw::deg_to_rad(mRPY[1]) };
+    pose.rpy = { fw::deg_to_rad(pose.rpy[2]), fw::deg_to_rad(pose.rpy[0]), fw::deg_to_rad(pose.rpy[1]) };
+
+    return pose;
   }
 
-  void PoseEstimationDispatcher::estimateShape3D()
+  PoseEstimationDispatcher::ObjectPts PoseEstimationDispatcher::EstimateShape3D(const cv::Mat& iExtrinsics) const
   {
-    mShape3D.clear();
-    mShape3D.reserve(sObjectPoints.size());
+    ObjectPts shape3D;
+    shape3D.reserve(sObjectPoints.size());
 
     for (const auto& objPt : sObjectPoints)
     {
-      const cv::Mat& objPtRot = mExtrinsics * cv::Mat_<double>({ 4, 1 }, { objPt.x, objPt.y, objPt.z, 1.0 });
+      const cv::Mat& objPtRot = iExtrinsics * cv::Mat_<double>({ 4, 1 }, { objPt.x, objPt.y, objPt.z, 1.0 });
 
-      mShape3D.emplace_back(
+      shape3D.emplace_back(
         objPtRot.at<double>(0, 0),
         objPtRot.at<double>(1, 0),
         objPtRot.at<double>(2, 0)
       );
     }
+
+    return shape3D;
   }
 
-  void PoseEstimationDispatcher::estimateFaceBox()
+  PoseEstimationDispatcher::ObjectPts PoseEstimationDispatcher::CreateFaceBox() const
   {
-    CV_DbgAssert(!mShape3D.empty());
+    CV_DbgAssert(!sObjectPoints.empty());
 
     cv::Point3d minPt = sObjectPoints[0];
     cv::Point3d maxPt = sObjectPoints[0];
@@ -124,7 +122,7 @@ namespace face
     }
 
     // See the order in PoseGeometry.h
-    mFaceBox = {
+    return {
       // Front face
       { minPt.x - mFaceBoxOffset, minPt.y - mFaceBoxOffset, minPt.z },
       { maxPt.x + mFaceBoxOffset, minPt.y - mFaceBoxOffset, minPt.z },

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -57,12 +57,20 @@
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ImageQueue\ImageQueue.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserHistory\UserHistory.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserManager\UserManager.cpp" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\HeadPose\PoseEstimationDispatcher.cpp" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\ShapeModel\ClmWrapper.cpp" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\ShapeModel\ShapeModel.cpp" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\ShapeModel\ShapeModelDispatcher.cpp" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\ShapeNorm\ShapeNormDispatcher.cpp" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\UserProcessor.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\HeadPose\HeadPoseModule.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\HeadPose\PoseEstimationDispatcher.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\ClmWrapper.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\ShapeModel.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\ShapeModelDispatcher.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\ShapeModelModule.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeNorm\ShapeNormDispatcher.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeNorm\ShapeNormModule.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserSnapshot\UserSnapshot.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Parallel.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Graph\ModuleGraph.cpp">
+      <!-- Shares its base name with Modules\ModuleGraph.cpp, which would overwrite its object file -->
+      <ObjectFileName>$(IntDir)Framework.Graph.ModuleGraph.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\Visualizer\Visualizer.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\User\User.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\User\UserData.cpp" />
@@ -119,12 +127,17 @@
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ImageQueue\ImageQueue.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\UserHistory\UserHistory.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\UserManager\UserManager.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\HeadPose\PoseEstimationDispatcher.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\ShapeModel\ClmWrapper.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\ShapeModel\ShapeModel.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\ShapeModel\ShapeModelDispatcher.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\ShapeNorm\ShapeNormDispatcher.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\UserProcessor.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\HeadPose\HeadPoseModule.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\HeadPose\PoseEstimationDispatcher.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\ClmWrapper.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\ShapeModel.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\ShapeModelDispatcher.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\ShapeModelModule.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeNorm\ShapeNormDispatcher.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeNorm\ShapeNormModule.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\UserSnapshot\UserSnapshot.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Parallel.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Graph\ModuleGraph.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\Visualizer\Visualizer.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\User\User.h" />
     <ClInclude Include="..\..\FaceApi\Framework\Graph\Port.hpp" />
@@ -135,7 +148,6 @@
     <ClInclude Include="..\..\FaceApi\Modules\ModuleFactory.h" />
     <ClInclude Include="..\..\FaceApi\Modules\ModuleGraph.h" />
     <ClInclude Include="..\..\FaceApi\User\UserData.hpp" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\User\UserDispatcher.hpp" />
     <ClInclude Include="..\..\FaceApi\Messages\ImageSizeChangedMessage.h" />
   </ItemGroup>
   <ItemGroup>

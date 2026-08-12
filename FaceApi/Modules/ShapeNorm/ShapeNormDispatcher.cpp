@@ -1,13 +1,12 @@
 #include "Framework/Settings.h"
 #include "Framework/ErrorCode.h"
-#include "Modules/UserProcessor/ShapeNorm/ShapeNormDispatcher.h"
-#include "Modules/UserProcessor/ShapeModel/ClmWrapper.h"
+#include "Modules/ShapeNorm/ShapeNormDispatcher.h"
+#include "Modules/ShapeModel/ClmWrapper.h"
 
 #include "Framework/Text.h"
 #include "User/User.h"
 
 #include <opencv2/core/core.hpp>
-#include <numeric>
 
 namespace face
 {
@@ -27,41 +26,38 @@ namespace face
     return fw::ErrorCode::OK;
   }
 
-  bool ShapeNormDispatcher::Dispatch(User& ioUser)
+  bool ShapeNormDispatcher::Normalize(User& ioUser) const
   {
-    mMeanShape2D.clear();
-    mMeanShape3D.clear();
-
-    NormalizeShape2D(ioUser);
-    NormalizeShape3D(ioUser);
-
-    ioUser.SetNormShapes(mMeanShape2D, mMeanShape3D);
+    ioUser.SetNormShapes(NormalizeShape2D(ioUser), NormalizeShape3D(ioUser));
 
     return true;
   }
 
-  void ShapeNormDispatcher::NormalizeShape2D(User& ioUser)
+  fw::VectorPt2D ShapeNormDispatcher::NormalizeShape2D(const User& iUser) const
   {
-    const auto& userShape2D = cv::Mat(ioUser.GetShape2D());
+    const auto& userShape2D = cv::Mat(iUser.GetShape2D());
     const auto& refShape2D = cv::Mat(ClmWrapper::GetInstance().GetReferenceShape2D());
 
     fw::ShapeVector shapes2D = { userShape2D.clone(), refShape2D.clone() };
     cv::Mat meanShape2D = refShape2D.clone().reshape(1);
     fw::generalized_procrustes(shapes2D, meanShape2D, mMaxIterations, mEpsilon);
 
-    meanShape2D.reshape(2).copyTo(mMeanShape2D);
+    fw::VectorPt2D result;
+    meanShape2D.reshape(2).copyTo(result);
+    return result;
   }
 
-  void ShapeNormDispatcher::NormalizeShape3D(User& ioUser)
+  fw::VectorPt3D ShapeNormDispatcher::NormalizeShape3D(const User& iUser) const
   {
-    const auto& userShape3D = cv::Mat(ioUser.GetShape3D());
+    const auto& userShape3D = cv::Mat(iUser.GetShape3D());
     const auto& refShape3D = cv::Mat(ClmWrapper::GetInstance().GetReferenceShape3D());
 
     fw::ShapeVector shapes3D = { userShape3D.clone(), refShape3D.clone() };
     cv::Mat meanShape3D = refShape3D.clone().reshape(1);
     fw::generalized_procrustes(shapes3D, meanShape3D, mMaxIterations, mEpsilon);
 
-    meanShape3D.reshape(3).copyTo(mMeanShape3D);
+    fw::VectorPt3D result;
+    meanShape3D.reshape(3).copyTo(result);
+    return result;
   }
-
 }
