@@ -16,7 +16,7 @@ import com.face.common.Native;
 public final class FaceOverlayData {
 
     private static final int HEADER_FLOATS = 1;
-    private static final int MAX_LANDMARKS = 66;
+    private static final int MAX_LANDMARKS = 68;
     private static final int MAX_BOX_POINTS = 8;
     private static final int FACE_STRIDE = 8 + (MAX_LANDMARKS * 2) + (MAX_BOX_POINTS * 2) + 3 + 3;
 

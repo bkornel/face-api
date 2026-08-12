@@ -24,7 +24,7 @@ namespace face
   namespace result_buffer
   {
     constexpr int cHeaderFloats = 1;
-    constexpr int cMaxLandmarks = 66;
+    constexpr int cMaxLandmarks = 68;
     constexpr int cMaxBoxPoints = 8;
     constexpr int cFaceStride = 8 + (cMaxLandmarks * 2) + (cMaxBoxPoints * 2) + 3 + 3;
 

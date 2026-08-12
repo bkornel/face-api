@@ -27,7 +27,7 @@ public final class FaceOverlayRenderer {
     private final Paint mTextBackPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
     private final float[] mLineBuffer = new float[BOX_EDGES.length * 2];
-    private final float[] mPointBuffer = new float[66 * 2];
+    private final float[] mPointBuffer = new float[68 * 2];
 
     public FaceOverlayRenderer(float iDensity) {
         final float scale = iDensity > 0.0F ? iDensity : 1.0F;
@@ -73,7 +73,7 @@ public final class FaceOverlayRenderer {
             mPointBuffer[(i * 2) + 1] = iData.getLandmarkY(iFace, i) * iScaleY;
         }
 
-        // One drawPoints call instead of 66 drawCircle calls
+        // One drawPoints call instead of 68 drawCircle calls
         iCanvas.drawPoints(mPointBuffer, 0, count * 2, mLandmarkPaint);
     }
 
