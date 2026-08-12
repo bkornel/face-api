@@ -50,19 +50,9 @@ namespace face
       return mLastTimestamp;
     }
 
-    inline int GetQueueSize() const
+    inline MessageQueue::Statistics GetQueueStatistics() const
     {
-      return mQueue.GetSize();
-    }
-
-    inline float GetSamplingFPS() const
-    {
-      return mQueue.GetSamplingFPS();
-    }
-
-    inline int GetBound() const
-    {
-      return mQueue.GetBound();
+      return mQueue.GetStatistics();
     }
 
   private:

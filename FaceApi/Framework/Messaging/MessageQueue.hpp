@@ -1,20 +1,21 @@
 #pragma once
 
-
 #include "Framework/ErrorCode.h"
 #include "Framework/TimeExtensions.h"
-#include <easyloggingpp/easyloggingpp.h>
-#include <memory>
-#include <opencv2/core/base.hpp>
 
-#include <atomic>
-#include <chrono>
+#include <algorithm>
+#include <cassert>
 #include <concepts>
 #include <condition_variable>
+#include <cstddef>
 #include <limits>
+#include <memory>
 #include <mutex>
+#include <optional>
 #include <queue>
-#include <thread>
+#include <string>
+#include <tuple>
+#include <utility>
 
 namespace fw
 {
@@ -24,14 +25,32 @@ namespace fw
   concept SharedPointer = requires { typename T::element_type; } &&
                           std::same_as<T, std::shared_ptr<typename T::element_type>>;
 
-  /// @brief A queue is only ever asked to carry messages, and messages travel as shared_ptr.
-  /// The constraint says so in the signature, where a static_assert said it in the body.
+  /// @brief A bounded, sampled queue of messages. A push is turned away with OutOfResources
+  /// when the queue is full, with BadData when it came sooner than the sampling rate allows,
+  /// and with BadState once the queue is closed. Only fullness is worth waiting for, so only
+  /// Push() waits. Close() releases every waiting thread and is not undone by Clear(); the
+  /// owner still has to keep the queue alive until those threads have left it.
+  ///
+  /// This class is thread-safe.
   template <SharedPointer First, SharedPointer... Rest>
   class MessageQueue
   {
     using MessageTuple = std::tuple<First, Rest...>;
 
   public:
+    struct Statistics
+    {
+      int size = 0;
+      int bound = 0;
+      float samplingFPS = 0.0F;
+    };
+
+    static constexpr float MAX_SAMPLING_RATE_FPS = (std::numeric_limits<float>::max)();
+    static constexpr float MIN_SAMPLING_RATE_FPS = 1.0F;
+
+    static constexpr int MAX_BOUND = (std::numeric_limits<int>::max)();
+    static constexpr int MIN_BOUND = 1;
+
     explicit MessageQueue(const std::string& iName) :
       MessageQueue(iName, MAX_SAMPLING_RATE_FPS, MAX_BOUND, Milliseconds(-1.0))
     {
@@ -50,26 +69,29 @@ namespace fw
       SetTimestampFiltering(iThreshold);
     }
 
+    MessageQueue(const MessageQueue& iOther) = delete;
+
     MessageQueue& operator=(const MessageQueue& iOther) = delete;
 
     ~MessageQueue()
     {
+      Close();
       Clear();
     }
 
-    MessageQueue(const MessageQueue& iOther) = delete;
-
     ErrorCode Push(const MessageTuple& iMessageTuple)
     {
-      ErrorCode retCode = ErrorCode::OK;
       std::unique_lock<std::mutex> lock(mMutex);
 
-      while ((retCode = PushLocked(iMessageTuple)) == ErrorCode::OutOfResources)
+      for (;;)
       {
-        mCV.wait_for(lock, std::chrono::milliseconds(1));
-      }
+        if (mClosed) return ErrorCode::BadState;
 
-      return retCode;
+        const ErrorCode code = PushLocked(iMessageTuple);
+        if (code != ErrorCode::OutOfResources) return code;
+
+        WaitForRoomLocked(lock);
+      }
     }
 
     ErrorCode Push(const First& iFirst, const Rest&... iArgs)
@@ -79,7 +101,10 @@ namespace fw
 
     ErrorCode TryPush(const MessageTuple& iMessageTuple)
     {
-      std::unique_lock<std::mutex> lock(mMutex);
+      std::lock_guard<std::mutex> lock(mMutex);
+
+      if (mClosed) return ErrorCode::BadState;
+
       return PushLocked(iMessageTuple);
     }
 
@@ -90,40 +115,61 @@ namespace fw
 
     ErrorCode Pop(MessageTuple& oDestination)
     {
-      ErrorCode retCode = ErrorCode::OK;
       std::unique_lock<std::mutex> lock(mMutex);
 
-      while ((retCode = PopLocked(oDestination)) == ErrorCode::NotFound)
+      for (;;)
       {
-        mCV.wait_for(lock, std::chrono::milliseconds(1));
-      }
+        const ErrorCode code = PopLocked(oDestination);
+        if (code != ErrorCode::NotFound) return code;
 
-      return retCode;
+        // A closed queue can still be drained, but once empty nothing more is coming
+        if (mClosed) return ErrorCode::BadState;
+
+        mCV.wait(lock);
+      }
     }
 
     ErrorCode TryPop(MessageTuple& oDestination)
     {
-      std::unique_lock<std::mutex> lock(mMutex);
+      std::lock_guard<std::mutex> lock(mMutex);
       return PopLocked(oDestination);
     }
 
     ErrorCode Front(MessageTuple& oDestination)
     {
-      ErrorCode retCode = ErrorCode::OK;
       std::unique_lock<std::mutex> lock(mMutex);
 
-      while ((retCode = FrontLocked(oDestination)) == ErrorCode::NotFound)
+      for (;;)
       {
-        mCV.wait_for(lock, std::chrono::milliseconds(1));
-      }
+        const ErrorCode code = FrontLocked(oDestination);
+        if (code != ErrorCode::NotFound) return code;
 
-      return retCode;
+        if (mClosed) return ErrorCode::BadState;
+
+        mCV.wait(lock);
+      }
     }
 
     ErrorCode TryFront(MessageTuple& oDestination)
     {
-      std::unique_lock<std::mutex> lock(mMutex);
+      std::lock_guard<std::mutex> lock(mMutex);
       return FrontLocked(oDestination);
+    }
+
+    void Close()
+    {
+      {
+        std::lock_guard<std::mutex> lock(mMutex);
+        mClosed = true;
+      }
+
+      mCV.notify_all();
+    }
+
+    inline bool IsClosed() const
+    {
+      std::lock_guard<std::mutex> lock(mMutex);
+      return mClosed;
     }
 
     void Clear()
@@ -131,46 +177,57 @@ namespace fw
       {
         std::lock_guard<std::mutex> lock(mMutex);
 
-        while (!mQueue.empty())
-        {
-          mQueue.pop();
-        }
-
+        mQueue = {};
         mTimestamp = Timestamp{};
-        mSize = 0;
       }
 
       mCV.notify_all();
     }
 
+    inline const std::string& GetName() const
+    {
+      return mName;
+    }
+
+    inline Statistics GetStatistics() const
+    {
+      std::lock_guard<std::mutex> lock(mMutex);
+      return { static_cast<int>(mQueue.size()), mBound, mSamplingFPS };
+    }
+
     inline float GetSamplingFPS() const
     {
+      std::lock_guard<std::mutex> lock(mMutex);
       return mSamplingFPS;
     }
 
     inline int GetSize() const
     {
-      return mSize;
+      std::lock_guard<std::mutex> lock(mMutex);
+      return static_cast<int>(mQueue.size());
     }
 
     inline int GetBound() const
     {
+      std::lock_guard<std::mutex> lock(mMutex);
       return mBound;
     }
 
     inline bool IsEmpty() const
     {
-      return mSize == 0;
+      std::lock_guard<std::mutex> lock(mMutex);
+      return mQueue.empty();
     }
 
     inline bool IsFull() const
     {
-      return mSize >= mBound;
+      std::lock_guard<std::mutex> lock(mMutex);
+      return static_cast<int>(mQueue.size()) >= mBound;
     }
 
     void SetBound(int iBound)
     {
-      CV_DbgAssert(iBound > 0);
+      assert(iBound > 0);
       {
         std::lock_guard<std::mutex> lock(mMutex);
         mBound = (std::min)((std::max)(iBound, MIN_BOUND), MAX_BOUND);
@@ -181,39 +238,40 @@ namespace fw
 
     void SetSamplingFPS(float iSamplingFPS)
     {
-      CV_DbgAssert(iSamplingFPS > 0.0F);
-      std::lock_guard<std::mutex> lock(mMutex);
-      mSamplingFPS = (std::min)((std::max)(iSamplingFPS, MIN_SAMPLING_RATE_FPS), MAX_SAMPLING_RATE_FPS);
-      mSampling = ConvertFpsToDuration(mSamplingFPS);
+      assert(iSamplingFPS > 0.0F);
+      {
+        std::lock_guard<std::mutex> lock(mMutex);
+        mSamplingFPS = (std::min)((std::max)(iSamplingFPS, MIN_SAMPLING_RATE_FPS), MAX_SAMPLING_RATE_FPS);
+        mSampling = ConvertFpsToDuration(mSamplingFPS);
+      }
+
+      mCV.notify_all();
     }
 
     void SetTimestampFiltering(Milliseconds iThreshold)
     {
-      std::lock_guard<std::mutex> lock(mMutex);
-      mThreshold = iThreshold;
+      {
+        std::lock_guard<std::mutex> lock(mMutex);
+        mThreshold = iThreshold;
+      }
+
+      mCV.notify_all();
     }
 
   private:
-    const static float MAX_SAMPLING_RATE_FPS;
-    const static float MIN_SAMPLING_RATE_FPS;
-
-    const static int MAX_BOUND;
-    const static int MIN_BOUND;
-
     ErrorCode PushLocked(const MessageTuple& iMessageTuple)
     {
       FilterLocked();
 
-      if (static_cast<int>(mQueue.size()) >= mBound.load()) return ErrorCode::OutOfResources;
+      if (static_cast<int>(mQueue.size()) >= mBound) return ErrorCode::OutOfResources;
 
       const Timestamp currentTimestamp = now();
 
-      if (elapsed(mTimestamp, currentTimestamp) <= mSampling.load())
+      if (elapsed(mTimestamp, currentTimestamp) <= mSampling)
         return ErrorCode::BadData;
 
       mTimestamp = currentTimestamp;
-      mQueue.push(std::make_pair(mTimestamp, iMessageTuple));
-      mSize = static_cast<int>(mQueue.size());
+      mQueue.emplace(mTimestamp, iMessageTuple);
 
       mCV.notify_all();
 
@@ -237,76 +295,75 @@ namespace fw
 
     ErrorCode PopLocked(MessageTuple& oDestination)
     {
-      const ErrorCode retCode = FrontLocked(oDestination);
+      const ErrorCode code = FrontLocked(oDestination);
 
-      if (retCode == ErrorCode::OK)
+      if (code == ErrorCode::OK)
       {
         mQueue.pop();
-        mSize = static_cast<int>(mQueue.size());
 
         mCV.notify_all();
       }
 
-      return retCode;
+      return code;
     }
 
     void FilterLocked()
     {
-      const Milliseconds threshold = mThreshold.load();
-      if (threshold.count() <= 0.0) return;
+      if (mThreshold.count() <= 0.0) return;
 
       const Timestamp currentTimestamp = now();
-      const int startSize = mSize;
+      const std::size_t startSize = mQueue.size();
 
-      while (!mQueue.empty())
-      {
-        const Timestamp createTimestamp = mQueue.front().first;
-
-        if (elapsed(createTimestamp, currentTimestamp) <= threshold)
-          break;
-
+      while (!mQueue.empty() && elapsed(mQueue.front().first, currentTimestamp) > mThreshold)
         mQueue.pop();
-      }
 
-      mSize = static_cast<int>(mQueue.size());
-
-      if (startSize != mSize)
+      if (startSize != mQueue.size())
       {
         mCV.notify_all();
       }
     }
 
-    inline Milliseconds ConvertFpsToDuration(float iFPS) const
+    std::optional<Milliseconds> TimeToNextExpiryLocked() const
     {
-      CV_DbgAssert(iFPS > 0.0F);
+      if (mThreshold.count() <= 0.0 || mQueue.empty()) return std::nullopt;
+
+      const Milliseconds age = elapsed(mQueue.front().first, now());
+
+      return (age >= mThreshold) ? Milliseconds(0.0) : Milliseconds(mThreshold - age);
+    }
+
+    // Room appears either because someone popped, which notifies, or because the oldest
+    // message aged past the threshold, which nothing announces - hence the bounded wait.
+    void WaitForRoomLocked(std::unique_lock<std::mutex>& ioLock)
+    {
+      const std::optional<Milliseconds> expiry = TimeToNextExpiryLocked();
+
+      if (expiry)
+        mCV.wait_for(ioLock, std::chrono::duration_cast<std::chrono::microseconds>(*expiry));
+      else
+        mCV.wait(ioLock);
+    }
+
+    static Milliseconds ConvertFpsToDuration(float iFPS)
+    {
+      assert(iFPS > 0.0F);
       return Milliseconds((1.0 / iFPS) * 1000.0);
     }
 
-    std::mutex mMutex;
+    mutable std::mutex mMutex;
     std::condition_variable mCV;
+
     std::queue<std::pair<Timestamp, MessageTuple>> mQueue;
 
-    std::string mName;
+    const std::string mName;
 
-    std::atomic<int> mSize{ 0 };
-    std::atomic<int> mBound{ MAX_BOUND };
+    bool mClosed = false;
 
-    std::atomic<float> mSamplingFPS{ MAX_SAMPLING_RATE_FPS };
-    std::atomic<Milliseconds> mSampling{ Milliseconds(1.0) };
-    std::atomic<Milliseconds> mThreshold{ Milliseconds(-1.0) };
+    int mBound = MAX_BOUND;
+    float mSamplingFPS = MAX_SAMPLING_RATE_FPS;
+    Milliseconds mSampling{ 1.0 };
+    Milliseconds mThreshold{ -1.0 };
 
     Timestamp mTimestamp;
   };
-
-  template <SharedPointer First, SharedPointer... Rest>
-  const float fw::MessageQueue<First, Rest...>::MAX_SAMPLING_RATE_FPS = (std::numeric_limits<float>::max)();
-
-  template <SharedPointer First, SharedPointer... Rest>
-  const float fw::MessageQueue<First, Rest...>::MIN_SAMPLING_RATE_FPS = 1.0F;
-
-  template <SharedPointer First, SharedPointer... Rest>
-  const int fw::MessageQueue<First, Rest...>::MAX_BOUND = (std::numeric_limits<int>::max)();
-
-  template <SharedPointer First, SharedPointer... Rest>
-  const int fw::MessageQueue<First, Rest...>::MIN_BOUND = 1;
 }
