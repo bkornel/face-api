@@ -107,7 +107,9 @@ namespace face
     kMouth14,
     kMouth15,
     kMouth16,
-    kMouth17
+    kMouth17,
+    kMouth18,
+    kMouth19
   };
 
   class FaceModel
@@ -116,7 +118,6 @@ namespace face
     using Landmarks = std::vector<Landmark>;
     using ShapeParts = std::map<BodyPart, Landmarks>;
     using Connections = std::vector<std::pair<int, int>>;
-    using Triangles = std::vector<std::tuple<int, int, int>>;
 
     static FaceModel& GetInstance();
 
@@ -137,24 +138,16 @@ namespace face
       return mConnections;
     }
 
-    inline const Triangles& GetTriangles() const
-    {
-      return mTriangles;
-    }
-
     inline const fw::VectorPt3D& GetShape3D() const
     {
       return mShape3D;
     }
 
-    inline void SetConnections(const Connections& iConnections)
+    /// @brief The frontal view of the model: its x and y, which the model lays out in image
+    /// orientation. This is what shapes are aligned against when they are normalized.
+    const fw::VectorPt2D& GetFrontalShape2D() const
     {
-      mConnections = iConnections;
-    }
-
-    inline void SetTriangles(const Triangles& iTriangles)
-    {
-      mTriangles = iTriangles;
+      return mFrontalShape2D;
     }
 
   private:
@@ -162,8 +155,8 @@ namespace face
 
     ShapeParts mShapeParts;
     Connections mConnections;
-    Triangles mTriangles;
     fw::VectorPt3D mShape3D;
+    fw::VectorPt2D mFrontalShape2D;
 
     std::map<Landmark, std::string> mShapePoints;
     std::map<BodyPart, std::string> mShapeClusters;

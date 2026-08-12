@@ -52,7 +52,6 @@ endif()
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/3rdparty)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/clm)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/easyloggingpp)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Framework)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Messages)
@@ -73,12 +72,6 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/User)
 # Sources are the same for all platforms
 set(SOURCES;
   FaceApi.cpp;
-  3rdparty/clm/CLM.cc;
-  3rdparty/clm/FCheck.cc;
-  3rdparty/clm/IO.cc;
-  3rdparty/clm/Patch.cc;
-  3rdparty/clm/PAW.cc;
-  3rdparty/clm/PDM.cc;
   3rdparty/easyloggingpp/easyloggingpp.cpp;
   FaceResultBuffer.cpp;
   Configuration.cpp;
@@ -119,9 +112,6 @@ set(SOURCES;
   Modules/HeadPose/PoseEstimationDispatcher.cpp;
   Modules/ImageQueue/ImageQueue.cpp;
   Modules/LastModule/LastModule.cpp;
-  Modules/ShapeModel/ClmWrapper.cpp;
-  Modules/ShapeModel/ShapeModel.cpp;
-  Modules/ShapeModel/ShapeModelDispatcher.cpp;
   Modules/ShapeModel/ShapeModelModule.cpp;
   Modules/ShapeModel/TddfaDispatcher.cpp;
   Modules/ShapeNorm/ShapeNormDispatcher.cpp;

@@ -19,12 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\CLM.cc" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\FCheck.cc" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\IO.cc" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\Patch.cc" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\PAW.cc" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\PDM.cc" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\3rdparty\easyloggingpp\easyloggingpp.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Profiler.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Stopwatch.cpp" />
@@ -59,9 +53,6 @@
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserManager\UserManager.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\HeadPose\HeadPoseModule.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\HeadPose\PoseEstimationDispatcher.cpp" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\ClmWrapper.cpp" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\ShapeModel.cpp" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\ShapeModelDispatcher.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\ShapeModelModule.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\TddfaDispatcher.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeNorm\ShapeNormDispatcher.cpp" />
@@ -82,12 +73,6 @@
     <ClCompile Include="..\..\FaceApi\Modules\ModuleGraph.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\CLM.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\FCheck.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\IO.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\Patch.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\PAW.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\PDM.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\3rdparty\easyloggingpp\easyloggingpp.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Profiler.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Messaging\Event.hpp" />
@@ -134,12 +119,8 @@
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\UserManager\UserManager.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\HeadPose\HeadPoseModule.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\HeadPose\PoseEstimationDispatcher.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\ClmWrapper.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\ShapeModel.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\ShapeModelDispatcher.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\ShapeModelModule.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\TddfaDispatcher.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\IShapeFitter.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\OneEuroFilter.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeNorm\ShapeNormDispatcher.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeNorm\ShapeNormModule.h" />

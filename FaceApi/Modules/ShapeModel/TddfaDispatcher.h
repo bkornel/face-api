@@ -3,7 +3,8 @@
 #include "Framework/ErrorCode.h"
 #include "Framework/OneEuroFilter.h"
 #include "Framework/TimeExtensions.h"
-#include "Modules/ShapeModel/IShapeFitter.h"
+#include "Messages/ShapeMessage.h"
+#include "User/TrackedFace.h"
 
 #include <opencv2/dnn.hpp>
 
@@ -14,27 +15,27 @@
 namespace face
 {
   /// @brief The 3DDFA_V2 fitter: a MobileNet regressing 62 3DMM parameters from a 120x120
-  /// face crop, decoded to the 68 landmark subset of the Basel Face Model and mapped onto
-  /// the 66-point layout the rest of the pipeline speaks. Trained on large poses, so it
-  /// keeps working when the head is turned far from the camera.
+  /// face crop, decoded to the 68 landmarks of the Basel Face Model, which is the layout the
+  /// rest of the pipeline speaks. Trained on large poses, so it keeps working when the head
+  /// is turned far from the camera.
   ///
   /// The network is shared and cv::dnn forward() is not reentrant, so inference is
   /// serialized; everything around it runs per track. A One Euro filter per landmark takes
   /// the per-frame regression jitter out.
-  class TddfaDispatcher : public IShapeFitter
+  class TddfaDispatcher
   {
   public:
     TddfaDispatcher() = default;
 
-    virtual ~TddfaDispatcher() = default;
+    ~TddfaDispatcher() = default;
 
-    fw::ErrorCode Initialize(const cv::FileNode& iSettings) override;
+    fw::ErrorCode Initialize(const cv::FileNode& iSettings);
 
-    void BeginFrame(const std::vector<TrackedFace>& iTracks) override;
+    void BeginFrame(const std::vector<TrackedFace>& iTracks);
 
-    bool Fit(const TrackedFace& iTrack, const cv::Mat& iFrameGray, const cv::Mat& iFrameBGR, ShapeDescriptor& oShape) override;
+    bool Fit(const TrackedFace& iTrack, const cv::Mat& iFrameBGR, ShapeDescriptor& oShape);
 
-    void Clear() override;
+    void Clear();
 
   private:
     static constexpr int cInputSize = 120;

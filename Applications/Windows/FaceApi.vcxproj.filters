@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="3rdparty">
@@ -69,24 +69,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\CLM.cc">
-      <Filter>3rdparty\clm</Filter>
-    </ClCompile>
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\FCheck.cc">
-      <Filter>3rdparty\clm</Filter>
-    </ClCompile>
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\IO.cc">
-      <Filter>3rdparty\clm</Filter>
-    </ClCompile>
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\Patch.cc">
-      <Filter>3rdparty\clm</Filter>
-    </ClCompile>
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\PAW.cc">
-      <Filter>3rdparty\clm</Filter>
-    </ClCompile>
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\PDM.cc">
-      <Filter>3rdparty\clm</Filter>
-    </ClCompile>
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\3rdparty\easyloggingpp\easyloggingpp.cpp">
       <Filter>3rdparty\easyloggingpp</Filter>
     </ClCompile>
@@ -180,15 +162,6 @@
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\HeadPose\PoseEstimationDispatcher.cpp">
       <Filter>Modules\HeadPose</Filter>
     </ClCompile>
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\ClmWrapper.cpp">
-      <Filter>Modules\ShapeModel</Filter>
-    </ClCompile>
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\ShapeModel.cpp">
-      <Filter>Modules\ShapeModel</Filter>
-    </ClCompile>
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\ShapeModelDispatcher.cpp">
-      <Filter>Modules\ShapeModel</Filter>
-    </ClCompile>
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeNorm\ShapeNormDispatcher.cpp">
       <Filter>Modules\ShapeNorm</Filter>
     </ClCompile>
@@ -239,24 +212,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\CLM.h">
-      <Filter>3rdparty\clm</Filter>
-    </ClInclude>
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\FCheck.h">
-      <Filter>3rdparty\clm</Filter>
-    </ClInclude>
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\IO.h">
-      <Filter>3rdparty\clm</Filter>
-    </ClInclude>
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\Patch.h">
-      <Filter>3rdparty\clm</Filter>
-    </ClInclude>
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\PAW.h">
-      <Filter>3rdparty\clm</Filter>
-    </ClInclude>
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\PDM.h">
-      <Filter>3rdparty\clm</Filter>
-    </ClInclude>
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\3rdparty\easyloggingpp\easyloggingpp.h">
       <Filter>3rdparty\easyloggingpp</Filter>
     </ClInclude>
@@ -369,15 +324,6 @@
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\HeadPose\PoseEstimationDispatcher.h">
       <Filter>Modules\HeadPose</Filter>
     </ClInclude>
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\ClmWrapper.h">
-      <Filter>Modules\ShapeModel</Filter>
-    </ClInclude>
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\ShapeModel.h">
-      <Filter>Modules\ShapeModel</Filter>
-    </ClInclude>
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\ShapeModelDispatcher.h">
-      <Filter>Modules\ShapeModel</Filter>
-    </ClInclude>
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeNorm\ShapeNormDispatcher.h">
       <Filter>Modules\ShapeNorm</Filter>
     </ClInclude>
@@ -445,9 +391,6 @@
       <Filter>Messages</Filter>
     </ClInclude>
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\TddfaDispatcher.h">
-      <Filter>Modules\ShapeModel</Filter>
-    </ClInclude>
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\IShapeFitter.h">
       <Filter>Modules\ShapeModel</Filter>
     </ClInclude>
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\OneEuroFilter.h">

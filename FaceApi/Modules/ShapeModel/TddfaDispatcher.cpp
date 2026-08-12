@@ -14,14 +14,6 @@
 
 namespace face
 {
-  namespace
-  {
-    // The 66-point layout of the pipeline is the 68-point markup without the two inner lip
-    // corners, which are these indices in the 68-point numbering
-    constexpr int cDropped1 = 60;
-    constexpr int cDropped2 = 64;
-  }
-
   fw::ErrorCode TddfaDispatcher::Initialize(const cv::FileNode& iSettings)
   {
     std::string modelDir = "3ddfa/";
@@ -150,7 +142,7 @@ namespace face
     return crop;
   }
 
-  bool TddfaDispatcher::Fit(const TrackedFace& iTrack, const cv::Mat& /*iFrameGray*/, const cv::Mat& iFrameBGR, ShapeDescriptor& oShape)
+  bool TddfaDispatcher::Fit(const TrackedFace& iTrack, const cv::Mat& iFrameBGR, ShapeDescriptor& oShape)
   {
     auto it = mStates.find(iTrack.trackId);
     if (it == mStates.end()) return false;
@@ -242,23 +234,15 @@ namespace face
       }
     }
 
-    // Map onto the 66-point layout and take the bounding box for the reported rectangle
-    fw::VectorPt2D shape66;
-    shape66.reserve(cLandmarks - 2);
-
     cv::Point2d minPt = shape68[0];
     cv::Point2d maxPt = shape68[0];
 
-    for (int i = 0; i < cLandmarks; ++i)
+    for (const auto& pt : shape68)
     {
-      if (i == cDropped1 || i == cDropped2) continue;
-
-      shape66.emplace_back(shape68[i]);
-
-      minPt.x = (std::min)(minPt.x, shape68[i].x);
-      minPt.y = (std::min)(minPt.y, shape68[i].y);
-      maxPt.x = (std::max)(maxPt.x, shape68[i].x);
-      maxPt.y = (std::max)(maxPt.y, shape68[i].y);
+      minPt.x = (std::min)(minPt.x, pt.x);
+      minPt.y = (std::min)(minPt.y, pt.y);
+      maxPt.x = (std::max)(maxPt.x, pt.x);
+      maxPt.y = (std::max)(maxPt.y, pt.y);
     }
 
     // Clipped rather than rejected: this fitter keeps a turned face, and a turned face may
@@ -272,7 +256,7 @@ namespace face
 
     oShape.trackId = iTrack.trackId;
     oShape.faceRect = fittedRect;
-    oShape.shape2D = std::move(shape66);
+    oShape.shape2D = std::move(shape68);
 
     return true;
   }

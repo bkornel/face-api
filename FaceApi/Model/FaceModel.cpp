@@ -42,7 +42,7 @@ namespace face
     };
 
     mShapePoints = {
-      { Landmark::kContour0, "CONTOUR_0" }, { Landmark::kContour1, "CONTOUR_1" }, { Landmark::kContour2, "CONTOUR_2" }, { Landmark::kContour3, "CONTOUR_3" }, { Landmark::kContour4, "CONTOUR_4" }, { Landmark::kContour5, "CONTOUR_5" }, { Landmark::kContour6, "CONTOUR_6" }, { Landmark::kContour7, "CONTOUR_7" }, { Landmark::kContour8, "CONTOUR_8" }, { Landmark::kContour9, "CONTOUR_9" }, { Landmark::kContour10, "CONTOUR_10" }, { Landmark::kContour11, "CONTOUR_11" }, { Landmark::kContour12, "CONTOUR_12" }, { Landmark::kContour13, "CONTOUR_13" }, { Landmark::kContour14, "CONTOUR_14" }, { Landmark::kContour15, "CONTOUR_15" }, { Landmark::kContour16, "CONTOUR_16" }, { Landmark::kRightEyebrow0, "RIGHT_EYE_BROW_0" }, { Landmark::kRightEyebrow1, "RIGHT_EYE_BROW_1" }, { Landmark::kRightEyebrow2, "RIGHT_EYE_BROW_2" }, { Landmark::kRightEyebrow3, "RIGHT_EYE_BROW_3" }, { Landmark::kRightEyebrow4, "RIGHT_EYE_BROW_4" }, { Landmark::kLeftEyebrow0, "LEFT_EYE_BROW_0" }, { Landmark::kLeftEyebrow1, "LEFT_EYE_BROW_1" }, { Landmark::kLeftEyebrow2, "LEFT_EYE_BROW_2" }, { Landmark::kLeftEyebrow3, "LEFT_EYE_BROW_3" }, { Landmark::kLeftEyebrow4, "LEFT_EYE_BROW_4" }, { Landmark::kNose0, "NOSE_0" }, { Landmark::kNose1, "NOSE_1" }, { Landmark::kNose2, "NOSE_2" }, { Landmark::kNose3, "NOSE_3" }, { Landmark::kNose4, "NOSE_4" }, { Landmark::kNose5, "NOSE_5" }, { Landmark::kNose6, "NOSE_6" }, { Landmark::kNose7, "NOSE_7" }, { Landmark::kNose8, "NOSE_8" }, { Landmark::kRightEye0, "RIGHT_EYE_0" }, { Landmark::kRightEye1, "RIGHT_EYE_1" }, { Landmark::kRightEye2, "RIGHT_EYE_2" }, { Landmark::kRightEye3, "RIGHT_EYE_3" }, { Landmark::kRightEye4, "RIGHT_EYE_4" }, { Landmark::kRightEye5, "RIGHT_EYE_5" }, { Landmark::kLeftEye0, "LEFT_EYE_0" }, { Landmark::kLeftEye1, "LEFT_EYE_1" }, { Landmark::kLeftEye2, "LEFT_EYE_2" }, { Landmark::kLeftEye3, "LEFT_EYE_3" }, { Landmark::kLeftEye4, "LEFT_EYE_4" }, { Landmark::kLeftEye5, "LEFT_EYE_5" }, { Landmark::kMouth0, "MOUTH_0" }, { Landmark::kMouth1, "MOUTH_1" }, { Landmark::kMouth2, "MOUTH_2" }, { Landmark::kMouth3, "MOUTH_3" }, { Landmark::kMouth4, "MOUTH_4" }, { Landmark::kMouth5, "MOUTH_5" }, { Landmark::kMouth6, "MOUTH_6" }, { Landmark::kMouth7, "MOUTH_7" }, { Landmark::kMouth8, "MOUTH_8" }, { Landmark::kMouth9, "MOUTH_9" }, { Landmark::kMouth10, "MOUTH_10" }, { Landmark::kMouth11, "MOUTH_11" }, { Landmark::kMouth12, "MOUTH_12" }, { Landmark::kMouth13, "MOUTH_13" }, { Landmark::kMouth14, "MOUTH_14" }, { Landmark::kMouth15, "MOUTH_15" }, { Landmark::kMouth16, "MOUTH_16" }, { Landmark::kMouth17, "MOUTH_17" }
+      { Landmark::kContour0, "CONTOUR_0" }, { Landmark::kContour1, "CONTOUR_1" }, { Landmark::kContour2, "CONTOUR_2" }, { Landmark::kContour3, "CONTOUR_3" }, { Landmark::kContour4, "CONTOUR_4" }, { Landmark::kContour5, "CONTOUR_5" }, { Landmark::kContour6, "CONTOUR_6" }, { Landmark::kContour7, "CONTOUR_7" }, { Landmark::kContour8, "CONTOUR_8" }, { Landmark::kContour9, "CONTOUR_9" }, { Landmark::kContour10, "CONTOUR_10" }, { Landmark::kContour11, "CONTOUR_11" }, { Landmark::kContour12, "CONTOUR_12" }, { Landmark::kContour13, "CONTOUR_13" }, { Landmark::kContour14, "CONTOUR_14" }, { Landmark::kContour15, "CONTOUR_15" }, { Landmark::kContour16, "CONTOUR_16" }, { Landmark::kRightEyebrow0, "RIGHT_EYE_BROW_0" }, { Landmark::kRightEyebrow1, "RIGHT_EYE_BROW_1" }, { Landmark::kRightEyebrow2, "RIGHT_EYE_BROW_2" }, { Landmark::kRightEyebrow3, "RIGHT_EYE_BROW_3" }, { Landmark::kRightEyebrow4, "RIGHT_EYE_BROW_4" }, { Landmark::kLeftEyebrow0, "LEFT_EYE_BROW_0" }, { Landmark::kLeftEyebrow1, "LEFT_EYE_BROW_1" }, { Landmark::kLeftEyebrow2, "LEFT_EYE_BROW_2" }, { Landmark::kLeftEyebrow3, "LEFT_EYE_BROW_3" }, { Landmark::kLeftEyebrow4, "LEFT_EYE_BROW_4" }, { Landmark::kNose0, "NOSE_0" }, { Landmark::kNose1, "NOSE_1" }, { Landmark::kNose2, "NOSE_2" }, { Landmark::kNose3, "NOSE_3" }, { Landmark::kNose4, "NOSE_4" }, { Landmark::kNose5, "NOSE_5" }, { Landmark::kNose6, "NOSE_6" }, { Landmark::kNose7, "NOSE_7" }, { Landmark::kNose8, "NOSE_8" }, { Landmark::kRightEye0, "RIGHT_EYE_0" }, { Landmark::kRightEye1, "RIGHT_EYE_1" }, { Landmark::kRightEye2, "RIGHT_EYE_2" }, { Landmark::kRightEye3, "RIGHT_EYE_3" }, { Landmark::kRightEye4, "RIGHT_EYE_4" }, { Landmark::kRightEye5, "RIGHT_EYE_5" }, { Landmark::kLeftEye0, "LEFT_EYE_0" }, { Landmark::kLeftEye1, "LEFT_EYE_1" }, { Landmark::kLeftEye2, "LEFT_EYE_2" }, { Landmark::kLeftEye3, "LEFT_EYE_3" }, { Landmark::kLeftEye4, "LEFT_EYE_4" }, { Landmark::kLeftEye5, "LEFT_EYE_5" }, { Landmark::kMouth0, "MOUTH_0" }, { Landmark::kMouth1, "MOUTH_1" }, { Landmark::kMouth2, "MOUTH_2" }, { Landmark::kMouth3, "MOUTH_3" }, { Landmark::kMouth4, "MOUTH_4" }, { Landmark::kMouth5, "MOUTH_5" }, { Landmark::kMouth6, "MOUTH_6" }, { Landmark::kMouth7, "MOUTH_7" }, { Landmark::kMouth8, "MOUTH_8" }, { Landmark::kMouth9, "MOUTH_9" }, { Landmark::kMouth10, "MOUTH_10" }, { Landmark::kMouth11, "MOUTH_11" }, { Landmark::kMouth12, "MOUTH_12" }, { Landmark::kMouth13, "MOUTH_13" }, { Landmark::kMouth14, "MOUTH_14" }, { Landmark::kMouth15, "MOUTH_15" }, { Landmark::kMouth16, "MOUTH_16" }, { Landmark::kMouth17, "MOUTH_17" }, { Landmark::kMouth18, "MOUTH_18" }, { Landmark::kMouth19, "MOUTH_19" }
     };
 
     mShapeClusters = {
@@ -65,72 +65,100 @@ namespace face
     };
 
     mShape3D = {
-      { -63.23, -10.97, 90.84 },
-      { -61.55, 7.21, 89.43 },
-      { -58.82, 25.30, 88.63 },
-      { -54.83, 42.33, 83.25 },
-      { -48.57, 56.84, 69.67 },
-      { -38.40, 67.80, 55.43 },
-      { -25.35, 75.10, 44.12 },
-      { -10.90, 79.07, 32.87 },
-      { 0.00, 78.67, 23.43 },
-      { 10.90, 79.07, 32.87 },
-      { 25.35, 75.10, 44.12 },
-      { 38.40, 67.80, 55.43 },
-      { 48.57, 56.84, 69.67 },
-      { 54.83, 42.33, 83.25 },
-      { 58.82, 25.30, 88.63 },
-      { 61.55, 7.21, 89.43 },
-      { 63.23, -10.97, 90.84 },
-      { -50.36, -40.24, 35.36 },
-      { -42.94, -47.48, 31.02 },
-      { -33.69, -50.39, 27.59 },
-      { -24.18, -50.00, 24.20 },
-      { -14.97, -47.50, 21.05 },
-      { 14.97, -47.50, 21.05 },
-      { 24.18, -50.00, 24.20 },
-      { 33.69, -50.39, 27.59 },
-      { 42.94, -47.48, 31.02 },
-      { 50.36, -40.24, 35.36 },
-      { 0.00, -30.40, 22.32 },
-      { 0.00, -20.21, 14.93 },
-      { 0.00, -10.12, 7.19 },
-      { 0.00, 0.00, 0.00 }, // Origin: kNose3
-      { -7.78, 14.80, 18.03 },
-      { -2.81, 16.32, 15.94 },
-      { 0.00, 16.54, 14.12 },
-      { 2.81, 16.32, 15.94 },
-      { 7.78, 14.80, 18.03 },
-      { -36.34, -24.73, 32.61 },
-      { -30.84, -29.23, 32.09 },
-      { -24.03, -29.83, 32.18 },
-      { -18.18, -25.86, 32.70 },
-      { -24.05, -23.21, 32.02 },
-      { -30.41, -22.60, 32.08 },
-      { 18.18, -25.86, 32.70 },
-      { 24.03, -29.83, 32.18 },
-      { 30.84, -29.23, 32.09 },
-      { 36.34, -24.73, 32.61 },
-      { 30.41, -22.60, 32.08 },
-      { 24.05, -23.21, 32.02 },
-      { -14.45, 39.27, 27.35 },
-      { -8.96, 34.16, 21.80 },
-      { -3.03, 30.09, 17.46 },
-      { 0.00, 30.52, 13.32 },
-      { 3.30, 30.09, 17.46 },
-      { 8.96, 34.16, 21.80 },
-      { 14.45, 39.27, 27.35 },
-      { 13.35, 38.83, 25.24 },
-      { 2.44, 39.57, 21.27 },
-      { 0.00, 38.60, 18.20 },
-      { -2.44, 39.57, 21.27 },
-      { -13.35, 38.83, 25.24 },
-      { -1.41, 37.25, 20.81 },
-      { 0.00, 37.00, 16.39 },
-      { 1.41, 37.25, 20.81 },
-      { 1.41, 31.60, 22.62 },
-      { 0.00, 29.53, 18.07 },
-      { -1.41, 31.60, 22.62 }
+      {  -65.06,  -23.49,  101.10 },  // Contour
+      {  -63.33,   -5.99,   98.96 },
+      {  -59.89,    9.96,   97.39 },
+      {  -56.49,   24.35,   94.01 },
+      {  -51.65,   39.83,   85.87 },
+      {  -42.98,   52.22,   71.50 },
+      {  -32.65,   59.66,   53.99 },
+      {  -19.47,   65.86,   37.86 },
+      {    0.01,   69.39,   31.57 },
+      {   19.50,   65.64,   37.92 },
+      {   32.60,   59.69,   54.03 },
+      {   42.85,   52.43,   71.45 },
+      {   51.44,   40.20,   85.81 },
+      {   56.28,   24.80,   93.92 },
+      {   59.56,   10.29,   97.41 },
+      {   62.69,   -5.75,   99.07 },
+      {   64.35,  -23.44,  100.96 },
+      {  -50.82,  -42.77,   45.57 },  // Eyebrows
+      {  -43.49,  -48.42,   34.97 },
+      {  -34.13,  -50.29,   27.58 },
+      {  -25.15,  -49.49,   23.06 },
+      {  -17.03,  -47.23,   20.91 },
+      {   16.28,  -47.44,   20.96 },
+      {   24.44,  -49.74,   23.20 },
+      {   33.48,  -50.59,   27.79 },
+      {   43.00,  -48.71,   35.11 },
+      {   50.33,  -42.91,   45.70 },
+      {   -0.13,  -30.40,   18.17 },  // Nose
+      {   -0.09,  -19.73,   10.22 },
+      {    0.00,   -9.11,    1.96 },
+      {    0.00,    0.00,    0.00 },  // Origin: the nose tip
+      {  -10.76,    7.94,   19.60 },
+      {   -6.26,    8.86,   15.60 },
+      {   -0.15,   10.06,   13.74 },
+      {    5.91,    8.84,   15.63 },
+      {   10.36,    7.88,   19.64 },
+      {  -38.44,  -30.05,   39.57 },  // Eyes
+      {  -32.80,  -33.45,   32.34 },
+      {  -24.77,  -33.56,   32.18 },
+      {  -17.29,  -29.76,   34.38 },
+      {  -24.04,  -27.89,   32.44 },
+      {  -32.42,  -27.47,   34.45 },
+      {   16.36,  -29.76,   34.67 },
+      {   23.88,  -33.66,   32.54 },
+      {   32.11,  -33.44,   32.56 },
+      {   37.94,  -29.95,   39.62 },
+      {   31.77,  -27.59,   34.52 },
+      {   23.28,  -27.88,   32.61 },
+      {  -22.72,   29.43,   28.98 },  // Outer lip
+      {  -14.73,   24.16,   19.04 },
+      {   -5.21,   20.71,   13.69 },
+      {   -0.13,   21.70,   13.16 },
+      {    4.92,   20.71,   13.71 },
+      {   14.40,   24.17,   19.13 },
+      {   21.88,   29.46,   29.17 },
+      {   13.93,   33.13,   20.70 },
+      {    7.11,   35.70,   16.90 },
+      {   -0.11,   36.14,   16.01 },
+      {   -7.28,   35.67,   16.75 },
+      {  -14.01,   33.16,   20.55 },
+      {  -20.48,   28.97,   28.32 },  // Inner lip
+      {   -6.70,   26.65,   18.21 },
+      {   -0.23,   26.49,   16.62 },
+      {    6.28,   26.71,   18.23 },
+      {   20.41,   29.04,   28.65 },
+      {    6.12,   28.78,   18.03 },
+      {   -0.25,   29.10,   17.26 },
+      {   -6.54,   28.72,   18.10 }
+    };
+
+    mFrontalShape2D.reserve(mShape3D.size());
+    for (const auto& pt : mShape3D)
+      mFrontalShape2D.emplace_back(pt.x, pt.y);
+
+    // The anatomy of the 68-point layout: the contour and brow chains, the nose, and the
+    // closed rings of the eyes and both lips.
+    mConnections = {
+      // Contour
+      { 0, 1 }, { 1, 2 }, { 2, 3 }, { 3, 4 }, { 4, 5 }, { 5, 6 }, { 6, 7 }, { 7, 8 },
+      { 8, 9 }, { 9, 10 }, { 10, 11 }, { 11, 12 }, { 12, 13 }, { 13, 14 }, { 14, 15 }, { 15, 16 },
+      // Eyebrows
+      { 17, 18 }, { 18, 19 }, { 19, 20 }, { 20, 21 },
+      { 22, 23 }, { 23, 24 }, { 24, 25 }, { 25, 26 },
+      // Nose
+      { 27, 28 }, { 28, 29 }, { 29, 30 },
+      { 31, 32 }, { 32, 33 }, { 33, 34 }, { 34, 35 },
+      // Eyes
+      { 36, 37 }, { 37, 38 }, { 38, 39 }, { 39, 40 }, { 40, 41 }, { 41, 36 },
+      { 42, 43 }, { 43, 44 }, { 44, 45 }, { 45, 46 }, { 46, 47 }, { 47, 42 },
+      // Outer and inner lips
+      { 48, 49 }, { 49, 50 }, { 50, 51 }, { 51, 52 }, { 52, 53 }, { 53, 54 },
+      { 54, 55 }, { 55, 56 }, { 56, 57 }, { 57, 58 }, { 58, 59 }, { 59, 48 },
+      { 60, 61 }, { 61, 62 }, { 62, 63 }, { 63, 64 },
+      { 64, 65 }, { 65, 66 }, { 66, 67 }, { 67, 60 }
     };
   }
 

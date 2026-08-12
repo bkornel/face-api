@@ -42,8 +42,10 @@ namespace face
     oPose.cameraMatrix = iCameraMatrix;
     oPose.extrinsics = cv::Mat::eye(4, 4, CV_64FC1);
 
-    // Solve for pose
-    cv::solvePnP(sObjectPoints, imagePts, iCameraMatrix, sDistCoeffs, oPose.rvec, oPose.tvec, false, cv::SOLVEPNP_EPNP);
+    // Solve for pose. Iterative rather than EPNP: on the 68-point set EPNP settles into a
+    // solution that throws the jaw contour off by hundreds of pixels, while the iterative
+    // refinement stays at the few pixels the landmarks themselves are worth.
+    cv::solvePnP(sObjectPoints, imagePts, iCameraMatrix, sDistCoeffs, oPose.rvec, oPose.tvec, false, cv::SOLVEPNP_ITERATIVE);
     cv::Rodrigues(oPose.rvec, oPose.extrinsics({ 0, 0, 3, 3 }));
 
     if (mEstimateReprojection)
