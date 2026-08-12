@@ -29,7 +29,7 @@ namespace face
 
     std::size_t GetActiveUserSize() const;
 
-    inline int GetMaxUsers() const
+    inline std::size_t GetMaxUsers() const
     {
       return mMaxUsers;
     }
@@ -59,7 +59,7 @@ namespace face
     cv::Size mMinFaceSize;
     cv::Size mMaxFaceSize;
 
-    int mMaxUsers = 1;
+    std::size_t mMaxUsers = 1U;
     float mUserOverlap = 0.2F;
     float mUserAwaySec = 15.0F;
     float mTemplateScale = 1.0f;

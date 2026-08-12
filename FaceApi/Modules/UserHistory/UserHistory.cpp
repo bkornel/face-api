@@ -24,7 +24,7 @@ namespace face
     return fw::ErrorCode::OK;
   }
 
-  std::shared_ptr<UserEntriesMessage> UserHistory::Main(std::shared_ptr<ActiveUsersMessage> iActiveUsers)
+  std::shared_ptr<UserEntriesMessage> UserHistory::Main(std::shared_ptr<UserSnapshotMessage> iActiveUsers)
   {
     DrainCommands();
 
@@ -37,7 +37,7 @@ namespace face
       mRemoveSW.Reset();
     }
 
-    const auto& activeUsers = iActiveUsers->GetActiveUsers();
+    const auto& activeUsers = iActiveUsers->GetUsers();
 
     for (auto& user : activeUsers)
     {
@@ -45,7 +45,6 @@ namespace face
       const fw::Timestamp lastUpdateTs = user->GetLastUpdateTs();
       if (lastUpdateTs == currentTime)
       {
-        // Snapshot, not the live User: a cast would alias the same mutating object.
         mEntryMap[user->GetUserId()].emplace_back(lastUpdateTs, std::make_shared<UserData>(*user));
       }
     }

@@ -2,7 +2,7 @@
 
 namespace face
 {
-  unsigned FirstModule::Main()
+  uint32_t FirstModule::Main()
   {
     DrainCommands();
 

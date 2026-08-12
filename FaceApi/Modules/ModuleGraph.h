@@ -3,6 +3,7 @@
 #include "Framework/ErrorCode.h"
 #include "Framework/Messaging/Event.hpp"
 #include "Framework/Graph/Module.h"
+#include "Framework/Graph/ModuleConnector.h"
 #include "Framework/Graph/FlowGraph.hpp"
 
 #include "Messages/ImageMessage.h"
@@ -11,6 +12,7 @@
 #include "Modules/ImageQueue/ImageQueue.h"
 #include "Modules/LastModule/LastModule.h"
 
+#include <cstdint>
 #include <map>
 #include <memory>
 #include <string>
@@ -20,14 +22,12 @@ namespace face
 {
   class ModuleGraph : public fw::Module
   {
-    using PredecessorMap = std::map<int, std::shared_ptr<fw::Module>>;
+    using PredecessorMap = fw::ModuleConnector::PredecessorMap;
     using FrameProcessedHandler = fw::Event<void(std::shared_ptr<ImageMessage>)>;
 
   public:
 
     using FrameProcessedToken = FrameProcessedHandler::Token;
-
-    static FrameProcessedHandler sFrameProcessed;
 
     ModuleGraph() = default;
 
@@ -41,6 +41,16 @@ namespace face
 
     fw::ErrorCode Process();
 
+    FrameProcessedToken SubscribeFrameProcessed(FrameProcessedHandler::Handler iHandler)
+    {
+      return mFrameProcessed.Subscribe(std::move(iHandler));
+    }
+
+    void UnsubscribeFrameProcessed(FrameProcessedToken iToken)
+    {
+      mFrameProcessed.Unsubscribe(iToken);
+    }
+
     // The camera path: frames are handed to the queue directly, not broadcast
     inline std::shared_ptr<ImageQueue> GetImageQueue() const
     {
@@ -52,18 +62,18 @@ namespace face
       return mLastModule;
     }
 
-    inline unsigned GetLastFrameId() const
+    inline uint32_t GetLastFrameId() const
     {
       return mLastModule ? mLastModule->GetLastFrameId() : 0U;
     }
 
-    inline long long GetLastTimestamp() const
+    inline int64_t GetLastTimestamp() const
     {
       return mLastModule ? mLastModule->GetLastTimestamp() : 0LL;
     }
 
   private:
-    static const long long sProcessTimeoutMs;
+    static const int64_t sProcessTimeoutMs;
 
     fw::ErrorCode InitializeInternal(const cv::FileNode& iModulesNode) override;
 
@@ -73,9 +83,11 @@ namespace face
 
     fw::ErrorCode CreateConnections(const cv::FileNode& iModulesNode);
 
-    fw::ErrorCode GetPredecessors(const cv::FileNode& iModule, const cv::FileNode& iModules, PredecessorMap& oPredecessors);
+    fw::ErrorCode GetPredecessors(const cv::FileNode& iModule, PredecessorMap& oPredecessors);
 
     std::vector<cv::FileNode> GetConnectionOrder(const cv::FileNode& iModulesNode);
+
+    FrameProcessedHandler mFrameProcessed;
 
     std::shared_ptr<FirstModule> mFirstModule = nullptr;
     std::shared_ptr<LastModule> mLastModule = nullptr;

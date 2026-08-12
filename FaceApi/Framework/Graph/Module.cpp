@@ -103,12 +103,7 @@ namespace fw
 
     if (mInitialized)
     {
-      if (IsRunning())
-      {
-        result = StopThread();
-      }
-
-      DeInitializeInternal();
+      result = DeInitializeInternal();
       Clear();
 
       mInitialized = false;
@@ -161,9 +156,9 @@ namespace fw
     std::shared_ptr<face::CommandMessage> command = std::dynamic_pointer_cast<face::CommandMessage>(iMessage);
     if (command)
     {
-      if (command->GetType() == face::CommandMessage::Type::VerboseModeChanged)
+      if (command->GetType() == face::CommandMessage::Type::SetVerboseMode)
       {
-        mVerboseMode = !mVerboseMode;
+        mVerboseMode = command->GetFlag();
       }
 
       return;

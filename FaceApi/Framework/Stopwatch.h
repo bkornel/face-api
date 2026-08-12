@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Framework/TimeExtensions.h"
+
 #include <chrono>
 
 namespace fw
@@ -10,8 +12,6 @@ namespace fw
     // Measuring elapsed time is what steady_clock is for: it cannot be moved by the system
     // clock being corrected, and it never runs backwards
     using Clock = std::chrono::steady_clock;
-    using Seconds = std::chrono::duration<double>;
-    using Milliseconds = std::chrono::duration<double, std::milli>;
 
     explicit Stopwatch(bool iStart = false);
 

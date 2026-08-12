@@ -8,6 +8,7 @@
 #include "Framework/Profiler.h"
 #include "Framework/Text.h"
 
+#include <cstdint>
 #include <easyloggingpp/easyloggingpp.h>
 #include <iomanip>
 
@@ -19,8 +20,9 @@ namespace face
     {
       std::string value;
 
+      // At least one: a graph that may track nobody at all has no reason to run
       if (fw::get_value(iSettings, "maxUsers", value))
-        mMaxUsers = fw::str::convert_to_number<int>(value);
+        mMaxUsers = static_cast<std::size_t>((std::max)(fw::str::convert_to_number<int>(value), 1));
 
       if (fw::get_value(iSettings, "userOverlap", value))
         mUserOverlap = fw::str::convert_to_number<float>(value);
@@ -60,7 +62,7 @@ namespace face
 
     FACE_PROFILER(User_Manager);
 
-    const unsigned frameId = iImage->GetFrameId();
+    const uint32_t frameId = iImage->GetFrameId();
     mTimestamp = iImage->GetTimestamp();
 
     // Active users to inactive and set is-detected to false
@@ -123,7 +125,7 @@ namespace face
     // Add new users
     for (const auto& r : faceROIs)
     {
-      if (GetActiveUserSize() >= mMaxUsers) break;
+      if (GetActiveUserSize() >= GetMaxUsers()) break;
 
       mUsers.emplace_back(std::make_shared<User>(r, mLastUserID, mTimestamp));
       LOG(INFO) << "New user has been recognized, Welcome User(" << mLastUserID << ")!";
@@ -134,6 +136,9 @@ namespace face
   void UserManager::TrackUsers(std::shared_ptr<ImageMessage> iImage)
   {
     FACE_PROFILER(Track_Users);
+
+    const cv::Mat frameGray = iImage->GetFrameGray();
+    const cv::Rect screenRect(0, 0, frameGray.cols, frameGray.rows);
 
     for (const auto& user : mUsers)
     {
@@ -152,8 +157,17 @@ namespace face
         user->SetFaceRect(newFaceRect);
       }
 
-      const cv::Mat& frameGray = iImage->GetFrameGray();
-      user->SetFaceTemplate(frameGray(user->GetFaceRect()));
+      // Only the slice uses the clipped rectangle: assigning it back would recompute the
+      // offset the shape model shifts by, and flatten it whenever the clip changes nothing.
+      const cv::Rect faceRect = user->GetFaceRect() & screenRect;
+
+      if (faceRect.area() <= 0)
+      {
+        user->SetStatus(User::Status::Inactive);
+        continue;
+      }
+
+      user->SetFaceTemplate(frameGray(faceRect));
       user->SetLastUpdateTs(iImage->GetTimestamp());
     }
   }
@@ -171,32 +185,27 @@ namespace face
   {
     for (auto& user : mUsers)
     {
-      const cv::Rect& userFR = user->GetFaceRect();
+      // Taking an inactive user back makes it active, so it needs a free slot. Asked per
+      // user, not per detection: the answer cannot change while this user is matched.
+      if (!user->IsActive() && GetActiveUserSize() >= GetMaxUsers())
+        continue;
+
+      // A copy: SetDetectionData() moves the rectangle, and the detections are matched
+      // against where the user was last seen.
+      const cv::Rect userFaceRect = user->GetFaceRect();
 
       for (auto fr = ioFaceROIs.begin(); fr != ioFaceROIs.end();)
       {
-        if (fw::overlap_ratio(userFR, *fr) > mUserOverlap)
+        if (fw::overlap_ratio(userFaceRect, *fr) > mUserOverlap)
         {
-          // An active user is detected
-          if (user->IsActive())
-          {
-            // This also sets the status to detected
-            user->SetDetectionData(*fr, mTimestamp);
-          }
-          // An inactive user is detected
-          else
-          {
-            if (GetActiveUserSize() >= mMaxUsers) continue;
-
-            // This also sets the status to detected
-            user->SetDetectionData(*fr, mTimestamp);
-          }
+          // This also sets the status to detected, so the user counts as active from here
+          user->SetDetectionData(*fr, mTimestamp);
 
           fr = ioFaceROIs.erase(fr);
         }
         else
         {
-          fr++;
+          ++fr;
         }
       }
     }

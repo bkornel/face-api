@@ -6,7 +6,7 @@
 #include "Framework/Stopwatch.h"
 
 #include "Messages/ImageMessage.h"
-#include "Messages/ActiveUsersMessage.h"
+#include "Messages/UserSnapshotMessage.h"
 
 #include <memory>
 #include <opencv2/core/core.hpp>
@@ -16,7 +16,7 @@
 namespace face
 {
   class Visualizer : public fw::Module,
-                     public fw::Port<std::shared_ptr<ImageMessage>(std::shared_ptr<ImageMessage>, std::shared_ptr<ActiveUsersMessage>)>
+                     public fw::Port<std::shared_ptr<ImageMessage>(std::shared_ptr<ImageMessage>, std::shared_ptr<UserSnapshotMessage>)>
   {
   public:
 
@@ -24,7 +24,7 @@ namespace face
 
     virtual ~Visualizer() = default;
 
-    std::shared_ptr<ImageMessage> Main(std::shared_ptr<ImageMessage> iImage, std::shared_ptr<ActiveUsersMessage> iUsers) override;
+    std::shared_ptr<ImageMessage> Main(std::shared_ptr<ImageMessage> iImage, std::shared_ptr<UserSnapshotMessage> iUsers) override;
 
     void Clear() override
     {

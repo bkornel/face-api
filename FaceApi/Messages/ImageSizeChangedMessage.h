@@ -2,6 +2,7 @@
 
 #include "Framework/Messaging/Message.h"
 
+#include <cstdint>
 #include <opencv2/core/core.hpp>
 
 namespace face
@@ -10,7 +11,7 @@ namespace face
   {
   public:
 
-    ImageSizeChangedMessage(const cv::Size& iSize, unsigned iFrameId, fw::Timestamp iTimestamp);
+    ImageSizeChangedMessage(const cv::Size& iSize, uint32_t iFrameId, fw::Timestamp iTimestamp);
 
     virtual ~ImageSizeChangedMessage() = default;
 

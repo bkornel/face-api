@@ -2,6 +2,7 @@
 
 #include "Framework/Stopwatch.h"
 
+#include <cstdint>
 #include <deque>
 #include <map>
 #include <vector>
@@ -43,7 +44,7 @@ namespace fw
   class ProfilerDatabase
   {
   public:
-    using Measurement = std::pair<unsigned, double>;
+    using Measurement = std::pair<uint32_t, double>;
 
     struct Statistics
     {
@@ -70,7 +71,7 @@ namespace fw
 
     void LogStatistics() const;
 
-    void setCurrentFrameId(unsigned iCurrentFrameId);
+    void setCurrentFrameId(uint32_t iCurrentFrameId);
 
   private:
     static std::recursive_mutex sMutex;
@@ -83,7 +84,7 @@ namespace fw
 
     ProfilerDatabase& operator=(const ProfilerDatabase& iOther) = delete;
 
-    unsigned mCurrentFrameId = 0U;
+    uint32_t mCurrentFrameId = 0U;
     std::map<std::size_t, std::string> mNames;
     std::map<std::size_t, std::deque<Measurement>> mMeasurements;
   };

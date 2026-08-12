@@ -5,16 +5,17 @@
 #include "Framework/Graph/Port.hpp"
 #include "Framework/Stopwatch.h"
 #include "User/User.h"
-#include "Messages/ActiveUsersMessage.h"
+#include "Messages/UserSnapshotMessage.h"
 #include "Messages/UserEntriesMessage.h"
 
+#include <cstdint>
 #include <map>
 #include <memory>
 
 namespace face
 {
   class UserHistory : public fw::Module,
-                      public fw::Port<std::shared_ptr<UserEntriesMessage>(std::shared_ptr<ActiveUsersMessage>)>
+                      public fw::Port<std::shared_ptr<UserEntriesMessage>(std::shared_ptr<UserSnapshotMessage>)>
   {
   public:
 
@@ -22,7 +23,7 @@ namespace face
 
     virtual ~UserHistory() = default;
 
-    std::shared_ptr<UserEntriesMessage> Main(std::shared_ptr<ActiveUsersMessage> iActiveUsers) override;
+    std::shared_ptr<UserEntriesMessage> Main(std::shared_ptr<UserSnapshotMessage> iActiveUsers) override;
 
     void Clear() override;
 
@@ -36,6 +37,6 @@ namespace face
 
     EntryMap mEntryMap;
     fw::Stopwatch mRemoveSW;
-    long long mRemoveFreqMs = 10000LL;
+    int64_t mRemoveFreqMs = 10000LL;
   };
 }

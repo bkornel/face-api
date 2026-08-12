@@ -2,6 +2,7 @@
 
 #include "Framework/Messaging/Message.h"
 #include "User/User.h"
+#include <cstdint>
 #include <memory>
 
 namespace face
@@ -12,7 +13,7 @@ namespace face
 
     typedef std::vector<std::shared_ptr<User>> UserVector;
 
-    ActiveUsersMessage(const UserVector& iActiveUsers, unsigned iFrameId, fw::Timestamp iTimestamp);
+    ActiveUsersMessage(const UserVector& iActiveUsers, uint32_t iFrameId, fw::Timestamp iTimestamp);
 
     virtual ~ActiveUsersMessage() = default;
 

@@ -8,6 +8,7 @@
 #include "Messages/ImageMessage.h"
 
 #include <atomic>
+#include <cstdint>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -15,7 +16,7 @@
 namespace face
 {
   class ImageQueue : public fw::Module,
-                     public fw::Port<std::shared_ptr<ImageMessage>(unsigned)>
+                     public fw::Port<std::shared_ptr<ImageMessage>(uint32_t)>
   {
     using MessageQueue = fw::MessageQueue<std::shared_ptr<ImageMessage>>;
 
@@ -25,9 +26,9 @@ namespace face
 
     virtual ~ImageQueue() = default;
 
-    fw::ErrorCode Push(const cv::Mat& iFrame, unsigned iFrameId, fw::Timestamp iTimestamp);
+    fw::ErrorCode Push(const cv::Mat& iFrame, uint32_t iFrameId, fw::Timestamp iTimestamp);
 
-    std::shared_ptr<ImageMessage> Main(unsigned iTickNumber) override;
+    std::shared_ptr<ImageMessage> Main(uint32_t iTickNumber) override;
 
     void Clear() override
     {
@@ -40,7 +41,7 @@ namespace face
       return mImageSize;
     }
 
-    inline unsigned GetLastFrameId() const
+    inline uint32_t GetLastFrameId() const
     {
       return mLastFrameId;
     }
@@ -50,19 +51,9 @@ namespace face
       return mLastTimestamp;
     }
 
-    inline int GetQueueSize() const
+    inline MessageQueue::Statistics GetQueueStatistics() const
     {
-      return mQueue.GetSize();
-    }
-
-    inline float GetSamplingFPS() const
-    {
-      return mQueue.GetSamplingFPS();
-    }
-
-    inline int GetBound() const
-    {
-      return mQueue.GetBound();
+      return mQueue.GetStatistics();
     }
 
   private:
@@ -70,7 +61,7 @@ namespace face
 
     void NotifyPendingSizeChange();
 
-    std::atomic<unsigned> mLastFrameId{ 0U }; ///< Holds the ID of the last image frame.
+    std::atomic<uint32_t> mLastFrameId{ 0U }; ///< Holds the ID of the last image frame.
     std::atomic<fw::Timestamp> mLastTimestamp{};
 
     MessageQueue mQueue; ///< Queue for handling the frames

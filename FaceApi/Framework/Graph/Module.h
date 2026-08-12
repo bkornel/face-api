@@ -5,7 +5,6 @@
 #include "Framework/Graph/FlowGraph.hpp"
 #include "Framework/Messaging/Message.h"
 #include "Framework/Messaging/MessageBus.h"
-#include "Framework/Thread.h"
 
 #include <opencv2/core.hpp>
 
@@ -16,7 +15,9 @@
 
 namespace fw
 {
-  class Module : public Thread
+  /// @brief A node of the module graph. A module does not own a thread: where its Main() runs
+  /// is the executor's business, chosen per module through fw::IPortConnector::SetExecutor().
+  class Module
   {
   public:
 
@@ -24,7 +25,11 @@ namespace fw
 
     Module() = default;
 
-    ~Module() override;
+    Module(const Module& iOther) = delete;
+
+    virtual ~Module();
+
+    Module& operator=(const Module& iOther) = delete;
 
     // Must be called before Initialize(). iSelf may be empty for owners that are not held
     // by a shared_ptr, they are then responsible for outliving the bus.

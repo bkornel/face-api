@@ -1,7 +1,9 @@
 #pragma once
 
 #include <atomic>
+#include <cstdint>
 #include <memory>
+#include <mutex>
 #include <string>
 
 #include "Framework/ErrorCode.h"
@@ -9,11 +11,13 @@
 #include "Framework/Messaging/MessageBus.h"
 #include "Framework/Messaging/MessageQueue.hpp"
 #include "Framework/Graph/Module.h"
+#include "Framework/Thread.h"
 #include "Modules/ModuleGraph.h"
 
 namespace face
 {
-  class FaceApi : public fw::Module
+  class FaceApi : public fw::Module,
+                  public fw::Thread
   {
     using MessageQueue = fw::MessageQueue<std::shared_ptr<ImageMessage>>;
 
@@ -38,14 +42,16 @@ namespace face
 
     void SetRunFaceDetector();
 
+    void SetVerbose(bool iVerbose);
+
     void OnOffVerbose();
 
-    inline unsigned GetLastFrameId() const
+    inline uint32_t GetLastFrameId() const
     {
       return mModuleGraph ? mModuleGraph->GetLastFrameId() : 0U;
     }
 
-    inline long long GetLastTimestamp() const
+    inline int64_t GetLastTimestamp() const
     {
       return mModuleGraph ? mModuleGraph->GetLastTimestamp() : 0LL;
     }
@@ -53,8 +59,6 @@ namespace face
     void SetWorkingDirectory(const std::string& iWorkingDirectory);
 
   private:
-    static std::recursive_mutex sAppMutex; ///< The mutex to lock critical sections
-
     FaceApi();
 
     fw::ErrorCode InitializeInternal(const cv::FileNode& iSettingsNode) override;
@@ -65,13 +69,18 @@ namespace face
 
     void OnFrameProcessed(std::shared_ptr<ImageMessage> iMessage);
 
+    /// @brief Serialises one frame of the graph against the calls that reset it
+    std::mutex mProcessMutex;
+
     fw::MessageBus mBus;
 
     ModuleGraph::FrameProcessedToken mFrameProcessedToken = 0ULL;
 
     std::shared_ptr<ModuleGraph> mModuleGraph = nullptr;
 
-    std::atomic<unsigned> mCameraFrameId{ 0U };
+    std::atomic<uint32_t> mCameraFrameId{ 0U };
+
+    std::atomic<bool> mVerbose{ false };
 
     MessageQueue mOutputQueue;
   };

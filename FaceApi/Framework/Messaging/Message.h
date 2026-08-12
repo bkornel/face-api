@@ -2,6 +2,8 @@
 
 
 #include "Framework/TimeExtensions.h"
+
+#include <cstdint>
 #include <iostream>
 #include <memory>
 
@@ -11,7 +13,7 @@ namespace fw
   {
   public:
 
-    Message(unsigned iFrameId, Timestamp iTimestamp);
+    Message(uint32_t iFrameId, Timestamp iTimestamp);
 
     Message(const Message& iOther) = delete;
 
@@ -21,7 +23,7 @@ namespace fw
 
     friend inline std::ostream& operator<<(std::ostream& ioStream, const Message& iMessage);
 
-    inline unsigned GetFrameId() const
+    inline uint32_t GetFrameId() const
     {
       return mFrameId;
     }
@@ -32,7 +34,7 @@ namespace fw
     }
 
   private:
-    unsigned mFrameId = 0U;
+    uint32_t mFrameId = 0U;
     Timestamp mTimestamp;
   };
 

@@ -1,53 +1,59 @@
 #pragma once
 
-
-#include <opencv2/core/base.hpp>
-
 #include <algorithm>
 #include <array>
 #include <atomic>
+#include <cassert>
 #include <chrono>
 #include <condition_variable>
+#include <cstdint>
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <string>
 #include <tuple>
+#include <utility>
 #include <vector>
 
 namespace fw
 {
-  /// @ brief An interface for running tasks.
   class Executor
   {
   public:
-
     virtual ~Executor() = default;
-    virtual void run(std::function<void()> iTask) = 0;
+
+    virtual void Run(std::function<void()> iTask) = 0;
   };
 
-  std::shared_ptr<Executor> getInlineExecutor();
+  std::shared_ptr<Executor> get_inline_executor();
 
-  std::shared_ptr<Executor> getThreadExecutor();
+  /// @brief The process-wide worker pool. Bounded, so a graph that puts every module on it
+  /// cannot create more threads than the machine can run.
+  std::shared_ptr<Executor> get_thread_pool_executor();
 
-  /// @brief Continuation is a task that waits for its dependencies to be ready.
-  /// Providers of dependencies should call NotifyAndRun() once they are ready.
+  std::shared_ptr<Executor> make_thread_pool_executor(uint32_t iThreadCount);
+
+  /// @brief Names an executor as it is written in the settings file. Unknown names fall back
+  /// to the inline executor, which is what a graph gets when it asks for nothing.
+  std::shared_ptr<Executor> get_executor_by_name(const std::string& iName);
+
+  /// @brief A task that runs once all of its dependencies have reported in, on the executor it
+  /// was built with. It re-arms itself afterwards, so the same node serves every frame.
+  ///
   /// This class is thread-safe.
   class Continuation
   {
   public:
+    Continuation(std::function<void()> iTask, int iCount, std::shared_ptr<Executor> iExecutor);
 
-    Continuation(std::function<void(std::shared_ptr<Executor>)> iTask, unsigned iCounter);
-
-    /// @brief should be called once a dependency of this task is ready.
-    /// The task runs, using executor, iff all dependencies are satisfied.
-    /// The behavior of NotifyAndRun when called more times than there are
-    /// dependencies is undefined.
-    void NotifyAndRun(std::shared_ptr<Executor> iExecutor);
+    void NotifyAndRun();
 
   private:
-    std::function<void(std::shared_ptr<Executor>)> mTask;
-    std::atomic_uint mCounter;
-    const unsigned mCount = 0U;
+    const std::function<void()> mTask;
+    const std::shared_ptr<Executor> mExecutor;
+    const uint64_t mCount = 1ULL;
+
+    std::atomic<uint64_t> mArrivals{ 0ULL };
   };
 
   template <typename T>
@@ -56,7 +62,6 @@ namespace fw
   class IFuture
   {
   public:
-
     IFuture() = default;
 
     virtual ~IFuture() = default;
@@ -68,9 +73,8 @@ namespace fw
     virtual void Wait() const = 0;
   };
 
-  /// @brief Future is a flow graph equivalent of std::future. Future differs from a
-  /// std::future in that it implements an observer pattern -- once the promise
-  /// puts value, observing continuations are notified and run.
+  /// @brief A flow graph equivalent of std::future, differing in that it notifies the
+  /// continuations observing it once the promise puts a value.
   template <typename T>
   class Future : public IFuture
   {
@@ -85,57 +89,48 @@ namespace fw
 
     Future& operator=(const Future& iRhs) = delete;
 
-    /// @brief If ready, returns the value stored in the future.
     T Get() const
     {
       std::lock_guard<std::mutex> lock(mMutex);
-      CV_DbgAssert(mValue != nullptr);
+      assert(mValue != nullptr);
       return mValue ? *mValue : T();
     }
 
-    /// @brief If not ready, adds a continuation to be used once value is present.
-    /// Added continuations will be notified once a value is put to this Future.
-    ///
-    /// If ready, the continuation will be notified and run immediately with an
-    /// inline executor.
     void Listen(std::shared_ptr<Continuation> iContinuation) override
     {
-      bool isValid = false;
+      bool isReady = false;
       {
         std::lock_guard<std::mutex> lock(mMutex);
-        isValid = (mValue != nullptr);
+        isReady = (mValue != nullptr);
 
-        if (!isValid)
+        if (!isReady)
           mContinuations.emplace_back(iContinuation);
       }
 
-      if (isValid)
-        iContinuation->NotifyAndRun(getInlineExecutor());
+      if (isReady)
+        iContinuation->NotifyAndRun();
     }
 
-    /// @brief ready returns true iff the value is ready.
-    /// Subsequent calls to get() will  not block.
     bool Ready() const override
     {
       std::lock_guard<std::mutex> lock(mMutex);
       return mValue != nullptr;
     }
 
-    /// @brief Blocks till this Future is ready.
     void Wait() const override
     {
       std::unique_lock<std::mutex> lock(mMutex);
       mCV.wait(lock, [this] { return mValue != nullptr; });
     }
 
-    unsigned long long GetGeneration() const
+    uint64_t GetGeneration() const
     {
       std::lock_guard<std::mutex> lock(mMutex);
       return mGeneration;
     }
 
     template <typename Rep, typename Period>
-    bool WaitForNewValue(unsigned long long iGeneration, const std::chrono::duration<Rep, Period>& iTimeout) const
+    bool WaitForNewValue(uint64_t iGeneration, const std::chrono::duration<Rep, Period>& iTimeout) const
     {
       std::unique_lock<std::mutex> lock(mMutex);
       return mCV.wait_for(lock, iTimeout, [this, iGeneration] { return mGeneration > iGeneration; });
@@ -158,40 +153,41 @@ namespace fw
   private:
     Future() = default;
 
-    void Put(const T& iArg, std::shared_ptr<Executor> iExecutor)
+    void Put(const T& iArg)
     {
-      std::vector<std::shared_ptr<Continuation>> continuationsAux;
+      std::vector<std::shared_ptr<Continuation>> continuations;
       {
-        std::unique_lock<std::mutex> lock(mMutex);
-        mValue.reset(new T(iArg));
-        mGeneration++;
-        continuationsAux = mContinuations;
+        std::lock_guard<std::mutex> lock(mMutex);
+        mValue = std::make_unique<T>(iArg);
+        ++mGeneration;
+        continuations = mContinuations;
       }
 
       mCV.notify_all();
-      for (const auto& continuation : continuationsAux)
-        continuation->NotifyAndRun(iExecutor);
+
+      for (const auto& continuation : continuations)
+        continuation->NotifyAndRun();
     }
 
     mutable std::mutex mMutex;
     mutable std::condition_variable mCV;
+
     std::unique_ptr<T> mValue = nullptr;
-    unsigned long long mGeneration = 0ULL;
+    uint64_t mGeneration = 0ULL;
     std::vector<std::shared_ptr<Continuation>> mContinuations;
   };
 
   template <typename T>
   using FutureShared = std::shared_ptr<Future<T>>;
 
-  /// @brief Promise is a flow graph equivalent of std::promise.
-  /// Future associated with the Promise.
   template <typename T>
   class Promise
   {
   public:
     Promise() :
       mFuture(new Future<T>())
-    { }
+    {
+    }
 
     Promise(const Promise<T>& iRhs) = delete;
 
@@ -204,83 +200,69 @@ namespace fw
       return mFuture;
     }
 
-    /// @brief Puts the value for the associated Future to return.Uses executor to run
-    /// dependency tasks that are ready once after this put.
-    ///
-    /// The behavior of put is undefined if this is called more than once.
-    void Put(const T& iArg, std::shared_ptr<Executor> iExecutor)
+    void Put(const T& iArg)
     {
-      mFuture->Put(iArg, iExecutor);
+      mFuture->Put(iArg);
     }
 
   private:
     const FutureShared<T> mFuture = nullptr;
   };
 
-  /// @brief Returns the value of a Future, or a default-constructed one when the
-  /// Future is absent. An absent Future is an input that was left unconnected.
+  /// @brief The value of a Future, or a default-constructed one when the Future is absent.
+  /// An absent Future is an input that was left unconnected.
   template <typename T>
   T get_or_default(const FutureShared<T>& iFuture)
   {
     return iFuture ? iFuture->Get() : T();
   }
 
-  /// @brief Subscribes iContinuation to iFuture, unless the Future is absent.
   template <typename T>
   void listen_if_connected(const FutureShared<T>& iFuture, std::shared_ptr<Continuation> iContinuation)
   {
     if (iFuture) iFuture->Listen(iContinuation);
   }
 
-  /// @brief Returns an action running the provided function with executor and a Future
-  /// for the result. This connect() is for source nodes: they have no dependency to
-  /// wait for, so the returned action is what drives them.
+  /// @brief Connects a source node: it has no dependency, so the returned action drives it.
   template <typename ReturnT>
   std::pair<std::function<void()>, FutureShared<ReturnT>> connect(std::function<ReturnT()> iFunction, std::shared_ptr<Executor> iExecutor)
   {
-    // Using shared_ptr, because std::function is copyable, but Promise<R> is not.
+    // Held by shared_ptr because std::function is copyable and Promise is not
     auto promise = std::make_shared<Promise<ReturnT>>();
     auto future = promise->GetFuture();
 
-    auto task = [iFunction, promise, iExecutor] {
-      promise->Put(iFunction(), iExecutor);
+    auto task = [iFunction, promise] {
+      promise->Put(iFunction());
     };
 
-    auto runTask = [task, iExecutor] {
-      iExecutor->run(task);
+    auto trigger = [task, iExecutor] {
+      iExecutor->Run(task);
     };
 
-    return std::make_pair(runTask, future);
+    return std::make_pair(trigger, future);
   }
 
-  /// @brief Returns a Future for the result of iFunction, run once all of its
-  /// dependencies are ready.
+  /// @brief Connects a node run by its predecessors, on iExecutor once they are all ready.
   ///
-  /// An absent (unconnected) Future in iFutures is an optional input: it never
-  /// produces a value, so it is not counted as a dependency and the corresponding
-  /// argument arrives default-constructed. Passing only absent Futures yields a
-  /// Future that is never satisfied -- callers must reject that case themselves.
+  /// An absent Future in iFutures is an optional input: it never produces a value, so it is
+  /// not counted as a dependency and its argument arrives default-constructed. Passing only
+  /// absent Futures yields a Future that is never satisfied - callers must reject that case.
   template <typename ReturnT, typename... ArgumentT>
-  FutureShared<ReturnT> connect(std::function<ReturnT(ArgumentT...)> iFunction, FutureShared<ArgumentT>... iFutures)
+  FutureShared<ReturnT> connect(std::function<ReturnT(ArgumentT...)> iFunction, std::shared_ptr<Executor> iExecutor, FutureShared<ArgumentT>... iFutures)
   {
-    // Using shared_ptr, because std::function is copyable, but Promise is not.
     auto promise = std::make_shared<Promise<ReturnT>>();
     auto future = promise->GetFuture();
 
-    auto task = [iFunction, promise, iFutures...](std::shared_ptr<Executor> executor) {
-      promise->Put(iFunction(get_or_default(iFutures)...), executor);
+    auto task = [iFunction, promise, iFutures...] {
+      promise->Put(iFunction(get_or_default(iFutures)...));
     };
 
     const std::array<bool, sizeof...(ArgumentT)> connected = { { static_cast<bool>(iFutures)... } };
-    const unsigned count = static_cast<unsigned>(std::count(connected.begin(), connected.end(), true));
+    const int count = static_cast<int>(std::count(connected.begin(), connected.end(), true));
 
-    auto continuation = std::make_shared<Continuation>(std::move(task), count);
+    auto continuation = std::make_shared<Continuation>(std::move(task), count, std::move(iExecutor));
 
-    // Expand it in the initializer, the leading 0 keeps an empty pack well-formed
-    const int sf_array[] = {
-      0, (void(listen_if_connected(iFutures, continuation)), 0)...
-    };
-    (void)sf_array;
+    (listen_if_connected(iFutures, continuation), ...);
 
     return future;
   }

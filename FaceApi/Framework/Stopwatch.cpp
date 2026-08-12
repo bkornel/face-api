@@ -26,7 +26,7 @@ namespace fw
     mConstructionTime = mStartTime = mStopTime = Clock::now();
   }
 
-  Stopwatch::Milliseconds Stopwatch::GetElapsed(bool iStopped) const
+  Milliseconds Stopwatch::GetElapsed(bool iStopped) const
   {
     const Clock::time_point end = iStopped ? mStopTime : Clock::now();
     const Milliseconds elapsed = end - mStartTime;

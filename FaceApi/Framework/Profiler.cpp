@@ -1,7 +1,7 @@
 #include "Framework/Profiler.h"
 
+#include <cstdint>
 #include <easyloggingpp/easyloggingpp.h>
-#include <opencv2/core/core.hpp>
 
 #include <algorithm>
 #include <fstream>
@@ -49,7 +49,7 @@ namespace fw
     return sInstance;
   }
 
-  void ProfilerDatabase::setCurrentFrameId(unsigned iCurrentFrameId)
+  void ProfilerDatabase::setCurrentFrameId(uint32_t iCurrentFrameId)
   {
     // Set from the app thread, read by Push() from the graph thread
     std::lock_guard<std::recursive_mutex> lock(sMutex);

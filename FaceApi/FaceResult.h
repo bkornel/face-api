@@ -2,8 +2,10 @@
 
 
 #include "Framework/Imaging/Geometry.h"
+
 #include <opencv2/core/core.hpp>
 
+#include <cstdint>
 #include <vector>
 
 namespace face
@@ -16,8 +18,8 @@ namespace face
   struct FaceResult
   {
     int userId = 0;
-    unsigned frameId = 0U;
-    long long timestamp = 0LL;
+    uint32_t frameId = 0U;
+    int64_t timestamp = 0LL;
 
     /// @brief Face rectangle in 2-D pixel coordinates
     cv::Rect faceRect;

@@ -2,6 +2,7 @@
 
 #include "Framework/Messaging/Message.h"
 
+#include <cstdint>
 #include <opencv2/core/core.hpp>
 
 namespace face
@@ -10,7 +11,7 @@ namespace face
   {
   public:
 
-    RoiMessage(const std::vector<cv::Rect>& iROIs, const cv::Size& iMinRoiSize, const cv::Size& iMaxRoiSize, unsigned iFrameId, fw::Timestamp iTimestamp);
+    RoiMessage(const std::vector<cv::Rect>& iROIs, const cv::Size& iMinRoiSize, const cv::Size& iMaxRoiSize, uint32_t iFrameId, fw::Timestamp iTimestamp);
 
     virtual ~RoiMessage() = default;
 

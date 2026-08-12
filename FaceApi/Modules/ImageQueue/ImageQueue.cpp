@@ -5,6 +5,7 @@
 
 #include "Framework/Text.h"
 
+#include <cstdint>
 #include <easyloggingpp/easyloggingpp.h>
 #include <opencv2/highgui/highgui.hpp>
 
@@ -34,7 +35,7 @@ namespace face
     return fw::ErrorCode::OK;
   }
 
-  fw::ErrorCode ImageQueue::Push(const cv::Mat& iFrame, unsigned iFrameId, fw::Timestamp iTimestamp)
+  fw::ErrorCode ImageQueue::Push(const cv::Mat& iFrame, uint32_t iFrameId, fw::Timestamp iTimestamp)
   {
     if (iFrame.empty())
     {
@@ -57,15 +58,16 @@ namespace face
     // The id and the timestamp come from the camera, they are not re-stamped here
     std::shared_ptr<ImageMessage> message = std::make_shared<ImageMessage>(iFrame, iFrameId, iTimestamp);
 
-    // Counting this frame in, since after the push the message may already belong to the
-    // graph thread and writing to it would race
-    message->SetQueueData(GetQueueSize() + 1, GetSamplingFPS(), GetBound());
+    // Stamped before the push: afterwards the message may already belong to the graph thread.
+    // This frame is counted in, hence the +1 on a size read before it went on.
+    const MessageQueue::Statistics stats = GetQueueStatistics();
+    message->SetQueueData(stats.size + 1, stats.samplingFPS, stats.bound);
 
     // Never block the camera thread: dropping a frame beats stalling the capture.
     return mQueue.TryPush(message);
   }
 
-  std::shared_ptr<ImageMessage> ImageQueue::Main(unsigned /*iTickNumber*/)
+  std::shared_ptr<ImageMessage> ImageQueue::Main(uint32_t /*iTickNumber*/)
   {
     DrainCommands();
 

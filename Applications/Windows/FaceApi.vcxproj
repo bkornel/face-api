@@ -53,6 +53,7 @@
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Messages\ImageMessage.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Messages\RoiMessage.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Messages\UserEntriesMessage.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Messages\UserSnapshotMessage.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\FaceDetection\FaceDetection.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ImageQueue\ImageQueue.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserHistory\UserHistory.cpp" />
@@ -70,7 +71,7 @@
     <ClCompile Include="..\..\FaceApi\Messages\ImageSizeChangedMessage.cpp" />
     <ClCompile Include="..\..\FaceApi\Modules\FirstModule\FirstModule.cpp" />
     <ClCompile Include="..\..\FaceApi\Modules\LastModule\LastModule.cpp" />
-    <ClCompile Include="..\..\FaceApi\Modules\ModuleConnector.cpp" />
+    <ClCompile Include="..\..\FaceApi\Framework\Graph\ModuleConnector.cpp" />
     <ClCompile Include="..\..\FaceApi\Modules\ModuleFactory.cpp" />
     <ClCompile Include="..\..\FaceApi\Modules\ModuleGraph.cpp" />
   </ItemGroup>
@@ -115,6 +116,7 @@
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\ImageMessage.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\RoiMessage.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\UserEntriesMessage.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\UserSnapshotMessage.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\FaceDetection\FaceDetection.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ImageQueue\ImageQueue.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\UserHistory\UserHistory.h" />
@@ -131,7 +133,7 @@
     <ClInclude Include="..\..\FaceApi\Messages\CommandMessage.h" />
     <ClInclude Include="..\..\FaceApi\Modules\FirstModule\FirstModule.h" />
     <ClInclude Include="..\..\FaceApi\Modules\LastModule\LastModule.h" />
-    <ClInclude Include="..\..\FaceApi\Modules\ModuleConnector.h" />
+    <ClInclude Include="..\..\FaceApi\Framework\Graph\ModuleConnector.h" />
     <ClInclude Include="..\..\FaceApi\Modules\ModuleFactory.h" />
     <ClInclude Include="..\..\FaceApi\Modules\ModuleGraph.h" />
     <ClInclude Include="..\..\FaceApi\User\UserData.hpp" />

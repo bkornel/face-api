@@ -156,11 +156,14 @@ namespace face
       return nullptr;
     }
 
-    // Rescaling the images and sending the event about the hits
+    // Every rectangle leaves this module clipped to the frame. Scaling a corner and a side
+    // back up from the downscaled copy independently can put the far edge past it.
+    const cv::Rect screenRect(0, 0, iImage->GetWidth(), iImage->GetHeight());
+
     std::vector<cv::Rect> scaledFaceROIs;
     for (auto& r : faceROIs)
     {
-      const cv::Rect rect(
+      cv::Rect rect(
         cvRound(r.x * mImageScaleFactorInv),
         cvRound(r.y * mImageScaleFactorInv),
         cvRound(r.width * mImageScaleFactorInv),
@@ -168,13 +171,21 @@ namespace face
       );
 
 #ifdef CROP_FACE_RECT
-      cv::Rect r2 = rect;
-      r2 += cv::Point(cvRound(rect.width * 0.1F), 0.0F);
-      r2 -= cv::Size(cvRound(rect.width * 0.2F), 0.0F);
-      scaledFaceROIs.emplace_back(r2);
-#else
-      scaledFaceROIs.emplace_back(rect);
+      rect += cv::Point(cvRound(rect.width * 0.1F), 0);
+      rect -= cv::Size(cvRound(rect.width * 0.2F), 0);
 #endif
+
+      rect &= screenRect;
+
+      // A detection that survives the clip with no area left is not a face to report
+      if (rect.area() <= 0) continue;
+
+      scaledFaceROIs.emplace_back(rect);
+    }
+
+    if (scaledFaceROIs.empty())
+    {
+      return nullptr;
     }
 
     if (scaledFaceROIs.size() > 1)

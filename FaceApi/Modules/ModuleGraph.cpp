@@ -7,17 +7,16 @@
 #include "Framework/Text.h"
 
 #include "Modules/ModuleFactory.h"
-#include "Modules/ModuleConnector.h"
+#include "Framework/Graph/ModuleConnector.h"
 
+#include <cstdint>
 #include <easyloggingpp/easyloggingpp.h>
 #include <queue>
 
 namespace face
 {
-  ModuleGraph::FrameProcessedHandler ModuleGraph::sFrameProcessed;
-
   // Upper bound for one frame, so a stalled graph cannot block the worker forever.
-  const long long ModuleGraph::sProcessTimeoutMs = 5000LL;
+  const int64_t ModuleGraph::sProcessTimeoutMs = 5000LL;
 
   ModuleGraph::~ModuleGraph()
   {
@@ -32,21 +31,36 @@ namespace face
 
     FACE_PROFILER_FRAME_ID(GetLastFrameId());
 
-    // Reading the generation before the tick is what makes this a per-frame barrier.
-    const unsigned long long generation = mLastModule->GetGeneration();
-
-    mFirstModule->Tick();
-
-    if (!mLastModule->WaitForNewOutput(generation, sProcessTimeoutMs))
+    // One frame is one unit of failure: OpenCV reports what it dislikes by throwing, and the
+    // worker has no handler above it, so an escaping exception would end the process.
+    try
     {
-      LOG(WARNING) << "The module graph did not finish the frame within " << sProcessTimeoutMs << " ms.";
+      // Reading the generation before the tick is what makes this a per-frame barrier.
+      const uint64_t generation = mLastModule->GetGeneration();
+
+      mFirstModule->Tick();
+
+      if (!mLastModule->WaitForNewOutput(generation, sProcessTimeoutMs))
+      {
+        LOG(WARNING) << "The module graph did not finish the frame within " << sProcessTimeoutMs << " ms.";
+        return fw::ErrorCode::SystemFailure;
+      }
+
+      // Pushing a debug frame if we have it
+      if (mLastModule->HasOutput())
+      {
+        mFrameProcessed.Raise(mLastModule->GetLastImage());
+      }
+    }
+    catch (const cv::Exception& iException)
+    {
+      LOG(ERROR) << "Dropping the frame, OpenCV failed inside the module graph: " << iException.what();
       return fw::ErrorCode::SystemFailure;
     }
-
-    // Pushing a debug frame if we have it
-    if (mLastModule->HasOutput())
+    catch (const std::exception& iException)
     {
-      sFrameProcessed.Raise(mLastModule->GetLastImage());
+      LOG(ERROR) << "Dropping the frame, a module failed: " << iException.what();
+      return fw::ErrorCode::SystemFailure;
     }
 
     return fw::ErrorCode::OK;
@@ -75,12 +89,6 @@ namespace face
 
     // Connect modules to each other
     if ((result = CreateConnections(iModulesNode)) != fw::ErrorCode::OK)
-    {
-      return result;
-    }
-
-    // Start worker threads
-    if ((result = StartThread()) != fw::ErrorCode::OK)
     {
       return result;
     }
@@ -118,9 +126,11 @@ namespace face
     {
       if (moduleNode.empty() || !moduleNode.isNamed()) continue;
 
+      const std::string moduleName = fw::Module::CreateModuleName(moduleNode);
+
       // Check for duplications
       auto it = std::find_if(mModules.begin(), mModules.end(), [&](const std::shared_ptr<fw::Module>& obj) {
-        return obj->GetName() == fw::Module::CreateModuleName(moduleNode);
+        return obj->GetName() == moduleName;
       });
 
       if (it != mModules.end())
@@ -183,9 +193,11 @@ namespace face
     // Loop over the <modules> tag in the settings file
     for (const auto& moduleNode : modules)
     {
+      const std::string moduleName = fw::Module::CreateModuleName(moduleNode);
+
       // Find the corresponding module
       auto it = std::find_if(mModules.begin(), mModules.end(), [&](const std::shared_ptr<fw::Module>& obj) {
-        return obj->GetName() == fw::Module::CreateModuleName(moduleNode);
+        return obj->GetName() == moduleName;
       });
 
       // Unknown module
@@ -199,13 +211,13 @@ namespace face
       PredecessorMap predecessors; // Key: port, value: module
 
       // Read the <port> tag of each module
-      if ((result = GetPredecessors(moduleNode, iModulesNode, predecessors)) != fw::ErrorCode::OK)
+      if ((result = GetPredecessors(moduleNode, predecessors)) != fw::ErrorCode::OK)
       {
         return result;
       }
 
       // Source modules have no predecessor but still need their output port built
-      if ((result = ModuleConnector::Connect(module, predecessors)) != fw::ErrorCode::OK)
+      if ((result = fw::ModuleConnector::Connect(module, predecessors)) != fw::ErrorCode::OK)
       {
         return result;
       }
@@ -214,9 +226,9 @@ namespace face
     return result;
   }
 
-  fw::ErrorCode ModuleGraph::GetPredecessors(const cv::FileNode& iModule, const cv::FileNode& iModules, PredecessorMap& oPredecessors)
+  fw::ErrorCode ModuleGraph::GetPredecessors(const cv::FileNode& iModule, PredecessorMap& oPredecessors)
   {
-    CV_DbgAssert(!iModule.empty() && !iModules.empty());
+    CV_DbgAssert(!iModule.empty());
 
     // Collect predecessor modules of iModule
     oPredecessors.clear();
@@ -295,13 +307,21 @@ namespace face
   {
     CV_DbgAssert(!iModulesNode.empty());
 
-    using ModulesPrioElem = std::pair<cv::FileNode, unsigned>;
+    // The name is kept alongside the node: it is what every lookup below matches on, and
+    // rebuilding it per candidate meant composing the same string over and over.
+    struct ModulesPrioElem
+    {
+      cv::FileNode node;
+      std::string name;
+      uint32_t depth = 0U;
+    };
+
     std::vector<ModulesPrioElem> modulesPrio;
 
     // Loop over the <modules> tag in the settings file
     for (const auto& moduleNode : iModulesNode)
     {
-      modulesPrio.emplace_back(moduleNode, 0U);
+      modulesPrio.emplace_back(ModulesPrioElem{ moduleNode, fw::Module::CreateModuleName(moduleNode), 0U });
     }
 
     // Loop over the <modules> tag in the settings file
@@ -328,15 +348,15 @@ namespace face
         const std::string& predecessorName = predecessors.front();
 
         auto it = std::find_if(modulesPrio.begin(), modulesPrio.end(), [&](const ModulesPrioElem& iObj) {
-          return predecessorName == fw::Module::CreateModuleName(iObj.first);
+          return predecessorName == iObj.name;
         });
 
         if (it != modulesPrio.end())
         {
-          it->second++;
+          it->depth++;
 
-          // Loop over the <port> list of it->first and queueing them
-          for (const auto& portNode : it->first["port"])
+          // Loop over the <port> list of the predecessor and queueing them
+          for (const auto& portNode : it->node["port"])
           {
             // Tokenize the string: "predecessorName:portNumber"
             const auto tokens = fw::str::split(fw::str::trim(portNode.string()), ':');
@@ -356,14 +376,16 @@ namespace face
     // Modules that are equally deep in the graph tie here, and the connection order
     // decides the order they are notified in. std::sort would break such ties
     // arbitrarily, so keep the order of the settings file instead.
-    std::stable_sort(modulesPrio.begin(), modulesPrio.end(), [&](const ModulesPrioElem& iFirst, const ModulesPrioElem& iSecond) {
-      return iFirst.second > iSecond.second;
+    std::stable_sort(modulesPrio.begin(), modulesPrio.end(), [](const ModulesPrioElem& iFirst, const ModulesPrioElem& iSecond) {
+      return iFirst.depth > iSecond.depth;
     });
 
     std::vector<cv::FileNode> modules;
+    modules.reserve(modulesPrio.size());
+
     for (const auto& m : modulesPrio)
     {
-      modules.emplace_back(m.first);
+      modules.emplace_back(m.node);
     }
 
     return modules;

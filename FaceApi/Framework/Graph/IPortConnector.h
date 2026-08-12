@@ -30,6 +30,9 @@ namespace fw
     ///         empty, or iOutput carries something other than what this port expects
     virtual ErrorCode SetInput(std::size_t iIndex, const std::shared_ptr<IFuture>& iOutput) = 0;
 
+    /// @brief Chooses where Main() runs. Has to be called before Connect().
+    virtual void SetExecutor(const std::shared_ptr<Executor>& iExecutor) = 0;
+
     /// @brief Builds the output port from the inputs that have been set
     virtual ErrorCode Connect() = 0;
 

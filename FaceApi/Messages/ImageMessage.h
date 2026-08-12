@@ -2,6 +2,7 @@
 
 #include "Framework/Messaging/Message.h"
 
+#include <cstdint>
 #include <opencv2/core/core.hpp>
 
 #include <map>
@@ -20,9 +21,9 @@ namespace face
       int bound = 0;
     };
 
-    ImageMessage(const cv::Mat& iImage, unsigned iFrameId, fw::Timestamp iTimestamp);
+    ImageMessage(const cv::Mat& iImage, uint32_t iFrameId, fw::Timestamp iTimestamp);
 
-    ImageMessage(cv::Mat&& iImage, unsigned iFrameId, fw::Timestamp iTimestamp);
+    ImageMessage(cv::Mat&& iImage, uint32_t iFrameId, fw::Timestamp iTimestamp);
 
     ~ImageMessage() override = default;
 
