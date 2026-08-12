@@ -5,7 +5,6 @@
 
 #include "Model/FaceModel.h"
 #include "Framework/Text.h"
-#include "User/UserData.hpp"
 
 #include <easyloggingpp/easyloggingpp.h>
 #include <opencv2/calib3d.hpp>
@@ -33,56 +32,49 @@ namespace face
     return fw::ErrorCode::OK;
   }
 
-  bool PoseEstimationDispatcher::Estimate(UserData& ioData, const cv::Mat& iCameraMatrix) const
-  {
-    const Pose pose = EstimatePose(ioData.GetShape2D(), iCameraMatrix);
-
-    ioData.SetPose(pose.rpy, pose.position);
-    ioData.SetCameraMatrix(iCameraMatrix);
-    ioData.SetExtrinsics(pose.extrinsics, pose.rvec, pose.tvec);
-    ioData.SetShape3D(EstimateShape3D(pose.extrinsics));
-    ioData.SetFaceBox(mFaceBox);
-
-    return true;
-  }
-
-  PoseEstimationDispatcher::Pose PoseEstimationDispatcher::EstimatePose(const ImagePts& iImagePts, const cv::Mat& iCameraMatrix) const
+  bool PoseEstimationDispatcher::Estimate(const ShapeDescriptor& iShape, const cv::Mat& iCameraMatrix, PoseDescriptor& oPose) const
   {
     static const cv::Mat sDistCoeffs = cv::Mat::zeros(4, 1, CV_64FC1);
 
-    Pose pose;
-    pose.extrinsics = cv::Mat::eye(4, 4, CV_64FC1);
+    const ImagePts& imagePts = iShape.shape2D;
+
+    oPose.trackId = iShape.trackId;
+    oPose.cameraMatrix = iCameraMatrix;
+    oPose.extrinsics = cv::Mat::eye(4, 4, CV_64FC1);
 
     // Solve for pose
-    cv::solvePnP(sObjectPoints, iImagePts, iCameraMatrix, sDistCoeffs, pose.rvec, pose.tvec, false, cv::SOLVEPNP_EPNP);
-    cv::Rodrigues(pose.rvec, pose.extrinsics({ 0, 0, 3, 3 }));
+    cv::solvePnP(sObjectPoints, imagePts, iCameraMatrix, sDistCoeffs, oPose.rvec, oPose.tvec, false, cv::SOLVEPNP_EPNP);
+    cv::Rodrigues(oPose.rvec, oPose.extrinsics({ 0, 0, 3, 3 }));
 
     if (mEstimateReprojection)
     {
       ImagePts imagePointsRP;
-      cv::projectPoints(sObjectPoints, pose.rvec, pose.tvec, iCameraMatrix, sDistCoeffs, imagePointsRP);
+      cv::projectPoints(sObjectPoints, oPose.rvec, oPose.tvec, iCameraMatrix, sDistCoeffs, imagePointsRP);
 
       double totalErr = 0.0;
-      for (size_t i = 0; i < iImagePts.size(); i++)
+      for (size_t i = 0; i < imagePts.size(); i++)
       {
-        double err = cv::norm(cv::Mat(iImagePts[i]), cv::Mat(imagePointsRP[i]), cv::NORM_L2);
+        double err = cv::norm(cv::Mat(imagePts[i]), cv::Mat(imagePointsRP[i]), cv::NORM_L2);
         totalErr += err * err;
       }
 
-      totalErr = std::sqrt(totalErr / iImagePts.size());
+      totalErr = std::sqrt(totalErr / imagePts.size());
       LOG(DEBUG) << "Re-projection error: " << totalErr << " px.";
     }
 
     for (int i = 0; i < 3; ++i)
-      pose.position[i] = pose.extrinsics.at<double>(i, 3) = pose.tvec.at<double>(i, 0);
+      oPose.position3D[i] = oPose.extrinsics.at<double>(i, 3) = oPose.tvec.at<double>(i, 0);
 
     // Get roll-pitch-yaw
     cv::Mat cameraMatrix, rotation, translation;
-    cv::decomposeProjectionMatrix(pose.extrinsics({ 0, 0, 4, 3 }), cameraMatrix, rotation, translation, cv::noArray(), cv::noArray(), cv::noArray(), pose.rpy);
+    cv::decomposeProjectionMatrix(oPose.extrinsics({ 0, 0, 4, 3 }), cameraMatrix, rotation, translation, cv::noArray(), cv::noArray(), cv::noArray(), oPose.rpy);
 
-    pose.rpy = { fw::deg_to_rad(pose.rpy[2]), fw::deg_to_rad(pose.rpy[0]), fw::deg_to_rad(pose.rpy[1]) };
+    oPose.rpy = { fw::deg_to_rad(oPose.rpy[2]), fw::deg_to_rad(oPose.rpy[0]), fw::deg_to_rad(oPose.rpy[1]) };
 
-    return pose;
+    oPose.shape3D = EstimateShape3D(oPose.extrinsics);
+    oPose.faceBox = mFaceBox;
+
+    return true;
   }
 
   PoseEstimationDispatcher::ObjectPts PoseEstimationDispatcher::EstimateShape3D(const cv::Mat& iExtrinsics) const

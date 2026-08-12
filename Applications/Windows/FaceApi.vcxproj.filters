@@ -423,9 +423,6 @@
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Parallel.h">
       <Filter>Framework</Filter>
     </ClInclude>
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\FaceDataMessage.h">
-      <Filter>Messages</Filter>
-    </ClInclude>
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\FaceTracker\FaceTracker.h">
       <Filter>Modules\FaceTracker</Filter>
     </ClInclude>
@@ -434,6 +431,15 @@
     </ClInclude>
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\User\TrackedFace.h">
       <Filter>User</Filter>
+    </ClInclude>
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\ShapeMessage.h">
+      <Filter>Messages</Filter>
+    </ClInclude>
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\PoseMessage.h">
+      <Filter>Messages</Filter>
+    </ClInclude>
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\NormShapeMessage.h">
+      <Filter>Messages</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

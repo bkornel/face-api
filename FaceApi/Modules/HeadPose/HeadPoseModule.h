@@ -4,18 +4,18 @@
 #include "Framework/Graph/Module.h"
 #include "Framework/Graph/Port.hpp"
 
-#include "Messages/FaceDataMessage.h"
-#include "Messages/ImageMessage.h"
+#include "Messages/PoseMessage.h"
+#include "Messages/ShapeMessage.h"
 #include "Modules/HeadPose/PoseEstimationDispatcher.h"
 
 #include <memory>
 
 namespace face
 {
-  /// @brief Adds the head pose to every fitted face record. The image is only needed for
-  /// its size, which decides the camera matrix.
+  /// @brief Estimates the 6DoF head pose belonging to every fitted shape. All it needs is
+  /// the shapes: the camera matrix comes from the frame size the shape message carries.
   class HeadPoseModule : public fw::Module,
-                         public fw::Port<std::shared_ptr<FaceDataMessage>(std::shared_ptr<ImageMessage>, std::shared_ptr<FaceDataMessage>)>
+                         public fw::Port<std::shared_ptr<PoseMessage>(std::shared_ptr<ShapeMessage>)>
   {
   public:
 
@@ -23,7 +23,7 @@ namespace face
 
     virtual ~HeadPoseModule() = default;
 
-    std::shared_ptr<FaceDataMessage> Main(std::shared_ptr<ImageMessage> iImage, std::shared_ptr<FaceDataMessage> iFaces) override;
+    std::shared_ptr<PoseMessage> Main(std::shared_ptr<ShapeMessage> iShapes) override;
 
   private:
     fw::ErrorCode InitializeInternal(const cv::FileNode& iSettings) override;

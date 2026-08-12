@@ -39,7 +39,7 @@ namespace face
     return ClmWrapper::GetInstance().Initialize(trackerFile, triFile, conFile);
   }
 
-  std::shared_ptr<FaceDataMessage> ShapeModelModule::Main(std::shared_ptr<ImageMessage> iImage, std::shared_ptr<FaceTrackMessage> iTracks)
+  std::shared_ptr<ShapeMessage> ShapeModelModule::Main(std::shared_ptr<ImageMessage> iImage, std::shared_ptr<FaceTrackMessage> iTracks)
   {
     DrainCommands();
 
@@ -69,7 +69,7 @@ namespace face
       jobs.emplace_back(Job{ &track, &mDispatcher.GetModel(track) });
 
     // Every job owns its model and writes its own entry, so the fits are independent
-    FaceDataMessage::FaceDataVector entries(jobs.size());
+    ShapeMessage::ShapeVector shapes(jobs.size());
 
     // Not vector<bool>: its packed bits would let neighbouring writes collide
     std::vector<uint8_t> fitted(jobs.size(), 0U);
@@ -77,24 +77,20 @@ namespace face
     fw::parallel_for(
       jobs.size(),
       [&](std::size_t i) {
-        entries[i].track = *jobs[i].track;
-        fitted[i] = mDispatcher.Fit(*jobs[i].track, *jobs[i].model, frame, entries[i].data) ? 1U : 0U;
-
-        // The record carries the refined rectangle from here on
-        if (fitted[i]) entries[i].track.faceRect = entries[i].data.GetFaceRect();
+        fitted[i] = mDispatcher.Fit(*jobs[i].track, *jobs[i].model, frame, shapes[i]) ? 1U : 0U;
       },
       mParallelUsers ? fw::get_thread_pool_executor() : nullptr);
 
-    FaceDataMessage::FaceDataVector fittedEntries;
-    fittedEntries.reserve(entries.size());
+    ShapeMessage::ShapeVector fittedShapes;
+    fittedShapes.reserve(shapes.size());
 
-    for (std::size_t i = 0U; i < entries.size(); ++i)
+    for (std::size_t i = 0U; i < shapes.size(); ++i)
     {
-      if (fitted[i]) fittedEntries.emplace_back(std::move(entries[i]));
+      if (fitted[i]) fittedShapes.emplace_back(std::move(shapes[i]));
     }
 
-    if (fittedEntries.empty()) return nullptr;
+    if (fittedShapes.empty()) return nullptr;
 
-    return std::make_shared<FaceDataMessage>(std::move(fittedEntries), iTracks->GetFrameId(), iTracks->GetTimestamp());
+    return std::make_shared<ShapeMessage>(std::move(fittedShapes), iImage->GetSize(), iTracks->GetFrameId(), iTracks->GetTimestamp());
   }
 }

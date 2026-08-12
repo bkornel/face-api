@@ -4,7 +4,6 @@
 #include "Modules/ShapeModel/ClmWrapper.h"
 
 #include "Framework/Text.h"
-#include "User/UserData.hpp"
 
 #include <opencv2/core/core.hpp>
 
@@ -26,19 +25,12 @@ namespace face
     return fw::ErrorCode::OK;
   }
 
-  bool ShapeNormDispatcher::Normalize(UserData& ioData) const
+  fw::VectorPt2D ShapeNormDispatcher::Normalize2D(const fw::VectorPt2D& iShape2D) const
   {
-    ioData.SetNormShapes(NormalizeShape2D(ioData), NormalizeShape3D(ioData));
-
-    return true;
-  }
-
-  fw::VectorPt2D ShapeNormDispatcher::NormalizeShape2D(const UserData& iData) const
-  {
-    const auto& userShape2D = cv::Mat(iData.GetShape2D());
+    const auto& shape2D = cv::Mat(iShape2D);
     const auto& refShape2D = cv::Mat(ClmWrapper::GetInstance().GetReferenceShape2D());
 
-    fw::ShapeVector shapes2D = { userShape2D.clone(), refShape2D.clone() };
+    fw::ShapeVector shapes2D = { shape2D.clone(), refShape2D.clone() };
     cv::Mat meanShape2D = refShape2D.clone().reshape(1);
     fw::generalized_procrustes(shapes2D, meanShape2D, mMaxIterations, mEpsilon);
 
@@ -47,12 +39,12 @@ namespace face
     return result;
   }
 
-  fw::VectorPt3D ShapeNormDispatcher::NormalizeShape3D(const UserData& iData) const
+  fw::VectorPt3D ShapeNormDispatcher::Normalize3D(const fw::VectorPt3D& iShape3D) const
   {
-    const auto& userShape3D = cv::Mat(iData.GetShape3D());
+    const auto& shape3D = cv::Mat(iShape3D);
     const auto& refShape3D = cv::Mat(ClmWrapper::GetInstance().GetReferenceShape3D());
 
-    fw::ShapeVector shapes3D = { userShape3D.clone(), refShape3D.clone() };
+    fw::ShapeVector shapes3D = { shape3D.clone(), refShape3D.clone() };
     cv::Mat meanShape3D = refShape3D.clone().reshape(1);
     fw::generalized_procrustes(shapes3D, meanShape3D, mMaxIterations, mEpsilon);
 

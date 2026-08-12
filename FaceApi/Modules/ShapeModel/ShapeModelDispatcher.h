@@ -3,7 +3,7 @@
 #include "Framework/ErrorCode.h"
 #include "Modules/ShapeModel/ShapeModel.h"
 #include "User/TrackedFace.h"
-#include "User/UserData.hpp"
+#include "Messages/ShapeMessage.h"
 
 #include <map>
 #include <memory>
@@ -44,7 +44,7 @@ namespace face
     /// @brief Fits one track and fills oData with the shape and the refined rectangle.
     /// Reentrant across distinct tracks. ioModel's anchor is written by the one thread
     /// that owns this track's fit.
-    bool Fit(const TrackedFace& iTrack, TrackModel& ioModel, const cv::Mat& iFrame, UserData& oData) const;
+    bool Fit(const TrackedFace& iTrack, TrackModel& ioModel, const cv::Mat& iFrame, ShapeDescriptor& oShape) const;
 
   private:
     using TrackModels = std::map<int, TrackModel>;

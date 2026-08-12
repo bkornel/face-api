@@ -232,7 +232,16 @@ namespace fw
     auto future = promise->GetFuture();
 
     auto task = [iFunction, promise] {
-      promise->Put(iFunction());
+      // See the sibling overload: publishing on failure keeps the graph's counters whole
+      try
+      {
+        promise->Put(iFunction());
+      }
+      catch (...)
+      {
+        promise->Put(ReturnT{});
+        throw;
+      }
     };
 
     auto trigger = [task, iExecutor] {
@@ -254,7 +263,18 @@ namespace fw
     auto future = promise->GetFuture();
 
     auto task = [iFunction, promise, iFutures...] {
-      promise->Put(iFunction(get_or_default(iFutures)...));
+      // A node that throws must still publish: its listeners count arrivals, and a missing
+      // one would leave every downstream counter mid-round, firing them with the messages
+      // of different frames from then on. The empty value degrades this frame instead.
+      try
+      {
+        promise->Put(iFunction(get_or_default(iFutures)...));
+      }
+      catch (...)
+      {
+        promise->Put(ReturnT{});
+        throw;
+      }
     };
 
     const std::array<bool, sizeof...(ArgumentT)> connected = { { static_cast<bool>(iFutures)... } };
