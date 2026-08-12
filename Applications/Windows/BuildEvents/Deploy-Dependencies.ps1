@@ -38,7 +38,7 @@ if ($Configuration -eq 'Debug') { $suffix = 'd' }
 
 $opencvModules = @(
   'calib3d', 'core', 'features2d', 'flann', 'highgui',
-  'imgcodecs', 'imgproc', 'ml', 'objdetect', 'videoio'
+  'dnn', 'imgcodecs', 'imgproc', 'ml', 'objdetect', 'videoio'
 )
 
 $libraries = @()

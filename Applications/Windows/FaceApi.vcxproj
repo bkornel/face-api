@@ -63,6 +63,7 @@
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\ShapeModel.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\ShapeModelDispatcher.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\ShapeModelModule.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\TddfaDispatcher.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeNorm\ShapeNormDispatcher.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeNorm\ShapeNormModule.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Parallel.cpp" />
@@ -137,6 +138,9 @@
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\ShapeModel.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\ShapeModelDispatcher.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\ShapeModelModule.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\TddfaDispatcher.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\IShapeFitter.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\OneEuroFilter.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeNorm\ShapeNormDispatcher.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeNorm\ShapeNormModule.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Parallel.h" />

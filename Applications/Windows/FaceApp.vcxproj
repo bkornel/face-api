@@ -114,7 +114,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(OutDir);$(ProjectDir)..\..\..\3rdParty\opencv-4.5.2\windows\x64\vc16\lib;$(ProjectDir)..\..\..\3rdParty\poco-1.10.1\windows\x64\vc16\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>FaceApi.lib;opencv_calib3d452d.lib;opencv_core452d.lib;opencv_flann452d.lib;opencv_highgui452d.lib;opencv_imgcodecs452d.lib;opencv_imgproc452d.lib;opencv_objdetect452d.lib;opencv_videoio452d.lib;PocoFoundationd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>FaceApi.lib;opencv_calib3d452d.lib;opencv_core452d.lib;opencv_dnn452d.lib;opencv_flann452d.lib;opencv_highgui452d.lib;opencv_imgcodecs452d.lib;opencv_imgproc452d.lib;opencv_objdetect452d.lib;opencv_videoio452d.lib;PocoFoundationd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$(SolutionDir)BuildEvents\Deploy-Dependencies.ps1" -Configuration $(Configuration) -Platform $(Platform)</Command>
@@ -159,7 +159,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(OutDir);$(ProjectDir)..\..\..\3rdParty\opencv-4.5.2\windows\x64\vc16\lib;$(ProjectDir)..\..\..\3rdParty\poco-1.10.1\windows\x64\vc16\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>FaceApi.lib;opencv_calib3d452.lib;opencv_core452.lib;opencv_flann452.lib;opencv_highgui452.lib;opencv_imgcodecs452.lib;opencv_imgproc452.lib;opencv_objdetect452.lib;opencv_videoio452.lib;PocoFoundation.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>FaceApi.lib;opencv_calib3d452.lib;opencv_core452.lib;opencv_dnn452.lib;opencv_flann452.lib;opencv_highgui452.lib;opencv_imgcodecs452.lib;opencv_imgproc452.lib;opencv_objdetect452.lib;opencv_videoio452.lib;PocoFoundation.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$(SolutionDir)BuildEvents\Deploy-Dependencies.ps1" -Configuration $(Configuration) -Platform $(Platform)</Command>

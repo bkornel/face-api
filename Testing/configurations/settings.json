@@ -46,6 +46,9 @@
       },
       "shapeModel": {
         "port": [ "imageQueue:1", "faceTracker:2" ],
+        "method": "3ddfa",
+        "modelDir": "3ddfa/",
+        "smoothing": "TRUE",
         "clamp": "3.0",
         "conFile": "face.con",
         "failureCheck": "FALSE",

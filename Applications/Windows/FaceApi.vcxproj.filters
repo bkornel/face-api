@@ -234,6 +234,9 @@
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\FaceTracker\FaceTracker.cpp">
       <Filter>Modules\FaceTracker</Filter>
     </ClCompile>
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\TddfaDispatcher.cpp">
+      <Filter>Modules\ShapeModel</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\CLM.h">
@@ -440,6 +443,15 @@
     </ClInclude>
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\NormShapeMessage.h">
       <Filter>Messages</Filter>
+    </ClInclude>
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\TddfaDispatcher.h">
+      <Filter>Modules\ShapeModel</Filter>
+    </ClInclude>
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\IShapeFitter.h">
+      <Filter>Modules\ShapeModel</Filter>
+    </ClInclude>
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\OneEuroFilter.h">
+      <Filter>Framework</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

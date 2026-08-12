@@ -3,9 +3,13 @@
 #include "Framework/Parallel.h"
 #include "Modules/ShapeModel/ShapeModelModule.h"
 #include "Modules/ShapeModel/ClmWrapper.h"
+#include "Modules/ShapeModel/ShapeModelDispatcher.h"
+#include "Modules/ShapeModel/TddfaDispatcher.h"
 
 #include "Framework/Profiler.h"
 #include "Framework/Text.h"
+
+#include <easyloggingpp/easyloggingpp.h>
 
 #include <cstdint>
 
@@ -13,6 +17,7 @@ namespace face
 {
   fw::ErrorCode ShapeModelModule::InitializeInternal(const cv::FileNode& iSettings)
   {
+    std::string method = "3ddfa";
     std::string trackerFile = "face.tracker";
     std::string triFile = "face.tri";
     std::string conFile = "face.con";
@@ -20,6 +25,9 @@ namespace face
     if (!iSettings.empty())
     {
       std::string value;
+
+      if (fw::get_value(iSettings, "method", value))
+        method = fw::str::to_lower(fw::str::trim(value));
 
       if (fw::get_value(iSettings, "trackerFile", value))
         trackerFile = value;
@@ -32,10 +40,25 @@ namespace face
 
       if (fw::get_value(iSettings, "parallelUsers", value))
         mParallelUsers = fw::str::convert_to_boolean(value);
-
-      mDispatcher.Initialize(iSettings);
     }
 
+    if (method == "clm")
+      mFitter = std::make_unique<ShapeModelDispatcher>();
+    else if (method == "3ddfa")
+      mFitter = std::make_unique<TddfaDispatcher>();
+    else
+    {
+      LOG(ERROR) << "Unknown shape model method: " << method;
+      return fw::ErrorCode::BadParam;
+    }
+
+    LOG(INFO) << "Shape model method: " << method;
+
+    fw::ErrorCode result = mFitter->Initialize(iSettings);
+    if (result != fw::ErrorCode::OK) return result;
+
+    // Loaded regardless of the method: the connection list drives the visualizer and the
+    // reference shapes drive the normalization, whichever fitter produced the shape
     return ClmWrapper::GetInstance().Initialize(trackerFile, triFile, conFile);
   }
 
@@ -49,35 +72,23 @@ namespace face
     FACE_PROFILER(2_Shape_Model);
 
     // Taken once, before the fan-out: the getter converts lazily behind a lock
-    const cv::Mat frame = iImage->GetFrameGray();
+    const cv::Mat frameGray = iImage->GetFrameGray();
+    const cv::Mat frameBGR = iImage->GetFrameBGR();
 
     const auto& tracks = iTracks->GetTracks();
 
-    // The model map is maintained on this thread; the fits below only use their own entry
-    mDispatcher.RetainModels(tracks);
+    // Per-track state is maintained on this thread; the fits below only use their own entry
+    mFitter->BeginFrame(tracks);
 
-    struct Job
-    {
-      const TrackedFace* track = nullptr;
-      ShapeModelDispatcher::TrackModel* model = nullptr;
-    };
-
-    std::vector<Job> jobs;
-    jobs.reserve(tracks.size());
-
-    for (const auto& track : tracks)
-      jobs.emplace_back(Job{ &track, &mDispatcher.GetModel(track) });
-
-    // Every job owns its model and writes its own entry, so the fits are independent
-    ShapeMessage::ShapeVector shapes(jobs.size());
+    ShapeMessage::ShapeVector shapes(tracks.size());
 
     // Not vector<bool>: its packed bits would let neighbouring writes collide
-    std::vector<uint8_t> fitted(jobs.size(), 0U);
+    std::vector<uint8_t> fitted(tracks.size(), 0U);
 
     fw::parallel_for(
-      jobs.size(),
+      tracks.size(),
       [&](std::size_t i) {
-        fitted[i] = mDispatcher.Fit(*jobs[i].track, *jobs[i].model, frame, shapes[i]) ? 1U : 0U;
+        fitted[i] = mFitter->Fit(tracks[i], frameGray, frameBGR, shapes[i]) ? 1U : 0U;
       },
       mParallelUsers ? fw::get_thread_pool_executor() : nullptr);
 
