@@ -10,8 +10,6 @@
 
 namespace face
 {
-  class UserDispatcher;
-
   class User : public UserData
   {
   public:
@@ -29,8 +27,6 @@ namespace face
     User(const User& iOther) = default;
 
     virtual ~User() = default;
-
-    bool AcceptDispatcher(UserDispatcher& ioDispatcher);
 
     inline bool IsActive() const
     {

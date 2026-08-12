@@ -1,5 +1,5 @@
 #include "Framework/ErrorCode.h"
-#include "Modules/UserProcessor/ShapeModel/ClmWrapper.h"
+#include "Modules/ShapeModel/ClmWrapper.h"
 
 #include "Configuration.h"
 #include "Model/FaceModel.h"

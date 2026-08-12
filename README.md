@@ -109,7 +109,7 @@ Drawing on the host side is the cheaper path, because the frame is neither compo
 
 ```
 "lastModule": {
-  "port": [ "imageQueue:1", "userProcessor:2" ]
+  "port": [ "imageQueue:1", "userSnapshot:2" ]
 }
 ```
 

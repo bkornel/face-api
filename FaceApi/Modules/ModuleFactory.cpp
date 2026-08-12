@@ -7,11 +7,14 @@
 
 #include "Modules/FaceDetection/FaceDetection.h"
 #include "Modules/FirstModule/FirstModule.h"
+#include "Modules/HeadPose/HeadPoseModule.h"
 #include "Modules/ImageQueue/ImageQueue.h"
 #include "Modules/LastModule/LastModule.h"
+#include "Modules/ShapeModel/ShapeModelModule.h"
+#include "Modules/ShapeNorm/ShapeNormModule.h"
 #include "Modules/UserHistory/UserHistory.h"
 #include "Modules/UserManager/UserManager.h"
-#include "Modules/UserProcessor/UserProcessor.h"
+#include "Modules/UserSnapshot/UserSnapshot.h"
 #include "Modules/Visualizer/Visualizer.h"
 
 #include <easyloggingpp/easyloggingpp.h>
@@ -27,16 +30,22 @@ namespace face
       newModule = std::make_shared<FaceDetection>();
     else if (moduleName == "firstmodule")
       newModule = std::make_shared<FirstModule>();
+    else if (moduleName == "headpose")
+      newModule = std::make_shared<HeadPoseModule>();
     else if (moduleName == "imagequeue")
       newModule = std::make_shared<ImageQueue>();
     else if (moduleName == "lastmodule")
       newModule = std::make_shared<LastModule>();
+    else if (moduleName == "shapemodel")
+      newModule = std::make_shared<ShapeModelModule>();
+    else if (moduleName == "shapenorm")
+      newModule = std::make_shared<ShapeNormModule>();
     else if (moduleName == "userhistory")
       newModule = std::make_shared<UserHistory>();
     else if (moduleName == "usermanager")
       newModule = std::make_shared<UserManager>();
-    else if (moduleName == "userprocessor")
-      newModule = std::make_shared<UserProcessor>();
+    else if (moduleName == "usersnapshot")
+      newModule = std::make_shared<UserSnapshot>();
     else if (moduleName == "visualizer")
       newModule = std::make_shared<Visualizer>();
     // REMARK: Insert new modules here

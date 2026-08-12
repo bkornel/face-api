@@ -2,9 +2,7 @@
 
 #include "Framework/ErrorCode.h"
 #include "Framework/Messaging/Event.hpp"
-#include "Framework/Graph/Module.h"
-#include "Framework/Graph/ModuleConnector.h"
-#include "Framework/Graph/FlowGraph.hpp"
+#include "Framework/Graph/ModuleGraph.h"
 
 #include "Messages/ImageMessage.h"
 
@@ -13,16 +11,14 @@
 #include "Modules/LastModule/LastModule.h"
 
 #include <cstdint>
-#include <map>
 #include <memory>
-#include <string>
-#include <vector>
 
 namespace face
 {
-  class ModuleGraph : public fw::Module
+  /// @brief The face pipeline: fw::ModuleGraph builds and wires the graph, this class knows
+  /// which modules exist (through the factory) and drives the graph one frame at a time.
+  class ModuleGraph : public fw::ModuleGraph
   {
-    using PredecessorMap = fw::ModuleConnector::PredecessorMap;
     using FrameProcessedHandler = fw::Event<void(std::shared_ptr<ImageMessage>)>;
 
   public:
@@ -31,13 +27,7 @@ namespace face
 
     ModuleGraph() = default;
 
-    ModuleGraph(const ModuleGraph& iOther) = delete;
-
     ~ModuleGraph() override;
-
-    ModuleGraph& operator=(const ModuleGraph& iOther) = delete;
-
-    void Clear() override;
 
     fw::ErrorCode Process();
 
@@ -77,21 +67,16 @@ namespace face
 
     fw::ErrorCode InitializeInternal(const cv::FileNode& iModulesNode) override;
 
-    fw::ErrorCode DeInitializeInternal() override;
+    std::shared_ptr<fw::Module> CreateModule(const cv::FileNode& iModuleNode) override;
 
-    fw::ErrorCode CreateModules(const cv::FileNode& iModulesNode);
+    void OnModuleCreated(const std::shared_ptr<fw::Module>& iModule) override;
 
-    fw::ErrorCode CreateConnections(const cv::FileNode& iModulesNode);
-
-    fw::ErrorCode GetPredecessors(const cv::FileNode& iModule, PredecessorMap& oPredecessors);
-
-    std::vector<cv::FileNode> GetConnectionOrder(const cv::FileNode& iModulesNode);
+    fw::ErrorCode ValidateModules() override;
 
     FrameProcessedHandler mFrameProcessed;
 
     std::shared_ptr<FirstModule> mFirstModule = nullptr;
     std::shared_ptr<LastModule> mLastModule = nullptr;
     std::shared_ptr<ImageQueue> mImageQueue = nullptr;
-    std::vector<std::shared_ptr<fw::Module>> mModules;
   };
 }

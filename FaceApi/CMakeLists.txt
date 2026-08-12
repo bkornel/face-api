@@ -24,6 +24,9 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   message(FATAL_ERROR, "- Platform is not supported in cmake.")
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Android")
   add_definitions(-DOS_ANDROID)
+
+  # Modules log from pool threads as well, the logger must not assume one writer
+  add_definitions(-DELPP_THREAD_SAFE -DELPP_FORCE_USE_STD_THREAD)
   message("- Checking CMAKE_ANDROID_ARCH_ABI: '${CMAKE_ANDROID_ARCH_ABI}'")
   
   set(OpenCV_DIR "${OpenCV_DIR}/android/src/sdk/native/jni")
@@ -56,14 +59,14 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Messages)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/FaceDetection)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/FirstModule)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/HeadPose)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/ImageQueue)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/LastModule)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/ShapeModel)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/ShapeNorm)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/UserHistory)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/UserManager)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/UserProcessor)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/UserProcessor/HeadPose)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/UserProcessor/ShapeModel)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/UserProcessor/ShapeNorm)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/UserSnapshot)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/Visualizer)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/User)
 
@@ -87,6 +90,8 @@ set(SOURCES;
   Framework/Messaging/MessageBus.cpp;
   Framework/Graph/Module.cpp;
   Framework/Graph/ModuleConnector.cpp;
+  Framework/Graph/ModuleGraph.cpp;
+  Framework/Parallel.cpp;
   Framework/Profiler.cpp;
   Framework/Stopwatch.cpp;
   Framework/Thread.cpp;
@@ -111,16 +116,19 @@ set(SOURCES;
   Modules/ModuleGraph.cpp;
   Modules/FaceDetection/FaceDetection.cpp;
   Modules/FirstModule/FirstModule.cpp;
+  Modules/HeadPose/HeadPoseModule.cpp;
+  Modules/HeadPose/PoseEstimationDispatcher.cpp;
   Modules/ImageQueue/ImageQueue.cpp;
   Modules/LastModule/LastModule.cpp;
+  Modules/ShapeModel/ClmWrapper.cpp;
+  Modules/ShapeModel/ShapeModel.cpp;
+  Modules/ShapeModel/ShapeModelDispatcher.cpp;
+  Modules/ShapeModel/ShapeModelModule.cpp;
+  Modules/ShapeNorm/ShapeNormDispatcher.cpp;
+  Modules/ShapeNorm/ShapeNormModule.cpp;
   Modules/UserHistory/UserHistory.cpp;
   Modules/UserManager/UserManager.cpp;
-  Modules/UserProcessor/UserProcessor.cpp;
-  Modules/UserProcessor/HeadPose/PoseEstimationDispatcher.cpp;
-  Modules/UserProcessor/ShapeModel/ClmWrapper.cpp;
-  Modules/UserProcessor/ShapeModel/ShapeModel.cpp;
-  Modules/UserProcessor/ShapeModel/ShapeModelDispatcher.cpp;
-  Modules/UserProcessor/ShapeNorm/ShapeNormDispatcher.cpp;
+  Modules/UserSnapshot/UserSnapshot.cpp;
   Modules/Visualizer/Visualizer.cpp;
   User/User.cpp;
   User/UserData.cpp;

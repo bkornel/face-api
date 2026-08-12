@@ -1,17 +1,10 @@
 #include "Framework/ErrorCode.h"
 #include "Modules/ModuleGraph.h"
 
-#include "Configuration.h"
-
 #include "Framework/Profiler.h"
-#include "Framework/Text.h"
-
 #include "Modules/ModuleFactory.h"
-#include "Framework/Graph/ModuleConnector.h"
 
-#include <cstdint>
 #include <easyloggingpp/easyloggingpp.h>
-#include <queue>
 
 namespace face
 {
@@ -66,101 +59,37 @@ namespace face
     return fw::ErrorCode::OK;
   }
 
-  void ModuleGraph::Clear()
-  {
-    for (auto& module : mModules)
-      module->Clear();
-  }
-
   fw::ErrorCode ModuleGraph::InitializeInternal(const cv::FileNode& iModulesNode)
   {
-    if (iModulesNode.empty())
-    {
-      return fw::ErrorCode::NotFound;
-    }
-
-    fw::ErrorCode result = fw::ErrorCode::OK;
-
-    // Create the modules and load their settings
-    if ((result = CreateModules(iModulesNode)) != fw::ErrorCode::OK)
-    {
-      return result;
-    }
-
-    // Connect modules to each other
-    if ((result = CreateConnections(iModulesNode)) != fw::ErrorCode::OK)
-    {
-      return result;
-    }
-
-    return fw::ErrorCode::OK;
-  }
-
-  fw::ErrorCode ModuleGraph::DeInitializeInternal()
-  {
-    for (auto& module : mModules)
-    {
-      module->DeInitialize();
-    }
-
-    mModules.clear();
-
-    return fw::ErrorCode::OK;
-  }
-
-  fw::ErrorCode ModuleGraph::CreateModules(const cv::FileNode& iModulesNode)
-  {
-    CV_DbgAssert(!iModulesNode.empty());
-
-    // The aliases below are only ever assigned when empty, so drop the ones a previous
-    // Initialize() left behind - otherwise this graph would tick the old graph's modules.
-    // Done here and not in DeInitialize(): they are read from the app thread, and keeping
-    // every write inside Initialize() keeps those reads safe.
-    mModules.clear();
+    // The aliases are only ever assigned when empty, so drop the ones a previous
+    // Initialize() left behind. Done here and not in DeInitialize(): they are read from
+    // the app thread, and keeping every write inside Initialize() keeps those reads safe.
     mFirstModule = nullptr;
     mLastModule = nullptr;
     mImageQueue = nullptr;
 
-    // Loop over the <modules> tag in the settings file
-    for (const auto& moduleNode : iModulesNode)
-    {
-      if (moduleNode.empty() || !moduleNode.isNamed()) continue;
+    return fw::ModuleGraph::InitializeInternal(iModulesNode);
+  }
 
-      const std::string moduleName = fw::Module::CreateModuleName(moduleNode);
+  std::shared_ptr<fw::Module> ModuleGraph::CreateModule(const cv::FileNode& iModuleNode)
+  {
+    // Extend the factory if you add a new module
+    return mBus ? ModuleFactory::Create(iModuleNode, *mBus) : nullptr;
+  }
 
-      // Check for duplications
-      auto it = std::find_if(mModules.begin(), mModules.end(), [&](const std::shared_ptr<fw::Module>& obj) {
-        return obj->GetName() == moduleName;
-      });
+  void ModuleGraph::OnModuleCreated(const std::shared_ptr<fw::Module>& iModule)
+  {
+    // Create an alias for the modules with a role in Process()
+    // Duplications are already checked by the base class
+    if (!mFirstModule) mFirstModule = std::dynamic_pointer_cast<FirstModule>(iModule);
 
-      if (it != mModules.end())
-      {
-        LOG(ERROR) << "Module is already defined: " << (*it)->GetName();
-        return fw::ErrorCode::BadData;
-      }
+    if (!mLastModule) mLastModule = std::dynamic_pointer_cast<LastModule>(iModule);
 
-      // Extend this function if you add a new module
-      auto newModule = ModuleFactory::Create(moduleNode, *mBus);
+    if (!mImageQueue) mImageQueue = std::dynamic_pointer_cast<ImageQueue>(iModule);
+  }
 
-      // Check if the module is not set up in this file
-      if (!newModule)
-      {
-        return fw::ErrorCode::BadData;
-      }
-
-      // Create an alias for the first and last module of the process
-      // Duplications are already checked above
-      if (!mFirstModule) mFirstModule = std::dynamic_pointer_cast<FirstModule>(newModule);
-
-      if (!mLastModule) mLastModule = std::dynamic_pointer_cast<LastModule>(newModule);
-
-      if (!mImageQueue) mImageQueue = std::dynamic_pointer_cast<ImageQueue>(newModule);
-
-      LOG(INFO) << "New module is created: [" << newModule->GetName() << "]";
-
-      mModules.emplace_back(newModule);
-    }
-
+  fw::ErrorCode ModuleGraph::ValidateModules()
+  {
     // First-, and last modules are mandatory
     if (!mFirstModule)
     {
@@ -181,213 +110,5 @@ namespace face
     }
 
     return fw::ErrorCode::OK;
-  }
-
-  fw::ErrorCode ModuleGraph::CreateConnections(const cv::FileNode& iModulesNode)
-  {
-    CV_DbgAssert(!iModulesNode.empty());
-
-    fw::ErrorCode result = fw::ErrorCode::OK;
-    std::vector<cv::FileNode> modules = GetConnectionOrder(iModulesNode);
-
-    // Loop over the <modules> tag in the settings file
-    for (const auto& moduleNode : modules)
-    {
-      const std::string moduleName = fw::Module::CreateModuleName(moduleNode);
-
-      // Find the corresponding module
-      auto it = std::find_if(mModules.begin(), mModules.end(), [&](const std::shared_ptr<fw::Module>& obj) {
-        return obj->GetName() == moduleName;
-      });
-
-      // Unknown module
-      if (it == mModules.end())
-      {
-        LOG(ERROR) << "Unknown module is referenced with name: " << moduleNode.name();
-        return fw::ErrorCode::BadData;
-      }
-
-      std::shared_ptr<fw::Module> module = *it;
-      PredecessorMap predecessors; // Key: port, value: module
-
-      // Read the <port> tag of each module
-      if ((result = GetPredecessors(moduleNode, predecessors)) != fw::ErrorCode::OK)
-      {
-        return result;
-      }
-
-      // Source modules have no predecessor but still need their output port built
-      if ((result = fw::ModuleConnector::Connect(module, predecessors)) != fw::ErrorCode::OK)
-      {
-        return result;
-      }
-    }
-
-    return result;
-  }
-
-  fw::ErrorCode ModuleGraph::GetPredecessors(const cv::FileNode& iModule, PredecessorMap& oPredecessors)
-  {
-    CV_DbgAssert(!iModule.empty());
-
-    // Collect predecessor modules of iModule
-    oPredecessors.clear();
-
-    // Check if it does not have a predecessor
-    const cv::FileNode& portList = iModule["port"];
-    if (portList.empty())
-    {
-      return fw::ErrorCode::OK;
-    }
-
-    const std::string& moduleName = fw::Module::CreateModuleName(iModule);
-
-    // Loop over the <port> list of iModule
-    for (const auto& portNode : portList)
-    {
-      const std::string& portNodeStr = fw::str::trim(portNode.string());
-      if (portNodeStr.empty())
-      {
-        LOG(ERROR) << "Input port is not specified. Module " << moduleName;
-        return fw::ErrorCode::NotFound;
-      }
-
-      // Tokenize the string: "predecessorName:portNumber"
-      const auto tokens = fw::str::split(portNodeStr, ':');
-      if (tokens.size() != 2U)
-      {
-        LOG(ERROR) << "Input port format is wrong. Module " << moduleName << ", port: " << portNodeStr;
-        return fw::ErrorCode::BadData;
-      }
-
-      // Check the port number, indexing start from 1
-      const int portNumber = fw::str::convert_to_number<int>(fw::str::trim(tokens[1]));
-      if (portNumber < 1)
-      {
-        LOG(ERROR) << "Port number is less than 1. Module " << moduleName << ", port: " << portNodeStr;
-        return fw::ErrorCode::BadData;
-      }
-
-      // Find the predecessor between all of the modules
-      const std::string& predecessorName = fw::str::trim(tokens[0]);
-      bool isFound = false;
-
-      // Loop over the modules
-      for (const auto& module : mModules)
-      {
-        if (predecessorName == module->GetName())
-        {
-          // If the port number is still not reserved
-          if (oPredecessors[portNumber] == nullptr)
-          {
-            oPredecessors[portNumber] = module;
-            isFound = true;
-            break;
-          }
-          else
-          {
-            LOG(ERROR) << "Port number is already set. Module " << moduleName << ", port: " << portNodeStr;
-            return fw::ErrorCode::BadData;
-          }
-        }
-      }
-
-      // Predecessor could not be found in the settings file
-      if (!isFound)
-      {
-        LOG(ERROR) << "Predecessor is not defined in the configuration file. Module " << moduleName << ", port: " << portNodeStr;
-        return fw::ErrorCode::BadData;
-      }
-    }
-
-    return fw::ErrorCode::OK;
-  }
-
-  std::vector<cv::FileNode> ModuleGraph::GetConnectionOrder(const cv::FileNode& iModulesNode)
-  {
-    CV_DbgAssert(!iModulesNode.empty());
-
-    // The name is kept alongside the node: it is what every lookup below matches on, and
-    // rebuilding it per candidate meant composing the same string over and over.
-    struct ModulesPrioElem
-    {
-      cv::FileNode node;
-      std::string name;
-      uint32_t depth = 0U;
-    };
-
-    std::vector<ModulesPrioElem> modulesPrio;
-
-    // Loop over the <modules> tag in the settings file
-    for (const auto& moduleNode : iModulesNode)
-    {
-      modulesPrio.emplace_back(ModulesPrioElem{ moduleNode, fw::Module::CreateModuleName(moduleNode), 0U });
-    }
-
-    // Loop over the <modules> tag in the settings file
-    for (const auto& moduleNode : iModulesNode)
-    {
-      std::queue<std::string> predecessors;
-
-      // Loop over the <port> list of moduleNode
-      for (const auto& portNode : moduleNode["port"])
-      {
-        // Tokenize the string: "predecessorName:portNumber"
-        const auto tokens = fw::str::split(fw::str::trim(portNode.string()), ':');
-        if (tokens.size() != 2U)
-        {
-          continue;
-        }
-
-        predecessors.emplace(fw::str::trim(tokens[0]));
-      }
-
-      // Loop over the path of predecessors until the first module is not reached
-      while (!predecessors.empty())
-      {
-        const std::string& predecessorName = predecessors.front();
-
-        auto it = std::find_if(modulesPrio.begin(), modulesPrio.end(), [&](const ModulesPrioElem& iObj) {
-          return predecessorName == iObj.name;
-        });
-
-        if (it != modulesPrio.end())
-        {
-          it->depth++;
-
-          // Loop over the <port> list of the predecessor and queueing them
-          for (const auto& portNode : it->node["port"])
-          {
-            // Tokenize the string: "predecessorName:portNumber"
-            const auto tokens = fw::str::split(fw::str::trim(portNode.string()), ':');
-            if (tokens.size() != 2U)
-            {
-              continue;
-            }
-
-            predecessors.emplace(fw::str::trim(tokens[0]));
-          }
-        }
-
-        predecessors.pop();
-      }
-    }
-
-    // Modules that are equally deep in the graph tie here, and the connection order
-    // decides the order they are notified in. std::sort would break such ties
-    // arbitrarily, so keep the order of the settings file instead.
-    std::stable_sort(modulesPrio.begin(), modulesPrio.end(), [](const ModulesPrioElem& iFirst, const ModulesPrioElem& iSecond) {
-      return iFirst.depth > iSecond.depth;
-    });
-
-    std::vector<cv::FileNode> modules;
-    modules.reserve(modulesPrio.size());
-
-    for (const auto& m : modulesPrio)
-    {
-      modules.emplace_back(m.node);
-    }
-
-    return modules;
   }
 }

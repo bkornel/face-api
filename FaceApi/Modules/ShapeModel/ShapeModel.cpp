@@ -2,8 +2,8 @@
   #define _CRT_SECURE_NO_WARNINGS
 #endif
 
-#include "Modules/UserProcessor/ShapeModel/ShapeModel.h"
-#include "Modules/UserProcessor/ShapeModel/ClmWrapper.h"
+#include "Modules/ShapeModel/ShapeModel.h"
+#include "Modules/ShapeModel/ClmWrapper.h"
 
 #include "Configuration.h"
 #include "Framework/Text.h"
