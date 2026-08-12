@@ -7,6 +7,8 @@
 #include "Framework/Profiler.h"
 #include "Framework/Text.h"
 
+#include <cstdint>
+
 namespace face
 {
   fw::ErrorCode ShapeModelModule::InitializeInternal(const cv::FileNode& iSettings)
@@ -37,11 +39,11 @@ namespace face
     return ClmWrapper::GetInstance().Initialize(trackerFile, triFile, conFile);
   }
 
-  std::shared_ptr<ActiveUsersMessage> ShapeModelModule::Main(std::shared_ptr<ImageMessage> iImage, std::shared_ptr<ActiveUsersMessage> iUsers)
+  std::shared_ptr<FaceDataMessage> ShapeModelModule::Main(std::shared_ptr<ImageMessage> iImage, std::shared_ptr<FaceTrackMessage> iTracks)
   {
     DrainCommands();
 
-    if ((!iImage || iImage->IsEmpty()) || (!iUsers || iUsers->IsEmpty()))
+    if ((!iImage || iImage->IsEmpty()) || (!iTracks || iTracks->IsEmpty()))
       return nullptr;
 
     FACE_PROFILER(2_Shape_Model);
@@ -49,44 +51,50 @@ namespace face
     // Taken once, before the fan-out: the getter converts lazily behind a lock
     const cv::Mat frame = iImage->GetFrameGray();
 
-    const auto& users = iUsers->GetActiveUsers();
+    const auto& tracks = iTracks->GetTracks();
 
-    // The model map is maintained on this thread; the fits below only read it
-    mDispatcher.RetainModels(users);
+    // The model map is maintained on this thread; the fits below only use their own entry
+    mDispatcher.RetainModels(tracks);
 
     struct Job
     {
-      std::shared_ptr<User> user;
-      std::shared_ptr<ShapeModel> model;
+      const TrackedFace* track = nullptr;
+      ShapeModelDispatcher::TrackModel* model = nullptr;
     };
 
     std::vector<Job> jobs;
-    jobs.reserve(users.size());
+    jobs.reserve(tracks.size());
 
-    for (const auto& user : users)
-    {
-      if (user) jobs.emplace_back(Job{ user, mDispatcher.GetModel(*user) });
-    }
+    for (const auto& track : tracks)
+      jobs.emplace_back(Job{ &track, &mDispatcher.GetModel(track) });
 
-    // Each user carries its own model, so the fits are independent of each other. Not
-    // vector<bool>: its packed bits would let neighbouring writes collide.
+    // Every job owns its model and writes its own entry, so the fits are independent
+    FaceDataMessage::FaceDataVector entries(jobs.size());
+
+    // Not vector<bool>: its packed bits would let neighbouring writes collide
     std::vector<uint8_t> fitted(jobs.size(), 0U);
 
     fw::parallel_for(
       jobs.size(),
-      [&](std::size_t i) { fitted[i] = mDispatcher.Fit(*jobs[i].user, *jobs[i].model, frame) ? 1U : 0U; },
+      [&](std::size_t i) {
+        entries[i].track = *jobs[i].track;
+        fitted[i] = mDispatcher.Fit(*jobs[i].track, *jobs[i].model, frame, entries[i].data) ? 1U : 0U;
+
+        // The record carries the refined rectangle from here on
+        if (fitted[i]) entries[i].track.faceRect = entries[i].data.GetFaceRect();
+      },
       mParallelUsers ? fw::get_thread_pool_executor() : nullptr);
 
-    ActiveUsersMessage::UserVector fittedUsers;
-    fittedUsers.reserve(jobs.size());
+    FaceDataMessage::FaceDataVector fittedEntries;
+    fittedEntries.reserve(entries.size());
 
-    for (std::size_t i = 0U; i < jobs.size(); ++i)
+    for (std::size_t i = 0U; i < entries.size(); ++i)
     {
-      if (fitted[i]) fittedUsers.emplace_back(jobs[i].user);
+      if (fitted[i]) fittedEntries.emplace_back(std::move(entries[i]));
     }
 
-    if (fittedUsers.empty()) return nullptr;
+    if (fittedEntries.empty()) return nullptr;
 
-    return std::make_shared<ActiveUsersMessage>(fittedUsers, iUsers->GetFrameId(), iUsers->GetTimestamp());
+    return std::make_shared<FaceDataMessage>(std::move(fittedEntries), iTracks->GetFrameId(), iTracks->GetTimestamp());
   }
 }

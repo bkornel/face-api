@@ -99,7 +99,7 @@ namespace face
 
   void Visualizer::CreateShapeColorMap(const fw::VectorPt3D& iShape3D, cv::Mat& oColorMap) const
   {
-    const std::size_t n = iShape3D.size();
+    const int n = static_cast<int>(iShape3D.size());
 
     float minZ = (std::numeric_limits<float>::max)();
     // lowest(), not min(): min() is the smallest positive value, not the most negative.

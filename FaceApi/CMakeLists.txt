@@ -66,7 +66,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/ShapeModel)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/ShapeNorm)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/UserHistory)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/UserManager)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/UserSnapshot)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/FaceTracker)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/Visualizer)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/User)
 
@@ -105,16 +105,15 @@ set(SOURCES;
   Framework/Text.cpp;
   Framework/Settings.cpp;
   Framework/Imaging/VideoWriter.cpp;
-  Messages/ActiveUsersMessage.cpp;
   Messages/CommandMessage.cpp;
   Messages/ImageMessage.cpp;
   Messages/ImageSizeChangedMessage.cpp;
   Messages/RoiMessage.cpp;
   Messages/UserEntriesMessage.cpp;
-  Messages/UserSnapshotMessage.cpp;
   Modules/ModuleFactory.cpp;
   Modules/ModuleGraph.cpp;
   Modules/FaceDetection/FaceDetection.cpp;
+  Modules/FaceTracker/FaceTracker.cpp;
   Modules/FirstModule/FirstModule.cpp;
   Modules/HeadPose/HeadPoseModule.cpp;
   Modules/HeadPose/PoseEstimationDispatcher.cpp;
@@ -128,9 +127,7 @@ set(SOURCES;
   Modules/ShapeNorm/ShapeNormModule.cpp;
   Modules/UserHistory/UserHistory.cpp;
   Modules/UserManager/UserManager.cpp;
-  Modules/UserSnapshot/UserSnapshot.cpp;
   Modules/Visualizer/Visualizer.cpp;
-  User/User.cpp;
   User/UserData.cpp;
 )
 

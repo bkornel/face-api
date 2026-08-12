@@ -51,55 +51,51 @@ A pre-build step ([`Deploy-Dependencies.ps1`](https://github.com/bkornel/face-ap
 The Android Studio project can be found in [Applications/Android](https://github.com/bkornel/face-api/tree/master/Applications/Android). The following packages must be installed via SDK manager
 
 ### SDK platforms
-- Min SDK version: API 24 (Android 7.0)
-- Compile and target SDK version: API 35 (Android 15)
+- Min SDK version: API 23 (Android 6.0)
+- Target SDK version: API 28 (Android 9.0)
 
 ### SDK Tools
-- CMake 3.22.x or newer
-- NDK 26.x or newer
-- JDK 17 (bundled with recent Android Studio)
+- LLDB 3.x or newer
+- CMake 3.6.x or newer
+- NDK 20.x or newer
 
-The project builds with Android Gradle plugin 8.5 and Gradle 8.7, and uses AndroidX.
-
-The C++ part (image processing algorithms) is set up as a CMake external native build in the Android Studio project, thus it is built automatically when you make the project. OpenCV is linked statically, so no OpenCV shared object has to be packaged into the APK.
-
-Both `armeabi-v7a` and `arm64-v8a` are built. The OpenCV directory name is taken from the `OPENCV_VERSION` CMake cache variable, which defaults to `opencv-4.5.2`; override it if you keep a different version under `3rdparty`.
-
-The app stores its working files (settings, cascade files, shape models, logs) in app private storage, so it needs no storage permission. Only `CAMERA` is requested at runtime.
+The C++ part (image processing algorithms) is set up as a CMake external native build in the Android Studio project, thus it is built automatically when you make the project.
 
 # Modules
 
 The whole module graph can be created from the settings file (defined in [`settings.json`](https://github.com/bkornel/face-api/blob/master/Testing/configurations/settings.json) by default). Modules can interact and exchange information whith each others via ports. Every module must have one output port and can have any input ports (zero or more).
 
-Ports can be defined by implementing the `fw::Port` interface. For example the [`UserManager`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/UserManager/UserManager.h) class:
+Ports can be defined by implementing the `fw::Port` interface. For example the [`FaceTracker`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/FaceTracker/FaceTracker.h) class:
 
 ```
-class UserManager :
+class FaceTracker :
   public fw::Module,
-  public fw::Port<std::shared_ptr<ActiveUsersMessage>(std::shared_ptr<ImageMessage>, std::shared_ptr<RoiMessage>)>
+  public fw::Port<std::shared_ptr<FaceTrackMessage>(std::shared_ptr<ImageMessage>, std::shared_ptr<RoiMessage>)>
 {
   ...
-  std::shared_ptr<ActiveUsersMessage> Main(std::shared_ptr<ImageMessage> iImage, std::shared_ptr<RoiMessage> iDetections) override;
+  std::shared_ptr<FaceTrackMessage> Main(std::shared_ptr<ImageMessage> iImage, std::shared_ptr<RoiMessage> iDetections) override;
   ...
 };
 ```
 
-This class has the `ActiveUsersMessage` output and the `ImageMessage` and `RoiMessage` inputs. The `Main` member function of the class must defined according to the template arguments of `fw::Port`.
+This class has the `FaceTrackMessage` output and the `ImageMessage` and `RoiMessage` inputs. The `Main` member function of the class must defined according to the template arguments of `fw::Port`.
 
 A module that declares no input port at all is a source: it has nothing to wait for, so it is driven by `Trigger()` instead of by a predecessor. This is how [`FirstModule`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/FirstModule/FirstModule.h) starts every frame. Input ports are optional as well: a port that is left out of the settings file is not counted as a dependency, and its argument reaches `Main` default-constructed. A module with declared inputs of which none is connected is rejected, because nothing would ever make it run.
 
 ## Module Graph
 
-The module graph can be defined in the settings file ([`settings.json`](https://github.com/bkornel/face-api/blob/master/Testing/configurations/settings.json) by default). For the [`UserManager`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/UserManager/UserManager.h) module it is:
+The module graph can be defined in the settings file ([`settings.json`](https://github.com/bkornel/face-api/blob/master/Testing/configurations/settings.json) by default). For the [`FaceTracker`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/FaceTracker/FaceTracker.h) module it is:
 
 ```
-"userManager": {
+"faceTracker": {
   "port": [ "imageQueue:1", "faceDetection:2" ],
   ...
 }
 ```
 
-Where the [`ImageQueue`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/ImageQueue/ImageQueue.h) module returns with an `ImageMessage::Shared` and transfers the information to the first inputport of [`UserManager`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/UserManager/UserManager.h) and so does the [`FaceDetection`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/FaceDetection/FaceDetection.h) with `RoiMessage::Shared`.
+Where the [`ImageQueue`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/ImageQueue/ImageQueue.h) module returns with an `ImageMessage` and transfers the information to the first input port of [`FaceTracker`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/FaceTracker/FaceTracker.h) and so does the [`FaceDetection`](https://github.com/bkornel/face-api/blob/master/FaceApi/Modules/FaceDetection/FaceDetection.h) with `RoiMessage`.
+
+The pipeline itself is a chain of value messages: the tracker owns the identity of every face and publishes plain track records; `shapeModel`, `headPose` and `shapeNorm` enrich a per-face result record without touching any shared state; `userManager` at the end composes the records into immutable users. No module ever writes into an object another module holds.
 
 ## Getting the Results
 
@@ -109,13 +105,11 @@ Drawing on the host side is the cheaper path, because the frame is neither compo
 
 ```
 "lastModule": {
-  "port": [ "imageQueue:1", "userSnapshot:2" ]
+  "port": [ "imageQueue:1", "userManager:2" ]
 }
 ```
 
 The second port carries the users and is the one `GetResults` reports. It is optional, so a graph that only needs the rendered frame can leave it out.
-
-The Android application is set up this way. `Native.getResults` fills a reused `float[]` of a few kilobytes, `FaceOverlayRenderer` draws the landmarks, the face box and a label from it, and `FaceOverlayView` puts that on a transparent view above the live camera preview. Only when a photo is captured does the native side render a frame at all.
 
 ## Adding a New Module
 

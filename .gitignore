@@ -17,3 +17,6 @@ Applications/Windows/Bin/x64/
 
 # The test clips are tracked, output videos written by the app are not
 !Testing/media/*.avi
+
+# Log files written next to wherever the app runs
+myeasylog.log

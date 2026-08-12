@@ -4,7 +4,8 @@
 #include "Framework/Graph/Module.h"
 #include "Framework/Graph/Port.hpp"
 
-#include "Messages/ActiveUsersMessage.h"
+#include "Messages/FaceDataMessage.h"
+#include "Messages/FaceTrackMessage.h"
 #include "Messages/ImageMessage.h"
 #include "Modules/ShapeModel/ShapeModelDispatcher.h"
 
@@ -12,10 +13,11 @@
 
 namespace face
 {
-  /// @brief Fits the facial feature points of every user on the frame. Only the users whose
-  /// fit succeeded are forwarded, so downstream modules never see an unfitted shape.
+  /// @brief Fits the facial feature points of every tracked face on the frame and starts
+  /// the per-face result record: the track plus its shape and refined rectangle. Faces
+  /// whose fit failed are not forwarded, so nothing downstream sees an unfitted shape.
   class ShapeModelModule : public fw::Module,
-                           public fw::Port<std::shared_ptr<ActiveUsersMessage>(std::shared_ptr<ImageMessage>, std::shared_ptr<ActiveUsersMessage>)>
+                           public fw::Port<std::shared_ptr<FaceDataMessage>(std::shared_ptr<ImageMessage>, std::shared_ptr<FaceTrackMessage>)>
   {
   public:
 
@@ -23,7 +25,12 @@ namespace face
 
     virtual ~ShapeModelModule() = default;
 
-    std::shared_ptr<ActiveUsersMessage> Main(std::shared_ptr<ImageMessage> iImage, std::shared_ptr<ActiveUsersMessage> iUsers) override;
+    std::shared_ptr<FaceDataMessage> Main(std::shared_ptr<ImageMessage> iImage, std::shared_ptr<FaceTrackMessage> iTracks) override;
+
+    void Clear() override
+    {
+      mDispatcher.Clear();
+    }
 
   private:
     fw::ErrorCode InitializeInternal(const cv::FileNode& iSettings) override;

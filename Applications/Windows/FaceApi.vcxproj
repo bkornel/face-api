@@ -49,12 +49,11 @@
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Imaging\Projection.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Imaging\Procrustes.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Settings.cpp" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Messages\ActiveUsersMessage.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Messages\ImageMessage.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Messages\RoiMessage.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Messages\UserEntriesMessage.cpp" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Messages\UserSnapshotMessage.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\FaceDetection\FaceDetection.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\FaceTracker\FaceTracker.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ImageQueue\ImageQueue.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserHistory\UserHistory.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserManager\UserManager.cpp" />
@@ -66,14 +65,12 @@
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\ShapeModelModule.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeNorm\ShapeNormDispatcher.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeNorm\ShapeNormModule.cpp" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserSnapshot\UserSnapshot.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Parallel.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Graph\ModuleGraph.cpp">
       <!-- Shares its base name with Modules\ModuleGraph.cpp, which would overwrite its object file -->
       <ObjectFileName>$(IntDir)Framework.Graph.ModuleGraph.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\Visualizer\Visualizer.cpp" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\User\User.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\User\UserData.cpp" />
     <ClCompile Include="..\..\FaceApi\Messages\CommandMessage.cpp" />
     <ClCompile Include="..\..\FaceApi\Messages\ImageSizeChangedMessage.cpp" />
@@ -120,11 +117,14 @@
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Imaging\Projection.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Imaging\Procrustes.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Settings.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\ActiveUsersMessage.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\ImageMessage.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\RoiMessage.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\UserEntriesMessage.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\UserSnapshotMessage.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\FaceTrackMessage.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\FaceDataMessage.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\FaceTracker\FaceTracker.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\User\TrackedFace.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\FaceDetection\FaceDetection.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ImageQueue\ImageQueue.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\UserHistory\UserHistory.h" />
@@ -137,7 +137,6 @@
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\ShapeModelModule.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeNorm\ShapeNormDispatcher.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeNorm\ShapeNormModule.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\UserSnapshot\UserSnapshot.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Parallel.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Graph\ModuleGraph.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\Visualizer\Visualizer.h" />

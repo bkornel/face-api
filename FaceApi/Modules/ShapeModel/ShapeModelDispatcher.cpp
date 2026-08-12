@@ -4,7 +4,6 @@
 #include "Modules/ShapeModel/ShapeModelDispatcher.h"
 
 #include "Framework/Text.h"
-#include "User/User.h"
 
 #include <algorithm>
 
@@ -50,73 +49,89 @@ namespace face
     return fw::ErrorCode::OK;
   }
 
-  std::shared_ptr<ShapeModel> ShapeModelDispatcher::GetModel(const User& iUser)
+  ShapeModelDispatcher::TrackModel& ShapeModelDispatcher::GetModel(const TrackedFace& iTrack)
   {
-    auto it = mShapeModels.find(iUser.GetUserId());
-    if (it == mShapeModels.end())
+    auto it = mModels.find(iTrack.trackId);
+    if (it == mModels.end())
     {
-      it = mShapeModels.emplace(iUser.GetUserId(), std::make_shared<ShapeModel>()).first;
+      it = mModels.emplace(iTrack.trackId, TrackModel{ std::make_shared<ShapeModel>(), {}, false }).first;
     }
 
     return it->second;
   }
 
-  void ShapeModelDispatcher::RetainModels(const std::vector<std::shared_ptr<User>>& iUsers)
+  void ShapeModelDispatcher::RetainModels(const std::vector<TrackedFace>& iTracks)
   {
-    // Drop the models of the users that are no longer around. A user that comes back is
+    // Drop the models of the tracks that are no longer around. A track that comes back is
     // Detected again, and Fit() re-initializes its shape from the face rectangle then.
-    std::erase_if(mShapeModels, [&iUsers](const ShapeModels::value_type& iEntry) {
-      return std::none_of(iUsers.begin(), iUsers.end(), [&iEntry](const std::shared_ptr<User>& iUser) {
-        return iUser && iUser->GetUserId() == iEntry.first;
+    std::erase_if(mModels, [&iTracks](const TrackModels::value_type& iEntry) {
+      return std::none_of(iTracks.begin(), iTracks.end(), [&iEntry](const TrackedFace& iTrack) {
+        return iTrack.trackId == iEntry.first;
       });
     });
   }
 
-  bool ShapeModelDispatcher::Fit(User& ioUser, ShapeModel& ioShapeModel, const cv::Mat& iFrame) const
+  void ShapeModelDispatcher::Clear()
   {
+    mModels.clear();
+  }
+
+  bool ShapeModelDispatcher::Fit(const TrackedFace& iTrack, TrackModel& ioModel, const cv::Mat& iFrame, UserData& oData) const
+  {
+    ShapeModel& shapeModel = *ioModel.model;
+
     // Copied because the fit takes a mutable reference; the members stay read-only, which
-    // is what lets different users run concurrently through this method
+    // is what lets different tracks run concurrently through this method
     std::vector<int> winSize;
 
-    if (ioUser.IsDetected())
+    if (iTrack.status == TrackStatus::Detected || !ioModel.hasFit)
     {
       winSize = mWinDetection;
-      ioShapeModel.InitShape(ioUser.GetFaceRect());
+      shapeModel.InitShape(iTrack.faceRect);
     }
     else
     {
+      // The model sits where its last fit converged; move it by how far the track moved
       winSize = mWinTracking;
-      ioShapeModel.ShiftShape(ioUser.GetFaceRectOffset());
+      shapeModel.ShiftShape(iTrack.faceRect.tl() - ioModel.lastTrackRect.tl());
     }
 
-    ioShapeModel.Fit(iFrame, winSize, mNoIter, mClamp, mFTol);
+    // Where the track stood when this fit ran, which is what the next shift measures from
+    ioModel.lastTrackRect = iTrack.faceRect;
+    ioModel.hasFit = true;
 
-    if (mFailureCheck && !ioShapeModel.FailureCheck(iFrame)) return false;
+    shapeModel.Fit(iFrame, winSize, mNoIter, mClamp, mFTol);
 
-    return UpdateTemplate(ioUser, ioShapeModel, iFrame);
-  }
-
-  bool ShapeModelDispatcher::UpdateTemplate(User& ioUser, ShapeModel& ioShapeModel, const cv::Mat& iFrame) const
-  {
-    const cv::Rect screenRect(0, 0, iFrame.cols, iFrame.rows);
-
-    cv::Point2d minPt;
-    cv::Point2d maxPt;
-    if (!ioShapeModel.GetMinMax2D(screenRect, minPt, maxPt)) return false;
-
-    const cv::Rect newFaceRect(minPt, maxPt);
-    if (newFaceRect.area() <= 0) return false;
-
-    const cv::Mat& shape2DMat = ioShapeModel.GetShape2D();
+    const cv::Mat& shape2DMat = shapeModel.GetShape2D();
     const int count = shape2DMat.rows / 2;
     fw::VectorPt2D shape2D(count);
 
+    cv::Point2d minPt = { shape2DMat.at<double>(0, 0), shape2DMat.at<double>(count, 0) };
+    cv::Point2d maxPt = minPt;
+
     for (int i = 0; i < count; i++)
+    {
       shape2D[i] = { shape2DMat.at<double>(i, 0), shape2DMat.at<double>(i + count, 0) };
 
-    ioUser.SetShape2D(shape2D);
-    ioUser.SetFaceRect(newFaceRect);
-    ioUser.SetFaceTemplate(iFrame(newFaceRect));
+      if (cvIsNaN(shape2D[i].x) || cvIsInf(shape2D[i].x) || cvIsNaN(shape2D[i].y) || cvIsInf(shape2D[i].y))
+        return false;
+
+      minPt.x = (std::min)(minPt.x, shape2D[i].x);
+      minPt.y = (std::min)(minPt.y, shape2D[i].y);
+      maxPt.x = (std::max)(maxPt.x, shape2D[i].x);
+      maxPt.y = (std::max)(maxPt.y, shape2D[i].y);
+    }
+
+    const cv::Rect fittedRect(minPt, maxPt);
+
+    if (mFailureCheck && !shapeModel.FailureCheck(iFrame)) return false;
+
+    // Only a shape that lies fully on the frame is worth reporting
+    const cv::Rect screenRect(0, 0, iFrame.cols, iFrame.rows);
+    if (!screenRect.contains(minPt) || !screenRect.contains(maxPt) || fittedRect.area() <= 0) return false;
+
+    oData.SetShape2D(shape2D);
+    oData.SetFaceRect(fittedRect);
 
     return true;
   }

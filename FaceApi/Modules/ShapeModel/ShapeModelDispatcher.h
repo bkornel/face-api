@@ -2,6 +2,8 @@
 
 #include "Framework/ErrorCode.h"
 #include "Modules/ShapeModel/ShapeModel.h"
+#include "User/TrackedFace.h"
+#include "User/UserData.hpp"
 
 #include <map>
 #include <memory>
@@ -9,16 +11,22 @@
 
 namespace face
 {
-  class User;
-
-  /// @brief Owns one ShapeModel per tracked user and fits them to a frame. GetModel() and
-  /// RetainModels() maintain the map and stay on one thread; Fit() touches only the model
-  /// and user it is given, so different users may be fitted concurrently.
+  /// @brief Owns one ShapeModel per track and fits them to a frame. The model map and the
+  /// per-track fit anchors are maintained on one thread through GetModel()/RetainModels();
+  /// Fit() touches only the model it is given, so different tracks may run concurrently.
   class ShapeModelDispatcher
   {
-    using ShapeModels = std::map<int, std::shared_ptr<ShapeModel>>;
-
   public:
+    /// @brief A model and where its track stood at the last fit. The next warm start shifts
+    /// the shape by how far the track moved since then - measured between the tracker's own
+    /// rectangles, so the different framing of tracker box and fitted box cancels out.
+    struct TrackModel
+    {
+      std::shared_ptr<ShapeModel> model;
+      cv::Rect lastTrackRect;
+      bool hasFit = false;
+    };
+
     ShapeModelDispatcher() = default;
 
     ShapeModelDispatcher(const ShapeModelDispatcher& iOther) = delete;
@@ -27,16 +35,21 @@ namespace face
 
     fw::ErrorCode Initialize(const cv::FileNode& iSettings);
 
-    std::shared_ptr<ShapeModel> GetModel(const User& iUser);
+    TrackModel& GetModel(const TrackedFace& iTrack);
 
-    void RetainModels(const std::vector<std::shared_ptr<User>>& iUsers);
+    void RetainModels(const std::vector<TrackedFace>& iTracks);
 
-    bool Fit(User& ioUser, ShapeModel& ioShapeModel, const cv::Mat& iFrame) const;
+    void Clear();
+
+    /// @brief Fits one track and fills oData with the shape and the refined rectangle.
+    /// Reentrant across distinct tracks. ioModel's anchor is written by the one thread
+    /// that owns this track's fit.
+    bool Fit(const TrackedFace& iTrack, TrackModel& ioModel, const cv::Mat& iFrame, UserData& oData) const;
 
   private:
-    bool UpdateTemplate(User& ioUser, ShapeModel& ioShapeModel, const cv::Mat& iFrame) const;
+    using TrackModels = std::map<int, TrackModel>;
 
-    ShapeModels mShapeModels;
+    TrackModels mModels;
 
     std::vector<int> mWinDetection = { 11, 9, 7 };
     std::vector<int> mWinTracking = { 7 };

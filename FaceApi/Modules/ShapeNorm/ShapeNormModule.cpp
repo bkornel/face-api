@@ -32,23 +32,22 @@ namespace face
     return mDispatcher.Initialize(iSettings);
   }
 
-  std::shared_ptr<ActiveUsersMessage> ShapeNormModule::Main(std::shared_ptr<ActiveUsersMessage> iUsers)
+  std::shared_ptr<FaceDataMessage> ShapeNormModule::Main(std::shared_ptr<FaceDataMessage> iFaces)
   {
     DrainCommands();
 
-    if (!iUsers || iUsers->IsEmpty()) return nullptr;
+    if (!iFaces || iFaces->IsEmpty()) return nullptr;
 
     FACE_PROFILER(3_Shape_Norm);
 
-    const auto& users = iUsers->GetActiveUsers();
+    // A copy of the records: this module fills its own fields in its own message
+    FaceDataMessage::FaceDataVector entries = iFaces->GetEntries();
 
     fw::parallel_for(
-      users.size(),
-      [&](std::size_t i) {
-        if (users[i]) mDispatcher.Normalize(*users[i]);
-      },
+      entries.size(),
+      [&](std::size_t i) { mDispatcher.Normalize(entries[i].data); },
       mParallelUsers ? fw::get_thread_pool_executor() : nullptr);
 
-    return iUsers;
+    return std::make_shared<FaceDataMessage>(std::move(entries), iFaces->GetFrameId(), iFaces->GetTimestamp());
   }
 }

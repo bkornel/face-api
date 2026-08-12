@@ -1,29 +1,30 @@
 #pragma once
 
 #include "Framework/Messaging/Message.h"
-#include "Messages/ActiveUsersMessage.h"
 #include "User/User.h"
 
 #include <cstdint>
 #include <memory>
+#include <utility>
 #include <vector>
 
 namespace face
 {
-  /// @brief The users of one finished frame, as data nobody may change any more.
-  ///
-  /// ActiveUsersMessage carries the live users the tracking keeps writing to, and stays inside
-  /// the graph. This one is what leaves it: the users are copied on the way in and handed out
-  /// as const, so a reader on another thread cannot be looking at a user while it is being
-  /// updated. The two being separate types is also what stops a settings file from wiring a
-  /// reader straight to the tracking - the ports no longer fit together.
+  /// @brief The users of one finished frame, as data nobody may change any more. The user
+  /// manager composes them from the raw results; everything reading them - the visualizer,
+  /// the history, the host application - gets them as const and cannot be looking at a user
+  /// while it is being written.
   class UserSnapshotMessage : public fw::Message
   {
   public:
 
     using UserVector = std::vector<std::shared_ptr<const User>>;
 
-    UserSnapshotMessage(const ActiveUsersMessage::UserVector& iActiveUsers, uint32_t iFrameId, fw::Timestamp iTimestamp);
+    UserSnapshotMessage(UserVector iUsers, uint32_t iFrameId, fw::Timestamp iTimestamp) :
+      Message(iFrameId, iTimestamp),
+      mUsers(std::move(iUsers))
+    {
+    }
 
     virtual ~UserSnapshotMessage() = default;
 

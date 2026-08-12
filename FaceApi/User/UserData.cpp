@@ -19,10 +19,8 @@ namespace face
   void UserData::CopyFrom(const UserData& iOther)
   {
     // The matrices are cloned, not assigned: a copy is meant to be a snapshot, so it must
-    // not end up sharing pixel buffers with the user it was taken from.
+    // not end up sharing pixel buffers with the record it was taken from.
     mFaceRect = iOther.mFaceRect;
-    mFaceTemplate = iOther.mFaceTemplate.clone();
-    mFaceRectOffset = iOther.mFaceRectOffset;
     mFaceBox = iOther.mFaceBox;
 
     mRPY = iOther.mRPY;

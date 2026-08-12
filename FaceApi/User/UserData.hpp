@@ -25,16 +25,6 @@ namespace face
       return mFaceRect;
     }
 
-    inline const cv::Mat& GetFaceTemplate() const
-    {
-      return mFaceTemplate;
-    }
-
-    inline const cv::Vec2i& GetFaceRectOffset() const
-    {
-      return mFaceRectOffset;
-    }
-
     inline const fw::VectorPt3D& GetFaceBox() const
     {
       return mFaceBox;
@@ -109,13 +99,7 @@ namespace face
     // Set: General & detection
     inline void SetFaceRect(const cv::Rect& iFaceRect)
     {
-      mFaceRectOffset = (iFaceRect.tl() - mFaceRect.tl());
       mFaceRect = iFaceRect;
-    }
-
-    inline void SetFaceTemplate(const cv::Mat& iFaceTemplate)
-    {
-      mFaceTemplate = iFaceTemplate.clone();
     }
 
     inline void SetFaceBox(const fw::VectorPt3D& iFaceBox)
@@ -164,8 +148,6 @@ namespace face
 
     // Face
     cv::Rect mFaceRect;
-    cv::Mat mFaceTemplate;
-    cv::Vec2i mFaceRectOffset;
     fw::VectorPt3D mFaceBox;
 
     // Pose

@@ -5,9 +5,10 @@
 
 #include "Model/FaceModel.h"
 #include "Framework/Text.h"
-#include "User/User.h"
+#include "User/UserData.hpp"
 
 #include <easyloggingpp/easyloggingpp.h>
+#include <opencv2/calib3d.hpp>
 
 namespace face
 {
@@ -32,15 +33,15 @@ namespace face
     return fw::ErrorCode::OK;
   }
 
-  bool PoseEstimationDispatcher::Estimate(User& ioUser, const cv::Mat& iCameraMatrix) const
+  bool PoseEstimationDispatcher::Estimate(UserData& ioData, const cv::Mat& iCameraMatrix) const
   {
-    const Pose pose = EstimatePose(ioUser.GetShape2D(), iCameraMatrix);
+    const Pose pose = EstimatePose(ioData.GetShape2D(), iCameraMatrix);
 
-    ioUser.SetPose(pose.rpy, pose.position);
-    ioUser.SetCameraMatrix(iCameraMatrix);
-    ioUser.SetExtrinsics(pose.extrinsics, pose.rvec, pose.tvec);
-    ioUser.SetShape3D(EstimateShape3D(pose.extrinsics));
-    ioUser.SetFaceBox(mFaceBox);
+    ioData.SetPose(pose.rpy, pose.position);
+    ioData.SetCameraMatrix(iCameraMatrix);
+    ioData.SetExtrinsics(pose.extrinsics, pose.rvec, pose.tvec);
+    ioData.SetShape3D(EstimateShape3D(pose.extrinsics));
+    ioData.SetFaceBox(mFaceBox);
 
     return true;
   }

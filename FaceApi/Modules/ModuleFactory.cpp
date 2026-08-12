@@ -6,6 +6,7 @@
 #include "Framework/Text.h"
 
 #include "Modules/FaceDetection/FaceDetection.h"
+#include "Modules/FaceTracker/FaceTracker.h"
 #include "Modules/FirstModule/FirstModule.h"
 #include "Modules/HeadPose/HeadPoseModule.h"
 #include "Modules/ImageQueue/ImageQueue.h"
@@ -14,7 +15,6 @@
 #include "Modules/ShapeNorm/ShapeNormModule.h"
 #include "Modules/UserHistory/UserHistory.h"
 #include "Modules/UserManager/UserManager.h"
-#include "Modules/UserSnapshot/UserSnapshot.h"
 #include "Modules/Visualizer/Visualizer.h"
 
 #include <easyloggingpp/easyloggingpp.h>
@@ -28,6 +28,8 @@ namespace face
 
     if (moduleName == "facedetection")
       newModule = std::make_shared<FaceDetection>();
+    else if (moduleName == "facetracker")
+      newModule = std::make_shared<FaceTracker>();
     else if (moduleName == "firstmodule")
       newModule = std::make_shared<FirstModule>();
     else if (moduleName == "headpose")
@@ -44,8 +46,6 @@ namespace face
       newModule = std::make_shared<UserHistory>();
     else if (moduleName == "usermanager")
       newModule = std::make_shared<UserManager>();
-    else if (moduleName == "usersnapshot")
-      newModule = std::make_shared<UserSnapshot>();
     else if (moduleName == "visualizer")
       newModule = std::make_shared<Visualizer>();
     // REMARK: Insert new modules here

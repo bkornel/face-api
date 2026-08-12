@@ -4,17 +4,17 @@
 #include "Framework/Graph/Module.h"
 #include "Framework/Graph/Port.hpp"
 
-#include "Messages/ActiveUsersMessage.h"
+#include "Messages/FaceDataMessage.h"
 #include "Modules/ShapeNorm/ShapeNormDispatcher.h"
 
 #include <memory>
 
 namespace face
 {
-  /// @brief Aligns every user's shapes with the reference shape. Works purely on the fitted
-  /// shapes, so it needs no image.
+  /// @brief Adds the reference-aligned shapes to every face record. Works purely on the
+  /// fitted shapes, so it needs no image.
   class ShapeNormModule : public fw::Module,
-                          public fw::Port<std::shared_ptr<ActiveUsersMessage>(std::shared_ptr<ActiveUsersMessage>)>
+                          public fw::Port<std::shared_ptr<FaceDataMessage>(std::shared_ptr<FaceDataMessage>)>
   {
   public:
 
@@ -22,7 +22,7 @@ namespace face
 
     virtual ~ShapeNormModule() = default;
 
-    std::shared_ptr<ActiveUsersMessage> Main(std::shared_ptr<ActiveUsersMessage> iUsers) override;
+    std::shared_ptr<FaceDataMessage> Main(std::shared_ptr<FaceDataMessage> iFaces) override;
 
   private:
     fw::ErrorCode InitializeInternal(const cv::FileNode& iSettings) override;
