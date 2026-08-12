@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.6.0)
+cmake_minimum_required(VERSION 3.22)
 
 # The shared library has the name: libFaceApi.so
 set(TARGET_NAME FaceApi)
@@ -12,6 +12,7 @@ message("- Output directory of ${TARGET_NAME}: '${CMAKE_BINARY_DIR}/${TARGET_NAM
 # Setting some paths to 3rdparties and to the application logic
 set(DEPENDECIES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../3rdparty")
 set(OPENCV_VERSION  "opencv-4.14.0" CACHE STRING "OpenCV directory name under 3rdparty")
+
 set(OpenCV_DIR      "${DEPENDECIES_DIR}/${OPENCV_VERSION}")
 
 # Libraries have to determined based on the platform
@@ -30,6 +31,11 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Android")
   message("- Checking CMAKE_ANDROID_ARCH_ABI: '${CMAKE_ANDROID_ARCH_ABI}'")
   
   set(OpenCV_DIR "${OpenCV_DIR}/android/native/jni")
+
+  # Link OpenCV statically so everything ends up inside libFaceNative.so. This
+  # removes the need to package any OpenCV shared object, which is what used to
+  # break when the Android Gradle plugin was updated.
+  set(OpenCV_STATIC ON)
 
   # Finding 3rparty libraries
   find_package(OpenCV REQUIRED)
@@ -68,6 +74,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/User)
 set(SOURCES;
   FaceApi.cpp;
   3rdparty/easyloggingpp/easyloggingpp.cpp;
+  FaceResultBuffer.cpp;
   Configuration.cpp;
   Model/PoseGeometry.cpp;
   Model/FaceModel.cpp;

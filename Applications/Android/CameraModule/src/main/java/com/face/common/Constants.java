@@ -2,9 +2,6 @@ package com.face.common;
 
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
-import android.os.Environment;
-
-import java.io.File;
 
 public final class Constants {
     public static final String APP_NAME = "FaceApp";
@@ -28,10 +25,7 @@ public final class Constants {
         public static final String POSTFIX = ".jpg";
     }
 
-    public static final class Directories {
-        public static final String EXTERNAL = Environment.getExternalStorageDirectory().getPath() + File.separator;
-        public static final String WORKING = EXTERNAL + APP_NAME + File.separator;
-        public static final String OUTPUT = WORKING + "output" + File.separator;
-        public static final String GALLERY = EXTERNAL + Environment.DIRECTORY_DCIM + File.separator + APP_NAME + File.separator;
-    }
+    // The Directories constants moved to AppDirectories. They were resolved from
+    // Environment.getExternalStorageDirectory() while this class was being loaded,
+    // which is deprecated and not writable from API 29 on.
 }

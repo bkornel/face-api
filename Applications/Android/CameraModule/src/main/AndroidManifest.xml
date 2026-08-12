@@ -1,21 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.face">
+<!-- package= is gone: the namespace is declared in build.gradle from AGP 8 on.
+     The storage permissions are gone too: everything this app writes now lives
+     in app private storage, which needs no permission on any API level. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.CAMERA"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
     <uses-feature android:name="android.hardware.camera" android:required="true"/>
-    <uses-feature android:name="android.hardware.camera.autofocus"/>
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false"/>
 
     <application>
         <activity
              android:name="com.face.activity.CameraActivity"
+             android:exported="false"
              android:theme="@style/Theme.TranslucentNavigationBar"
              android:configChanges="orientation|screenSize|keyboardHidden"
              android:screenOrientation="portrait"/>
         <activity
              android:name="com.face.activity.PhotoActivity"
+             android:exported="false"
              android:label="@string/photo_preview_caption"
              android:screenOrientation="portrait"/>
     </application>

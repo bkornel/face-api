@@ -4,16 +4,13 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.ImageFormat;
-import android.graphics.PorterDuff;
 import android.hardware.Camera;
 import android.os.AsyncTask;
 import android.util.AttributeSet;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.widget.ImageView;
 
 import com.face.common.Configuration;
 import com.face.common.Native;
@@ -26,13 +23,15 @@ import timber.log.Timber;
 @SuppressWarnings("deprecation")
 public class CameraView extends SurfaceView implements SurfaceHolder.Callback, Camera.PreviewCallback {
 
+    /** Upper bound on the faces the overlay buffer can carry. */
+    private static final int MAX_OVERLAY_FACES = 4;
+
     private static ProcessAsyncTask sNativeTask;
 
     private int mCameraId;
     private Activity mActivity;
     private Camera mCamera;
-    private ImageView mNativeImageView;
-    private Canvas mNativeCanvas;
+    private FaceOverlayView mOverlayView;
     private int mDisplayOrientation;
     private int mImageOrientation;
 
@@ -51,9 +50,7 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback, C
         mActivity = iActivity;
         mCamera = iCamera;
 
-        mNativeImageView = new ImageView(mActivity);
-        mNativeImageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-        mNativeImageView.setAdjustViewBounds(true);
+        mOverlayView = new FaceOverlayView(mActivity);
 
         // Install a SurfaceHolder.Callback so we get notified when the underlying surface is created and destroyed.
         SurfaceHolder holder = getHolder();
@@ -64,15 +61,44 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback, C
     }
 
     public void surfaceCreated(SurfaceHolder iHolder) {
+        // The worker has to exist before the preview starts: onPreviewFrame() can
+        // fire as soon as the callback is installed, and it used to dereference a
+        // still null sNativeTask.
+        ensureWorker();
         startPreview(iHolder);
     }
 
     public void surfaceDestroyed(SurfaceHolder iHolder) {
         stopPreview();
+        stopWorker();
 
         SurfaceHolder holder = getHolder();
         if (holder != null) {
             holder.removeCallback(this);
+        }
+    }
+
+    /** Starts the processing worker if it is not running yet. */
+    private void ensureWorker() {
+        if (sNativeTask == null) {
+            sNativeTask = new ProcessAsyncTask();
+            // executeOnExecutor, not execute(): execute() uses the shared serial
+            // executor, and this task never returns, so it blocked every other
+            // AsyncTask in the app for good.
+            sNativeTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }
+
+        sNativeTask.setCameraView(this);
+    }
+
+    /**
+     * Stops the processing worker. It used to be left running for the whole process
+     * lifetime, spinning on a 1 ms sleep even while the app was in the background.
+     */
+    private void stopWorker() {
+        if (sNativeTask != null) {
+            sNativeTask.cancel(true);
+            sNativeTask = null;
         }
     }
 
@@ -82,16 +108,7 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback, C
             return;
         }
 
-        if (sNativeTask == null) {
-            sNativeTask = new ProcessAsyncTask();
-            sNativeTask.execute();
-        }
-
-        sNativeTask.setCameraView(this);
-
-        Bitmap bitmap = Bitmap.createBitmap(iWidth, iHeight, Bitmap.Config.ARGB_8888);
-        mNativeCanvas = new Canvas(bitmap);
-        mNativeImageView.setImageBitmap(bitmap);
+        ensureWorker();
 
         stopPreview();
         clearUsers();
@@ -182,35 +199,67 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback, C
             return;
         }
 
-        if (sNativeTask.getStatus() == AsyncTask.Status.RUNNING) {
+        final ProcessAsyncTask task = sNativeTask;
+        if (task == null) {
+            return;
+        }
+
+        if (task.getStatus() == AsyncTask.Status.RUNNING) {
             try {
                 Camera.Size size = iCamera.getParameters().getPreviewSize();
-                sNativeTask.setFrame(iBytes, mImageOrientation, size.width, size.height);
+                task.setFrame(iBytes, mImageOrientation, size.width, size.height);
             } catch (RuntimeException e) {
                 Timber.e(e, "Runtime exception in onPreviewFrame()");
             }
         }
     }
 
-    public Bitmap getOutputBitmap() {
-        return sNativeTask.getOutputBitmap();
+    /**
+     * Asks for the next processed frame to be rendered into a bitmap. The rendered frame is
+     * not produced per frame any more - the overlay is drawn from the geometry instead - so
+     * it has to be requested before {@link #getOutputBitmap()} is of any use.
+     */
+    public void requestCaptureFrame() {
+        final ProcessAsyncTask task = sNativeTask;
+        if (task != null) {
+            task.requestCapture();
+        }
     }
 
-    public ImageView getNativeImageView() {
-        return mNativeImageView;
+    public Bitmap getOutputBitmap() {
+        final ProcessAsyncTask task = sNativeTask;
+        return task != null ? task.getOutputBitmap() : null;
+    }
+
+    public FaceOverlayView getOverlayView() {
+        return mOverlayView;
     }
 
     private static class ProcessAsyncTask extends AsyncTask<Void, Void, Boolean> {
         private static final Object sOutputBitmapLock = new Object();
         private WeakReference<CameraView> mCameraView;
         private volatile boolean mIsInputSet = false;
+        private volatile boolean mCaptureRequested = false;
         private NativeFrame mNativeFrame = new NativeFrame();
+        private FaceOverlayData mOverlayData = new FaceOverlayData(MAX_OVERLAY_FACES);
         private Bitmap mOutputBitmap;
+        private int mFrameWidth;
+        private int mFrameHeight;
 
         public Bitmap getOutputBitmap() {
             synchronized (sOutputBitmapLock) {
-                return mOutputBitmap != null ? mOutputBitmap.copy(mOutputBitmap.getConfig(), true) : null;
+                if (mOutputBitmap == null) {
+                    return null;
+                }
+
+                // getConfig() can be null, and copy(null, ...) throws.
+                Bitmap.Config config = mOutputBitmap.getConfig();
+                return mOutputBitmap.copy(config != null ? config : Bitmap.Config.ARGB_8888, true);
             }
+        }
+
+        public void requestCapture() {
+            mCaptureRequested = true;
         }
 
         public void setCameraView(CameraView iCameraView) {
@@ -218,7 +267,7 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback, C
         }
 
         protected int NativeCall(int iRotation, int iWidth, int iHeight, byte iYUV[], int[] iRGBA) {
-            CameraView cp = mCameraView.get();
+            CameraView cp = mCameraView != null ? mCameraView.get() : null;
             if (cp == null || cp.mActivity.isFinishing()) return -1;
 
             return Native.i.process(iRotation, iWidth, iHeight, iYUV, iRGBA);
@@ -233,10 +282,6 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback, C
             if (!mIsInputSet) {
                 if (mNativeFrame.YUV == null || mNativeFrame.YUV.length != iYUV.length) {
                     mNativeFrame.YUV = new byte[iYUV.length];
-                }
-
-                if (mNativeFrame.RGBA == null || mNativeFrame.RGBA.length != iWidth * iHeight) {
-                    mNativeFrame.RGBA = new int[iWidth * iHeight];
                 }
 
                 System.arraycopy(iYUV, 0, mNativeFrame.YUV, 0, iYUV.length);
@@ -261,15 +306,34 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback, C
                         argbH = mNativeFrame.height;
                     }
 
-                    int retVal = NativeCall(mNativeFrame.rotation, mNativeFrame.width, mNativeFrame.height, mNativeFrame.YUV, mNativeFrame.RGBA);
+                    // The rendered frame is only asked for when something needs a bitmap.
+                    // Passing null keeps a full ARGB frame from crossing JNI every frame.
+                    final boolean wantsImage = mCaptureRequested;
+                    if (wantsImage && (mNativeFrame.RGBA == null || mNativeFrame.RGBA.length != argbW * argbH)) {
+                        mNativeFrame.RGBA = new int[argbW * argbH];
+                    }
+
+                    int retVal = NativeCall(mNativeFrame.rotation, mNativeFrame.width, mNativeFrame.height,
+                            mNativeFrame.YUV, wantsImage ? mNativeFrame.RGBA : null);
+
                     if (retVal == 0) {
-                        synchronized (sOutputBitmapLock) {
-                            if (mOutputBitmap == null || mOutputBitmap.getWidth() != argbW || mOutputBitmap.getHeight() != argbH) {
-                                mOutputBitmap = Bitmap.createBitmap(argbW, argbH, Bitmap.Config.ARGB_8888);
+                        mFrameWidth = argbW;
+                        mFrameHeight = argbH;
+                        mOverlayData.update();
+
+                        if (wantsImage) {
+                            synchronized (sOutputBitmapLock) {
+                                if (mOutputBitmap == null || mOutputBitmap.getWidth() != argbW || mOutputBitmap.getHeight() != argbH) {
+                                    mOutputBitmap = Bitmap.createBitmap(argbW, argbH, Bitmap.Config.ARGB_8888);
+                                }
+
+                                mOutputBitmap.setPixels(mNativeFrame.RGBA, 0, argbW, 0, 0, argbW, argbH);
+                                drawOverlayOnCapture(mOutputBitmap);
                             }
 
-                            mOutputBitmap.setPixels(mNativeFrame.RGBA, 0, argbW, 0, 0, argbW, argbH);
+                            mCaptureRequested = false;
                         }
+
                         publishProgress();
                     } else {
                         Timber.w("[JNIFACE] FaceApp returned with error code: %d.", retVal);
@@ -290,24 +354,27 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback, C
             return true;
         }
 
-        @Override
-        protected void onProgressUpdate(Void... iProgress) {
-            if (mOutputBitmap == null) {
+        /**
+         * The saved photo used to contain the overlay because the native side composited it
+         * into the frame. It is drawn here instead, at frame scale.
+         */
+        private void drawOverlayOnCapture(Bitmap ioBitmap) {
+            CameraView cp = mCameraView != null ? mCameraView.get() : null;
+            if (cp == null || cp.mOverlayView == null) {
                 return;
             }
 
-            CameraView cp = mCameraView.get();
+            cp.mOverlayView.getRenderer().draw(new Canvas(ioBitmap), mOverlayData, 1.0F, 1.0F);
+        }
 
-            if (cp == null || cp.mActivity.isFinishing()) return;
+        @Override
+        protected void onProgressUpdate(Void... iProgress) {
+            CameraView cp = mCameraView != null ? mCameraView.get() : null;
 
-            int ivWidth = cp.mNativeImageView.getWidth();
-            int ivHeight = cp.mNativeImageView.getHeight();
-            Bitmap scaledBitmap = Bitmap.createScaledBitmap(mOutputBitmap, ivWidth, ivHeight, true);
+            if (cp == null || cp.mActivity.isFinishing() || cp.mOverlayView == null) return;
 
-            cp.mNativeCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-            cp.mNativeCanvas.drawBitmap(scaledBitmap, 0, 0, null);
-            cp.mNativeImageView.draw(cp.mNativeCanvas);
-            cp.mNativeImageView.invalidate();
+            cp.mOverlayView.setFrameSize(mFrameWidth, mFrameHeight);
+            cp.mOverlayView.setData(mOverlayData);
         }
 
         @Override
@@ -317,7 +384,7 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback, C
 
         private class NativeFrame {
             byte[] YUV;     // input frame
-            int[] RGBA;     // output frame
+            int[] RGBA;     // output frame, only allocated when a capture is requested
             int rotation;
             int width;
             int height;

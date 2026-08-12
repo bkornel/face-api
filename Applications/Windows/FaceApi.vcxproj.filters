@@ -98,6 +98,7 @@
       <Filter>Framework\Imaging</Filter>
     </ClCompile>
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\FaceApi.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\FaceResultBuffer.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Exception.cpp">
       <Filter>Framework</Filter>
     </ClCompile>
@@ -256,6 +257,7 @@
     </ClInclude>
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\FaceApi.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\FaceResult.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\FaceResultBuffer.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Exception.h">
       <Filter>Framework</Filter>
     </ClInclude>
