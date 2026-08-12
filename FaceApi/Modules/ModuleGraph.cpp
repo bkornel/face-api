@@ -14,8 +14,6 @@
 
 namespace face
 {
-  ModuleGraph::FrameProcessedHandler ModuleGraph::sFrameProcessed;
-
   // Upper bound for one frame, so a stalled graph cannot block the worker forever.
   const long long ModuleGraph::sProcessTimeoutMs = 5000LL;
 
@@ -32,21 +30,36 @@ namespace face
 
     FACE_PROFILER_FRAME_ID(GetLastFrameId());
 
-    // Reading the generation before the tick is what makes this a per-frame barrier.
-    const unsigned long long generation = mLastModule->GetGeneration();
-
-    mFirstModule->Tick();
-
-    if (!mLastModule->WaitForNewOutput(generation, sProcessTimeoutMs))
+    // One frame is one unit of failure: OpenCV reports what it dislikes by throwing, and the
+    // worker has no handler above it, so an escaping exception would end the process.
+    try
     {
-      LOG(WARNING) << "The module graph did not finish the frame within " << sProcessTimeoutMs << " ms.";
+      // Reading the generation before the tick is what makes this a per-frame barrier.
+      const unsigned long long generation = mLastModule->GetGeneration();
+
+      mFirstModule->Tick();
+
+      if (!mLastModule->WaitForNewOutput(generation, sProcessTimeoutMs))
+      {
+        LOG(WARNING) << "The module graph did not finish the frame within " << sProcessTimeoutMs << " ms.";
+        return fw::ErrorCode::SystemFailure;
+      }
+
+      // Pushing a debug frame if we have it
+      if (mLastModule->HasOutput())
+      {
+        mFrameProcessed.Raise(mLastModule->GetLastImage());
+      }
+    }
+    catch (const cv::Exception& iException)
+    {
+      LOG(ERROR) << "Dropping the frame, OpenCV failed inside the module graph: " << iException.what();
       return fw::ErrorCode::SystemFailure;
     }
-
-    // Pushing a debug frame if we have it
-    if (mLastModule->HasOutput())
+    catch (const std::exception& iException)
     {
-      sFrameProcessed.Raise(mLastModule->GetLastImage());
+      LOG(ERROR) << "Dropping the frame, a module failed: " << iException.what();
+      return fw::ErrorCode::SystemFailure;
     }
 
     return fw::ErrorCode::OK;

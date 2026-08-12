@@ -27,8 +27,6 @@ namespace face
 
     using FrameProcessedToken = FrameProcessedHandler::Token;
 
-    static FrameProcessedHandler sFrameProcessed;
-
     ModuleGraph() = default;
 
     ModuleGraph(const ModuleGraph& iOther) = delete;
@@ -40,6 +38,16 @@ namespace face
     void Clear() override;
 
     fw::ErrorCode Process();
+
+    FrameProcessedToken SubscribeFrameProcessed(FrameProcessedHandler::Handler iHandler)
+    {
+      return mFrameProcessed.Subscribe(std::move(iHandler));
+    }
+
+    void UnsubscribeFrameProcessed(FrameProcessedToken iToken)
+    {
+      mFrameProcessed.Unsubscribe(iToken);
+    }
 
     // The camera path: frames are handed to the queue directly, not broadcast
     inline std::shared_ptr<ImageQueue> GetImageQueue() const
@@ -76,6 +84,8 @@ namespace face
     fw::ErrorCode GetPredecessors(const cv::FileNode& iModule, const cv::FileNode& iModules, PredecessorMap& oPredecessors);
 
     std::vector<cv::FileNode> GetConnectionOrder(const cv::FileNode& iModulesNode);
+
+    FrameProcessedHandler mFrameProcessed;
 
     std::shared_ptr<FirstModule> mFirstModule = nullptr;
     std::shared_ptr<LastModule> mLastModule = nullptr;
