@@ -107,7 +107,9 @@ namespace face
     kMouth14,
     kMouth15,
     kMouth16,
-    kMouth17
+    kMouth17,
+    kMouth18,
+    kMouth19
   };
 
   class FaceModel
