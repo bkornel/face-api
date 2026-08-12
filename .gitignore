@@ -14,3 +14,6 @@ Applications/Windows/Bin/x64/
 *.opendb
 *.avi
 .vs
+
+# The test clips are tracked, output videos written by the app are not
+!Testing/media/*.avi
