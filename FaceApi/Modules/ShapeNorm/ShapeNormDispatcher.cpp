@@ -1,7 +1,7 @@
 #include "Framework/Settings.h"
 #include "Framework/ErrorCode.h"
 #include "Modules/ShapeNorm/ShapeNormDispatcher.h"
-#include "Modules/ShapeModel/ClmWrapper.h"
+#include "Model/FaceModel.h"
 
 #include "Framework/Text.h"
 
@@ -28,7 +28,7 @@ namespace face
   fw::VectorPt2D ShapeNormDispatcher::Normalize2D(const fw::VectorPt2D& iShape2D) const
   {
     const auto& shape2D = cv::Mat(iShape2D);
-    const auto& refShape2D = cv::Mat(ClmWrapper::GetInstance().GetReferenceShape2D());
+    const auto& refShape2D = cv::Mat(FaceModel::GetInstance().GetFrontalShape2D());
 
     fw::ShapeVector shapes2D = { shape2D.clone(), refShape2D.clone() };
     cv::Mat meanShape2D = refShape2D.clone().reshape(1);
@@ -42,7 +42,7 @@ namespace face
   fw::VectorPt3D ShapeNormDispatcher::Normalize3D(const fw::VectorPt3D& iShape3D) const
   {
     const auto& shape3D = cv::Mat(iShape3D);
-    const auto& refShape3D = cv::Mat(ClmWrapper::GetInstance().GetReferenceShape3D());
+    const auto& refShape3D = cv::Mat(FaceModel::GetInstance().GetShape3D());
 
     fw::ShapeVector shapes3D = { shape3D.clone(), refShape3D.clone() };
     cv::Mat meanShape3D = refShape3D.clone().reshape(1);

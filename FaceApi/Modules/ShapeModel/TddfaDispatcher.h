@@ -3,7 +3,8 @@
 #include "Framework/ErrorCode.h"
 #include "Framework/OneEuroFilter.h"
 #include "Framework/TimeExtensions.h"
-#include "Modules/ShapeModel/IShapeFitter.h"
+#include "Messages/ShapeMessage.h"
+#include "User/TrackedFace.h"
 
 #include <opencv2/dnn.hpp>
 
@@ -21,20 +22,20 @@ namespace face
   /// The network is shared and cv::dnn forward() is not reentrant, so inference is
   /// serialized; everything around it runs per track. A One Euro filter per landmark takes
   /// the per-frame regression jitter out.
-  class TddfaDispatcher : public IShapeFitter
+  class TddfaDispatcher
   {
   public:
     TddfaDispatcher() = default;
 
-    virtual ~TddfaDispatcher() = default;
+    ~TddfaDispatcher() = default;
 
-    fw::ErrorCode Initialize(const cv::FileNode& iSettings) override;
+    fw::ErrorCode Initialize(const cv::FileNode& iSettings);
 
-    void BeginFrame(const std::vector<TrackedFace>& iTracks) override;
+    void BeginFrame(const std::vector<TrackedFace>& iTracks);
 
-    bool Fit(const TrackedFace& iTrack, const cv::Mat& iFrameGray, const cv::Mat& iFrameBGR, ShapeDescriptor& oShape) override;
+    bool Fit(const TrackedFace& iTrack, const cv::Mat& iFrameBGR, ShapeDescriptor& oShape);
 
-    void Clear() override;
+    void Clear();
 
   private:
     static constexpr int cInputSize = 120;

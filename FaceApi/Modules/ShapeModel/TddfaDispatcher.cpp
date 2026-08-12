@@ -150,7 +150,7 @@ namespace face
     return crop;
   }
 
-  bool TddfaDispatcher::Fit(const TrackedFace& iTrack, const cv::Mat& /*iFrameGray*/, const cv::Mat& iFrameBGR, ShapeDescriptor& oShape)
+  bool TddfaDispatcher::Fit(const TrackedFace& iTrack, const cv::Mat& iFrameBGR, ShapeDescriptor& oShape)
   {
     auto it = mStates.find(iTrack.trackId);
     if (it == mStates.end()) return false;

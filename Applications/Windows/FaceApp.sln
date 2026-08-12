@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27703.2026
@@ -39,11 +39,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "output", "output", "{3BED97
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "shapemodel", "shapemodel", "{28D41620-672C-4DA0-B48E-420CA82406ED}"
 	ProjectSection(SolutionItems) = preProject
-		..\..\Testing\configurations\shapemodel\face.con = ..\..\Testing\configurations\shapemodel\face.con
-		..\..\Testing\configurations\shapemodel\face.tracker = ..\..\Testing\configurations\shapemodel\face.tracker
-		..\..\Testing\configurations\shapemodel\face.tri = ..\..\Testing\configurations\shapemodel\face.tri
-		..\..\Testing\configurations\shapemodel\face2.tracker = ..\..\Testing\configurations\shapemodel\face2.tracker
-		..\..\Testing\configurations\shapemodel\face3d.obj = ..\..\Testing\configurations\shapemodel\face3d.obj
+		..\..\Testing\configurations\shapemodel\3ddfa\README.md = ..\..\Testing\configurations\shapemodel\3ddfa\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BuildEvents", "BuildEvents", "{92DEF603-2A75-4EE7-B65C-BF8014C1B1C2}"
