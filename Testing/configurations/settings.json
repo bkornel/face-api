@@ -67,7 +67,10 @@
         "removeFreqMs": "10000"
       },
       "visualizer": {
-        "port": [ "imageQueue:1", "userManager:2" ]
+        "port": [ "imageQueue:1", "userManager:2" ],
+        "glow": "TRUE",
+        "panel": "TRUE",
+        "poseBox": "TRUE"
       },
       "lastModule": {
         "port": [ "visualizer:1", "userManager:2" ]
