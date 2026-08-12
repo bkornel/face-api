@@ -8,6 +8,7 @@
 #include "Messages/ImageMessage.h"
 
 #include <chrono>
+#include <cstdint>
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -32,21 +33,21 @@ namespace face
       return mOutputPort && mOutputPort->Ready() && mOutputPort->Get();
     }
 
-    inline unsigned long long GetGeneration() const
+    inline uint64_t GetGeneration() const
     {
       return mOutputPort ? mOutputPort->GetGeneration() : 0ULL;
     }
 
-    inline bool WaitForNewOutput(unsigned long long iGeneration, long long iTimeoutMs) const
+    inline bool WaitForNewOutput(uint64_t iGeneration, int64_t iTimeoutMs) const
     {
       return mOutputPort
-               ? mOutputPort->WaitForNewValue(iGeneration, std::chrono::milliseconds(iTimeoutMs))
+               ? mOutputPort->WaitForNewValue(iGeneration, fw::Milliseconds(iTimeoutMs))
                : false;
     }
 
-    unsigned GetLastFrameId() const;
+    uint32_t GetLastFrameId() const;
 
-    long long GetLastTimestamp() const;
+    int64_t GetLastTimestamp() const;
 
     std::shared_ptr<ImageMessage> GetLastImage() const;
 

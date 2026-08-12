@@ -3,6 +3,7 @@
 #include "Framework/ErrorCode.h"
 #include "Framework/Messaging/Event.hpp"
 #include "Framework/Graph/Module.h"
+#include "Framework/Graph/ModuleConnector.h"
 #include "Framework/Graph/FlowGraph.hpp"
 
 #include "Messages/ImageMessage.h"
@@ -11,6 +12,7 @@
 #include "Modules/ImageQueue/ImageQueue.h"
 #include "Modules/LastModule/LastModule.h"
 
+#include <cstdint>
 #include <map>
 #include <memory>
 #include <string>
@@ -20,7 +22,7 @@ namespace face
 {
   class ModuleGraph : public fw::Module
   {
-    using PredecessorMap = std::map<int, std::shared_ptr<fw::Module>>;
+    using PredecessorMap = fw::ModuleConnector::PredecessorMap;
     using FrameProcessedHandler = fw::Event<void(std::shared_ptr<ImageMessage>)>;
 
   public:
@@ -60,18 +62,18 @@ namespace face
       return mLastModule;
     }
 
-    inline unsigned GetLastFrameId() const
+    inline uint32_t GetLastFrameId() const
     {
       return mLastModule ? mLastModule->GetLastFrameId() : 0U;
     }
 
-    inline long long GetLastTimestamp() const
+    inline int64_t GetLastTimestamp() const
     {
       return mLastModule ? mLastModule->GetLastTimestamp() : 0LL;
     }
 
   private:
-    static const long long sProcessTimeoutMs;
+    static const int64_t sProcessTimeoutMs;
 
     fw::ErrorCode InitializeInternal(const cv::FileNode& iModulesNode) override;
 

@@ -1,6 +1,8 @@
 #include "Framework/ErrorCode.h"
 #include "Framework/Thread.h"
+#include "Framework/TimeExtensions.h"
 
+#include <cstdint>
 #include <easyloggingpp/easyloggingpp.h>
 
 namespace fw
@@ -47,9 +49,9 @@ namespace fw
     return ErrorCode::OK;
   }
 
-  void Thread::ThreadSleep(long long iMilliseconds)
+  void Thread::ThreadSleep(int64_t iMilliseconds)
   {
-    std::this_thread::sleep_for(std::chrono::milliseconds(iMilliseconds));
+    std::this_thread::sleep_for(Milliseconds(iMilliseconds));
   }
 
   bool Thread::IsRunning() const

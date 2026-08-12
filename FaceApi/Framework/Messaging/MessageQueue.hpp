@@ -339,7 +339,7 @@ namespace fw
       const std::optional<Milliseconds> expiry = TimeToNextExpiryLocked();
 
       if (expiry)
-        mCV.wait_for(ioLock, std::chrono::duration_cast<std::chrono::microseconds>(*expiry));
+        mCV.wait_for(ioLock, std::chrono::duration_cast<Microseconds>(*expiry));
       else
         mCV.wait(ioLock);
     }

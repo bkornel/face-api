@@ -1,6 +1,7 @@
 #pragma once
 
 #include <atomic>
+#include <cstdint>
 #include <memory>
 #include <string>
 
@@ -42,12 +43,12 @@ namespace face
 
     void OnOffVerbose();
 
-    inline unsigned GetLastFrameId() const
+    inline uint32_t GetLastFrameId() const
     {
       return mModuleGraph ? mModuleGraph->GetLastFrameId() : 0U;
     }
 
-    inline long long GetLastTimestamp() const
+    inline int64_t GetLastTimestamp() const
     {
       return mModuleGraph ? mModuleGraph->GetLastTimestamp() : 0LL;
     }
@@ -73,7 +74,7 @@ namespace face
 
     std::shared_ptr<ModuleGraph> mModuleGraph = nullptr;
 
-    std::atomic<unsigned> mCameraFrameId{ 0U };
+    std::atomic<uint32_t> mCameraFrameId{ 0U };
 
     MessageQueue mOutputQueue;
   };

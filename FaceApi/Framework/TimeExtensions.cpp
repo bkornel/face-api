@@ -1,5 +1,6 @@
 #include "Framework/TimeExtensions.h"
 
+#include <cstdint>
 #include <format>
 
 namespace fw
@@ -36,12 +37,12 @@ namespace fw
     return elapsed(iFrom, now());
   }
 
-  long long to_epoch_ms(Timestamp iTimestamp)
+  int64_t to_epoch_ms(Timestamp iTimestamp)
   {
     return std::chrono::duration_cast<std::chrono::milliseconds>(iTimestamp.time_since_epoch()).count();
   }
 
-  Timestamp from_epoch_ms(long long iMilliseconds)
+  Timestamp from_epoch_ms(int64_t iMilliseconds)
   {
     return Timestamp(std::chrono::milliseconds(iMilliseconds));
   }

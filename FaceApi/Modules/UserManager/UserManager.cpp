@@ -8,6 +8,7 @@
 #include "Framework/Profiler.h"
 #include "Framework/Text.h"
 
+#include <cstdint>
 #include <easyloggingpp/easyloggingpp.h>
 #include <iomanip>
 
@@ -61,7 +62,7 @@ namespace face
 
     FACE_PROFILER(User_Manager);
 
-    const unsigned frameId = iImage->GetFrameId();
+    const uint32_t frameId = iImage->GetFrameId();
     mTimestamp = iImage->GetTimestamp();
 
     // Active users to inactive and set is-detected to false

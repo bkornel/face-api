@@ -7,15 +7,16 @@
 #include "Framework/Text.h"
 
 #include "Modules/ModuleFactory.h"
-#include "Modules/ModuleConnector.h"
+#include "Framework/Graph/ModuleConnector.h"
 
+#include <cstdint>
 #include <easyloggingpp/easyloggingpp.h>
 #include <queue>
 
 namespace face
 {
   // Upper bound for one frame, so a stalled graph cannot block the worker forever.
-  const long long ModuleGraph::sProcessTimeoutMs = 5000LL;
+  const int64_t ModuleGraph::sProcessTimeoutMs = 5000LL;
 
   ModuleGraph::~ModuleGraph()
   {
@@ -35,7 +36,7 @@ namespace face
     try
     {
       // Reading the generation before the tick is what makes this a per-frame barrier.
-      const unsigned long long generation = mLastModule->GetGeneration();
+      const uint64_t generation = mLastModule->GetGeneration();
 
       mFirstModule->Tick();
 
@@ -212,7 +213,7 @@ namespace face
       }
 
       // Source modules have no predecessor but still need their output port built
-      if ((result = ModuleConnector::Connect(module, predecessors)) != fw::ErrorCode::OK)
+      if ((result = fw::ModuleConnector::Connect(module, predecessors)) != fw::ErrorCode::OK)
       {
         return result;
       }
@@ -302,7 +303,7 @@ namespace face
   {
     CV_DbgAssert(!iModulesNode.empty());
 
-    using ModulesPrioElem = std::pair<cv::FileNode, unsigned>;
+    using ModulesPrioElem = std::pair<cv::FileNode, uint32_t>;
     std::vector<ModulesPrioElem> modulesPrio;
 
     // Loop over the <modules> tag in the settings file

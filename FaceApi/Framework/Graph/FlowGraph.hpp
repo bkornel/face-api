@@ -6,6 +6,7 @@
 #include <cassert>
 #include <chrono>
 #include <condition_variable>
+#include <cstdint>
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -30,7 +31,7 @@ namespace fw
   /// cannot create more threads than the machine can run.
   std::shared_ptr<Executor> get_thread_pool_executor();
 
-  std::shared_ptr<Executor> make_thread_pool_executor(unsigned iThreadCount);
+  std::shared_ptr<Executor> make_thread_pool_executor(uint32_t iThreadCount);
 
   /// @brief Names an executor as it is written in the settings file. Unknown names fall back
   /// to the inline executor, which is what a graph gets when it asks for nothing.
@@ -50,9 +51,9 @@ namespace fw
   private:
     const std::function<void()> mTask;
     const std::shared_ptr<Executor> mExecutor;
-    const unsigned long long mCount = 1ULL;
+    const uint64_t mCount = 1ULL;
 
-    std::atomic<unsigned long long> mArrivals{ 0ULL };
+    std::atomic<uint64_t> mArrivals{ 0ULL };
   };
 
   template <typename T>
@@ -122,14 +123,14 @@ namespace fw
       mCV.wait(lock, [this] { return mValue != nullptr; });
     }
 
-    unsigned long long GetGeneration() const
+    uint64_t GetGeneration() const
     {
       std::lock_guard<std::mutex> lock(mMutex);
       return mGeneration;
     }
 
     template <typename Rep, typename Period>
-    bool WaitForNewValue(unsigned long long iGeneration, const std::chrono::duration<Rep, Period>& iTimeout) const
+    bool WaitForNewValue(uint64_t iGeneration, const std::chrono::duration<Rep, Period>& iTimeout) const
     {
       std::unique_lock<std::mutex> lock(mMutex);
       return mCV.wait_for(lock, iTimeout, [this, iGeneration] { return mGeneration > iGeneration; });
@@ -172,7 +173,7 @@ namespace fw
     mutable std::condition_variable mCV;
 
     std::unique_ptr<T> mValue = nullptr;
-    unsigned long long mGeneration = 0ULL;
+    uint64_t mGeneration = 0ULL;
     std::vector<std::shared_ptr<Continuation>> mContinuations;
   };
 

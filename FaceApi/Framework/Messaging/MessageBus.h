@@ -2,6 +2,7 @@
 
 #include "Framework/Messaging/Message.h"
 
+#include <cstdint>
 #include <functional>
 #include <map>
 #include <memory>
@@ -27,7 +28,7 @@ namespace fw
   public:
 
     using Handler = std::function<void(std::shared_ptr<Message>)>;
-    using Token = unsigned long long;
+    using Token = uint64_t;
 
     static const Token sInvalidToken;
 

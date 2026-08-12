@@ -2,6 +2,7 @@
 
 #include "Framework/Messaging/Message.h"
 
+#include <cstdint>
 #include <opencv2/core/core.hpp>
 
 namespace face
@@ -17,7 +18,7 @@ namespace face
       VerboseModeChanged
     };
 
-    CommandMessage(Type iType, unsigned iFrameId, fw::Timestamp iTimestamp);
+    CommandMessage(Type iType, uint32_t iFrameId, fw::Timestamp iTimestamp);
 
     virtual ~CommandMessage() = default;
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <cstdint>
 #include <string>
 
 namespace fw
@@ -12,9 +13,11 @@ namespace fw
   using WallClock = std::chrono::system_clock;
   using Timestamp = WallClock::time_point;
 
-  /// @brief Fractional milliseconds. The unit lives in the type, so nothing has to be named
+  /// @brief Fractional units of time. The unit lives in the type, so nothing has to be named
   /// somethingMs to say what it holds.
+  using Seconds = std::chrono::duration<double>;
   using Milliseconds = std::chrono::duration<double, std::milli>;
+  using Microseconds = std::chrono::duration<double, std::micro>;
 
   inline Timestamp now()
   {
@@ -27,9 +30,9 @@ namespace fw
   Milliseconds elapsed_since(Timestamp iFrom);
 
   /// @brief For the boundaries that can only carry a number: the JNI buffer, FaceResult, logs
-  long long to_epoch_ms(Timestamp iTimestamp);
+  int64_t to_epoch_ms(Timestamp iTimestamp);
 
-  Timestamp from_epoch_ms(long long iMilliseconds);
+  Timestamp from_epoch_ms(int64_t iMilliseconds);
 
   std::string& get_log_stamp();
 }

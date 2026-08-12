@@ -4,6 +4,7 @@
 #include "Configuration.h"
 #include "Framework/Stopwatch.h"
 
+#include <cstdint>
 #include <easyloggingpp/easyloggingpp.h>
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
@@ -62,7 +63,7 @@ Java_com_face_common_Native_initialize(JNIEnv* iEnv, jobject /*iThis*/, jstring 
 
   const jsize pathLength = iEnv->GetStringUTFLength(iPath);
   const char* pathChars = iEnv->GetStringUTFChars(iPath, nullptr);
-  const std::string workingDirectory(pathChars, static_cast<unsigned>(pathLength));
+  const std::string workingDirectory(pathChars, static_cast<uint32_t>(pathLength));
   iEnv->ReleaseStringUTFChars(iPath, pathChars);
 
   face_jni::log("- Working directory sent from Java side: " + workingDirectory);
@@ -107,7 +108,7 @@ Java_com_face_common_Native_process(JNIEnv* iEnv, jobject /*iThis*/, jint iRotat
   }
 
   cv::Mat bgr;
-  cv::Mat jni_yuv_mat(iHeight + iHeight / 2, iWidth, CV_8UC1, (unsigned char*)jni_yuv);
+  cv::Mat jni_yuv_mat(iHeight + iHeight / 2, iWidth, CV_8UC1, (uint8_t*)jni_yuv);
   if (!jni_yuv_mat.empty())
   {
     cv::cvtColor(jni_yuv_mat, bgr, cv::COLOR_YUV420sp2BGR, 3);
@@ -138,7 +139,7 @@ Java_com_face_common_Native_process(JNIEnv* iEnv, jobject /*iThis*/, jint iRotat
         jint* jni_argb = iEnv->GetIntArrayElements(iARGB, nullptr);
         if (jni_argb && !iEnv->ExceptionOccurred())
         {
-          cv::Mat jni_argb_mat(bgr.rows, bgr.cols, CV_8UC4, (unsigned char*)jni_argb);
+          cv::Mat jni_argb_mat(bgr.rows, bgr.cols, CV_8UC4, (uint8_t*)jni_argb);
 
           cv::cvtColor(resultImage, jni_argb_mat, cv::COLOR_BGR2BGRA, 4);
           jni_argb_mat = face_jni::ARGB_2_BGRA(jni_argb_mat);

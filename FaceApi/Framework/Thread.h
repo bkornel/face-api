@@ -4,6 +4,7 @@
 
 #include <atomic>
 #include <chrono>
+#include <cstdint>
 #include <thread>
 
 namespace fw
@@ -23,7 +24,7 @@ namespace fw
 
     ErrorCode StopThread();
 
-    void ThreadSleep(long long iMilliseconds);
+    void ThreadSleep(int64_t iMilliseconds);
 
     bool IsRunning() const;
 

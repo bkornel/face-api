@@ -39,13 +39,13 @@ namespace face
     return mLastImage;
   }
 
-  unsigned LastModule::GetLastFrameId() const
+  uint32_t LastModule::GetLastFrameId() const
   {
     std::shared_ptr<ImageMessage> lastImage = GetLastImage();
     return lastImage ? lastImage->GetFrameId() : 0U;
   }
 
-  long long LastModule::GetLastTimestamp() const
+  int64_t LastModule::GetLastTimestamp() const
   {
     std::shared_ptr<ImageMessage> lastImage = GetLastImage();
     return lastImage ? fw::to_epoch_ms(lastImage->GetTimestamp()) : 0LL;

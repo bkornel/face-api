@@ -2,6 +2,7 @@
 
 #include "Framework/Messaging/Message.h"
 #include "User/User.h"
+#include <cstdint>
 #include <memory>
 
 namespace face
@@ -13,7 +14,7 @@ namespace face
     using Entry = std::pair<fw::Timestamp, std::shared_ptr<UserData>>;
     using EntryMap = std::map<int, std::vector<Entry>>;
 
-    UserEntriesMessage(const EntryMap& iEntryMap, unsigned iFrameId, fw::Timestamp iTimestamp);
+    UserEntriesMessage(const EntryMap& iEntryMap, uint32_t iFrameId, fw::Timestamp iTimestamp);
 
     virtual ~UserEntriesMessage() = default;
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <cstdint>
 #include <functional>
 #include <mutex>
 #include <utility>
@@ -26,7 +27,7 @@ namespace fw
   {
   public:
     using Handler = std::function<void(ArgumentT...)>;
-    using Token = unsigned long long;
+    using Token = uint64_t;
 
     static constexpr Token cInvalidToken = 0ULL;
 

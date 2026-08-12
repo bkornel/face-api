@@ -1,6 +1,7 @@
 #include "Framework/Graph/FlowGraph.hpp"
 #include "Framework/Text.h"
 
+#include <cstdint>
 #include <queue>
 #include <thread>
 
@@ -20,11 +21,11 @@ namespace fw
     class ThreadPoolExecutor : public Executor
     {
     public:
-      explicit ThreadPoolExecutor(unsigned iThreadCount)
+      explicit ThreadPoolExecutor(uint32_t iThreadCount)
       {
         mThreads.reserve(iThreadCount);
 
-        for (unsigned i = 0U; i < iThreadCount; ++i)
+        for (uint32_t i = 0U; i < iThreadCount; ++i)
           mThreads.emplace_back([this] { Work(); });
       }
 
@@ -89,9 +90,9 @@ namespace fw
       bool mStopped = false;
     };
 
-    unsigned DefaultThreadCount()
+    uint32_t DefaultThreadCount()
     {
-      const unsigned hardware = std::thread::hardware_concurrency();
+      const uint32_t hardware = std::thread::hardware_concurrency();
       return hardware > 2U ? hardware - 1U : 2U;
     }
 
@@ -113,7 +114,7 @@ namespace fw
     return sExecutor;
   }
 
-  std::shared_ptr<Executor> make_thread_pool_executor(unsigned iThreadCount)
+  std::shared_ptr<Executor> make_thread_pool_executor(uint32_t iThreadCount)
   {
     return std::make_shared<ThreadPoolExecutor>(iThreadCount > 0U ? iThreadCount : 1U);
   }
@@ -131,7 +132,7 @@ namespace fw
   Continuation::Continuation(std::function<void()> iTask, int iCount, std::shared_ptr<Executor> iExecutor) :
     mTask(std::move(iTask)),
     mExecutor(OrInline(std::move(iExecutor))),
-    mCount(iCount > 0 ? static_cast<unsigned long long>(iCount) : 1ULL)
+    mCount(iCount > 0 ? static_cast<uint64_t>(iCount) : 1ULL)
   {
   }
 
@@ -141,7 +142,7 @@ namespace fw
     // counted down to zero and the count put back. Re-arming cannot be part of the same
     // atomic step as the decrement that completed the round, and the arrivals landing in
     // between drove such a counter past zero, from where it never came back.
-    const unsigned long long arrivals = mArrivals.fetch_add(1ULL, std::memory_order_acq_rel) + 1ULL;
+    const uint64_t arrivals = mArrivals.fetch_add(1ULL, std::memory_order_acq_rel) + 1ULL;
 
     if (arrivals % mCount != 0ULL) return;
 

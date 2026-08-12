@@ -8,6 +8,7 @@
 #include "Messages/ActiveUsersMessage.h"
 #include "Messages/UserEntriesMessage.h"
 
+#include <cstdint>
 #include <map>
 #include <memory>
 
@@ -36,6 +37,6 @@ namespace face
 
     EntryMap mEntryMap;
     fw::Stopwatch mRemoveSW;
-    long long mRemoveFreqMs = 10000LL;
+    int64_t mRemoveFreqMs = 10000LL;
   };
 }

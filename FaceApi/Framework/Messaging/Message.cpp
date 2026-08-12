@@ -2,7 +2,7 @@
 
 namespace fw
 {
-  Message::Message(unsigned iFrameId, Timestamp iTimestamp) :
+  Message::Message(uint32_t iFrameId, Timestamp iTimestamp) :
     mFrameId(iFrameId),
     mTimestamp(iTimestamp)
   {

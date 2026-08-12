@@ -5,6 +5,7 @@
 
 #include "Framework/Text.h"
 
+#include <cstdint>
 #include <easyloggingpp/easyloggingpp.h>
 #include <opencv2/highgui/highgui.hpp>
 
@@ -34,7 +35,7 @@ namespace face
     return fw::ErrorCode::OK;
   }
 
-  fw::ErrorCode ImageQueue::Push(const cv::Mat& iFrame, unsigned iFrameId, fw::Timestamp iTimestamp)
+  fw::ErrorCode ImageQueue::Push(const cv::Mat& iFrame, uint32_t iFrameId, fw::Timestamp iTimestamp)
   {
     if (iFrame.empty())
     {
@@ -66,7 +67,7 @@ namespace face
     return mQueue.TryPush(message);
   }
 
-  std::shared_ptr<ImageMessage> ImageQueue::Main(unsigned /*iTickNumber*/)
+  std::shared_ptr<ImageMessage> ImageQueue::Main(uint32_t /*iTickNumber*/)
   {
     DrainCommands();
 
