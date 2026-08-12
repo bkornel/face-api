@@ -15,6 +15,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Testing", "Testing", "{0B45
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FaceApi", "FaceApi.vcxproj", "{3416DE23-C794-4DD7-B3CA-5BFAF7649D6D}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FaceApiTests", "FaceApiTests.vcxproj", "{7C1F3A52-9D4E-4B8A-B7E1-64C2A3F0D9B1}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3416DE23-C794-4DD7-B3CA-5BFAF7649D6D} = {3416DE23-C794-4DD7-B3CA-5BFAF7649D6D}
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "configurations", "configurations", "{BDC96046-5D30-404C-8352-AE31EBD6A175}"
 	ProjectSection(SolutionItems) = preProject
 		..\..\Testing\configurations\log.cfg = ..\..\Testing\configurations\log.cfg
@@ -61,6 +66,10 @@ Global
 		{3416DE23-C794-4DD7-B3CA-5BFAF7649D6D}.Debug|x64.Build.0 = Debug|x64
 		{3416DE23-C794-4DD7-B3CA-5BFAF7649D6D}.Release|x64.ActiveCfg = Release|x64
 		{3416DE23-C794-4DD7-B3CA-5BFAF7649D6D}.Release|x64.Build.0 = Release|x64
+		{7C1F3A52-9D4E-4B8A-B7E1-64C2A3F0D9B1}.Debug|x64.ActiveCfg = Debug|x64
+		{7C1F3A52-9D4E-4B8A-B7E1-64C2A3F0D9B1}.Debug|x64.Build.0 = Debug|x64
+		{7C1F3A52-9D4E-4B8A-B7E1-64C2A3F0D9B1}.Release|x64.ActiveCfg = Release|x64
+		{7C1F3A52-9D4E-4B8A-B7E1-64C2A3F0D9B1}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
