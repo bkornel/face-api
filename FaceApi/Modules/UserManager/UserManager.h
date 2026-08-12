@@ -3,18 +3,25 @@
 #include "Framework/Graph/Module.h"
 #include "Framework/Graph/Port.hpp"
 
-#include "Messages/FaceDataMessage.h"
+#include "Messages/FaceTrackMessage.h"
+#include "Messages/NormShapeMessage.h"
+#include "Messages/PoseMessage.h"
+#include "Messages/ShapeMessage.h"
 #include "Messages/UserSnapshotMessage.h"
 
 #include <memory>
 
 namespace face
 {
-  /// @brief The end of the processing chain: composes the raw per-face results into
-  /// immutable User records. It is the only place a User is ever built, so what a user
-  /// consists of is decided here and nowhere else.
+  /// @brief Composes the final users: one record per track, joined by track id with whatever
+  /// the estimator modules produced for it. Only the tracks are required - the other inputs
+  /// are optional ports, so a graph that skips the pose or the normalization simply leaves
+  /// those fields empty. It is the only place a User is ever built.
   class UserManager : public fw::Module,
-                      public fw::Port<std::shared_ptr<UserSnapshotMessage>(std::shared_ptr<FaceDataMessage>)>
+                      public fw::Port<std::shared_ptr<UserSnapshotMessage>(std::shared_ptr<FaceTrackMessage>,
+                                                                           std::shared_ptr<ShapeMessage>,
+                                                                           std::shared_ptr<PoseMessage>,
+                                                                           std::shared_ptr<NormShapeMessage>)>
   {
   public:
 
@@ -22,6 +29,9 @@ namespace face
 
     virtual ~UserManager() = default;
 
-    std::shared_ptr<UserSnapshotMessage> Main(std::shared_ptr<FaceDataMessage> iFaces) override;
+    std::shared_ptr<UserSnapshotMessage> Main(std::shared_ptr<FaceTrackMessage> iTracks,
+                                              std::shared_ptr<ShapeMessage> iShapes,
+                                              std::shared_ptr<PoseMessage> iPoses,
+                                              std::shared_ptr<NormShapeMessage> iNormShapes) override;
   };
 }

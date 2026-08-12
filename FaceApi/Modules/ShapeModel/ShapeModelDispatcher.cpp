@@ -76,7 +76,7 @@ namespace face
     mModels.clear();
   }
 
-  bool ShapeModelDispatcher::Fit(const TrackedFace& iTrack, TrackModel& ioModel, const cv::Mat& iFrame, UserData& oData) const
+  bool ShapeModelDispatcher::Fit(const TrackedFace& iTrack, TrackModel& ioModel, const cv::Mat& iFrame, ShapeDescriptor& oShape) const
   {
     ShapeModel& shapeModel = *ioModel.model;
 
@@ -130,8 +130,9 @@ namespace face
     const cv::Rect screenRect(0, 0, iFrame.cols, iFrame.rows);
     if (!screenRect.contains(minPt) || !screenRect.contains(maxPt) || fittedRect.area() <= 0) return false;
 
-    oData.SetShape2D(shape2D);
-    oData.SetFaceRect(fittedRect);
+    oShape.trackId = iTrack.trackId;
+    oShape.faceRect = fittedRect;
+    oShape.shape2D = std::move(shape2D);
 
     return true;
   }

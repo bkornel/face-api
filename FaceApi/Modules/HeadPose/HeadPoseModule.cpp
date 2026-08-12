@@ -21,25 +21,24 @@ namespace face
     return mDispatcher.Initialize(iSettings);
   }
 
-  std::shared_ptr<FaceDataMessage> HeadPoseModule::Main(std::shared_ptr<ImageMessage> iImage, std::shared_ptr<FaceDataMessage> iFaces)
+  std::shared_ptr<PoseMessage> HeadPoseModule::Main(std::shared_ptr<ShapeMessage> iShapes)
   {
     DrainCommands();
 
-    if ((!iImage || iImage->IsEmpty()) || (!iFaces || iFaces->IsEmpty()))
-      return nullptr;
+    if (!iShapes || iShapes->IsEmpty()) return nullptr;
 
     FACE_PROFILER(3_Head_Pose);
 
-    const cv::Mat cameraMatrix = fw::get_camera_matrix(iImage->GetSize());
+    const cv::Mat cameraMatrix = fw::get_camera_matrix(iShapes->GetFrameSize());
+    const auto& shapes = iShapes->GetShapes();
 
-    // A copy of the records: this module fills its own fields in its own message
-    FaceDataMessage::FaceDataVector entries = iFaces->GetEntries();
+    PoseMessage::PoseVector poses(shapes.size());
 
     fw::parallel_for(
-      entries.size(),
-      [&](std::size_t i) { mDispatcher.Estimate(entries[i].data, cameraMatrix); },
+      shapes.size(),
+      [&](std::size_t i) { mDispatcher.Estimate(shapes[i], cameraMatrix, poses[i]); },
       mParallelUsers ? fw::get_thread_pool_executor() : nullptr);
 
-    return std::make_shared<FaceDataMessage>(std::move(entries), iFaces->GetFrameId(), iFaces->GetTimestamp());
+    return std::make_shared<PoseMessage>(std::move(poses), iShapes->GetFrameId(), iShapes->GetTimestamp());
   }
 }

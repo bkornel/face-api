@@ -120,7 +120,9 @@
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\UserEntriesMessage.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\UserSnapshotMessage.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\FaceTrackMessage.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\FaceDataMessage.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\ShapeMessage.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\PoseMessage.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\NormShapeMessage.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\FaceTracker\FaceTracker.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\User\TrackedFace.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\FaceDetection\FaceDetection.h" />

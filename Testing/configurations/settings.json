@@ -58,19 +58,19 @@
         "winTracking": "7"
       },
       "headPose": {
-        "port": [ "imageQueue:1", "shapeModel:2" ],
+        "port": [ "shapeModel:1" ],
         "estimateReprojection": "FALSE",
         "faceBoxOffset": "5.0",
         "parallelUsers": "TRUE"
       },
       "shapeNorm": {
-        "port": [ "headPose:1" ],
+        "port": [ "shapeModel:1", "headPose:2" ],
         "maxCount": "1000",
         "epsilon": "1e-6",
         "parallelUsers": "TRUE"
       },
       "userManager": {
-        "port": [ "shapeNorm:1" ]
+        "port": [ "faceTracker:1", "shapeModel:2", "headPose:3", "shapeNorm:4" ]
       },
       "userHistory": {
         "port": [ "userManager:1" ],

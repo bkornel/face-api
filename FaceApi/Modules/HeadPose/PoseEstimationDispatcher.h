@@ -4,14 +4,15 @@
 #include "Framework/Imaging/Projection.h"
 #include "Framework/ErrorCode.h"
 
+#include "Messages/PoseMessage.h"
+#include "Messages/ShapeMessage.h"
+
 #include <opencv2/core.hpp>
 
 namespace face
 {
-  class UserData;
-
-  /// @brief Estimates the head pose of one user from its fitted 2-D shape. After Initialize()
-  /// every member is read-only, so different users may be estimated concurrently.
+  /// @brief Estimates the 6DoF head pose belonging to one fitted shape. After Initialize()
+  /// every member is read-only, so different faces may be estimated concurrently.
   class PoseEstimationDispatcher
   {
     using ImagePts = fw::VectorPt2D;
@@ -26,21 +27,10 @@ namespace face
 
     fw::ErrorCode Initialize(const cv::FileNode& iSettings);
 
-    bool Estimate(UserData& ioData, const cv::Mat& iCameraMatrix) const;
+    bool Estimate(const ShapeDescriptor& iShape, const cv::Mat& iCameraMatrix, PoseDescriptor& oPose) const;
 
   private:
-    struct Pose
-    {
-      cv::Mat extrinsics;
-      cv::Mat rvec;
-      cv::Mat tvec;
-      cv::Vec3d rpy;
-      cv::Vec3d position;
-    };
-
     static const ObjectPts sObjectPoints;
-
-    Pose EstimatePose(const ImagePts& iImagePts, const cv::Mat& iCameraMatrix) const;
 
     ObjectPts EstimateShape3D(const cv::Mat& iExtrinsics) const;
 

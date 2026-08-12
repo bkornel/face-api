@@ -2,6 +2,7 @@
 #include "Framework/Text.h"
 
 #include <cstdint>
+#include <cstdio>
 #include <queue>
 #include <thread>
 
@@ -79,7 +80,20 @@ namespace fw
             mTasks.pop();
           }
 
-          task();
+          // A worker must survive a failing task: modules publish an empty value before
+          // throwing, so the frame is already accounted for - here it is only reported.
+          try
+          {
+            task();
+          }
+          catch (const std::exception& iException)
+          {
+            std::fprintf(stderr, "A task failed on the worker pool: %s\n", iException.what());
+          }
+          catch (...)
+          {
+            std::fprintf(stderr, "A task failed on the worker pool.\n");
+          }
         }
       }
 
