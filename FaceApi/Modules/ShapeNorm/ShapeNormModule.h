@@ -13,8 +13,14 @@
 
 namespace face
 {
-  /// @brief Aligns every fitted shape with the reference shape. The pose input is optional:
-  /// without it only the 2-D half is normalized, since the 3-D shape comes from the pose.
+  /// @brief Aligns every fitted shape with the reference shape, in two and in three
+  /// dimensions.
+  ///
+  /// The pose input is no longer read. It was there because the 3-D shape used to come from
+  /// the pose module, which produces the canonical model moved to where the head is - a
+  /// shape that normalises to the same answer on every frame of every face. The fitter's own
+  /// 3-D shape is the one with a face in it, and it arrives on the first port. The port is
+  /// kept so that a settings file wiring it does not become invalid.
   class ShapeNormModule : public fw::Module,
                           public fw::Port<std::shared_ptr<NormShapeMessage>(std::shared_ptr<ShapeMessage>, std::shared_ptr<PoseMessage>)>
   {

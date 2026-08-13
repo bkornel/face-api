@@ -30,12 +30,16 @@ namespace face
     const auto& shape2D = cv::Mat(iShape2D);
     const auto& refShape2D = cv::Mat(FaceModel::GetInstance().GetFrontalShape2D());
 
+    // The reference is the second shape and the mean is seeded from it, so what the
+    // alignment converges on is the reference's own frame
     fw::ShapeVector shapes2D = { shape2D.clone(), refShape2D.clone() };
     cv::Mat meanShape2D = refShape2D.clone().reshape(1);
     fw::generalized_procrustes(shapes2D, meanShape2D, mMaxIterations, mEpsilon);
 
+    // The aligned shape, not the mean the alignment converged on: the mean of a face and
+    // the reference is a face halfway to the model, which is nobody's face
     fw::VectorPt2D result;
-    meanShape2D.reshape(2).copyTo(result);
+    shapes2D.front().reshape(2).copyTo(result);
     return result;
   }
 
@@ -49,7 +53,7 @@ namespace face
     fw::generalized_procrustes(shapes3D, meanShape3D, mMaxIterations, mEpsilon);
 
     fw::VectorPt3D result;
-    meanShape3D.reshape(3).copyTo(result);
+    shapes3D.front().reshape(3).copyTo(result);
     return result;
   }
 }

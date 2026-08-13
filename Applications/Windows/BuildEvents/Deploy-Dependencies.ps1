@@ -1,12 +1,19 @@
 <#
 .SYNOPSIS
-Copies the OpenCV and Poco runtime binaries plus the test configurations next to the
-built executable. Runs as the pre-build event of FaceApp.
+Copies the OpenCV and Poco runtime binaries, the shared model files and each application's
+own settings next to the built executables. Runs as a pre-build event.
 
 .DESCRIPTION
 Every path is derived from this script's own location, so the working directory the build
 happens to start in does not matter. Missing runtime libraries fail the build instead of
 producing an executable that cannot start.
+
+The model files are shared - they are large and identical for every host - but the settings
+are not: the console application and Face Studio configure the graph differently, and one
+deployment overwriting the other's settings would be a puzzle to debug. Each therefore gets
+its own working directory next to the executable, seeded from its own project, and only
+when the file in the project is the newer of the two - so that a setting changed in a
+deployed copy, by hand or by the settings editor, survives the next build.
 #>
 [CmdletBinding()]
 param(
@@ -26,8 +33,16 @@ $repoRoot = Split-Path -Parent (Split-Path -Parent $windowsDir)      # face-api
 $thirdParty = Join-Path (Split-Path -Parent $repoRoot) '3rdparty'
 
 $outDir = Join-Path $windowsDir "Bin\$Configuration"
+
+# The models, shared by every application
 $configSrc = Join-Path $repoRoot 'Testing\configurations'
 $configDst = Join-Path $outDir 'configurations'
+
+# One working directory per application, each holding only that application's settings.json
+$appConfigs = @(
+  @{ Source = Join-Path $windowsDir 'FaceApp\Configurations'; Destination = Join-Path $outDir 'faceapp' }
+  @{ Source = Join-Path $windowsDir 'FaceStudio\Configurations'; Destination = Join-Path $outDir 'studio' }
+)
 
 $opencvVersion = 'opencv-4.14.0'
 $opencvAbi = '4140'
@@ -103,4 +118,16 @@ if (-not (Test-Path -LiteralPath $configSrc)) {
 New-Item -ItemType Directory -Path $configDst -Force | Out-Null
 Copy-Item -Path (Join-Path $configSrc '*') -Destination $configDst -Recurse -Force
 
-Write-Host "Deploy-Dependencies: $Configuration|$Platform - $copied binaries updated, configurations synced to $configDst"
+$seeded = 0
+
+foreach ($app in $appConfigs) {
+  if (-not (Test-Path -LiteralPath $app.Source)) { continue }
+
+  New-Item -ItemType Directory -Path $app.Destination -Force | Out-Null
+
+  foreach ($file in Get-ChildItem -LiteralPath $app.Source -File) {
+    if (Copy-IfNewer -Source $file.FullName -DestinationDir $app.Destination) { $seeded++ }
+  }
+}
+
+Write-Host "Deploy-Dependencies: $Configuration|$Platform - $copied binaries updated, models synced to $configDst, $seeded application settings seeded"

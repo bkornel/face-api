@@ -1,0 +1,81 @@
+{
+  "face": {
+    "general": {
+      "output": {
+        "verbose": "FALSE",
+        "video": "FALSE",
+        "videoFourCC": "XVID",
+        "videoFPS": "25"
+      },
+      "directories": {
+        "faceDetector": "../configurations/facedetector/",
+        "shapeModel": "../configurations/shapemodel/",
+        "output": "../configurations/output/"
+      }
+    },
+    "modules": {
+      "firstModule": {
+        "port": []
+      },
+      "imageQueue": {
+        "port": [ "firstModule:1" ],
+        "bound": "10",
+        "samplingFPS": "30.0",
+        "thresholdMS": "100"
+      },
+      "faceDetection": {
+        "port": [ "imageQueue:1" ],
+        "detectionSec": "10.0",
+        "fileName": "face_detection_yunet_2023mar.onnx",
+        "imageScale": "1.0",
+        "maxSize": "1.0",
+        "minSize": "0.05",
+        "nmsThreshold": "0.3",
+        "scoreThreshold": "0.7",
+        "topK": "50"
+      },
+      "faceTracker": {
+        "port": [ "imageQueue:1", "faceDetection:2" ],
+        "maxTracks": "1",
+        "trackAwaySec": "15.0",
+        "trackOverlap": "0.2",
+        "templateScale": "0.3"
+      },
+      "shapeModel": {
+        "port": [ "imageQueue:1", "faceTracker:2" ],
+        "modelDir": "3ddfa/",
+        "smoothing": "TRUE",
+        "parallelUsers": "TRUE"
+      },
+      "headPose": {
+        "port": [ "shapeModel:1" ],
+        "poseFromShapeModel": "TRUE",
+        "estimateReprojection": "FALSE",
+        "faceBoxOffset": "5.0",
+        "parallelUsers": "TRUE"
+      },
+      "shapeNorm": {
+        "port": [ "shapeModel:1", "headPose:2" ],
+        "maxCount": "1000",
+        "epsilon": "1e-6",
+        "parallelUsers": "TRUE"
+      },
+      "userManager": {
+        "port": [ "faceTracker:1", "shapeModel:2", "headPose:3", "shapeNorm:4" ]
+      },
+      "userHistory": {
+        "port": [ "userManager:1" ],
+        "removeFreqMs": "10000"
+      },
+      "visualizer": {
+        "port": [ "imageQueue:1", "userManager:2" ],
+        "glow": "TRUE",
+        "panel": "TRUE",
+        "poseBox": "TRUE"
+      },
+      "lastModule": {
+        "port": [ "visualizer:1", "userManager:2" ]
+      }
+    }
+  }
+}

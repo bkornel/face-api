@@ -2,6 +2,7 @@
 
 #include "Framework/Imaging/Geometry.h"
 #include "Model/FaceModel.h"
+#include "Model/ShapeMetrics.h"
 
 #include <memory>
 
@@ -49,6 +50,11 @@ namespace face
     inline const fw::VectorPt3D& GetNormShape3D() const
     {
       return mNormShape3D;
+    }
+
+    inline const ExpressionMetrics& GetExpression() const
+    {
+      return mExpression;
     }
 
     inline const cv::Point2d& GetPoint2d(Landmark iIdx) const
@@ -124,6 +130,11 @@ namespace face
       mNormShape3D = iNormShape3D;
     }
 
+    inline void SetExpression(const ExpressionMetrics& iExpression)
+    {
+      mExpression = iExpression;
+    }
+
     // Set: Pose
     inline void SetPose(const cv::Vec3d& iRPY, const cv::Vec3d& iPosition3D)
     {
@@ -163,5 +174,8 @@ namespace face
     fw::VectorPt2D mNormShape2D;
     fw::VectorPt3D mShape3D;
     fw::VectorPt3D mNormShape3D;
+
+    // Expression
+    ExpressionMetrics mExpression;
   };
 }

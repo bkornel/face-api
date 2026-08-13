@@ -1,7 +1,36 @@
-#include "PoseGeometry.h"
+#include "Model/PoseGeometry.h"
+
+#include <algorithm>
 
 namespace face
 {
+  std::vector<ProjectedAxis> project_axes(const cv::Mat& iRotation)
+  {
+    std::vector<ProjectedAxis> axes;
+
+    if (iRotation.empty() || iRotation.rows < 3 || iRotation.cols < 3) return axes;
+
+    cv::Mat rotation;
+    iRotation.convertTo(rotation, CV_64F);
+
+    axes.reserve(3U);
+
+    for (int a = 0; a < 3; ++a)
+    {
+      axes.emplace_back(ProjectedAxis{
+        cv::Point2d(rotation.at<double>(0, a), rotation.at<double>(1, a)),
+        rotation.at<double>(2, a),
+        a });
+    }
+
+    // The axis pointing away is first, so the near ones are drawn over it
+    std::sort(axes.begin(), axes.end(), [](const ProjectedAxis& iLhs, const ProjectedAxis& iRhs) {
+      return iLhs.away > iRhs.away;
+    });
+
+    return axes;
+  }
+
   PoseGeometry& PoseGeometry::GetInstance()
   {
     static PoseGeometry sInstance;

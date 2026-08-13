@@ -19,20 +19,6 @@
 
 namespace face
 {
-  // The 68-point layout as the parts of a face. Every group is one stroke, which is what
-  // makes the drawing read as a face rather than as a cloud of points.
-  const std::vector<Visualizer::FeatureGroup> Visualizer::sFeatureGroups = {
-    { 0, 16, false, false, 2 },  // Jaw
-    { 17, 21, false, false, 2 }, // Right eyebrow
-    { 22, 26, false, false, 2 }, // Left eyebrow
-    { 27, 30, false, false, 2 }, // Nose bridge
-    { 31, 35, false, false, 2 }, // Nostrils
-    { 36, 41, true, true, 1 },   // Right eye
-    { 42, 47, true, true, 1 },   // Left eye
-    { 48, 59, true, false, 2 },  // Outer lip
-    { 60, 67, true, true, 1 }    // Inner lip
-  };
-
   const std::size_t Visualizer::sRuntimeHistorySize = 120U;
 
   fw::ErrorCode Visualizer::InitializeInternal(const cv::FileNode& iSettings)
@@ -79,36 +65,6 @@ namespace face
 
     const std::size_t index = static_cast<std::size_t>(iUserId < 0 ? -iUserId : iUserId) % mAccentPalette.size();
     return mAccentPalette[index];
-  }
-
-  std::vector<double> Visualizer::GetDepthWeights(const fw::VectorPt3D& iShape3D) const
-  {
-    std::vector<double> weights(iShape3D.size(), 1.0);
-    if (iShape3D.empty()) return weights;
-
-    double minZ = iShape3D[0].z;
-    double maxZ = iShape3D[0].z;
-
-    for (const auto& pt : iShape3D)
-    {
-      minZ = (std::min)(minZ, pt.z);
-      maxZ = (std::max)(maxZ, pt.z);
-    }
-
-    const double range = maxZ - minZ;
-
-    // A flat shape carries no depth information, so it is drawn evenly rather than at an
-    // arbitrary end of the ramp
-    if (range < 1e-6) return weights;
-
-    for (std::size_t i = 0U; i < iShape3D.size(); ++i)
-    {
-      // Nearer is brighter; the floor keeps the far side visible instead of black
-      const double t = (iShape3D[i].z - minZ) / range;
-      weights[i] = 1.0 - 0.6 * t;
-    }
-
-    return weights;
   }
 
   std::shared_ptr<ImageMessage> Visualizer::Main(std::shared_ptr<ImageMessage> iImage, std::shared_ptr<UserSnapshotMessage> iUsers)
@@ -194,10 +150,10 @@ namespace face
     if (shape2D.empty()) return;
 
     const int pointCount = static_cast<int>(shape2D.size());
-    const std::vector<double> depth = GetDepthWeights(shape3D);
+    const std::vector<double> depth = fw::depth_weights(shape3D);
     const bool hasDepth = (shape3D.size() == shape2D.size());
 
-    for (const auto& group : sFeatureGroups)
+    for (const auto& group : FaceModel::GetInstance().GetFeatureStrokes())
     {
       if (group.last >= pointCount) continue;
 
@@ -217,7 +173,7 @@ namespace face
       if (iIsGlowLayer)
       {
         // Thicker and plain: what matters here is the mass of light the blur spreads
-        cv::polylines(oImage, points, group.closed, color, group.thickness + 2, cv::LINE_AA);
+        cv::polylines(oImage, points, group.closed, color, group.weight + 2, cv::LINE_AA);
         continue;
       }
 
@@ -239,7 +195,7 @@ cv::addWeighted(patch, 0.78, tinted, 0.22, 0.0, patch);
         }
       }
 
-      fw::draw_contrast_polyline(oImage, points, group.closed, color, group.thickness);
+      fw::draw_contrast_polyline(oImage, points, group.closed, color, group.weight);
     }
 
     if (iIsGlowLayer) return;
@@ -269,7 +225,7 @@ cv::addWeighted(patch, 0.78, tinted, 0.22, 0.0, patch);
     const int cornerCount = static_cast<int>(corners.size());
     if (cornerCount == 0) return;
 
-    const std::vector<double> depth = GetDepthWeights(iUser.GetFaceBox());
+    const std::vector<double> depth = fw::depth_weights(iUser.GetFaceBox());
     const bool hasDepth = (depth.size() == corners.size());
 
     for (const auto& c : connections)
@@ -290,36 +246,20 @@ cv::line(oImage, corners[c.first], corners[c.second], iAccent * (weight * weight
 
     cv::circle(oImage, iCentre, iRadius + 4, cv::Scalar::all(235.0), 1, cv::LINE_AA);
 
-    // Column a of the rotation is where the model's a-th axis points in camera space, so its
-    // x and y are the direction on screen and its z says whether it points away from us
-    struct Axis { cv::Point tip; double away; int index; };
-    std::vector<Axis> axes;
-
-    for (int a = 0; a < 3; ++a)
+    for (const auto& axis : project_axes(iExtrinsics))
     {
-      const double dx = iExtrinsics.at<double>(0, a);
-      const double dy = iExtrinsics.at<double>(1, a);
-      const double dz = iExtrinsics.at<double>(2, a);
+      // The palette's first entry is the ring, so the axes start at one
+      const std::size_t colour = static_cast<std::size_t>(axis.index) + 1U;
+      if (colour >= mColorsOfAxes.size()) continue;
 
-      axes.emplace_back(Axis{
-        { iCentre.x + cvRound(dx * iRadius), iCentre.y + cvRound(dy * iRadius) },
-        dz, a + 1 });
-    }
-
-    // The axis pointing away is drawn first, so the near ones cross over it
-    std::sort(axes.begin(), axes.end(), [](const Axis& iLhs, const Axis& iRhs) {
-      return iLhs.away > iRhs.away;
-    });
-
-    for (const auto& axis : axes)
-    {
-      if (axis.index >= static_cast<int>(mColorsOfAxes.size())) continue;
+      const cv::Point tip(iCentre.x + cvRound(axis.direction.x * iRadius),
+                          iCentre.y + cvRound(axis.direction.y * iRadius));
 
       const double fade = axis.away > 0.0 ? 0.45 : 1.0;
 
-      cv::line(oImage, iCentre, axis.tip, cv::Scalar::all(0.0), 3, cv::LINE_AA);
-      cv::line(oImage, iCentre, axis.tip, mColorsOfAxes[axis.index] * fade, 2, cv::LINE_AA);
-      cv::circle(oImage, axis.tip, 2, mColorsOfAxes[axis.index] * fade, -1, cv::LINE_AA);
+      cv::line(oImage, iCentre, tip, cv::Scalar::all(0.0), 3, cv::LINE_AA);
+      cv::line(oImage, iCentre, tip, mColorsOfAxes[colour] * fade, 2, cv::LINE_AA);
+      cv::circle(oImage, tip, 2, mColorsOfAxes[colour] * fade, -1, cv::LINE_AA);
     }
   }
 

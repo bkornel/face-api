@@ -4,6 +4,10 @@ Applications/Android/obj/
 Applications/Windows/Bin/Debug/
 Applications/Windows/Bin/Release/
 Applications/Windows/Bin/x64/
+
+# Intermediates of the .NET application; its binaries go to Bin like everything else
+Applications/Windows/FaceStudio/obj/
+Applications/Windows/FaceStudio/bin/
 *.db
 *.db-shm
 *.db-wal

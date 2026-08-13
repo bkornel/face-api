@@ -18,11 +18,13 @@ void FaceApp::initialize(Application& self)
 
   Poco::Util::Application::initialize(self);
 
-  // add your own initialization code here
+  // This application's own working directory, not the one Face Studio uses: the two
+  // configure the graph differently, and the models they share are reached from here by the
+  // relative paths in settings.json
   Poco::Path path(commandPath());
   path = path.makeDirectory();
   path = path.popDirectory();
-  path = path.pushDirectory("configurations");
+  path = path.pushDirectory("faceapp");
 
   const std::string& workingDirectory = path.toString();
   face::FaceApi::GetInstance().SetWorkingDirectory(workingDirectory);

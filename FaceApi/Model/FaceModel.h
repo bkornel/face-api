@@ -112,12 +112,36 @@ namespace face
     kMouth19
   };
 
+  /// @brief One part of the face, as the range of the layout that draws it in a single
+  /// stroke.
+  ///
+  /// Drawing the points one by one gives a cloud; drawing them as these strokes gives a
+  /// face. Which is a property of the layout and not of any drawing API, so it belongs here
+  /// - the pipeline's own Visualizer and a host with its own canvas both read it from here.
+  struct FeatureStroke
+  {
+    int first;
+    int last;
+
+    /// @brief Whether the last point joins back to the first
+    bool closed;
+
+    /// @brief Whether the stroke encloses a surface worth tinting, such as an eye
+    bool filled;
+
+    /// @brief How heavy the stroke is, relative to the others
+    int weight;
+
+    const char* name;
+  };
+
   class FaceModel
   {
   public:
     using Landmarks = std::vector<Landmark>;
     using ShapeParts = std::map<BodyPart, Landmarks>;
     using Connections = std::vector<std::pair<int, int>>;
+    using FeatureStrokes = std::vector<FeatureStroke>;
 
     static FaceModel& GetInstance();
 
@@ -138,6 +162,12 @@ namespace face
       return mConnections;
     }
 
+    /// @brief The layout as the parts of a face, in drawing order
+    inline const FeatureStrokes& GetFeatureStrokes() const
+    {
+      return mFeatureStrokes;
+    }
+
     inline const fw::VectorPt3D& GetShape3D() const
     {
       return mShape3D;
@@ -155,6 +185,7 @@ namespace face
 
     ShapeParts mShapeParts;
     Connections mConnections;
+    FeatureStrokes mFeatureStrokes;
     fw::VectorPt3D mShape3D;
     fw::VectorPt2D mFrontalShape2D;
 

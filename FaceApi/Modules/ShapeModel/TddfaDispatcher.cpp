@@ -57,7 +57,38 @@ namespace face
       return fw::ErrorCode::NotFound;
     }
 
+    mModelScale = MeasureModelScale();
+
     return fw::ErrorCode::OK;
+  }
+
+  double TddfaDispatcher::MeasureModelScale() const
+  {
+    // The root mean square distance of the mean shape's landmarks from their centroid, and
+    // the size FaceModel's table was scaled to. Doing the same arithmetic here is what makes
+    // a fitted shape and the canonical model comparable rather than merely similar.
+    constexpr double cRmsRadiusMm = 54.56;
+
+    cv::Point3d centroid(0.0, 0.0, 0.0);
+
+    for (int i = 0; i < cLandmarks; ++i)
+    {
+      centroid += cv::Point3d(mUBase[i * 3], mUBase[i * 3 + 1], mUBase[i * 3 + 2]);
+    }
+
+    centroid /= static_cast<double>(cLandmarks);
+
+    double sum = 0.0;
+
+    for (int i = 0; i < cLandmarks; ++i)
+    {
+      const cv::Point3d offset = cv::Point3d(mUBase[i * 3], mUBase[i * 3 + 1], mUBase[i * 3 + 2]) - centroid;
+      sum += offset.dot(offset);
+    }
+
+    const double rms = std::sqrt(sum / cLandmarks);
+
+    return rms > 1e-9 ? cRmsRadiusMm / rms : 1.0;
   }
 
   bool TddfaDispatcher::LoadBin(const std::string& iPath, std::size_t iCount, std::vector<float>& oData) const
@@ -175,6 +206,40 @@ namespace face
 
     // verts = u + w_shp * alpha_shp + w_exp * alpha_exp, laid out x,y,z per landmark
     std::vector<cv::Point2d> shape68(cLandmarks);
+    std::vector<cv::Point3d> shape3D(cLandmarks);
+
+    // The first twelve parameters are the pose: a 3x4 similarity whose first two rows are
+    // what projects a landmark to the image. Only those two are trustworthy - the third is
+    // regressed but never used by the projection, so nothing trains it - and two rows are
+    // enough: normalise them and the third axis is their cross product.
+    //
+    // Image y grows downwards while the model's grows upwards, so the second row flips; and
+    // the shape is reported in the same flipped frame, so the rotation is conjugated by that
+    // flip to act on it.
+    {
+      const cv::Vec3d right(param[0], param[1], param[2]);
+      const cv::Vec3d down(-param[4], -param[5], -param[6]);
+
+      const double rightLength = cv::norm(right);
+      const double downLength = cv::norm(down);
+
+      if (rightLength > 1e-9 && downLength > 1e-9)
+      {
+        const cv::Vec3d r1 = right / rightLength;
+        const cv::Vec3d r2 = down / downLength;
+        const cv::Vec3d r3 = r1.cross(r2);
+
+        const cv::Matx33d toCamera(r1[0], r1[1], r1[2],
+                                   r2[0], r2[1], r2[2],
+                                   r3[0], r3[1], r3[2]);
+
+        const cv::Matx33d flip(1.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, -1.0);
+
+        oShape.rotation = toCamera * flip;
+        oShape.hasRotation = true;
+      }
+    }
+
     const double scaleX = roi.width / cInputSize;
     const double scaleY = roi.height / cInputSize;
 
@@ -193,6 +258,12 @@ namespace face
         vertex[c] = v;
       }
 
+      // The shape before the pose is applied: this is the face itself, and the projection
+      // below is what turns it into the 2-D landmarks. It used to be discarded here, which
+      // left the pose module's rigidly moved canonical model as the pipeline's only 3-D
+      // shape - a shape with no expression in it whatsoever.
+      shape3D[i] = { vertex[0] * mModelScale, -vertex[1] * mModelScale, -vertex[2] * mModelScale };
+
       // pts = R * verts + offset, then the similar transform back to frame coordinates,
       // which flips y: the morphable model lives in a y-up space
       const double x = param[0] * vertex[0] + param[1] * vertex[1] + param[2] * vertex[2] + param[3];
@@ -210,6 +281,11 @@ namespace face
       }
     }
 
+    // The canonical model puts the nose tip at the origin, and a shape that is going to be
+    // compared with it has to agree
+    const cv::Point3d origin = shape3D[cOriginLandmark];
+    for (auto& point : shape3D) point -= origin;
+
     // The raw shape drives the next frame's crop; smoothing only shapes what is reported
     state.lastShape = shape68;
     state.hasShape = true;
@@ -218,7 +294,8 @@ namespace face
     {
       if (state.filters.empty())
       {
-        state.filters.assign(cLandmarks * 2, fw::OneEuroFilter(mSmoothMinCutoff, mSmoothBeta));
+        // Two channels per landmark for the 2-D shape and three for the 3-D one
+        state.filters.assign(cLandmarks * 5, fw::OneEuroFilter(mSmoothMinCutoff, mSmoothBeta));
         state.lastTimestamp = iTrack.lastUpdateTs;
       }
 
@@ -227,10 +304,16 @@ namespace face
 
       state.lastTimestamp = iTrack.lastUpdateTs;
 
+      const int firstOf3D = cLandmarks * 2;
+
       for (int i = 0; i < cLandmarks; ++i)
       {
         shape68[i].x = state.filters[i * 2].Filter(shape68[i].x, dt);
         shape68[i].y = state.filters[i * 2 + 1].Filter(shape68[i].y, dt);
+
+        shape3D[i].x = state.filters[firstOf3D + i * 3].Filter(shape3D[i].x, dt);
+        shape3D[i].y = state.filters[firstOf3D + i * 3 + 1].Filter(shape3D[i].y, dt);
+        shape3D[i].z = state.filters[firstOf3D + i * 3 + 2].Filter(shape3D[i].z, dt);
       }
     }
 
@@ -257,6 +340,7 @@ namespace face
     oShape.trackId = iTrack.trackId;
     oShape.faceRect = fittedRect;
     oShape.shape2D = std::move(shape68);
+    oShape.shape3D = std::move(shape3D);
 
     return true;
   }

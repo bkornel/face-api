@@ -34,5 +34,7 @@ namespace face
     mNormShape2D = iOther.mNormShape2D;
     mShape3D = iOther.mShape3D;
     mNormShape3D = iOther.mNormShape3D;
+
+    mExpression = iOther.mExpression;
   }
 }

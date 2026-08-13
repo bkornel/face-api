@@ -4,6 +4,7 @@
 
 #include <opencv2/core.hpp>
 
+#include <array>
 #include <vector>
 
 namespace fw
@@ -13,6 +14,22 @@ namespace fw
 
   // Ratio of the intersection to the smaller of the two rectangles, 0 if either is empty
   float overlap_ratio(const cv::Rect& iR1, const cv::Rect& iR2);
+
+  /// @brief How near each point of a shape is, mapped to [iFar, 1] with the nearest at 1.
+  ///
+  /// Fading the far side of a shape is what makes a flat overlay read as something with a
+  /// front and a back. A shape with no depth spread comes back all ones rather than at an
+  /// arbitrary end of the ramp.
+  std::vector<double> depth_weights(const VectorPt3D& iShape3D, double iFar = 0.4);
+
+  /// @brief The four corners of a rectangle as bracket strokes: three points each, the
+  /// middle one being the corner itself.
+  ///
+  /// Brackets mark the extent of something without boxing it in, and several of them
+  /// overlap far more legibly than closed rectangles do.
+  ///
+  /// @param iArmRatio Length of an arm as a fraction of the shorter side, clamped sensibly
+  std::array<std::array<cv::Point2d, 3>, 4> corner_brackets(const cv::Rect2d& iRect, double iArmRatio = 0.18);
 
   template <typename _Tp>
   inline bool equals(const cv::Rect_<_Tp>& iA, const cv::Rect_<_Tp>& iB)

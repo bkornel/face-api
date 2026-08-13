@@ -1,0 +1,205 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="FaceStudio.Views.PipelinePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:FaceStudio.Views"
+    xmlns:services="using:FaceStudio.Services"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Page.Resources>
+
+        <!-- One row per parameter: the name and its explanation on the left, the editor on
+             the right, at one width throughout so the column of controls stays a column. -->
+        <DataTemplate x:Key="BooleanParameterTemplate" x:DataType="services:ParameterSetting">
+            <Grid ColumnSpacing="20" Padding="0,9,0,9">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="220" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+                    <TextBlock Text="{x:Bind Label}" Style="{StaticResource BodyStyle}"
+                               Foreground="{ThemeResource TextPrimaryBrush}" />
+                    <TextBlock Text="{x:Bind Description}" Style="{StaticResource HintStyle}" />
+                </StackPanel>
+
+                <ToggleSwitch Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center"
+                              OnContent="" OffContent=""
+                              IsOn="{x:Bind BooleanValue, Mode=TwoWay}" />
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="SliderParameterTemplate" x:DataType="services:ParameterSetting">
+            <Grid ColumnSpacing="20" Padding="0,9,0,9">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="220" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+                    <TextBlock Text="{x:Bind Label}" Style="{StaticResource BodyStyle}"
+                               Foreground="{ThemeResource TextPrimaryBrush}" />
+                    <TextBlock Text="{x:Bind Description}" Style="{StaticResource HintStyle}" />
+                </StackPanel>
+
+                <Grid Grid.Column="1" ColumnSpacing="10" VerticalAlignment="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="58" />
+                    </Grid.ColumnDefinitions>
+
+                    <Slider Grid.Column="0"
+                            Minimum="{x:Bind Minimum}" Maximum="{x:Bind Maximum}"
+                            StepFrequency="{x:Bind Step}"
+                            Value="{x:Bind NumberValue, Mode=TwoWay}" />
+
+                    <TextBlock Grid.Column="1" Text="{x:Bind Value, Mode=OneWay}"
+                               Style="{StaticResource MetricSmallValueStyle}"
+                               HorizontalAlignment="Right" VerticalAlignment="Center" />
+                </Grid>
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="NumberParameterTemplate" x:DataType="services:ParameterSetting">
+            <Grid ColumnSpacing="20" Padding="0,9,0,9">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="220" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+                    <TextBlock Text="{x:Bind Label}" Style="{StaticResource BodyStyle}"
+                               Foreground="{ThemeResource TextPrimaryBrush}" />
+                    <TextBlock Text="{x:Bind Description}" Style="{StaticResource HintStyle}" />
+                </StackPanel>
+
+                <NumberBox Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                           SpinButtonPlacementMode="Compact"
+                           SmallChange="{x:Bind Step}"
+                           Value="{x:Bind NumberValue, Mode=TwoWay}" />
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="TextParameterTemplate" x:DataType="services:ParameterSetting">
+            <Grid ColumnSpacing="20" Padding="0,9,0,9">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="220" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+                    <TextBlock Text="{x:Bind Label}" Style="{StaticResource BodyStyle}"
+                               Foreground="{ThemeResource TextPrimaryBrush}" />
+                    <TextBlock Text="{x:Bind Description}" Style="{StaticResource HintStyle}" />
+                </StackPanel>
+
+                <TextBox Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                         Text="{x:Bind Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            </Grid>
+        </DataTemplate>
+
+        <local:ParameterTemplateSelector x:Key="ParameterSelector"
+                                         BooleanTemplate="{StaticResource BooleanParameterTemplate}"
+                                         SliderTemplate="{StaticResource SliderParameterTemplate}"
+                                         NumberTemplate="{StaticResource NumberParameterTemplate}"
+                                         TextTemplate="{StaticResource TextParameterTemplate}" />
+
+        <DataTemplate x:Key="ModuleTemplate" x:DataType="services:ModuleSettings">
+            <Border Style="{StaticResource CardStyle}" Margin="0,0,0,14">
+                <StackPanel Spacing="8">
+                    <StackPanel Spacing="3">
+                        <TextBlock Text="{x:Bind Title}" Style="{StaticResource CardTitleStyle}" />
+                        <TextBlock Text="{x:Bind Description}" Style="{StaticResource HintStyle}" />
+                        <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,3,0,0">
+                            <TextBlock Text="reads" Style="{StaticResource HintStyle}" />
+                            <TextBlock Text="{x:Bind PortSummary}" Style="{StaticResource HintStyle}"
+                                       Foreground="{ThemeResource TextSecondaryBrush}" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <Border Height="1" Background="{ThemeResource SeparatorBrush}" Margin="0,4,0,0" />
+
+                    <ItemsControl ItemsSource="{x:Bind Parameters}"
+                                  ItemTemplateSelector="{StaticResource ParameterSelector}" />
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+
+    </Page.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Padding="24,4,24,14" ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0" Spacing="3">
+                <TextBlock Text="Pipeline" Style="{StaticResource PageTitleStyle}" />
+                <TextBlock x:Name="PathText" Style="{StaticResource HintStyle}" />
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                <TextBlock x:Name="DirtyText" Text="Unsaved changes"
+                           Style="{StaticResource HintStyle}" VerticalAlignment="Center"
+                           Foreground="{ThemeResource WarningBrush}" Visibility="Collapsed" />
+                <Button Content="Revert" Click="OnRevertClicked" />
+                <Button x:Name="ApplyButton" Content="Save and rebuild" Click="OnApplyClicked"
+                        Style="{StaticResource AccentButtonStyle}" />
+            </StackPanel>
+        </Grid>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="24,0,24,24">
+            <StackPanel Spacing="14" MaxWidth="1000" HorizontalAlignment="Left">
+
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Overlay renderer" Style="{StaticResource CardTitleStyle}" />
+                        <TextBlock Style="{StaticResource HintStyle}"
+                                   Text="Who draws the mesh, the brackets and the pose. Drawing it here keeps the frame on the GPU and leaves the pipeline one module shorter; drawing it in the pipeline is what the console application does, and what a host that only wants a finished picture would use." />
+
+                        <RadioButtons x:Name="RendererChoice" SelectionChanged="OnRendererChanged">
+                            <x:String>This application, on the GPU</x:String>
+                            <x:String>The pipeline's Visualizer, into the frame</x:String>
+                        </RadioButtons>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel Spacing="8">
+                        <StackPanel Spacing="3">
+                            <TextBlock Text="Output" Style="{StaticResource CardTitleStyle}" />
+                            <TextBlock Text="What the pipeline logs and writes, regardless of which modules are in the graph."
+                                       Style="{StaticResource HintStyle}" />
+                        </StackPanel>
+
+                        <Border Height="1" Background="{ThemeResource SeparatorBrush}" Margin="0,4,0,0" />
+
+                        <ItemsControl x:Name="GeneralList"
+                                      ItemTemplateSelector="{StaticResource ParameterSelector}" />
+                    </StackPanel>
+                </Border>
+
+                <ItemsControl x:Name="ModulesList" ItemTemplate="{StaticResource ModuleTemplate}" />
+
+                <Border Style="{StaticResource TightCardStyle}">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <FontIcon Glyph="&#xE946;" FontSize="13"
+                                  Foreground="{ThemeResource TextTertiaryBrush}" VerticalAlignment="Top" Margin="0,2,0,0" />
+                        <TextBlock Style="{StaticResource HintStyle}" MaxWidth="820"
+                                   Text="Saving writes this file and builds the graph again without restarting. The source keeps running through it, and the frames that arrive while the graph is down are dropped. If the new settings describe a graph that cannot be created, the file is still saved and the message at the bottom of the window says what went wrong." />
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Page>

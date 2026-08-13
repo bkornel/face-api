@@ -1,0 +1,52 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0-windows10.0.22621.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.19041.0</TargetPlatformMinVersion>
+    <RootNamespace>FaceStudio</RootNamespace>
+    <AssemblyName>FaceStudio</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Platforms>x64</Platforms>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <UseWinUI>true</UseWinUI>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+    <!-- Unpackaged: the application is started from the Bin folder next to the native
+         binaries the way the console application always has been, rather than deployed as
+         an MSIX. The Windows App SDK still ships with it, so no runtime has to be
+         installed for it separately. -->
+    <WindowsPackageType>None</WindowsPackageType>
+    <EnableMsixTooling>false</EnableMsixTooling>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <SelfContained>false</SelfContained>
+
+    <!-- Alongside FaceEngine.dll, OpenCV and the deployed configurations, so that the
+         application finds everything it loads without a search path -->
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+    <BaseOutputPath>$(MSBuildThisFileDirectory)..\Bin\</BaseOutputPath>
+    <OutputPath>$(MSBuildThisFileDirectory)..\Bin\$(Configuration)\</OutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.260101001" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.7463" />
+  </ItemGroup>
+
+  <!-- This application's working directory, Bin/<configuration>/studio, is seeded by
+       Deploy-Dependencies.ps1 from Configurations/settings.json, alongside the console
+       application's own. It is not a Content item here, so that one script owns where every
+       application's settings come from and when a deployed copy may be overwritten. -->
+
+  <!-- The native engine is not a project reference: it is a plain DLL loaded by name, and
+       both land in the same output folder. Making the dependency explicit here is what
+       keeps a build of the application from silently using yesterday's engine. -->
+  <Target Name="CheckNativeEngine" AfterTargets="Build">
+    <Error Condition="!Exists('$(OutputPath)FaceEngine.dll')"
+           Text="FaceEngine.dll was not found in $(OutputPath). Build the FaceEngine project first; in the FaceStudio solution it is a project dependency and this cannot happen." />
+  </Target>
+
+</Project>

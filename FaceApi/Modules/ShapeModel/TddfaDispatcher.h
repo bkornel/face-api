@@ -42,6 +42,14 @@ namespace face
     static constexpr int cParams = 62;
     static constexpr int cLandmarks = 68;
 
+    /// @brief The nose tip, which the canonical model puts at the origin
+    static constexpr int cOriginLandmark = 30;
+
+    /// @brief What the morphable model's own units have to be multiplied by to become the
+    /// canonical model's. Derived from the mean shape exactly as Testing/tools did when it
+    /// generated FaceModel's table, so a fitted average face reproduces that table.
+    double MeasureModelScale() const;
+
     struct TrackState
     {
       // The crop of the next frame follows the landmarks of the previous one
@@ -68,6 +76,8 @@ namespace face
     std::vector<float> mUBase;
     std::vector<float> mWShp;
     std::vector<float> mWExp;
+
+    double mModelScale = 1.0;
 
     std::map<int, TrackState> mStates;
 

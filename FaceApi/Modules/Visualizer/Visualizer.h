@@ -45,26 +45,12 @@ namespace face
     }
 
   private:
-    /// @brief One chain of feature points, drawn as a single curve
-    struct FeatureGroup
-    {
-      int first = 0;
-      int last = 0;
-      bool closed = false;
-      bool filled = false;
-      int thickness = 1;
-    };
-
-    static const std::vector<FeatureGroup> sFeatureGroups;
     static const std::size_t sRuntimeHistorySize;
 
     fw::ErrorCode InitializeInternal(const cv::FileNode& iSettings) override;
 
     /// @brief A stable colour per user, so the same face keeps its colour frame to frame
     cv::Scalar GetAccentColor(int iUserId) const;
-
-    /// @brief How much of the accent colour a point keeps, by its distance from the camera
-    std::vector<double> GetDepthWeights(const fw::VectorPt3D& iShape3D) const;
 
     void DrawFeaturePoints(const User& iUser, cv::Mat& oImage, const cv::Scalar& iAccent, bool iIsGlowLayer) const;
 

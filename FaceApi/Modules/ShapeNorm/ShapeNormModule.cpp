@@ -6,8 +6,6 @@
 #include "Framework/Profiler.h"
 #include "Framework/Text.h"
 
-#include <map>
-
 namespace face
 {
   fw::ErrorCode ShapeNormModule::InitializeInternal(const cv::FileNode& iSettings)
@@ -23,7 +21,8 @@ namespace face
     return mDispatcher.Initialize(iSettings);
   }
 
-  std::shared_ptr<NormShapeMessage> ShapeNormModule::Main(std::shared_ptr<ShapeMessage> iShapes, std::shared_ptr<PoseMessage> iPoses)
+  std::shared_ptr<NormShapeMessage> ShapeNormModule::Main(std::shared_ptr<ShapeMessage> iShapes,
+                                                          std::shared_ptr<PoseMessage> /*iPoses*/)
   {
     DrainCommands();
 
@@ -33,14 +32,6 @@ namespace face
 
     const auto& shapes = iShapes->GetShapes();
 
-    // The pose input is optional; where a pose exists its 3-D shape is normalized as well
-    std::map<int, const PoseDescriptor*> poseById;
-    if (iPoses)
-    {
-      for (const auto& pose : iPoses->GetPoses())
-        poseById.emplace(pose.trackId, &pose);
-    }
-
     NormShapeMessage::NormShapeVector normShapes(shapes.size());
 
     fw::parallel_for(
@@ -49,9 +40,11 @@ namespace face
         normShapes[i].trackId = shapes[i].trackId;
         normShapes[i].normShape2D = mDispatcher.Normalize2D(shapes[i].shape2D);
 
-        auto pose = poseById.find(shapes[i].trackId);
-        if (pose != poseById.end())
-          normShapes[i].normShape3D = mDispatcher.Normalize3D(pose->second->shape3D);
+        // The fitted shape, not the pose module's: that one is the canonical model moved to
+        // where the head is, so normalising it gives the same answer on every frame of every
+        // face. This one is the face the network actually reconstructed.
+        if (!shapes[i].shape3D.empty())
+          normShapes[i].normShape3D = mDispatcher.Normalize3D(shapes[i].shape3D);
       },
       mParallelUsers ? fw::get_thread_pool_executor() : nullptr);
 

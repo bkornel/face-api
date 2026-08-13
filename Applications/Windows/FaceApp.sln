@@ -23,7 +23,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "configurations", "configurations", "{BDC96046-5D30-404C-8352-AE31EBD6A175}"
 	ProjectSection(SolutionItems) = preProject
 		..\..\Testing\configurations\log.cfg = ..\..\Testing\configurations\log.cfg
-		..\..\Testing\configurations\settings.json = ..\..\Testing\configurations\settings.json
+		FaceApp\Configurations\settings.json = FaceApp\Configurations\settings.json
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "facedetector", "facedetector", "{E550A3B6-9A2D-4F7A-9F60-4D9DF7AAA71E}"

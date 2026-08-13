@@ -21,12 +21,15 @@
   <ItemGroup>
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\3rdparty\easyloggingpp\easyloggingpp.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Profiler.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Metrics.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Stopwatch.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Thread.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\TimeExtensions.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Configuration.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Model\PoseGeometry.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Model\FaceModel.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Model\ShapeMetrics.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Model\HeadMesh.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Graph\FlowGraph.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Imaging\VideoWriter.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\FaceApi.cpp" />
@@ -74,6 +77,7 @@
   <ItemGroup>
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\3rdparty\easyloggingpp\easyloggingpp.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Profiler.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Metrics.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Messaging\Event.hpp" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Messaging\MessageQueue.hpp" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Stopwatch.h" />
@@ -84,6 +88,8 @@
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Configuration.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Model\PoseGeometry.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Model\FaceModel.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Model\ShapeMetrics.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Model\HeadMesh.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Graph\FlowGraph.hpp" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Graph\IPortConnector.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Imaging\VideoWriter.h" />

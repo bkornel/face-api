@@ -8,9 +8,9 @@
         "videoFPS": "25"
       },
       "directories": {
-        "faceDetector": "facedetector/",
-        "shapeModel": "shapemodel/",
-        "output": "output/"
+        "faceDetector": "../configurations/facedetector/",
+        "shapeModel": "../configurations/shapemodel/",
+        "output": "../configurations/output/"
       }
     },
     "modules": {
@@ -49,6 +49,7 @@
       },
       "headPose": {
         "port": [ "shapeModel:1" ],
+        "poseFromShapeModel": "TRUE",
         "estimateReprojection": "FALSE",
         "faceBoxOffset": "5.0",
         "parallelUsers": "TRUE"
@@ -66,14 +67,8 @@
         "port": [ "userManager:1" ],
         "removeFreqMs": "10000"
       },
-      "visualizer": {
-        "port": [ "imageQueue:1", "userManager:2" ],
-        "glow": "TRUE",
-        "panel": "TRUE",
-        "poseBox": "TRUE"
-      },
       "lastModule": {
-        "port": [ "visualizer:1", "userManager:2" ]
+        "port": [ "imageQueue:1", "userManager:2" ]
       }
     }
   }

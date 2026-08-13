@@ -64,6 +64,20 @@ namespace face
       { BodyPart::kUndefined, "UNKNOWN_CLUSTER" }
     };
 
+    // One stroke per part, in the order they are drawn. The weights are relative: the
+    // outlines that carry the shape are heavier than the small closed curves inside them.
+    mFeatureStrokes = {
+      { 0, 16, false, false, 2, "jaw" },
+      { 17, 21, false, false, 2, "right brow" },
+      { 22, 26, false, false, 2, "left brow" },
+      { 27, 30, false, false, 2, "nose bridge" },
+      { 31, 35, false, false, 2, "nostrils" },
+      { 36, 41, true, true, 1, "right eye" },
+      { 42, 47, true, true, 1, "left eye" },
+      { 48, 59, true, false, 2, "outer lip" },
+      { 60, 67, true, true, 1, "inner lip" }
+    };
+
     mShape3D = {
       {  -65.05,  -23.49,  101.09 },  // Contour
       {  -63.32,   -5.99,   98.95 },

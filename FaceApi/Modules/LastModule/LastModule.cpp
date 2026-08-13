@@ -75,12 +75,22 @@ namespace face
       result.userId = user->GetUserId();
       result.frameId = users->GetFrameId();
       result.timestamp = fw::to_epoch_ms(users->GetTimestamp());
+
+      result.status = user->GetStatus();
+
+      // Against the frame's own timestamp rather than the wall clock, so a result that is
+      // read late does not report an age the face never had
+      result.ageSeconds = fw::elapsed(user->GetCreationTs(), users->GetTimestamp()).count() / 1000.0;
+
       result.faceRect = user->GetFaceRect();
       result.shape2D = user->GetShape2D();
       result.shape3D = user->GetShape3D();
+      result.normShape2D = user->GetNormShape2D();
+      result.normShape3D = user->GetNormShape3D();
       result.faceBox = user->GetFaceBox();
       result.rpy = user->GetRPY();
       result.position3D = user->GetPosition3D();
+      result.expression = user->GetExpression();
       result.cameraMatrix = user->GetCameraMatrix();
       result.rvec = user->GetRvec();
       result.tvec = user->GetTvec();

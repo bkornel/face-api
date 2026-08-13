@@ -50,6 +50,10 @@ namespace face
       {
         data.SetShape2D(it->second->shape2D);
 
+        // A pure function of the shape this record already holds, so it is read here rather
+        // than by a module of its own: there is nothing to schedule and nothing to share
+        data.SetExpression(measure_expression(it->second->shape2D));
+
         // The shape's bounding box frames the face tighter than the tracker's rectangle
         data.SetFaceRect(it->second->faceRect);
         face.faceRect = it->second->faceRect;
