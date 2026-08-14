@@ -252,18 +252,13 @@ public sealed class PipelineSettings
             Modules.Add(module);
         }
 
-        LoadedRenderer = modules?["visualizer"] is not null && LastModuleReadsVisualizer()
+        // A visualizer in the graph is a visualizer whose frame comes out of the pipeline:
+        // it is a sink, so the pipeline hands its frame to the host by itself
+        LoadedRenderer = modules?["visualizer"] is not null
             ? OverlayRenderer.Pipeline
             : OverlayRenderer.Application;
 
         Renderer = LoadedRenderer;
-    }
-
-    private bool LastModuleReadsVisualizer()
-    {
-        if (ModulesNode?["lastModule"]?["port"] is not JsonArray ports) return false;
-
-        return ports.Any(port => port?.GetValue<string>()?.StartsWith("visualizer", StringComparison.Ordinal) == true);
     }
 
     private static string ReadValue(JsonObject? iNode, string iKey)
@@ -353,13 +348,11 @@ public sealed class PipelineSettings
     }
 
     /// <summary>
-    /// Wires the graph for whoever is drawing the overlay. Both ends have to move together:
-    /// the Visualizer has to exist, and the last module has to be reading from it.
+    /// Wires the graph for whoever is drawing the overlay. The Visualizer is a sink, so
+    /// adding it is the whole change - nothing downstream has to be re-pointed at it.
     /// </summary>
     private void ApplyRenderer(JsonObject iModules)
     {
-        if (iModules["lastModule"] is not JsonObject lastModule) return;
-
         if (Renderer == OverlayRenderer.Pipeline)
         {
             if (iModules["visualizer"] is not JsonObject)
@@ -372,16 +365,12 @@ public sealed class PipelineSettings
                     ["poseBox"] = "TRUE"
                 };
             }
-
-            lastModule["port"] = new JsonArray("visualizer:1", "userManager:2");
         }
         else
         {
+            // Without it the frame comes out of the image queue as it went in, and this
+            // application draws its own overlay on the GPU
             iModules.Remove("visualizer");
-
-            // The frame comes straight from the queue, and the users travel on the second
-            // port, which is what GetResults reports
-            lastModule["port"] = new JsonArray("imageQueue:1", "userManager:2");
         }
     }
 

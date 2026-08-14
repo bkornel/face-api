@@ -86,7 +86,7 @@ internal static class SettingsSchema
                     1.0, 500.0, 10.0),
 
                 new ParameterDescriptor("fileName", "Model file", ParameterKind.Text,
-                    "The ONNX network, under the face detector directory.")
+                    "The ONNX network, relative to the working directory.")
             }),
 
         new ModuleDescriptor("faceTracker", "Face tracker",
@@ -121,7 +121,7 @@ internal static class SettingsSchema
                     "Runs the fit for several faces at once. No effect while only one face is tracked."),
 
                 new ParameterDescriptor("modelDir", "Model directory", ParameterKind.Text,
-                    "Where the network lives, under the shape model directory.")
+                    "Where the network lives, relative to the working directory.")
             }),
 
         new ModuleDescriptor("headPose", "Head pose",

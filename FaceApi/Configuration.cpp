@@ -5,61 +5,53 @@
 #include "Framework/Text.h"
 
 #include <easyloggingpp/easyloggingpp.h>
-#include <opencv2/highgui/highgui.hpp>
 
-#include <cmath>
+#include <algorithm>
 
 namespace face
 {
-  Configuration& Configuration::GetInstance()
+  fw::ErrorCode Configuration::Initialize(const std::string& iWorkingDirectory, const std::string& iConfigFile)
   {
-    static Configuration sInstance;
-    return sInstance;
-  }
+    // Start from the defaults, so a re-read does not inherit what a previous file set
+    mModulesNode = cv::FileNode();
+    mDirectories = DirectoryParams();
+    mOutput = OutputParams();
+    mVerbose = false;
 
-  fw::ErrorCode Configuration::Initialize(const std::string& iConfigFile)
-  {
-    static bool sInitialized = false;
+    mDirectories.working = iWorkingDirectory;
+    FixPathSeparator(mDirectories.working);
 
-    if (sInitialized) return fw::ErrorCode::OK;
-
-    sInitialized = true;
-
-    std::string jsonFile = mDirectories.working + iConfigFile;
-    std::replace(jsonFile.begin(), jsonFile.end(), '\\', '/');
+    const std::string jsonFile = mDirectories.working + iConfigFile;
 
     if (!mFileStorage.open(jsonFile, cv::FileStorage::READ))
     {
       LOG(ERROR) << "ERROR: " << jsonFile << " cannot be opened.";
-      sInitialized = false;
       return fw::ErrorCode::BadData;
     }
 
     const cv::FileNode& faceNode = mFileStorage["face"];
-    if (!faceNode.empty())
+    if (faceNode.empty())
     {
-      const cv::FileNode& generalNode = faceNode["general"];
-      if (!generalNode.empty())
-      {
-        if (LoadSettings(generalNode))
-        {
-          const std::string& configFile = mDirectories.working + "log.cfg";
-          const std::string& logFile = mDirectories.output + fw::get_log_stamp() + ".txt";
-
-          el::Configurations conf(configFile);
-          conf.set(el::Level::Global, el::ConfigurationType::Filename, logFile);
-          el::Loggers::reconfigureAllLoggers(conf);
-        }
-        else
-        {
-          sInitialized = false;
-        }
-      }
-
-      mModulesNode = faceNode["modules"];
+      LOG(ERROR) << "ERROR: " << jsonFile << " carries no <face> node.";
+      return fw::ErrorCode::BadData;
     }
 
-    return sInitialized ? fw::ErrorCode::OK : fw::ErrorCode::SystemFailure;
+    const cv::FileNode& generalNode = faceNode["general"];
+    if (!generalNode.empty())
+    {
+      LoadSettings(generalNode);
+
+      const std::string& configFile = mDirectories.working + "log.cfg";
+      const std::string& logFile = mDirectories.output + fw::get_log_stamp() + ".txt";
+
+      el::Configurations conf(configFile);
+      conf.set(el::Level::Global, el::ConfigurationType::Filename, logFile);
+      el::Loggers::reconfigureAllLoggers(conf);
+    }
+
+    mModulesNode = faceNode["modules"];
+
+    return fw::ErrorCode::OK;
   }
 
   bool Configuration::LoadSettings(const cv::FileNode& iGeneralNode)
@@ -82,20 +74,17 @@ namespace face
         mOutput.videoFourCC = cv::VideoWriter::fourcc(value[0], value[1], value[2], value[3]);
     }
 
+    // The model files moved into the module settings; the only directory left to configure
+    // is where the output goes
     const cv::FileNode& dirNode = iGeneralNode["directories"];
     if (!dirNode.empty())
     {
-      if (fw::get_value(dirNode, "faceDetector", value))
-        mRelativeDirectories.faceDetector = value;
-
-      if (fw::get_value(dirNode, "shapeModel", value))
-        mRelativeDirectories.shapeModel = value;
-
       if (fw::get_value(dirNode, "output", value))
-        mRelativeDirectories.output = value;
+        mDirectories.output = value;
     }
 
-    RebuildPaths();
+    mDirectories.output = mDirectories.working + mDirectories.output;
+    FixPathSeparator(mDirectories.output);
 
     return true;
   }
@@ -123,32 +112,10 @@ namespace face
     return sEmptyNode;
   }
 
-  void Configuration::SetWorkingDirectory(const std::string& iWorkingDir)
-  {
-    mRelativeDirectories.working = iWorkingDir;
-    RebuildPaths();
-  }
-
-  void Configuration::RebuildPaths()
-  {
-    FixPathSeparator(mRelativeDirectories.working);
-
-    mDirectories.working = mRelativeDirectories.working;
-
-    mDirectories.faceDetector = mDirectories.working + mRelativeDirectories.faceDetector;
-    FixPathSeparator(mDirectories.faceDetector);
-
-    mDirectories.shapeModel = mDirectories.working + mRelativeDirectories.shapeModel;
-    FixPathSeparator(mDirectories.shapeModel);
-
-    mDirectories.output = mDirectories.working + mRelativeDirectories.output;
-    FixPathSeparator(mDirectories.output);
-  }
-
   void Configuration::FixPathSeparator(std::string& ioPath)
   {
     std::replace(ioPath.begin(), ioPath.end(), '\\', '/');
-    if (!ioPath.ends_with("/") && !ioPath.ends_with("\\"))
+    if (!ioPath.empty() && !ioPath.ends_with("/"))
       ioPath += "/";
   }
 }

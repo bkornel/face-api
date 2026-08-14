@@ -6,7 +6,6 @@
 #include <opencv2/videoio/videoio.hpp>
 
 #include <string>
-#include <vector>
 
 namespace face
 {
@@ -19,22 +18,27 @@ namespace face
 
   struct DirectoryParams
   {
+    /// @brief Where settings.json lives, and what every relative path resolves against
     std::string working;
-    std::string faceDetector = "facedetector/";
-    std::string shapeModel = "shapemodel/";
+
+    /// @brief Where logs, recordings and profiler dumps go
     std::string output = "output/";
   };
 
+  /// @brief One settings.json, parsed. Owned by the FaceApi instance it configures - it
+  /// used to be a process-wide singleton, which meant two pipelines could never read two
+  /// different files.
   class Configuration
   {
   public:
-    static Configuration& GetInstance();
+    Configuration() = default;
 
     Configuration(const Configuration& iOther) = delete;
 
     Configuration& operator=(const Configuration& iOther) = delete;
 
-    fw::ErrorCode Initialize(const std::string& iConfigFile = "settings.json");
+    /// @brief Reads iConfigFile from iWorkingDirectory; may be called again to re-read
+    fw::ErrorCode Initialize(const std::string& iWorkingDirectory, const std::string& iConfigFile = "settings.json");
 
     inline const DirectoryParams& GetDirectories() const
     {
@@ -58,20 +62,13 @@ namespace face
 
     cv::FileNode GetModuleSettings(const std::string& iName) const;
 
-    void SetWorkingDirectory(const std::string& iWorkingDir);
-
   private:
-    Configuration() = default;
-
     bool LoadSettings(const cv::FileNode& iGeneralNode);
 
-    void RebuildPaths();
-
-    void FixPathSeparator(std::string& ioPath);
+    static void FixPathSeparator(std::string& ioPath);
 
     cv::FileStorage mFileStorage;
     cv::FileNode mModulesNode;
-    DirectoryParams mRelativeDirectories;
     DirectoryParams mDirectories;
     OutputParams mOutput;
     bool mVerbose = false;
