@@ -130,6 +130,12 @@ namespace face
     return imageQueue ? imageQueue->GetQueueStatistics().size : 0;
   }
 
+  uint64_t FaceApi::GetDroppedFrameCount() const
+  {
+    std::shared_ptr<ImageQueue> imageQueue = mPipeline ? mPipeline->GetImageQueue() : nullptr;
+    return imageQueue ? imageQueue->GetDroppedFrameCount() : 0ULL;
+  }
+
   fw::ErrorCode FaceApi::Run()
   {
     while (!GetThreadStopSignal())

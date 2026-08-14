@@ -588,9 +588,11 @@ namespace fe
     oSnapshot.framesRendered = mFramesRendered.load(std::memory_order_acquire);
 
     // Both reported rather than inferred: the pipeline says how many frames are waiting,
-    // and every drop was counted when the push reported it
+    // and a drop is either one the push turned away or one the queue threw out to make
+    // room for a fresher frame
     oSnapshot.queueDepth = mFaceApi.GetQueueSize();
-    oSnapshot.framesDropped = mFramesDropped.load(std::memory_order_acquire);
+    oSnapshot.framesDropped = mFramesDropped.load(std::memory_order_acquire) +
+                              mFaceApi.GetDroppedFrameCount();
     oSnapshot.rendererGeneration = mRendererGeneration.load(std::memory_order_acquire);
 
     oSnapshot.pipelineDrawsOverlay = mPipelineDrawsOverlay.load(std::memory_order_acquire) ? 1 : 0;

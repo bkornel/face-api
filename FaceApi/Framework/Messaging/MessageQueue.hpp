@@ -30,6 +30,19 @@ namespace fw
   /// owner still has to keep the queue alive until those threads have left it.
   ///
   /// This class is thread-safe.
+  /// @brief What a push does when the queue is full
+  enum class DropPolicy
+  {
+    /// @brief Turn the new message away. What a recorder wants: nothing is lost, and the
+    /// producer is told to slow down.
+    Reject = 0,
+
+    /// @brief Make room by throwing the oldest message away. What anything interactive
+    /// wants: when the consumer falls behind, the freshest frame is the one worth having,
+    /// and holding on to a queue of stale ones only adds the delay of working through them.
+    DropOldest = 1
+  };
+
   template <SharedPointer MessageT>
   class MessageQueue
   {
@@ -39,6 +52,10 @@ namespace fw
       int size = 0;
       int bound = 0;
       float samplingFPS = 0.0F;
+
+      /// @brief Messages the queue itself threw away: overtaken by a newer one under
+      /// DropOldest, or aged past the staleness threshold
+      uint64_t dropped = 0ULL;
     };
 
     static constexpr float MAX_SAMPLING_RATE_FPS = (std::numeric_limits<float>::max)();
@@ -203,7 +220,26 @@ namespace fw
     inline Statistics GetStatistics() const
     {
       std::lock_guard<std::mutex> lock(mMutex);
-      return { static_cast<int>(mQueue.size()), mBound, mSamplingFPS };
+      return { static_cast<int>(mQueue.size()), mBound, mSamplingFPS, mDropped };
+    }
+
+    void SetDropPolicy(DropPolicy iPolicy)
+    {
+      std::lock_guard<std::mutex> lock(mMutex);
+      mPolicy = iPolicy;
+    }
+
+    inline DropPolicy GetDropPolicy() const
+    {
+      std::lock_guard<std::mutex> lock(mMutex);
+      return mPolicy;
+    }
+
+    /// @brief How many messages the queue has thrown away since it was created
+    inline uint64_t GetDroppedCount() const
+    {
+      std::lock_guard<std::mutex> lock(mMutex);
+      return mDropped;
     }
 
     inline float GetSamplingFPS() const
@@ -274,7 +310,15 @@ namespace fw
     {
       FilterLocked();
 
-      if (static_cast<int>(mQueue.size()) >= mBound) return ErrorCode::OutOfResources;
+      if (static_cast<int>(mQueue.size()) >= mBound)
+      {
+        if (mPolicy == DropPolicy::Reject) return ErrorCode::OutOfResources;
+
+        // The consumer is behind. Everything waiting is older than what has just arrived,
+        // so the head of the queue is the least worth keeping.
+        mQueue.pop();
+        ++mDropped;
+      }
 
       const Timestamp currentTimestamp = now();
 
@@ -338,6 +382,7 @@ namespace fw
 
       if (startSize != mQueue.size())
       {
+        mDropped += (startSize - mQueue.size());
         mCV.notify_all();
       }
     }
@@ -382,6 +427,9 @@ namespace fw
     float mSamplingFPS = MAX_SAMPLING_RATE_FPS;
     Milliseconds mSampling{ 1.0 };
     Milliseconds mThreshold{ -1.0 };
+
+    DropPolicy mPolicy = DropPolicy::Reject;
+    uint64_t mDropped = 0ULL;
 
     /// @brief When the next admission slot opens; epoch admits the first push immediately
     Timestamp mNextAdmission;

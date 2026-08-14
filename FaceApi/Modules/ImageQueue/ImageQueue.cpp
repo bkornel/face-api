@@ -29,6 +29,14 @@ namespace face
 
       if (fw::get_value(iSettings, "thresholdMS", value))
         mQueue.SetTimestampFiltering(fw::Milliseconds(fw::str::convert_to_number<double>(value)));
+
+      // What to do when the graph is behind: keep the oldest frames and turn the new ones
+      // away, or make room for the new ones. The second is what an overlay wants.
+      if (fw::get_value(iSettings, "dropOldest", value))
+      {
+        mQueue.SetDropPolicy(fw::str::convert_to_boolean(value) ? fw::DropPolicy::DropOldest
+                                                               : fw::DropPolicy::Reject);
+      }
     }
 
     return fw::ErrorCode::OK;

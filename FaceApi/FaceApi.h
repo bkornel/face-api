@@ -47,6 +47,10 @@ namespace face
     /// @brief How many frames are waiting in the image queue right now
     int GetQueueSize() const;
 
+    /// @brief Frames the pipeline threw away rather than processed: overtaken by a newer
+    /// frame, or stale by the time the graph got to them
+    uint64_t GetDroppedFrameCount() const;
+
     /// @brief The parsed settings.json, for hosts that read their own values out of it
     inline const Configuration& GetConfiguration() const
     {

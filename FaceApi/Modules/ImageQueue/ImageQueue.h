@@ -75,6 +75,12 @@ namespace face
       return mQueue.GetStatistics();
     }
 
+    /// @brief Frames the queue threw away: overtaken by a newer one, or gone stale
+    inline uint64_t GetDroppedFrameCount() const
+    {
+      return mQueue.GetDroppedCount();
+    }
+
   private:
     fw::ErrorCode InitializeInternal(const cv::FileNode& iSettings) override;
 
