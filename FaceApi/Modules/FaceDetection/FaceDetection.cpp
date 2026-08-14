@@ -3,11 +3,8 @@
 #include "Framework/ErrorCode.h"
 #include "Modules/FaceDetection/FaceDetection.h"
 
-#include "Configuration.h"
 #include "Framework/Profiler.h"
 #include "Framework/Text.h"
-#include "Messages/CommandMessage.h"
-#include "Messages/ImageSizeChangedMessage.h"
 
 #include <easyloggingpp/easyloggingpp.h>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -29,8 +26,7 @@ namespace face
 
       if (fw::get_value(iSettings, "imageScale", value))
       {
-        mImageScaleFactor = fw::str::convert_to_number<float>(value);
-        mImageScaleFactor = (std::max)((std::min)(mImageScaleFactor, 1.0F), 0.2F);
+        mImageScaleFactor = std::clamp(fw::str::convert_to_number<float>(value), 0.2F, 1.0F);
         mImageScaleFactorInv = (1.0F / mImageScaleFactor);
       }
 
@@ -53,7 +49,8 @@ namespace face
         mMaxSizeFactor = fw::str::convert_to_number<float>(value);
     }
 
-    const std::string modelPath = Configuration::GetInstance().GetDirectories().faceDetector + mModelFile;
+    // Relative to the working directory, like every path a settings file carries
+    const std::string modelPath = GetWorkingDirectory() + mModelFile;
 
     try
     {
@@ -77,46 +74,34 @@ namespace face
     return fw::ErrorCode::OK;
   }
 
-  void FaceDetection::HandleCommand(std::shared_ptr<fw::Message> iMessage)
+  void FaceDetection::ForceDetection()
   {
-    Module::HandleCommand(iMessage);
+    if (mForceRun) return;
 
-    std::shared_ptr<CommandMessage> command = std::dynamic_pointer_cast<CommandMessage>(iMessage);
-    if (command)
+    mForceRun = true;
+    mDetectionSW.Reset();
+
+    LOG(DEBUG) << "Force to run face detector.";
+  }
+
+  void FaceDetection::OnImageSizeChanged(const cv::Size& iSize)
+  {
+    const int shorterSide = (std::min)(iSize.width, iSize.height);
+
+    if (mMinSizeFactor > 0.0F && mMinSizeFactor < 1.0F)
     {
-      if (command->GetType() == CommandMessage::Type::RunFaceDetection && !mForceRun)
-      {
-        mForceRun = true;
-        mDetectionSW.Reset();
-
-        LOG(DEBUG) << "Force to run face detector.";
-      }
-
-      return;
+      mMinSize = { cvRound(shorterSide * mMinSizeFactor), cvRound(shorterSide * mMinSizeFactor) };
+      LOG(DEBUG) << "Minimum face size of the detector: " << mMinSize;
     }
 
-    std::shared_ptr<ImageSizeChangedMessage> imageSizeChanged = std::dynamic_pointer_cast<ImageSizeChangedMessage>(iMessage);
-    if (imageSizeChanged)
+    if (mMaxSizeFactor > 0.0F && mMaxSizeFactor < 1.0F)
     {
-      const int shorterSide = (std::min)(imageSizeChanged->GetWidth(), imageSizeChanged->GetHeight());
-
-      if (mMinSizeFactor > 0.0F && mMinSizeFactor < 1.0F)
-      {
-        mMinSize = { cvRound(shorterSide * mMinSizeFactor), cvRound(shorterSide * mMinSizeFactor) };
-        LOG(DEBUG) << "Minimum face size of the detector: " << mMinSize;
-      }
-
-      if (mMaxSizeFactor > 0.0F && mMaxSizeFactor < 1.0F)
-      {
-        mMaxSize = { cvRound(shorterSide * mMaxSizeFactor), cvRound(shorterSide * mMaxSizeFactor) };
-        LOG(DEBUG) << "Maximum face size of the detector: " << mMaxSize;
-      }
-
-      mForceRun = true;
-      mDetectionSW.Reset();
-
-      return;
+      mMaxSize = { cvRound(shorterSide * mMaxSizeFactor), cvRound(shorterSide * mMaxSizeFactor) };
+      LOG(DEBUG) << "Maximum face size of the detector: " << mMaxSize;
     }
+
+    mForceRun = true;
+    mDetectionSW.Reset();
   }
 
   std::shared_ptr<RoiMessage> FaceDetection::Main(std::shared_ptr<ImageMessage> iImage)

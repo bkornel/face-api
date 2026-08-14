@@ -11,7 +11,9 @@
 #include "User/TrackedFace.h"
 
 #include <cstddef>
+#include <functional>
 #include <memory>
+#include <utility>
 #include <vector>
 
 namespace face
@@ -28,6 +30,13 @@ namespace face
     FaceTracker() = default;
 
     virtual ~FaceTracker() = default;
+
+    /// @brief Wired by whoever builds the graph; called when the tracker has a free slot
+    /// and wants the detector to look for a face to fill it
+    void SetDetectionRequest(std::function<void()> iRequest)
+    {
+      mRequestDetection = std::move(iRequest);
+    }
 
     std::shared_ptr<FaceTrackMessage> Main(std::shared_ptr<ImageMessage> iImage, std::shared_ptr<RoiMessage> iDetections) override;
 
@@ -63,6 +72,8 @@ namespace face
     void SetStatus(Track& ioTrack, TrackStatus iStatus);
 
     std::size_t GetActiveTrackCount() const;
+
+    std::function<void()> mRequestDetection;
 
     std::vector<Track> mTracks;
     fw::Stopwatch mRemoveSW;

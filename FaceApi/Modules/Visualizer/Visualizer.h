@@ -4,15 +4,14 @@
 #include "Framework/ErrorCode.h"
 #include "Framework/Graph/Module.h"
 #include "Framework/Graph/Port.hpp"
+#include "Framework/Metrics.h"
 
 #include "Messages/ImageMessage.h"
 #include "Messages/UserSnapshotMessage.h"
 
 #include <cstddef>
-#include <deque>
 #include <memory>
 #include <opencv2/core/core.hpp>
-#include <limits>
 #include <string>
 #include <vector>
 
@@ -38,14 +37,12 @@ namespace face
 
     void Clear() override
     {
-      mMinRuntimeMs = (std::numeric_limits<double>::max)();
-      mMaxRuntimeMs = (std::numeric_limits<double>::lowest)();
-      mRuntimeHistory.clear();
+      mRuntime.Reset();
       mGlowLayer.release();
     }
 
   private:
-    static const std::size_t sRuntimeHistorySize;
+    static constexpr std::size_t sRuntimeHistorySize = 120U;
 
     fw::ErrorCode InitializeInternal(const cv::FileNode& iSettings) override;
 
@@ -72,15 +69,12 @@ namespace face
     static std::string FormatNumber(double iValue, int iDecimals);
 
     std::vector<cv::Scalar> mColorsOfAxes;
-    std::vector<cv::Scalar> mAccentPalette;
 
     /// @brief Where the strokes are drawn before they are blurred back over the frame
     cv::Mat mGlowLayer;
 
-    std::deque<double> mRuntimeHistory;
-
-    double mMinRuntimeMs = (std::numeric_limits<double>::max)();
-    double mMaxRuntimeMs = (std::numeric_limits<double>::lowest)();
+    /// @brief The frame times of the last few seconds, for the status bar's plot
+    fw::SampleStatistics mRuntime{ sRuntimeHistorySize };
 
     bool mDrawGlow = true;
     bool mDrawPanel = true;

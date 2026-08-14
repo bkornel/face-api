@@ -2,21 +2,26 @@
 
 #include "Framework/ErrorCode.h"
 #include "Framework/Messaging/Event.hpp"
-#include "Framework/Graph/FlowGraph.hpp"
-#include "Framework/Messaging/Message.h"
-#include "Framework/Messaging/MessageBus.h"
 
 #include <opencv2/core.hpp>
 
+#include <cstddef>
+#include <functional>
 #include <mutex>
 #include <string>
-#include <memory>
+#include <utility>
 #include <vector>
 
 namespace fw
 {
   /// @brief A node of the module graph. A module does not own a thread: where its Main() runs
   /// is the executor's business, chosen per module through fw::IPortConnector::SetExecutor().
+  ///
+  /// The framework knows nothing about what a module reacts to. Whoever builds the graph
+  /// wires the module to its signals with Listen() - once, at creation - and a handler must
+  /// only PostCommand() the work, which Main() applies through DrainCommands(). Module state
+  /// stays owned by the thread that runs it this way, and every subscription is dropped when
+  /// the module is deinitialized or destroyed.
   class Module
   {
   public:
@@ -30,10 +35,6 @@ namespace fw
     virtual ~Module();
 
     Module& operator=(const Module& iOther) = delete;
-
-    // Must be called before Initialize(). iSelf may be empty for owners that are not held
-    // by a shared_ptr, they are then responsible for outliving the bus.
-    void Attach(MessageBus& ioBus, const std::shared_ptr<void>& iSelf);
 
     virtual ErrorCode Initialize(const cv::FileNode& iModuleNode);
 
@@ -53,6 +54,39 @@ namespace fw
       return mName;
     }
 
+    /// @brief The directory relative paths in the module's settings resolve against.
+    /// Set it before Initialize().
+    void SetWorkingDirectory(const std::string& iWorkingDirectory)
+    {
+      mWorkingDirectory = iWorkingDirectory;
+    }
+
+    inline const std::string& GetWorkingDirectory() const
+    {
+      return mWorkingDirectory;
+    }
+
+    /// @brief Applied through a posted command by whoever wires the module, so the flag
+    /// changes on the graph thread like the rest of the module's state
+    void SetVerboseMode(bool iVerbose)
+    {
+      mVerboseMode = iVerbose;
+    }
+
+    /// @brief Subscribes iHandler to ioEvent and remembers how to undo it: DeInitialize()
+    /// and the destructor drop every subscription, so a signal can never reach a module
+    /// that no longer runs. ioEvent must outlive the subscription.
+    template <typename SignatureT>
+    void Listen(Event<SignatureT>& ioEvent, typename Event<SignatureT>::Handler iHandler)
+    {
+      const auto token = ioEvent.Subscribe(std::move(iHandler));
+      mUnsubscribers.emplace_back([&ioEvent, token] { ioEvent.Unsubscribe(token); });
+    }
+
+    /// @brief Queues iCommand from any thread; DrainCommands() applies it later. Full queues
+    /// drop the command with a warning, so a stalled module cannot hoard work forever.
+    void PostCommand(std::function<void()> iCommand);
+
   protected:
     static const std::size_t sMaxPendingCommands;
 
@@ -60,46 +94,20 @@ namespace fw
 
     virtual ErrorCode DeInitializeInternal();
 
-    void Publish(const std::shared_ptr<Message>& iMessage);
-
-    // Subscribes the module for a message type until DeInitialize()
-    template <typename MessageT>
-    void SubscribeCommand()
-    {
-      if (!mBus) return;
-
-      const MessageBus::Token token =
-        mSelf.expired()
-          ? mBus->Subscribe<MessageT>([this](std::shared_ptr<Message> iMessage) { OnCommand(iMessage); })
-          : mBus->Subscribe<MessageT>(mSelf.lock(), [this](std::shared_ptr<Message> iMessage) { OnCommand(iMessage); });
-
-      if (token != MessageBus::sInvalidToken) mSubscriptions.emplace_back(token);
-    }
-
-    // Subscribes for the message types this module wants, called from Initialize()
-    virtual void SubscribeCommands();
-
-    // Called on the publishing thread, only queues the command
-    virtual void OnCommand(std::shared_ptr<Message> iMessage);
-
-    // Applies the queued commands, must be called from Main()
+    /// @brief Applies the queued commands, must be called from Main()
     void DrainCommands();
-
-    // Called by DrainCommands() on the graph thread
-    virtual void HandleCommand(std::shared_ptr<Message> iMessage);
 
     bool mInitialized = false;
     bool mVerboseMode = false;
     std::string mName;
-
-    MessageBus* mBus = nullptr;
-    std::weak_ptr<void> mSelf;
+    std::string mWorkingDirectory;
 
   private:
-    void UnsubscribeCommands();
+    void DropSubscriptions();
+
+    std::vector<std::function<void()>> mUnsubscribers;
 
     std::mutex mCommandMutex;
-    std::vector<std::shared_ptr<Message>> mPendingCommands;
-    std::vector<MessageBus::Token> mSubscriptions;
+    std::vector<std::function<void()>> mPendingCommands;
   };
 }

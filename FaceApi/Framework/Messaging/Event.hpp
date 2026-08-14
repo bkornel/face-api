@@ -13,7 +13,8 @@ namespace fw
   class Event;
 
   /// @brief A typed, direct callback list: whoever raises it knows exactly who listens for
-  /// what, unlike fw::MessageBus where the sender does not know its audience.
+  /// what. It is what replaced the type-indexed message bus - a connection is made once, at
+  /// wiring time, instead of being discovered per message with a cast chain.
   ///
   /// Subscribing hands back a token and unsubscribing takes it. The previous version stored
   /// std::function-like delegates and removed them by comparing the pair of pointers inside,

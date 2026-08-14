@@ -1,9 +1,10 @@
 #include "Engine.h"
 
 #include "CameraEnumerator.h"
+#include "TextConversions.h"
 
 #include "Configuration.h"
-#include "FaceApi.h"
+#include "Framework/MathExtensions.h"
 #include "Framework/Profiler.h"
 #include "Framework/Settings.h"
 #include "Framework/TimeExtensions.h"
@@ -19,38 +20,6 @@ namespace fe
 {
   namespace
   {
-    constexpr double sRadToDeg = 57.29577951308232;
-
-    /// @brief What the pipeline holds beyond its image queue: the frame being worked on and
-    /// the output queue it is handed to, which FaceApi bounds at ten.
-    constexpr uint64_t sInternalQueueDepth = 12ULL;
-
-    std::string ToUtf8(const std::wstring& iText)
-    {
-      if (iText.empty()) return {};
-
-      const int size = WideCharToMultiByte(CP_UTF8, 0, iText.c_str(), static_cast<int>(iText.size()),
-                                           nullptr, 0, nullptr, nullptr);
-      if (size <= 0) return {};
-
-      std::string result(static_cast<std::size_t>(size), '\0');
-      WideCharToMultiByte(CP_UTF8, 0, iText.c_str(), static_cast<int>(iText.size()),
-                          result.data(), size, nullptr, nullptr);
-      return result;
-    }
-
-    std::wstring ToWide(const std::string& iText)
-    {
-      if (iText.empty()) return {};
-
-      const int size = MultiByteToWideChar(CP_UTF8, 0, iText.c_str(), static_cast<int>(iText.size()), nullptr, 0);
-      if (size <= 0) return {};
-
-      std::wstring result(static_cast<std::size_t>(size), L'\0');
-      MultiByteToWideChar(CP_UTF8, 0, iText.c_str(), static_cast<int>(iText.size()), result.data(), size);
-      return result;
-    }
-
     int64_t NowMs()
     {
       return fw::to_epoch_ms(fw::now());
@@ -103,11 +72,11 @@ namespace fe
       mWorkingDirectory += '\\';
     }
 
-    face::FaceApi::GetInstance().SetWorkingDirectory(mWorkingDirectory);
+    mFaceApi.SetWorkingDirectory(mWorkingDirectory);
 
     static const cv::FileNode sEmptyNode;
 
-    if (face::FaceApi::GetInstance().Initialize(sEmptyNode) != fw::ErrorCode::OK)
+    if (mFaceApi.Initialize(sEmptyNode) != fw::ErrorCode::OK)
     {
       SetLastError(L"The pipeline could not be initialised from " + iWorkingDirectory +
                    L". Check that settings.json and the model files are there.");
@@ -122,7 +91,7 @@ namespace fe
       if (!mDevice.Create())
       {
         SetLastError(L"No Direct3D 11 device could be created.");
-        face::FaceApi::GetInstance().DeInitialize();
+        mFaceApi.DeInitialize();
         return false;
       }
     }
@@ -149,7 +118,7 @@ namespace fe
     mRenderStop.store(true, std::memory_order_release);
     if (mRenderThread.joinable()) mRenderThread.join();
 
-    face::FaceApi::GetInstance().DeInitialize();
+    mFaceApi.DeInitialize();
 
     {
       std::lock_guard<std::mutex> lock(mRecordMutex);
@@ -183,47 +152,17 @@ namespace fe
   {
     // The Visualizer draws the overlay into the frame itself. This application draws its own
     // on the GPU, so it has to know whether it would be drawing a second one over the first.
-    const cv::FileNode lastModule = face::Configuration::GetInstance().GetModuleSettings("lastModule");
-
-    bool visualizerWired = false;
-
-    if (!lastModule.empty())
-    {
-      const cv::FileNode ports = lastModule["port"];
-
-      for (const auto& port : ports)
-      {
-        std::string value;
-        port >> value;
-
-        if (value.rfind("visualizer", 0U) == 0U)
-        {
-          visualizerWired = true;
-          break;
-        }
-      }
-    }
+    // A visualizer in the graph is a visualizer whose frame comes out of the pipeline.
+    const bool visualizerWired = !mFaceApi.GetConfiguration().GetModuleSettings("visualizer").empty();
 
     mPipelineDrawsOverlay.store(visualizerWired, std::memory_order_release);
 
-    // How many frames the pipeline can hold before it starts dropping them. Knowing it is
-    // what turns "the pipeline is behind" into a number the statistics can show.
-    const cv::FileNode imageQueue = face::Configuration::GetInstance().GetModuleSettings("imageQueue");
+    // The artificial head is deployed with the shape model, so the model's own directory
+    // says where the head lives - a moved configurations directory moves both together
+    std::string modelDir = "shapemodel/3ddfa/";
+    fw::get_value(mFaceApi.GetConfiguration().GetModuleSettings("shapeModel"), "modelDir", modelDir);
 
-    std::string bound;
-
-    if (!imageQueue.empty() && fw::get_value(imageQueue, "bound", bound))
-    {
-      try
-      {
-        const long long parsed = std::stoll(bound);
-        if (parsed > 0LL) mQueueBound.store(static_cast<uint64_t>(parsed), std::memory_order_release);
-      }
-      catch (const std::exception&)
-      {
-        // Left at the default the pipeline itself falls back to
-      }
-    }
+    mHeadModelPath = mFaceApi.GetConfiguration().GetDirectories().working + modelDir + "../head/ict_neutral_head.obj";
   }
 
   int Engine::EnumerateCameras(int iMaxProbe)
@@ -314,7 +253,12 @@ namespace fe
 
   void Engine::OnCameraFrame(const cv::Mat& iFrame)
   {
-    face::FaceApi::GetInstance().PushCameraFrame(iFrame);
+    // The push itself says whether the pipeline took the frame, so a drop is counted here
+    // rather than inferred later from what never came back out
+    if (mFaceApi.PushCameraFrame(iFrame) != fw::ErrorCode::OK)
+    {
+      mFramesDropped.fetch_add(1ULL, std::memory_order_acq_rel);
+    }
 
     mFramesCaptured.fetch_add(1ULL, std::memory_order_acq_rel);
 
@@ -373,7 +317,7 @@ namespace fe
 
     if (!mHeadView)
     {
-      mHeadView = std::make_unique<gfx::HeadView>(mDevice);
+      mHeadView = std::make_unique<gfx::HeadView>(mDevice, mHeadModelPath);
 
       if (!mHeadView->Create(512U, 512U))
       {
@@ -429,7 +373,7 @@ namespace fe
   {
     cv::Mat image;
 
-    if (face::FaceApi::GetInstance().GetResultImage(image) != fw::ErrorCode::OK) return nullptr;
+    if (mFaceApi.GetResultImage(image) != fw::ErrorCode::OK) return nullptr;
     if (image.empty()) return nullptr;
 
     auto frame = std::make_shared<ViewFrame>();
@@ -440,15 +384,15 @@ namespace fe
     frame->imageHasOverlay = mPipelineDrawsOverlay.load(std::memory_order_acquire);
 
     face::FaceResults results;
-    const bool hasResults = (face::FaceApi::GetInstance().GetResults(results) == fw::ErrorCode::OK);
+    const bool hasResults = (mFaceApi.GetResults(results) == fw::ErrorCode::OK);
 
     frame->frameId = hasResults && !results.empty()
                        ? results.front().frameId
-                       : face::FaceApi::GetInstance().GetLastFrameId();
+                       : mFaceApi.GetLastFrameId();
 
     frame->timestampMs = hasResults && !results.empty()
                            ? results.front().timestamp
-                           : face::FaceApi::GetInstance().GetLastTimestamp();
+                           : mFaceApi.GetLastTimestamp();
 
     frame->latencyMs = frame->timestampMs > 0LL
                          ? static_cast<double>(NowMs() - frame->timestampMs)
@@ -609,7 +553,7 @@ namespace fe
 
     if (hadHead)
     {
-      mHeadView = std::make_unique<gfx::HeadView>(mDevice);
+      mHeadView = std::make_unique<gfx::HeadView>(mDevice, mHeadModelPath);
 
       if (mHeadView->Create(512U, 512U)) mHeadView->SetOptions(mHeadOptions);
       else mHeadView.reset();
@@ -643,18 +587,10 @@ namespace fe
     oSnapshot.framesProcessed = mFramesProcessed.load(std::memory_order_acquire);
     oSnapshot.framesRendered = mFramesRendered.load(std::memory_order_acquire);
 
-    // A frame that went in and has not come out is either still inside the pipeline or was
-    // dropped by its bounded queue, and the pipeline can only hold so many at once. That
-    // ceiling is what separates the two: everything above it is gone for good.
-    const uint64_t notReturned = oSnapshot.framesCaptured > oSnapshot.framesProcessed
-                                   ? oSnapshot.framesCaptured - oSnapshot.framesProcessed
-                                   : 0ULL;
-
-    const uint64_t capacity = mQueueBound.load(std::memory_order_acquire) + sInternalQueueDepth;
-    const uint64_t inFlight = (std::min)(notReturned, capacity);
-
-    oSnapshot.queueDepth = static_cast<int32_t>(inFlight);
-    oSnapshot.framesDropped = notReturned - inFlight;
+    // Both reported rather than inferred: the pipeline says how many frames are waiting,
+    // and every drop was counted when the push reported it
+    oSnapshot.queueDepth = mFaceApi.GetQueueSize();
+    oSnapshot.framesDropped = mFramesDropped.load(std::memory_order_acquire);
     oSnapshot.rendererGeneration = mRendererGeneration.load(std::memory_order_acquire);
 
     oSnapshot.pipelineDrawsOverlay = mPipelineDrawsOverlay.load(std::memory_order_acquire) ? 1 : 0;
@@ -718,9 +654,9 @@ namespace fe
       target.ageSeconds = face.ageSeconds;
 
       // The pipeline stores roll, pitch and yaw in that order and in radians
-      target.rollDeg = face.rpy[0] * sRadToDeg;
-      target.pitchDeg = face.rpy[1] * sRadToDeg;
-      target.yawDeg = face.rpy[2] * sRadToDeg;
+      target.rollDeg = fw::rad_to_deg(face.rpy[0]);
+      target.pitchDeg = fw::rad_to_deg(face.rpy[1]);
+      target.yawDeg = fw::rad_to_deg(face.rpy[2]);
 
       target.posX = face.position3D[0];
       target.posY = face.position3D[1];
@@ -757,11 +693,11 @@ namespace fe
 
     if (mCapture) mCapture->SetPaused(true);
 
-    face::FaceApi::GetInstance().DeInitialize();
+    mFaceApi.DeInitialize();
 
     static const cv::FileNode sEmptyNode;
 
-    const bool ok = face::FaceApi::GetInstance().Initialize(sEmptyNode) == fw::ErrorCode::OK;
+    const bool ok = mFaceApi.Initialize(sEmptyNode) == fw::ErrorCode::OK;
 
     if (!ok)
     {
@@ -795,7 +731,7 @@ namespace fe
 
   void Engine::ClearUsers()
   {
-    face::FaceApi::GetInstance().Clear();
+    mFaceApi.Clear();
 
     std::lock_guard<std::mutex> lock(mFrameMutex);
     mLastFrame.reset();
@@ -803,12 +739,12 @@ namespace fe
 
   void Engine::ForceDetection()
   {
-    face::FaceApi::GetInstance().SetRunFaceDetector();
+    mFaceApi.SetRunFaceDetector();
   }
 
   void Engine::SetVerbose(bool iVerbose)
   {
-    face::FaceApi::GetInstance().SetVerbose(iVerbose);
+    mFaceApi.SetVerbose(iVerbose);
   }
 
   bool Engine::SaveFrame(const std::wstring& iPath)
@@ -880,10 +816,10 @@ namespace fe
       return true;
     }
 
-    const auto& output = face::Configuration::GetInstance().GetOutput();
+    const auto& output = mFaceApi.GetConfiguration().GetOutput();
 
     std::string directory = ToUtf8(iDirectory);
-    if (directory.empty()) directory = face::Configuration::GetInstance().GetDirectories().output;
+    if (directory.empty()) directory = mFaceApi.GetConfiguration().GetDirectories().output;
 
     if (!directory.empty() && directory.back() != '\\' && directory.back() != '/') directory += '\\';
 

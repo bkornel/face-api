@@ -20,7 +20,7 @@ namespace face
   /// replaced used to lose the face entirely.
   ///
   /// It does not run on every frame: the tracker follows the faces in between and asks for a
-  /// detection when it wants one, which is what the command handling below is for.
+  /// detection when it wants one, which is what the runFaceDetection signal is for.
   class FaceDetection : public fw::Module,
                         public fw::Port<std::shared_ptr<RoiMessage>(std::shared_ptr<ImageMessage>)>
   {
@@ -30,6 +30,14 @@ namespace face
 
     virtual ~FaceDetection() = default;
 
+    /// @brief Runs the detector at its next opportunity. Wired to the pipeline's signals by
+    /// whoever builds the graph; must arrive as a posted command, like all module state.
+    void ForceDetection();
+
+    /// @brief The size range and the detector both follow the frame. Same contract as
+    /// ForceDetection(): wired at creation, applied on the graph thread.
+    void OnImageSizeChanged(const cv::Size& iSize);
+
     std::shared_ptr<RoiMessage> Main(std::shared_ptr<ImageMessage> iImage) override;
 
   protected:
@@ -37,15 +45,13 @@ namespace face
 
     fw::ErrorCode InitializeInternal(const cv::FileNode& iSettings) override;
 
-    void HandleCommand(std::shared_ptr<fw::Message> iMessage) override;
-
     bool RunDetectection() const;
 
     cv::Ptr<cv::FaceDetectorYN> mDetector;
     fw::Stopwatch mDetectionSW;
 
-    // General parameters
-    std::string mModelFile = "face_detection_yunet_2023mar.onnx";
+    // General parameters. The model file is relative to the working directory.
+    std::string mModelFile = "facedetector/face_detection_yunet_2023mar.onnx";
     float mImageScaleFactor = 1.0F;
     float mImageScaleFactorInv = 1.0F;
     float mDetectionSec = 10.0F;

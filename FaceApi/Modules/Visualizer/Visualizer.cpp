@@ -8,6 +8,7 @@
 #include "Modules/Visualizer/Visualizer.h"
 
 #include "Configuration.h"
+#include "Model/Palette.h"
 #include "Model/PoseGeometry.h"
 #include "Model/FaceModel.h"
 #include "Framework/Profiler.h"
@@ -19,27 +20,16 @@
 
 namespace face
 {
-  const std::size_t Visualizer::sRuntimeHistorySize = 120U;
-
   fw::ErrorCode Visualizer::InitializeInternal(const cv::FileNode& iSettings)
   {
     // Assigned, not appended: a second Initialize() used to grow the list and shift every
-    // axis onto the wrong colour.
+    // axis onto the wrong colour. The colours themselves come from the shared palette; the
+    // first entry is the gizmo's ring, which only this renderer draws.
     mColorsOfAxes = {
       { 255, 255, 255 },
-      { 90, 90, 245 },  // X, red
-      { 90, 225, 90 },  // Y, green
-      { 245, 175, 60 }  // Z, blue
-    };
-
-    // Blue-green-red order, and picked to stay apart on skin tones and to survive the
-    // glow without washing out to white
-    mAccentPalette = {
-      { 70, 200, 255 },  // amber
-      { 150, 240, 120 }, // mint
-      { 240, 140, 200 }, // orchid
-      { 255, 190, 90 },  // sky
-      { 120, 120, 250 }  // coral
+      palette::to_bgr(palette::kAxes[0]),
+      palette::to_bgr(palette::kAxes[1]),
+      palette::to_bgr(palette::kAxes[2])
     };
 
     if (!iSettings.empty())
@@ -61,10 +51,7 @@ namespace face
 
   cv::Scalar Visualizer::GetAccentColor(int iUserId) const
   {
-    if (mAccentPalette.empty()) return { 255, 255, 255 };
-
-    const std::size_t index = static_cast<std::size_t>(iUserId < 0 ? -iUserId : iUserId) % mAccentPalette.size();
-    return mAccentPalette[index];
+    return palette::to_bgr(palette::accent_of(iUserId));
   }
 
   std::shared_ptr<ImageMessage> Visualizer::Main(std::shared_ptr<ImageMessage> iImage, std::shared_ptr<UserSnapshotMessage> iUsers)
@@ -338,12 +325,9 @@ cv::line(oImage, corners[c.first], corners[c.second], iAccent * (weight * weight
   {
     const double runtimeMs = fw::elapsed_since(iImage->GetTimestamp()).count();
 
-    // Members, not function statics: resettable with the rest of the module.
-    if (runtimeMs < mMinRuntimeMs) mMinRuntimeMs = runtimeMs;
-    if (runtimeMs > mMaxRuntimeMs) mMaxRuntimeMs = runtimeMs;
-
-    mRuntimeHistory.emplace_back(runtimeMs);
-    while (mRuntimeHistory.size() > sRuntimeHistorySize) mRuntimeHistory.pop_front();
+    // Kept over the plotted window rather than the whole session, so a single stall at
+    // startup does not pin the colour scale for as long as the application runs
+    mRuntime.Push(runtimeMs);
 
     const int barHeight = 26;
     const cv::Rect bar(0, oImage.rows - barHeight, oImage.cols, barHeight);
@@ -365,28 +349,29 @@ cv::line(oImage, corners[c.first], corners[c.second], iAccent * (weight * weight
     fw::put_text(ss.str(), { 10, oImage.rows - 9 }, oImage, false, font);
 
     // The frame time of the last two seconds, so a stall is visible as it happens
-    if (mRuntimeHistory.size() > 2U)
+    const auto& history = mRuntime.GetSamples();
+    if (history.size() > 2U)
     {
       const int plotWidth = (std::min)(160, oImage.cols / 3);
       const int plotHeight = barHeight - 10;
       const int plotX = oImage.cols - plotWidth - 10;
       const int plotY = oImage.rows - barHeight + 5;
 
-      const double upper = (std::max)(1.0, *std::max_element(mRuntimeHistory.begin(), mRuntimeHistory.end()));
+      const double upper = (std::max)(1.0, mRuntime.GetMaximum());
 
       std::vector<cv::Point> curve;
-      curve.reserve(mRuntimeHistory.size());
+      curve.reserve(history.size());
 
-      for (std::size_t i = 0U; i < mRuntimeHistory.size(); ++i)
+      for (std::size_t i = 0U; i < history.size(); ++i)
       {
         const double t = static_cast<double>(i) / (sRuntimeHistorySize - 1);
-        const double v = mRuntimeHistory[i] / upper;
+        const double v = history[i] / upper;
 
         curve.emplace_back(plotX + static_cast<int>(t * plotWidth),
                            plotY + plotHeight - static_cast<int>(v * plotHeight));
       }
 
-      cv::polylines(oImage, curve, false, fw::get_color(runtimeMs, mMinRuntimeMs, mMaxRuntimeMs), 1, cv::LINE_AA);
+      cv::polylines(oImage, curve, false, fw::get_color(runtimeMs, mRuntime.GetMinimum(), mRuntime.GetMaximum()), 1, cv::LINE_AA);
     }
 
     if (mVerboseMode) DrawProfiler(oImage, iImage->GetFrameId());

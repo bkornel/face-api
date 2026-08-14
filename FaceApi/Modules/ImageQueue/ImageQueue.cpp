@@ -1,7 +1,6 @@
 #include "Framework/Settings.h"
 #include "Framework/ErrorCode.h"
 #include "Modules/ImageQueue/ImageQueue.h"
-#include "Messages/ImageSizeChangedMessage.h"
 
 #include "Framework/Text.h"
 
@@ -67,13 +66,12 @@ namespace face
     return mQueue.TryPush(message);
   }
 
-  std::shared_ptr<ImageMessage> ImageQueue::Main(uint32_t /*iTickNumber*/)
+  std::shared_ptr<ImageMessage> ImageQueue::Main()
   {
     DrainCommands();
 
-    std::tuple<std::shared_ptr<ImageMessage>> framePool;
-    std::shared_ptr<ImageMessage> image =
-      (mQueue.TryPop(framePool) == fw::ErrorCode::OK) ? std::get<0>(framePool) : nullptr;
+    std::shared_ptr<ImageMessage> image;
+    if (mQueue.TryPop(image) != fw::ErrorCode::OK) image = nullptr;
 
     if (image)
     {
@@ -100,6 +98,6 @@ namespace face
       imageSize = mImageSize;
     }
 
-    Publish(std::make_shared<ImageSizeChangedMessage>(imageSize, mLastFrameId, mLastTimestamp));
+    if (mAnnounceSizeChange) mAnnounceSizeChange(imageSize);
   }
 }

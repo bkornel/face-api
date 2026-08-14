@@ -8,6 +8,9 @@
 #include <cassert>
 #include <cstdint>
 #include <queue>
+#include <set>
+#include <string>
+#include <unordered_map>
 #include <utility>
 
 namespace fw
@@ -39,6 +42,8 @@ namespace fw
       return result;
     }
 
+    OnGraphConnected();
+
     return ErrorCode::OK;
   }
 
@@ -49,6 +54,7 @@ namespace fw
       module->DeInitialize();
     }
 
+    mSinks.clear();
     mModules.clear();
 
     return ErrorCode::OK;
@@ -61,6 +67,15 @@ namespace fw
   ErrorCode ModuleGraph::ValidateModules()
   {
     return ErrorCode::OK;
+  }
+
+  void ModuleGraph::OnGraphConnected()
+  {
+  }
+
+  bool ModuleGraph::IsObsoleteModule(const std::string& /*iModuleName*/) const
+  {
+    return false;
   }
 
   ErrorCode ModuleGraph::CreateModules(const cv::FileNode& iModulesNode)
@@ -77,6 +92,14 @@ namespace fw
       if (moduleNode.empty() || !moduleNode.isNamed()) continue;
 
       const std::string moduleName = Module::CreateModuleName(moduleNode);
+
+      // A settings file written for an older build may still carry a module that no
+      // longer exists; the graph works without it, so it is not worth failing over
+      if (IsObsoleteModule(str::to_lower(moduleName)))
+      {
+        LOG(WARNING) << "Module " << moduleName << " no longer exists and is ignored; it can be removed from the settings.";
+        continue;
+      }
 
       // Check for duplications
       auto it = std::find_if(mModules.begin(), mModules.end(), [&](const std::shared_ptr<Module>& obj) {
@@ -114,10 +137,15 @@ namespace fw
     ErrorCode result = ErrorCode::OK;
     std::vector<cv::FileNode> modules = GetConnectionOrder(iModulesNode);
 
+    // Every module that feeds another; what is left over at the end are the sinks
+    std::set<const Module*> consumed;
+
     // Loop over the <modules> tag in the settings file
     for (const auto& moduleNode : modules)
     {
       const std::string moduleName = Module::CreateModuleName(moduleNode);
+
+      if (IsObsoleteModule(str::to_lower(moduleName))) continue;
 
       // Find the corresponding module
       auto it = std::find_if(mModules.begin(), mModules.end(), [&](const std::shared_ptr<Module>& obj) {
@@ -140,11 +168,24 @@ namespace fw
         return result;
       }
 
+      for (const auto& [portNumber, predecessor] : predecessors)
+        consumed.emplace(predecessor.get());
+
       // Source modules have no predecessor but still need their output port built
       if ((result = ModuleConnector::Connect(module, predecessors)) != ErrorCode::OK)
       {
         return result;
       }
+    }
+
+    // Where a frame is finished: the modules nothing consumes. Waiting for their output
+    // is waiting for the whole graph, and it needs no designated terminal module.
+    mSinks.clear();
+
+    for (const auto& module : mModules)
+    {
+      if (consumed.find(module.get()) == consumed.end())
+        mSinks.emplace_back(module);
     }
 
     return result;
@@ -194,6 +235,16 @@ namespace fw
 
       // Find the predecessor between all of the modules
       const std::string& predecessorName = str::trim(tokens[0]);
+
+      // A port aimed at a module that no longer exists is simply left unconnected: the
+      // input arrives default-constructed, which is what an optional port means anyway
+      if (IsObsoleteModule(str::to_lower(predecessorName)))
+      {
+        LOG(WARNING) << "Module " << moduleName << " references the obsolete module " << predecessorName
+                     << " on port " << portNodeStr << "; the connection is skipped.";
+        continue;
+      }
+
       bool isFound = false;
 
       // Loop over the modules
@@ -231,21 +282,23 @@ namespace fw
   {
     assert(!iModulesNode.empty());
 
-    // The name is kept alongside the node: it is what every lookup below matches on, and
-    // rebuilding it per candidate meant composing the same string over and over.
     struct ModulesPrioElem
     {
       cv::FileNode node;
-      std::string name;
       uint32_t depth = 0U;
     };
 
     std::vector<ModulesPrioElem> modulesPrio;
 
+    // Every lookup below matches on the module name, so it is indexed once up front
+    // instead of being searched for linearly per predecessor
+    std::unordered_map<std::string, std::size_t> indexByName;
+
     // Loop over the <modules> tag in the settings file
     for (const auto& moduleNode : iModulesNode)
     {
-      modulesPrio.emplace_back(ModulesPrioElem{ moduleNode, Module::CreateModuleName(moduleNode), 0U });
+      indexByName.emplace(Module::CreateModuleName(moduleNode), modulesPrio.size());
+      modulesPrio.emplace_back(ModulesPrioElem{ moduleNode, 0U });
     }
 
     // Loop over the <modules> tag in the settings file
@@ -269,18 +322,15 @@ namespace fw
       // Loop over the path of predecessors until the first module is not reached
       while (!predecessors.empty())
       {
-        const std::string& predecessorName = predecessors.front();
+        const auto it = indexByName.find(predecessors.front());
 
-        auto it = std::find_if(modulesPrio.begin(), modulesPrio.end(), [&](const ModulesPrioElem& iObj) {
-          return predecessorName == iObj.name;
-        });
-
-        if (it != modulesPrio.end())
+        if (it != indexByName.end())
         {
-          it->depth++;
+          ModulesPrioElem& predecessor = modulesPrio[it->second];
+          predecessor.depth++;
 
           // Loop over the <port> list of the predecessor and queueing them
-          for (const auto& portNode : it->node["port"])
+          for (const auto& portNode : predecessor.node["port"])
           {
             // Tokenize the string: "predecessorName:portNumber"
             const auto tokens = str::split(str::trim(portNode.string()), ':');

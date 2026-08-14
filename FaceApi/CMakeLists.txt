@@ -52,10 +52,8 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Framework)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Messages)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/FaceDetection)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/FirstModule)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/HeadPose)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/ImageQueue)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/LastModule)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/ShapeModel)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/ShapeNorm)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Modules/UserHistory)
@@ -73,10 +71,8 @@ set(SOURCES;
   Model/FaceModel.cpp;
   Model/ShapeMetrics.cpp;
   Model/HeadMesh.cpp;
-  Framework/Exception.cpp;
   Framework/Graph/FlowGraph.cpp;
   Framework/Messaging/Message.cpp;
-  Framework/Messaging/MessageBus.cpp;
   Framework/Graph/Module.cpp;
   Framework/Graph/ModuleConnector.cpp;
   Framework/Graph/ModuleGraph.cpp;
@@ -95,20 +91,15 @@ set(SOURCES;
   Framework/Text.cpp;
   Framework/Settings.cpp;
   Framework/Imaging/VideoWriter.cpp;
-  Messages/CommandMessage.cpp;
   Messages/ImageMessage.cpp;
-  Messages/ImageSizeChangedMessage.cpp;
   Messages/RoiMessage.cpp;
   Messages/UserEntriesMessage.cpp;
-  Modules/ModuleFactory.cpp;
-  Modules/ModuleGraph.cpp;
+  Modules/FacePipeline.cpp;
   Modules/FaceDetection/FaceDetection.cpp;
   Modules/FaceTracker/FaceTracker.cpp;
-  Modules/FirstModule/FirstModule.cpp;
   Modules/HeadPose/HeadPoseModule.cpp;
   Modules/HeadPose/PoseEstimationDispatcher.cpp;
   Modules/ImageQueue/ImageQueue.cpp;
-  Modules/LastModule/LastModule.cpp;
   Modules/ShapeModel/ShapeModelModule.cpp;
   Modules/ShapeModel/TddfaDispatcher.cpp;
   Modules/ShapeNorm/ShapeNormDispatcher.cpp;

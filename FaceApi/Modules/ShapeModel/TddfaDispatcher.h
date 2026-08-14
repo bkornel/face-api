@@ -10,6 +10,7 @@
 
 #include <map>
 #include <mutex>
+#include <string>
 #include <vector>
 
 namespace face
@@ -29,7 +30,8 @@ namespace face
 
     ~TddfaDispatcher() = default;
 
-    fw::ErrorCode Initialize(const cv::FileNode& iSettings);
+    /// @param iWorkingDirectory What the modelDir setting is relative to
+    fw::ErrorCode Initialize(const cv::FileNode& iSettings, const std::string& iWorkingDirectory);
 
     void BeginFrame(const std::vector<TrackedFace>& iTracks);
 

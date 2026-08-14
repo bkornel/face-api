@@ -45,9 +45,25 @@ namespace fw
     /// @brief Called once every module exists, before the graph is connected
     virtual ErrorCode ValidateModules();
 
+    /// @brief Called once the whole graph is wired, for derived classes that want to look
+    /// at the finished topology - the sinks, say
+    virtual void OnGraphConnected();
+
+    /// @brief A settings file may still name modules that no longer exist. Naming one is
+    /// tolerated with a warning rather than failing the whole graph, and this says which
+    /// names get that treatment. iModuleName is lower case.
+    virtual bool IsObsoleteModule(const std::string& iModuleName) const;
+
     inline const std::vector<std::shared_ptr<Module>>& GetModules() const
     {
       return mModules;
+    }
+
+    /// @brief The modules whose output nobody consumes: where a frame is finished. Empty
+    /// until the graph is connected.
+    inline const std::vector<std::shared_ptr<Module>>& GetSinkModules() const
+    {
+      return mSinks;
     }
 
   private:
@@ -60,5 +76,6 @@ namespace fw
     std::vector<cv::FileNode> GetConnectionOrder(const cv::FileNode& iModulesNode);
 
     std::vector<std::shared_ptr<Module>> mModules;
+    std::vector<std::shared_ptr<Module>> mSinks;
   };
 }

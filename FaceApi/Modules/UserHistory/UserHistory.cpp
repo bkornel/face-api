@@ -56,28 +56,23 @@ namespace face
   {
     const fw::Timestamp cutoff = iTimestamp - std::chrono::milliseconds(mRemoveFreqMs);
 
+    for (auto& h : mEntryMap)
     {
-      for (auto& h : mEntryMap)
-      {
-        auto& entries = h.second;
-        const std::size_t sizeBefore = entries.size();
+      auto& entries = h.second;
 
-        entries.erase(std::remove_if(entries.begin(), entries.end(), [&](const Entry& obj) {
-                        return obj.first < cutoff;
-                      }),
-                      entries.end());
-
-        const std::size_t count = sizeBefore - entries.size();
-        if (count > 0U)
-        {
-          LOG(INFO) << "Number of entries deleted from User(" << h.first << "): " << count << " (" << cvRound((count * sizeof(UserData)) / 1024.0) << " KB).";
-        }
-      }
-
-      std::erase_if(mEntryMap, [&](const EntryMap::value_type& obj) {
-        return obj.second.empty();
+      const std::size_t count = std::erase_if(entries, [&](const Entry& obj) {
+        return obj.first < cutoff;
       });
+
+      if (count > 0U)
+      {
+        LOG(INFO) << "Number of entries deleted from User(" << h.first << "): " << count << " (" << cvRound((count * sizeof(UserData)) / 1024.0) << " KB).";
+      }
     }
+
+    std::erase_if(mEntryMap, [&](const EntryMap::value_type& obj) {
+      return obj.second.empty();
+    });
   }
 
   void UserHistory::Clear()

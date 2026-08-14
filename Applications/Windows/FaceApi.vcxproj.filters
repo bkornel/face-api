@@ -4,9 +4,6 @@
     <Filter Include="3rdparty">
       <UniqueIdentifier>{5729556f-fc3c-46fc-a226-eabcd9dd3655}</UniqueIdentifier>
     </Filter>
-    <Filter Include="3rdparty\clm">
-      <UniqueIdentifier>{1b98cdfc-7062-4d35-b95e-a74096934d74}</UniqueIdentifier>
-    </Filter>
     <Filter Include="3rdparty\easyloggingpp">
       <UniqueIdentifier>{87ccbb9a-075d-4dac-9f34-18e30dcf4c9c}</UniqueIdentifier>
     </Filter>
@@ -34,14 +31,8 @@
     <Filter Include="Modules\FaceDetection">
       <UniqueIdentifier>{919e078b-85ca-456b-bcc5-f2b368d55941}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Modules\FirstModule">
-      <UniqueIdentifier>{a9fc0986-7016-4672-883a-76e525f13e47}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Modules\ImageQueue">
       <UniqueIdentifier>{8c0101b1-f2e2-4155-ba80-246f9b4baacf}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Modules\LastModule">
-      <UniqueIdentifier>{7a8b2dd8-8dea-4b94-9fda-9adb687bc8dc}</UniqueIdentifier>
     </Filter>
     <Filter Include="Modules\UserHistory">
       <UniqueIdentifier>{5e55172a-b12e-4394-a440-91caac080729}</UniqueIdentifier>
@@ -75,6 +66,9 @@
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Profiler.cpp">
       <Filter>Framework</Filter>
     </ClCompile>
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Metrics.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Stopwatch.cpp">
       <Filter>Framework</Filter>
     </ClCompile>
@@ -91,6 +85,12 @@
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Model\FaceModel.cpp">
       <Filter>Model</Filter>
     </ClCompile>
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Model\ShapeMetrics.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Model\HeadMesh.cpp">
+      <Filter>Model</Filter>
+    </ClCompile>
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Graph\FlowGraph.cpp">
       <Filter>Framework\Graph</Filter>
     </ClCompile>
@@ -98,13 +98,7 @@
       <Filter>Framework\Imaging</Filter>
     </ClCompile>
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\FaceApi.cpp" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Exception.cpp">
-      <Filter>Framework</Filter>
-    </ClCompile>
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Messaging\Message.cpp">
-      <Filter>Framework\Messaging</Filter>
-    </ClCompile>
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Messaging\MessageBus.cpp">
       <Filter>Framework\Messaging</Filter>
     </ClCompile>
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Graph\Module.cpp">
@@ -170,26 +164,11 @@
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\User\UserData.cpp">
       <Filter>User</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\FaceApi\Messages\CommandMessage.cpp">
-      <Filter>Messages</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\FaceApi\Messages\ImageSizeChangedMessage.cpp">
-      <Filter>Messages</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\FaceApi\Modules\FirstModule\FirstModule.cpp">
-      <Filter>Modules\FirstModule</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\FaceApi\Modules\LastModule\LastModule.cpp">
-      <Filter>Modules\LastModule</Filter>
+    <ClCompile Include="..\..\FaceApi\Modules\FacePipeline.cpp">
+      <Filter>Modules</Filter>
     </ClCompile>
     <ClCompile Include="..\..\FaceApi\Framework\Graph\ModuleConnector.cpp">
       <Filter>Framework\Graph</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\FaceApi\Modules\ModuleFactory.cpp">
-      <Filter>Modules</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\FaceApi\Modules\ModuleGraph.cpp">
-      <Filter>Modules</Filter>
     </ClCompile>
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\ShapeModelModule.cpp">
       <Filter>Modules\ShapeModel</Filter>
@@ -217,6 +196,9 @@
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Profiler.h">
       <Filter>Framework</Filter>
     </ClInclude>
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Metrics.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Messaging\Event.hpp">
       <Filter>Framework\Messaging</Filter>
     </ClInclude>
@@ -239,10 +221,19 @@
       <Filter>Framework</Filter>
     </ClInclude>
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Configuration.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Model\Palette.h">
+      <Filter>Model</Filter>
+    </ClInclude>
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Model\PoseGeometry.h">
       <Filter>Model</Filter>
     </ClInclude>
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Model\FaceModel.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Model\ShapeMetrics.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Model\HeadMesh.h">
       <Filter>Model</Filter>
     </ClInclude>
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Graph\FlowGraph.hpp">
@@ -256,13 +247,10 @@
     </ClInclude>
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\FaceApi.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\FaceResult.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Exception.h">
-      <Filter>Framework</Filter>
+    <ClInclude Include="..\..\FaceApi\Modules\FacePipeline.h">
+      <Filter>Modules</Filter>
     </ClInclude>
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Messaging\Message.h">
-      <Filter>Framework\Messaging</Filter>
-    </ClInclude>
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Messaging\MessageBus.h">
       <Filter>Framework\Messaging</Filter>
     </ClInclude>
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Graph\Module.h">
@@ -334,29 +322,11 @@
     <ClInclude Include="..\..\FaceApi\Framework\Graph\Port.hpp">
       <Filter>Framework\Graph</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\FaceApi\Messages\CommandMessage.h">
-      <Filter>Messages</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\FaceApi\Modules\FirstModule\FirstModule.h">
-      <Filter>Modules\FirstModule</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\FaceApi\Modules\LastModule\LastModule.h">
-      <Filter>Modules\LastModule</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\FaceApi\Framework\Graph\ModuleConnector.h">
       <Filter>Framework\Graph</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\FaceApi\Modules\ModuleFactory.h">
-      <Filter>Modules</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\FaceApi\Modules\ModuleGraph.h">
-      <Filter>Modules</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\FaceApi\User\UserData.hpp">
       <Filter>User</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\FaceApi\Messages\ImageSizeChangedMessage.h">
-      <Filter>Messages</Filter>
     </ClInclude>
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Graph\ModuleGraph.h">
       <Filter>Framework\Graph</Filter>

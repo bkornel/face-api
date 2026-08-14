@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Framework/TimeExtensions.h"
+
 #include <algorithm>
 #include <array>
 #include <atomic>
@@ -71,6 +73,15 @@ namespace fw
     virtual bool Ready() const = 0;
 
     virtual void Wait() const = 0;
+
+    /// @brief How many values have been published so far. Reading it before a round and
+    /// waiting for it to move past is the per-frame barrier, and it needs no knowledge of
+    /// the type the future carries - which is what lets a graph wait on whatever its
+    /// terminal node happens to be.
+    virtual uint64_t GetGeneration() const = 0;
+
+    /// @return true once a value newer than iGeneration has been published
+    virtual bool WaitForNewValue(uint64_t iGeneration, Milliseconds iTimeout) const = 0;
   };
 
   /// @brief A flow graph equivalent of std::future, differing in that it notifies the
@@ -123,14 +134,13 @@ namespace fw
       mCV.wait(lock, [this] { return mValue != nullptr; });
     }
 
-    uint64_t GetGeneration() const
+    uint64_t GetGeneration() const override
     {
       std::lock_guard<std::mutex> lock(mMutex);
       return mGeneration;
     }
 
-    template <typename Rep, typename Period>
-    bool WaitForNewValue(uint64_t iGeneration, const std::chrono::duration<Rep, Period>& iTimeout) const
+    bool WaitForNewValue(uint64_t iGeneration, Milliseconds iTimeout) const override
     {
       std::unique_lock<std::mutex> lock(mMutex);
       return mCV.wait_for(lock, iTimeout, [this, iGeneration] { return mGeneration > iGeneration; });

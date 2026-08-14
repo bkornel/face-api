@@ -20,7 +20,7 @@ namespace face
         mParallelUsers = fw::str::convert_to_boolean(value);
     }
 
-    return mDispatcher.Initialize(iSettings);
+    return mDispatcher.Initialize(iSettings, GetWorkingDirectory());
   }
 
   std::shared_ptr<ShapeMessage> ShapeModelModule::Main(std::shared_ptr<ImageMessage> iImage, std::shared_ptr<FaceTrackMessage> iTracks)

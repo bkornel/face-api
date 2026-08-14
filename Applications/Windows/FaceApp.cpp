@@ -27,8 +27,8 @@ void FaceApp::initialize(Application& self)
   path = path.pushDirectory("faceapp");
 
   const std::string& workingDirectory = path.toString();
-  face::FaceApi::GetInstance().SetWorkingDirectory(workingDirectory);
-  face::FaceApi::GetInstance().Initialize(sSettingsNode);
+  mFaceApi.SetWorkingDirectory(workingDirectory);
+  mFaceApi.Initialize(sSettingsNode);
 
   LOG(INFO) << name() << " starting up.";
   LOG(INFO) << name() << " working directory: " << workingDirectory;
@@ -38,7 +38,7 @@ void FaceApp::uninitialize()
 {
   // add your own uninitialization code here
   LOG(INFO) << name() << " shutting down.";
-  face::FaceApi::GetInstance().DeInitialize();
+  mFaceApi.DeInitialize();
   Poco::Util::Application::uninitialize();
 }
 
@@ -52,7 +52,7 @@ int FaceApp::main(const std::vector<std::string>& args)
     return Poco::Util::Application::EXIT_USAGE;
   }
 
-  if (!face::FaceApi::GetInstance().IsInitialized())
+  if (!mFaceApi.IsInitialized())
   {
     LOG(ERROR) << name() << " is not initialized correctly.";
     return Poco::Util::Application::EXIT_USAGE;
@@ -76,14 +76,14 @@ int FaceApp::main(const std::vector<std::string>& args)
 
   printKeys();
 
-  const auto& outputParams = face::Configuration::GetInstance().GetOutput();
-  const auto& outputDir = face::Configuration::GetInstance().GetDirectories().output;
+  const auto& outputParams = mFaceApi.GetConfiguration().GetOutput();
+  const auto& outputDir = mFaceApi.GetConfiguration().GetDirectories().output;
   mSaveVideo = outputParams.video;
   mVideoWriter.Create(outputDir, "sample", outputParams.videoFourCC, outputParams.videoFPS);
 
   while (capture.isOpened())
   {
-    if (!face::FaceApi::GetInstance().IsRunning())
+    if (!mFaceApi.IsRunning())
     {
       break;
     }
@@ -95,9 +95,9 @@ int FaceApp::main(const std::vector<std::string>& args)
       break;
     }
 
-    face::FaceApi::GetInstance().PushCameraFrame(mFrame);
+    mFaceApi.PushCameraFrame(mFrame);
 
-    if (face::FaceApi::GetInstance().GetResultImage(mResultFrame) == fw::ErrorCode::OK)
+    if (mFaceApi.GetResultImage(mResultFrame) == fw::ErrorCode::OK)
     {
       showResults();
 
@@ -128,7 +128,7 @@ void FaceApp::handleKey(int keyPressed)
   if (keyPressed == 27)
   {
     LOG(INFO) << "Exiting from the application";
-    face::FaceApi::GetInstance().StopThread();
+    mFaceApi.StopThread();
   }
   else if (keyPressed == 's')
   {
@@ -140,25 +140,25 @@ void FaceApp::handleKey(int keyPressed)
     }
 
     const std::string& name =
-      "result_frame_" + std::to_string(face::FaceApi::GetInstance().GetLastFrameId()) + ".png";
-    const std::string& path = face::Configuration::GetInstance().GetDirectories().output + name;
+      "result_frame_" + std::to_string(mFaceApi.GetLastFrameId()) + ".png";
+    const std::string& path = mFaceApi.GetConfiguration().GetDirectories().output + name;
     cv::imwrite(path, mResultFrame);
     LOG(INFO) << "Saving frame to: " << path;
   }
   else if (keyPressed == 'c')
   {
     LOG(INFO) << "Clearing users";
-    face::FaceApi::GetInstance().Clear();
+    mFaceApi.Clear();
   }
   else if (keyPressed == 'v')
   {
     LOG(INFO) << "Setting verbose mode ON/OFF";
-    face::FaceApi::GetInstance().OnOffVerbose();
+    mFaceApi.OnOffVerbose();
   }
   else if (keyPressed == 'd')
   {
     LOG(INFO) << "Forcing face detection";
-    face::FaceApi::GetInstance().SetRunFaceDetector();
+    mFaceApi.SetRunFaceDetector();
   }
   else if (keyPressed == 'o')
   {

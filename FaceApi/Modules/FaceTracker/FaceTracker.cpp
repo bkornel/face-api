@@ -3,7 +3,6 @@
 #include "Framework/ErrorCode.h"
 #include "Framework/TimeExtensions.h"
 #include "Modules/FaceTracker/FaceTracker.h"
-#include "Messages/CommandMessage.h"
 
 #include "Framework/Profiler.h"
 #include "Framework/Text.h"
@@ -36,8 +35,7 @@ namespace face
 
       if (fw::get_value(iSettings, "templateScale", value))
       {
-        mTemplateScale = fw::str::convert_to_number<float>(value);
-        mTemplateScale = (std::max)((std::min)(mTemplateScale, 1.0F), 0.2F);
+        mTemplateScale = std::clamp(fw::str::convert_to_number<float>(value), 0.2F, 1.0F);
         mTemplateScaleInv = (1.0F / mTemplateScale);
       }
     }
@@ -66,7 +64,6 @@ namespace face
 
     FACE_PROFILER(Face_Tracker);
 
-    const uint32_t frameId = iImage->GetFrameId();
     const fw::Timestamp timestamp = iImage->GetTimestamp();
 
     // Active tracks to inactive if they aged or left the allowed size range
@@ -85,9 +82,9 @@ namespace face
       mRemoveSW.Reset();
     }
 
-    if (GetMaxTracks() != GetActiveTrackCount())
+    if (GetMaxTracks() != GetActiveTrackCount() && mRequestDetection)
     {
-      Publish(std::make_shared<CommandMessage>(CommandMessage::Type::RunFaceDetection, frameId, timestamp));
+      mRequestDetection();
     }
 
     FaceTrackMessage::TrackVector tracks;
@@ -99,7 +96,7 @@ namespace face
         tracks.emplace_back(track.face);
     }
 
-    return tracks.empty() ? nullptr : std::make_shared<FaceTrackMessage>(std::move(tracks), frameId, timestamp);
+    return tracks.empty() ? nullptr : std::make_shared<FaceTrackMessage>(std::move(tracks), iImage->GetFrameId(), timestamp);
   }
 
   void FaceTracker::PreprocessTracks(fw::Timestamp iTimestamp)
@@ -300,14 +297,8 @@ namespace face
 
   std::size_t FaceTracker::GetActiveTrackCount() const
   {
-    std::size_t count = 0U;
-
-    for (const auto& track : mTracks)
-    {
-      if (track.face.status != TrackStatus::Inactive)
-        count++;
-    }
-
-    return count;
+    return static_cast<std::size_t>(std::count_if(mTracks.begin(), mTracks.end(), [](const Track& iTrack) {
+      return iTrack.face.status != TrackStatus::Inactive;
+    }));
   }
 }

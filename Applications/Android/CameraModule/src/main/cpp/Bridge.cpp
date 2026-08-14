@@ -1,7 +1,6 @@
 #include "Framework/Imaging/Transform.h"
 #include "Framework/ErrorCode.h"
 #include "FaceApi.h"
-#include "Configuration.h"
 #include "Framework/Stopwatch.h"
 
 #include <cstdint>
@@ -24,6 +23,14 @@ namespace face_jni
 {
   constexpr const char* cModuleName = "FACE_JNI";
   constexpr android_LogPriority cLogLevel = ANDROID_LOG_DEBUG;
+
+  // The JNI entry points carry no state of their own, so the bridge owns one engine for the
+  // process. FaceApi itself is instantiable; this static is a choice of this bridge alone.
+  face::FaceApi& TheEngine()
+  {
+    static face::FaceApi sEngine;
+    return sEngine;
+  }
 
   template <typename T>
   void log(T iMessage)
@@ -67,9 +74,9 @@ Java_com_face_common_Native_initialize(JNIEnv* iEnv, jobject /*iThis*/, jstring 
   iEnv->ReleaseStringUTFChars(iPath, pathChars);
 
   face_jni::log("- Working directory sent from Java side: " + workingDirectory);
-  face::FaceApi::GetInstance().SetWorkingDirectory(workingDirectory);
+  face_jni::TheEngine().SetWorkingDirectory(workingDirectory);
 
-  if (face::FaceApi::GetInstance().Initialize(sSettingsNode) != fw::ErrorCode::OK)
+  if (face_jni::TheEngine().Initialize(sSettingsNode) != fw::ErrorCode::OK)
   {
     face_jni::log("- FaceApi cannot be initialized (check its settings file first)");
     face_jni::log("- Native side is not initialized correctly");
@@ -84,7 +91,7 @@ JNIEXPORT jint JNICALL
 Java_com_face_common_Native_reset(JNIEnv* /*iEnv*/, jobject /*iThis*/)
 {
   face_jni::log("RESETTING NATIVE SIDE");
-  face::FaceApi::GetInstance().Clear();
+  face_jni::TheEngine().Clear();
   return 0;
 }
 
@@ -127,12 +134,12 @@ Java_com_face_common_Native_process(JNIEnv* iEnv, jobject /*iThis*/, jint iRotat
 #endif
   }
 
-  if (!bgr.empty() && face::FaceApi::GetInstance().IsRunning())
+  if (!bgr.empty() && face_jni::TheEngine().IsRunning())
   {
-    face::FaceApi::GetInstance().PushCameraFrame(bgr);
+    face_jni::TheEngine().PushCameraFrame(bgr);
 
     cv::Mat resultImage;
-    if (face::FaceApi::GetInstance().GetResultImage(resultImage) == fw::ErrorCode::OK)
+    if (face_jni::TheEngine().GetResultImage(resultImage) == fw::ErrorCode::OK)
     {
       if (!resultImage.empty() && bgr.size() == resultImage.size())
       {

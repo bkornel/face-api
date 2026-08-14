@@ -2,7 +2,6 @@
 #include "Framework/ErrorCode.h"
 #include "Modules/ShapeModel/TddfaDispatcher.h"
 
-#include "Configuration.h"
 #include "Framework/Text.h"
 
 #include <easyloggingpp/easyloggingpp.h>
@@ -14,9 +13,9 @@
 
 namespace face
 {
-  fw::ErrorCode TddfaDispatcher::Initialize(const cv::FileNode& iSettings)
+  fw::ErrorCode TddfaDispatcher::Initialize(const cv::FileNode& iSettings, const std::string& iWorkingDirectory)
   {
-    std::string modelDir = "3ddfa/";
+    std::string modelDir = "shapemodel/3ddfa/";
 
     if (!iSettings.empty())
     {
@@ -35,7 +34,7 @@ namespace face
         mSmoothBeta = fw::str::convert_to_number<double>(value);
     }
 
-    const std::string path = Configuration::GetInstance().GetDirectories().shapeModel + modelDir;
+    const std::string path = iWorkingDirectory + modelDir;
 
     try
     {

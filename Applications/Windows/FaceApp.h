@@ -5,6 +5,7 @@
 #include <opencv2/core/core.hpp>
 #include <vector>
 
+#include "FaceApi.h"
 #include "Framework/Imaging/VideoWriter.h"
 
 class FaceApp : public Poco::Util::Application
@@ -37,6 +38,8 @@ private:
   void handleKey(int keyPressed);
 
   bool mSaveVideo = false;
+
+  face::FaceApi mFaceApi;
 
   cv::Mat mFrame;
   cv::Mat mResultFrame;

@@ -10,6 +10,7 @@
 #include "Framework/Metrics.h"
 #include "ViewFrame.h"
 
+#include "FaceApi.h"
 #include "FaceResult.h"
 #include "Framework/Imaging/VideoWriter.h"
 
@@ -136,7 +137,14 @@ namespace fe
 
     bool mInitialized = false;
 
+    /// @brief The pipeline this engine drives. Each engine owns its own; what instances
+    /// still share is face::Configuration, i.e. the settings file.
+    face::FaceApi mFaceApi;
+
     std::string mWorkingDirectory;
+
+    /// @brief Where the artificial head's model lives; derived from the pipeline's settings
+    std::string mHeadModelPath;
 
     /// @brief Serialises everything that touches the graphics device: the render thread
     /// draws under it, and the UI thread creates and resizes views under it
@@ -170,9 +178,9 @@ namespace fe
     std::atomic<uint64_t> mFramesProcessed{ 0ULL };
     std::atomic<uint64_t> mFramesRendered{ 0ULL };
 
-    /// @brief How many frames the pipeline's image queue holds, read from settings.json.
-    /// A push that meets a full queue is one the pipeline will drop.
-    std::atomic<uint64_t> mQueueBound{ 10ULL };
+    /// @brief Frames the pipeline turned away at the door: its queue was full, or the frame
+    /// came faster than the sampling rate allows. Counted, not inferred - the push says so.
+    std::atomic<uint64_t> mFramesDropped{ 0ULL };
 
     std::atomic<bool> mPipelineDrawsOverlay{ false };
 

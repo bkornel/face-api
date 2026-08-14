@@ -2,56 +2,61 @@
 #include "Framework/TimeExtensions.h"
 #include "FaceApi.h"
 
-#include "Configuration.h"
 #include "Framework/Profiler.h"
-#include "Messages/CommandMessage.h"
 
 INITIALIZE_EASYLOGGINGPP
 
 namespace face
 {
-
-  FaceApi& FaceApi::GetInstance()
+  namespace
   {
-    static FaceApi sInstance;
-    return sInstance;
+    /// @brief The longest one wait for a frame may last. Short enough that a stop request
+    /// or a posted command is honoured promptly, long enough that an idle pipeline sleeps
+    /// instead of polling.
+    constexpr fw::Milliseconds sFrameWaitTimeout{ 50.0 };
   }
 
   FaceApi::FaceApi() :
     mOutputQueue("OutputQueue", 100.0F, 10),
-    mModuleGraph(std::make_shared<ModuleGraph>())
+    mPipeline(std::make_shared<FacePipeline>())
   {
     START_EASYLOGGINGPP(0, static_cast<char**>(nullptr));
 
-    // The singleton is not owned by a shared_ptr, so it gets an untracked subscription and
-    // unsubscribes in DeInitialize(). The bus is a member, it outlives the modules.
-    Attach(mBus, nullptr);
-    mModuleGraph->Attach(mBus, mModuleGraph);
-
-    mFrameProcessedToken = mModuleGraph->SubscribeFrameProcessed(
+    mFrameProcessedToken = mPipeline->SubscribeFrameProcessed(
       [this](std::shared_ptr<ImageMessage> iMessage) { OnFrameProcessed(iMessage); });
   }
 
   FaceApi::~FaceApi()
   {
     DeInitialize();
-    mModuleGraph->UnsubscribeFrameProcessed(mFrameProcessedToken);
+
+    mPipeline->UnsubscribeFrameProcessed(mFrameProcessedToken);
   }
 
   fw::ErrorCode FaceApi::InitializeInternal(const cv::FileNode& /*iSettingsNode*/)
   {
     fw::ErrorCode result = fw::ErrorCode::OK;
 
-    if ((result = Configuration::GetInstance().Initialize()) != fw::ErrorCode::OK) return result;
+    // Read on every initialization, so a pipeline reload picks up a freshly saved file
+    if ((result = mConfiguration.Initialize(GetWorkingDirectory())) != fw::ErrorCode::OK)
+      return result;
+
+    // Wired per initialization: DeInitialize() drops every subscription. Posted rather
+    // than applied in place - Clear() takes the lock the graph runs under, and the signal
+    // is raised from the graph thread.
+    Listen(mPipeline->GetEvents().imageSizeChanged,
+           [this](cv::Size /*iSize*/) { PostCommand([this] { Clear(); }); });
 
     // Create and init modules here
-    if ((result = mModuleGraph->Initialize(Configuration::GetInstance().GetModulesNode())) != fw::ErrorCode::OK)
+    mPipeline->SetWorkingDirectory(mConfiguration.GetDirectories().working);
+
+    if ((result = mPipeline->Initialize(mConfiguration.GetModulesNode())) != fw::ErrorCode::OK)
       return result;
 
     // Start worker threads
     if ((result = StartThread()) != fw::ErrorCode::OK) return result;
 
-    SetVerbose(Configuration::GetInstance().GetVerbose());
+    SetVerbose(mConfiguration.GetVerbose());
 
     return fw::ErrorCode::OK;
   }
@@ -63,13 +68,14 @@ namespace face
 
     Clear();
 
-    return fw::ErrorCode::OK;
+    // Initialize() may run again with new settings; the modules must be built anew then
+    return mPipeline->DeInitialize();
   }
 
   void FaceApi::Clear()
   {
     std::lock_guard<std::mutex> lock(mProcessMutex);
-    mModuleGraph->Clear();
+    mPipeline->Clear();
     mOutputQueue.Clear();
     mCameraFrameId = 0U;
   }
@@ -84,40 +90,44 @@ namespace face
     }
   }
 
-  void FaceApi::PushCameraFrame(const cv::Mat& iFrame)
+  fw::ErrorCode FaceApi::PushCameraFrame(const cv::Mat& iFrame)
   {
-    std::shared_ptr<ImageQueue> imageQueue = mModuleGraph ? mModuleGraph->GetImageQueue() : nullptr;
-    if (!imageQueue) return;
+    std::shared_ptr<ImageQueue> imageQueue = mPipeline ? mPipeline->GetImageQueue() : nullptr;
+    if (!imageQueue) return fw::ErrorCode::BadState;
 
     // Handed straight to the queue. Broadcasting it would call every module for every
     // frame, and all but one of them only to find out they are not interested.
-    imageQueue->Push(iFrame, mCameraFrameId++, fw::now());
+    return imageQueue->Push(iFrame, mCameraFrameId++, fw::now());
   }
 
   fw::ErrorCode FaceApi::GetResults(FaceResults& oResults) const
   {
     oResults.clear();
 
-    std::shared_ptr<LastModule> lastModule = mModuleGraph ? mModuleGraph->GetLastModule() : nullptr;
-    if (!lastModule) return fw::ErrorCode::BadState;
+    if (!mPipeline) return fw::ErrorCode::BadState;
 
-    return lastModule->GetLastResults(oResults);
+    return mPipeline->GetLastResults(oResults);
   }
 
   fw::ErrorCode FaceApi::GetResultImage(cv::Mat& oResultImage)
   {
-    std::tuple<std::shared_ptr<ImageMessage>> framePool;
-    const fw::ErrorCode code = mOutputQueue.TryPop(framePool);
+    std::shared_ptr<ImageMessage> frame;
+    const fw::ErrorCode code = mOutputQueue.TryPop(frame);
 
     if (code != fw::ErrorCode::OK)
     {
       return code;
     }
 
-    std::shared_ptr<ImageMessage> frame = std::get<0>(framePool);
     oResultImage = frame->GetFrameBGR();
 
     return code;
+  }
+
+  int FaceApi::GetQueueSize() const
+  {
+    std::shared_ptr<ImageQueue> imageQueue = mPipeline ? mPipeline->GetImageQueue() : nullptr;
+    return imageQueue ? imageQueue->GetQueueStatistics().size : 0;
   }
 
   fw::ErrorCode FaceApi::Run()
@@ -130,20 +140,23 @@ namespace face
         continue;
       }
 
-      // Outside the lock: a queued command may be the one that calls Clear(), which takes it
+      // Outside the lock: a posted command may be the one that calls Clear(), which takes it
       DrainCommands();
+
+      // Sleeps until a frame arrives instead of ticking on a timer: the timer used to run
+      // every module a thousand times a second only to find out there was nothing to do
+      std::shared_ptr<ImageQueue> imageQueue = mPipeline->GetImageQueue();
+      if (!imageQueue || !imageQueue->WaitForFrame(sFrameWaitTimeout)) continue;
 
       {
         std::lock_guard<std::mutex> lock(mProcessMutex);
         FACE_PROFILER_FRAME_ID(GetLastFrameId());
-        mModuleGraph->Process();
+        mPipeline->Process();
       }
-
-      ThreadSleep(1);
     }
 
     const std::string& profilerPath =
-      Configuration::GetInstance().GetDirectories().output + "profiler." + fw::get_log_stamp() + ".txt";
+      mConfiguration.GetDirectories().output + "profiler." + fw::get_log_stamp() + ".txt";
     FACE_PROFILER_SAVE(profilerPath);
     FACE_PROFILER_SUMMARY();
 
@@ -152,31 +165,20 @@ namespace face
 
   void FaceApi::SetRunFaceDetector()
   {
-    const fw::Timestamp timestamp = fw::now();
-    Publish(
-      std::make_shared<CommandMessage>(CommandMessage::Type::RunFaceDetection, mCameraFrameId, timestamp)
-    );
+    if (mPipeline) mPipeline->GetEvents().runFaceDetection.Raise();
   }
 
   void FaceApi::SetVerbose(bool iVerbose)
   {
-    // The message carries the value rather than asking for a flip: a module that misses one
+    // The signal carries the value rather than asking for a flip: a module that misses one
     // or handles it twice would otherwise be left inverted for the rest of the run.
     mVerbose = iVerbose;
 
-    const fw::Timestamp timestamp = fw::now();
-    Publish(
-      std::make_shared<CommandMessage>(CommandMessage::Type::SetVerboseMode, iVerbose, mCameraFrameId, timestamp)
-    );
+    if (mPipeline) mPipeline->GetEvents().verboseChanged.Raise(iVerbose);
   }
 
   void FaceApi::OnOffVerbose()
   {
     SetVerbose(!mVerbose);
-  }
-
-  void FaceApi::SetWorkingDirectory(const std::string& iWorkingDirectory)
-  {
-    Configuration::GetInstance().SetWorkingDirectory(iWorkingDirectory);
   }
 } // namespace face

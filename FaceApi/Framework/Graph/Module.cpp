@@ -1,10 +1,10 @@
 #include "Framework/ErrorCode.h"
 #include "Framework/Graph/Module.h"
 #include "Framework/Text.h"
-#include "Messages/CommandMessage.h"
-#include "Messages/ImageSizeChangedMessage.h"
 
 #include <easyloggingpp/easyloggingpp.h>
+
+#include <utility>
 
 namespace fw
 {
@@ -13,24 +13,7 @@ namespace fw
   Module::~Module()
   {
     // A failed init never reaches DeInitialize, so the subscriptions are dropped here too
-    UnsubscribeCommands();
-  }
-
-  void Module::Attach(MessageBus& ioBus, const std::shared_ptr<void>& iSelf)
-  {
-    mBus = &ioBus;
-    mSelf = iSelf;
-  }
-
-  void Module::Publish(const std::shared_ptr<Message>& iMessage)
-  {
-    if (!mBus)
-    {
-      LOG(ERROR) << "Module " << mName << " is not attached to a message bus.";
-      return;
-    }
-
-    mBus->Publish(iMessage);
+    DropSubscriptions();
   }
 
   std::string Module::CreateModuleName(const cv::FileNode& iModuleNode)
@@ -69,32 +52,9 @@ namespace fw
       }
 
       mInitialized = (result == ErrorCode::OK);
-
-      // Only listen for commands once the module is actually usable.
-      if (mInitialized)
-      {
-        SubscribeCommands();
-      }
     }
 
     return result;
-  }
-
-  void Module::SubscribeCommands()
-  {
-    SubscribeCommand<face::CommandMessage>();
-    SubscribeCommand<face::ImageSizeChangedMessage>();
-  }
-
-  void Module::UnsubscribeCommands()
-  {
-    if (mBus)
-    {
-      for (const MessageBus::Token token : mSubscriptions)
-        mBus->Unsubscribe(token);
-    }
-
-    mSubscriptions.clear();
   }
 
   ErrorCode Module::DeInitialize()
@@ -103,11 +63,14 @@ namespace fw
 
     if (mInitialized)
     {
+      // First: a signal raised from here on would otherwise queue work on a module that
+      // no longer runs
+      DropSubscriptions();
+
       result = DeInitializeInternal();
       Clear();
 
       mInitialized = false;
-      UnsubscribeCommands();
 
       std::lock_guard<std::mutex> lock(mCommandMutex);
       mPendingCommands.clear();
@@ -116,17 +79,24 @@ namespace fw
     return result;
   }
 
+  void Module::DropSubscriptions()
+  {
+    for (const auto& unsubscribe : mUnsubscribers)
+      unsubscribe();
+
+    mUnsubscribers.clear();
+  }
+
   void Module::Clear()
   {
     // There is nothing to clear here, override the method in the child classes
   }
 
-  void Module::OnCommand(std::shared_ptr<Message> iMessage)
+  void Module::PostCommand(std::function<void()> iCommand)
   {
-    // Runs on the publishing thread, so the command is only queued here and applied later
-    // from Main(). Module state stays owned by the graph thread this way. No type check is
-    // needed, the bus only delivers the types this module subscribed for.
-    if (!iMessage) return;
+    // Runs on the posting thread, so the command is only queued here and applied later
+    // from Main(). Module state stays owned by the graph thread this way.
+    if (!iCommand) return;
 
     std::lock_guard<std::mutex> lock(mCommandMutex);
 
@@ -136,39 +106,19 @@ namespace fw
       return;
     }
 
-    mPendingCommands.emplace_back(iMessage);
+    mPendingCommands.emplace_back(std::move(iCommand));
   }
 
   void Module::DrainCommands()
   {
-    std::vector<std::shared_ptr<Message>> commands;
+    std::vector<std::function<void()>> commands;
     {
       std::lock_guard<std::mutex> lock(mCommandMutex);
       commands.swap(mPendingCommands);
     }
 
     for (const auto& command : commands)
-      HandleCommand(command);
-  }
-
-  void Module::HandleCommand(std::shared_ptr<Message> iMessage)
-  {
-    std::shared_ptr<face::CommandMessage> command = std::dynamic_pointer_cast<face::CommandMessage>(iMessage);
-    if (command)
-    {
-      if (command->GetType() == face::CommandMessage::Type::SetVerboseMode)
-      {
-        mVerboseMode = command->GetFlag();
-      }
-
-      return;
-    }
-
-    if (std::dynamic_pointer_cast<face::ImageSizeChangedMessage>(iMessage))
-    {
-      Clear();
-      return;
-    }
+      command();
   }
 
   ErrorCode Module::InitializeInternal(const cv::FileNode& iModuleNode)
