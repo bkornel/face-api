@@ -5,16 +5,14 @@
 
 #include <algorithm>
 #include <cassert>
+#include <chrono>
 #include <concepts>
 #include <condition_variable>
-#include <cstddef>
 #include <limits>
-#include <memory>
 #include <mutex>
 #include <optional>
 #include <queue>
 #include <string>
-#include <tuple>
 #include <utility>
 
 namespace fw
@@ -32,11 +30,9 @@ namespace fw
   /// owner still has to keep the queue alive until those threads have left it.
   ///
   /// This class is thread-safe.
-  template <SharedPointer First, SharedPointer... Rest>
+  template <SharedPointer MessageT>
   class MessageQueue
   {
-    using MessageTuple = std::tuple<First, Rest...>;
-
   public:
     struct Statistics
     {
@@ -79,7 +75,7 @@ namespace fw
       Clear();
     }
 
-    ErrorCode Push(const MessageTuple& iMessageTuple)
+    ErrorCode Push(const MessageT& iMessage)
     {
       std::unique_lock<std::mutex> lock(mMutex);
 
@@ -87,33 +83,23 @@ namespace fw
       {
         if (mClosed) return ErrorCode::BadState;
 
-        const ErrorCode code = PushLocked(iMessageTuple);
+        const ErrorCode code = PushLocked(iMessage);
         if (code != ErrorCode::OutOfResources) return code;
 
         WaitForRoomLocked(lock);
       }
     }
 
-    ErrorCode Push(const First& iFirst, const Rest&... iArgs)
-    {
-      return Push(std::make_tuple(iFirst, iArgs...));
-    }
-
-    ErrorCode TryPush(const MessageTuple& iMessageTuple)
+    ErrorCode TryPush(const MessageT& iMessage)
     {
       std::lock_guard<std::mutex> lock(mMutex);
 
       if (mClosed) return ErrorCode::BadState;
 
-      return PushLocked(iMessageTuple);
+      return PushLocked(iMessage);
     }
 
-    ErrorCode TryPush(const First& iFirst, const Rest&... iArgs)
-    {
-      return TryPush(std::make_tuple(iFirst, iArgs...));
-    }
-
-    ErrorCode Pop(MessageTuple& oDestination)
+    ErrorCode Pop(MessageT& oDestination)
     {
       std::unique_lock<std::mutex> lock(mMutex);
 
@@ -129,13 +115,13 @@ namespace fw
       }
     }
 
-    ErrorCode TryPop(MessageTuple& oDestination)
+    ErrorCode TryPop(MessageT& oDestination)
     {
       std::lock_guard<std::mutex> lock(mMutex);
       return PopLocked(oDestination);
     }
 
-    ErrorCode Front(MessageTuple& oDestination)
+    ErrorCode Front(MessageT& oDestination)
     {
       std::unique_lock<std::mutex> lock(mMutex);
 
@@ -150,10 +136,35 @@ namespace fw
       }
     }
 
-    ErrorCode TryFront(MessageTuple& oDestination)
+    ErrorCode TryFront(MessageT& oDestination)
     {
       std::lock_guard<std::mutex> lock(mMutex);
       return FrontLocked(oDestination);
+    }
+
+    /// @brief Waits until a message is available, the queue is closed, or iTimeout passes.
+    /// Lets a consumer sleep on the queue instead of polling it.
+    /// @return true when a message is waiting to be popped
+    bool WaitForMessage(Milliseconds iTimeout)
+    {
+      const auto deadline = std::chrono::steady_clock::now() +
+                            std::chrono::duration_cast<std::chrono::steady_clock::duration>(iTimeout);
+
+      std::unique_lock<std::mutex> lock(mMutex);
+
+      for (;;)
+      {
+        FilterLocked();
+
+        if (!mQueue.empty()) return true;
+        if (mClosed) return false;
+
+        if (mCV.wait_until(lock, deadline) == std::cv_status::timeout)
+        {
+          FilterLocked();
+          return !mQueue.empty();
+        }
+      }
     }
 
     void Close()
@@ -178,7 +189,7 @@ namespace fw
         std::lock_guard<std::mutex> lock(mMutex);
 
         mQueue = {};
-        mTimestamp = Timestamp{};
+        mNextAdmission = Timestamp{};
       }
 
       mCV.notify_all();
@@ -230,7 +241,7 @@ namespace fw
       assert(iBound > 0);
       {
         std::lock_guard<std::mutex> lock(mMutex);
-        mBound = (std::min)((std::max)(iBound, MIN_BOUND), MAX_BOUND);
+        mBound = std::clamp(iBound, MIN_BOUND, MAX_BOUND);
       }
 
       mCV.notify_all();
@@ -241,7 +252,7 @@ namespace fw
       assert(iSamplingFPS > 0.0F);
       {
         std::lock_guard<std::mutex> lock(mMutex);
-        mSamplingFPS = (std::min)((std::max)(iSamplingFPS, MIN_SAMPLING_RATE_FPS), MAX_SAMPLING_RATE_FPS);
+        mSamplingFPS = std::clamp(iSamplingFPS, MIN_SAMPLING_RATE_FPS, MAX_SAMPLING_RATE_FPS);
         mSampling = ConvertFpsToDuration(mSamplingFPS);
       }
 
@@ -259,7 +270,7 @@ namespace fw
     }
 
   private:
-    ErrorCode PushLocked(const MessageTuple& iMessageTuple)
+    ErrorCode PushLocked(const MessageT& iMessage)
     {
       FilterLocked();
 
@@ -267,24 +278,32 @@ namespace fw
 
       const Timestamp currentTimestamp = now();
 
-      if (elapsed(mTimestamp, currentTimestamp) <= mSampling)
-        return ErrorCode::BadData;
+      // Admission works in slots rather than "at least a period since the last arrival":
+      // measured arrival-to-arrival, a source running exactly at the sampling rate lands
+      // every frame a hair inside the period of the one before, and half of them were
+      // turned away - a 30 fps camera came through at 15.
+      if (currentTimestamp < mNextAdmission) return ErrorCode::BadData;
 
-      mTimestamp = currentTimestamp;
-      mQueue.emplace(mTimestamp, iMessageTuple);
+      // The next slot opens one period after this one, keeping the cadence, so scheduling
+      // jitter cannot shave frames off an at-rate source. A source that stalled gets no
+      // credit to burst: the cadence restarts from now.
+      mNextAdmission = (std::max)(mNextAdmission + std::chrono::duration_cast<WallClock::duration>(mSampling),
+                                  currentTimestamp);
+
+      mQueue.emplace(currentTimestamp, iMessage);
 
       mCV.notify_all();
 
       return ErrorCode::OK;
     }
 
-    ErrorCode FrontLocked(MessageTuple& oDestination)
+    ErrorCode FrontLocked(MessageT& oDestination)
     {
       FilterLocked();
 
       if (mQueue.empty())
       {
-        oDestination = MessageTuple();
+        oDestination = MessageT();
         return ErrorCode::NotFound;
       }
 
@@ -293,7 +312,7 @@ namespace fw
       return ErrorCode::OK;
     }
 
-    ErrorCode PopLocked(MessageTuple& oDestination)
+    ErrorCode PopLocked(MessageT& oDestination)
     {
       const ErrorCode code = FrontLocked(oDestination);
 
@@ -353,7 +372,7 @@ namespace fw
     mutable std::mutex mMutex;
     std::condition_variable mCV;
 
-    std::queue<std::pair<Timestamp, MessageTuple>> mQueue;
+    std::queue<std::pair<Timestamp, MessageT>> mQueue;
 
     const std::string mName;
 
@@ -364,6 +383,7 @@ namespace fw
     Milliseconds mSampling{ 1.0 };
     Milliseconds mThreshold{ -1.0 };
 
-    Timestamp mTimestamp;
+    /// @brief When the next admission slot opens; epoch admits the first push immediately
+    Timestamp mNextAdmission;
   };
 }

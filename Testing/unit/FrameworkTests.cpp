@@ -15,7 +15,6 @@
 #include <stdexcept>
 #include <string>
 #include <thread>
-#include <tuple>
 #include <vector>
 
 INITIALIZE_EASYLOGGINGPP
@@ -32,7 +31,6 @@ namespace
 
   using Payload = std::shared_ptr<int>;
   using Queue = fw::MessageQueue<Payload>;
-  using Tuple = std::tuple<Payload>;
 
   void QueueBlockingPopIsWokenByPush()
   {
@@ -40,8 +38,8 @@ namespace
 
     std::atomic<bool> got{ false };
     std::thread consumer([&] {
-      Tuple out;
-      if (queue.Pop(out) == fw::ErrorCode::OK && std::get<0>(out) && *std::get<0>(out) == 42)
+      Payload out;
+      if (queue.Pop(out) == fw::ErrorCode::OK && out && *out == 42)
         got = true;
     });
 
@@ -58,7 +56,7 @@ namespace
 
     std::atomic<bool> released{ false };
     std::thread consumer([&] {
-      Tuple out;
+      Payload out;
       released = (queue.Pop(out) == fw::ErrorCode::BadState);
     });
 
@@ -83,7 +81,7 @@ namespace
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
     Check(!pushed.load(), "blocking Push() is still waiting while the queue is full");
 
-    Tuple out;
+    Payload out;
     queue.TryPop(out);
 
     producer.join();
@@ -104,6 +102,57 @@ namespace
     Check(waited.count() >= 100 && waited.count() < 2000, "the wait was bounded by the expiry, not by a poll");
   }
 
+  /// @brief Pushes iCount messages spaced iSpacing apart, paced by a spin wait so the
+  /// spacing is exact to the microsecond, and pops after every push so the bound never
+  /// interferes. Returns how many the sampler admitted.
+  int PushPaced(Queue& ioQueue, int iCount, std::chrono::microseconds iSpacing)
+  {
+    using Clock = std::chrono::steady_clock;
+    const auto start = Clock::now();
+
+    int admitted = 0;
+
+    for (int i = 0; i < iCount; ++i)
+    {
+      while (Clock::now() < start + i * iSpacing)
+      {
+        // Spinning, not sleeping: the OS timer's 15 ms granularity would destroy the pacing
+      }
+
+      if (ioQueue.TryPush(std::make_shared<int>(i)) == fw::ErrorCode::OK) ++admitted;
+
+      Payload out;
+      ioQueue.TryPop(out);
+    }
+
+    return admitted;
+  }
+
+  void QueueSamplingKeepsAnAtRateSource()
+  {
+    // A 50 fps sampler fed at a shade over 50 fps, which is what a real camera at the
+    // sampling rate looks like. The old arrival-to-arrival check landed every frame a hair
+    // inside the period of the one before and turned away every second one.
+    Queue queue("q", 50.0F, 8);
+
+    constexpr int cFrames = 30;
+    const int admitted = PushPaced(queue, cFrames, std::chrono::microseconds(19500));
+
+    Check(admitted >= cFrames - 3, "a source at the sampling rate is not halved (" + std::to_string(admitted) + "/" + std::to_string(cFrames) + ")");
+  }
+
+  void QueueSamplingThrottlesAFastSource()
+  {
+    // The same sampler fed four times too fast must still be held to its rate
+    Queue queue("q", 50.0F, 8);
+
+    constexpr int cFrames = 40;
+    const int admitted = PushPaced(queue, cFrames, std::chrono::microseconds(5000));
+
+    Check(admitted >= cFrames / 5 && admitted <= cFrames / 2,
+          "a source above the sampling rate is throttled (" + std::to_string(admitted) + "/" + std::to_string(cFrames) + ")");
+  }
+
   void QueueClosedRefusesPushAndStillDrains()
   {
     Queue queue("q", 1000.0F, 8);
@@ -112,7 +161,7 @@ namespace
 
     Check(queue.TryPush(std::make_shared<int>(8)) == fw::ErrorCode::BadState, "a closed queue refuses a push");
 
-    Tuple out;
+    Payload out;
     Check(queue.TryPop(out) == fw::ErrorCode::OK, "a closed queue can still be drained");
     Check(queue.Pop(out) == fw::ErrorCode::BadState, "a drained closed queue reports BadState");
   }
@@ -284,6 +333,8 @@ int main()
   QueueCloseReleasesBlockedPop();
   QueueBlockingPushWaitsForRoom();
   QueueBlockingPushWaitsForExpiry();
+  QueueSamplingKeepsAnAtRateSource();
+  QueueSamplingThrottlesAFastSource();
   QueueClosedRefusesPushAndStillDrains();
   ContinuationReArmsUnderContention();
   ThreadPoolRunsEveryTask();
