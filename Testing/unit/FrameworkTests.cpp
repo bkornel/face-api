@@ -1,12 +1,12 @@
-// Exercises the framework primitives everything else stands on: the message queue's
-// blocking calls and Close(), the continuation's re-arm under contention, the thread
-// pool, a small flow graph with the per-frame barrier, and parallel_for.
+// The framework primitives everything else stands on: the message queue's blocking calls,
+// its sampler and Close(), the continuation's re-arm under contention, the thread pool, a
+// small flow graph with the per-frame barrier, and parallel_for.
+#include "TestSupport.h"
+
 #include "Framework/Graph/FlowGraph.hpp"
 #include "Framework/Graph/Port.hpp"
 #include "Framework/Messaging/MessageQueue.hpp"
 #include "Framework/Parallel.h"
-
-#include <easyloggingpp/easyloggingpp.h>
 
 #include <atomic>
 #include <cstdio>
@@ -17,17 +17,9 @@
 #include <thread>
 #include <vector>
 
-INITIALIZE_EASYLOGGINGPP
-
 namespace
 {
-  int gFailures = 0;
-
-  void Check(bool iCondition, const std::string& iWhat)
-  {
-    std::printf("%-62s %s\n", iWhat.c_str(), iCondition ? "ok" : "FAILED");
-    if (!iCondition) ++gFailures;
-  }
+  using test::Check;
 
   using Payload = std::shared_ptr<int>;
   using Queue = fw::MessageQueue<Payload>;
@@ -151,6 +143,45 @@ namespace
 
     Check(admitted >= cFrames / 5 && admitted <= cFrames / 2,
           "a source above the sampling rate is throttled (" + std::to_string(admitted) + "/" + std::to_string(cFrames) + ")");
+  }
+
+  void QueueRejectsWhenFullByDefault()
+  {
+    // No sampling limit: this is about what a full queue does, and a rate would turn the
+    // back-to-back pushes away before they ever got there
+    Queue queue("q");
+    queue.SetBound(2);
+
+    Check(queue.TryPush(std::make_shared<int>(1)) == fw::ErrorCode::OK, "first push onto a queue bounded at two");
+    Check(queue.TryPush(std::make_shared<int>(2)) == fw::ErrorCode::OK, "second push fills it");
+    Check(queue.TryPush(std::make_shared<int>(3)) == fw::ErrorCode::OutOfResources, "the third is turned away");
+
+    Payload out;
+    queue.TryPop(out);
+    Check(out && *out == 1, "and the oldest message is still the one waiting");
+  }
+
+  void QueueDropsTheOldestWhenAskedTo()
+  {
+    // What an overlay wants: the graph is behind, and the freshest frame is the one worth
+    // having rather than the one that has been waiting longest
+    Queue queue("q");
+    queue.SetBound(2);
+    queue.SetDropPolicy(fw::DropPolicy::DropOldest);
+
+    Check(queue.TryPush(std::make_shared<int>(1)) == fw::ErrorCode::OK, "first push onto a latest-wins queue");
+    queue.TryPush(std::make_shared<int>(2));
+
+    Check(queue.TryPush(std::make_shared<int>(3)) == fw::ErrorCode::OK, "a push onto a full latest-wins queue succeeds");
+    Check(queue.GetSize() == 2, "the queue stays at its bound (" + std::to_string(queue.GetSize()) + ")");
+    Check(queue.GetDroppedCount() == 1ULL, "and the overtaken message is counted as dropped");
+
+    Payload first;
+    Payload second;
+    queue.TryPop(first);
+    queue.TryPop(second);
+
+    Check(first && *first == 2 && second && *second == 3, "what is left is the two newest messages");
   }
 
   void QueueClosedRefusesPushAndStillDrains()
@@ -327,14 +358,18 @@ namespace
   }
 }
 
-int main()
+void RunFrameworkTests()
 {
+  test::Section("framework primitives");
+
   QueueBlockingPopIsWokenByPush();
   QueueCloseReleasesBlockedPop();
   QueueBlockingPushWaitsForRoom();
   QueueBlockingPushWaitsForExpiry();
   QueueSamplingKeepsAnAtRateSource();
   QueueSamplingThrottlesAFastSource();
+  QueueRejectsWhenFullByDefault();
+  QueueDropsTheOldestWhenAskedTo();
   QueueClosedRefusesPushAndStillDrains();
   ContinuationReArmsUnderContention();
   ThreadPoolRunsEveryTask();
@@ -343,7 +378,4 @@ int main()
   ParallelForSurvivesASaturatedPool();
   ParallelForRethrowsOnTheCaller();
   ParallelForWithoutExecutorRunsInline();
-
-  std::printf("\n%s (%d failure(s))\n", gFailures == 0 ? "PASS" : "FAIL", gFailures);
-  return gFailures == 0 ? 0 : 1;
 }

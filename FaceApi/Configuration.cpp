@@ -23,6 +23,10 @@ namespace face
 
     const std::string jsonFile = mDirectories.working + iConfigFile;
 
+    // Released explicitly: the nodes handed out above point into the open storage, and this
+    // may well be a re-read - which is what a pipeline reload does
+    mFileStorage.release();
+
     if (!mFileStorage.open(jsonFile, cv::FileStorage::READ))
     {
       LOG(ERROR) << "ERROR: " << jsonFile << " cannot be opened.";
