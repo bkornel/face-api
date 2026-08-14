@@ -120,9 +120,8 @@ extern "C" {
     uint64_t framesCaptured;
     uint64_t framesProcessed;
 
-    /// @brief Frames pushed that the pipeline neither returned nor could still be holding.
-    /// It drops them silently when its queue is full and does not report it, so this is
-    /// what went in, has not come out, and no longer fits inside.
+    /// @brief Frames the pipeline turned away at the door: its queue was full, or the frame
+    /// came faster than the configured sampling rate. Counted per push, not inferred.
     uint64_t framesDropped;
 
     uint64_t framesRendered;
@@ -151,7 +150,7 @@ extern "C" {
     int32_t sourceHeight;
     int32_t faceCount;
 
-    /// @brief Frames pushed that have not come back out: what is inside the pipeline
+    /// @brief Frames waiting in the pipeline's image queue right now, as it reports it
     int32_t queueDepth;
 
     int32_t stageCount;
@@ -230,6 +229,14 @@ extern "C" {
   /// its own declarations against them once, at startup, instead of discovering a mismatch
   /// as a field that reads nonsense.
   FE_API void FE_CALL FeEngine_GetStructSizes(int32_t* oSnapshotSize, int32_t* oFaceSize);
+
+  /// @brief How many accent colours the shared palette holds. The palette lives in the
+  /// pipeline's model, so a face, its overlay, its head and its panel are one colour.
+  FE_API int32_t FE_CALL FeEngine_GetAccentCount(void);
+
+  /// @brief One accent colour as red, green and blue in [0, 1]. iIndex wraps, so a user id
+  /// may be passed directly.
+  FE_API void FE_CALL FeEngine_GetAccentColor(int32_t iIndex, double* oR, double* oG, double* oB);
 
   /// @name Lifetime
   /// @{

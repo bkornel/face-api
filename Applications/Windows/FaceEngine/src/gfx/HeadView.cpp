@@ -1,6 +1,7 @@
 #include "gfx/HeadView.h"
 
-#include "Configuration.h"
+#include "Framework/MathExtensions.h"
+#include "Model/Palette.h"
 
 #include <d3dcompiler.h>
 #include <DirectXMath.h>
@@ -14,8 +15,6 @@ namespace fe::gfx
   namespace
   {
     using namespace DirectX;
-
-    constexpr float sDegToRad = 0.01745329251994329577F;
 
     /// @brief One source for both stages: they share the constant buffer and the varyings,
     /// and keeping them together is what stops the two from drifting apart.
@@ -148,8 +147,9 @@ float4 PSMain(PSInput input) : SV_TARGET
     }
   }
 
-  HeadView::HeadView(GraphicsDevice& ioDevice) :
-    mDevice(ioDevice)
+  HeadView::HeadView(GraphicsDevice& ioDevice, std::string iModelPath) :
+    mDevice(ioDevice),
+    mModelPath(std::move(iModelPath))
   {
     mOptions.orbitYawDeg = 0.0;
     mOptions.orbitPitchDeg = 0.0;
@@ -176,11 +176,9 @@ float4 PSMain(PSInput input) : SV_TARGET
 
     if (!mDevice.CreateCompositionSwapChain(mWidth, mHeight, &mSwapChain)) return false;
 
-    // The head is an authored model, deployed with the other model files
-    const std::string path = face::Configuration::GetInstance().GetDirectories().shapeModel +
-                             "head/ict_neutral_head.obj";
-
-    if (!mMesh.Build(path))
+    // The head is an authored model, deployed with the other model files; where it lives
+    // comes from whoever created this view
+    if (!mMesh.Build(mModelPath))
     {
       Destroy();
       return false;
@@ -561,8 +559,8 @@ float4 PSMain(PSInput input) : SV_TARGET
       pose = XMMatrixRotationY(static_cast<float>(std::sin(mIdleAngle) * 0.55));
     }
 
-    const XMMATRIX orbit = XMMatrixRotationX(static_cast<float>(mOptions.orbitPitchDeg) * sDegToRad) *
-                           XMMatrixRotationY(static_cast<float>(mOptions.orbitYawDeg) * sDegToRad);
+    const XMMATRIX orbit = XMMatrixRotationX(static_cast<float>(fw::deg_to_rad(mOptions.orbitPitchDeg))) *
+                           XMMatrixRotationY(static_cast<float>(fw::deg_to_rad(mOptions.orbitYawDeg)));
 
     // Turned about the head's own centre rather than about the nose tip the model is
     // measured from, so that orbiting reads as circling the head
@@ -578,7 +576,7 @@ float4 PSMain(PSInput input) : SV_TARGET
     const XMMATRIX view = XMMatrixLookAtLH(eye, centre, XMVectorSet(0.0F, -1.0F, 0.0F, 0.0F));
 
     const float aspect = static_cast<float>(mWidth) / static_cast<float>((std::max)(1U, mHeight));
-    const XMMATRIX projection = XMMatrixPerspectiveFovLH(38.0F * sDegToRad, aspect, 0.05F, 100.0F);
+    const XMMATRIX projection = XMMatrixPerspectiveFovLH(static_cast<float>(fw::deg_to_rad(38.0)), aspect, 0.05F, 100.0F);
 
     Constants constants{};
 
@@ -741,20 +739,12 @@ float4 PSMain(PSInput input) : SV_TARGET
 
   void HeadView::ComputeAccent(int iUserId, float oAccent[4])
   {
-    // The same five colours the video view uses, so a face and its head are one thing
-    static const float sAccents[5][3] = {
-      { 0.30F, 0.78F, 1.00F },
-      { 0.55F, 0.94F, 0.60F },
-      { 1.00F, 0.73F, 0.35F },
-      { 0.94F, 0.55F, 0.80F },
-      { 1.00F, 0.47F, 0.47F }
-    };
+    // The shared palette, so a face and its head are one thing
+    const face::palette::Rgb& accent = face::palette::accent_of(iUserId);
 
-    const std::size_t index = static_cast<std::size_t>(iUserId < 0 ? -iUserId : iUserId) % 5U;
-
-    oAccent[0] = sAccents[index][0];
-    oAccent[1] = sAccents[index][1];
-    oAccent[2] = sAccents[index][2];
+    oAccent[0] = static_cast<float>(accent.r);
+    oAccent[1] = static_cast<float>(accent.g);
+    oAccent[2] = static_cast<float>(accent.b);
     oAccent[3] = 1.0F;
   }
 }

@@ -84,9 +84,6 @@ namespace fe
       return mFrameCount.load(std::memory_order_acquire);
     }
 
-    /// @brief Frames per second measured over the last second of grabs
-    double GetMeasuredFps() const;
-
   private:
     /// @brief Takes over a capture that is already open and starts the reader thread
     bool Start(Kind iKind, double iNominalFps);
@@ -111,8 +108,5 @@ namespace fe
     /// @brief Guards the capture against Close() running while the thread is grabbing
     std::mutex mCaptureMutex;
     cv::VideoCapture mCapture;
-
-    mutable std::mutex mRateMutex;
-    double mMeasuredFps = 0.0;
   };
 }

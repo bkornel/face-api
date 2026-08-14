@@ -4,10 +4,7 @@ using System.Runtime.CompilerServices;
 
 using FaceStudio.Interop;
 
-using Microsoft.UI;
 using Microsoft.UI.Xaml.Media;
-
-using Windows.UI;
 
 namespace FaceStudio.Models;
 
@@ -20,19 +17,6 @@ namespace FaceStudio.Models;
 /// </summary>
 public sealed class FaceStatus : INotifyPropertyChanged
 {
-    /// <summary>
-    /// The same five colours the renderers use, so that a face, its overlay and its head
-    /// are recognisably one thing. Kept in step with the tables in VideoView and HeadView.
-    /// </summary>
-    private static readonly Color[] Accents =
-    {
-        Color.FromArgb(0xFF, 0x4D, 0xC7, 0xFF),
-        Color.FromArgb(0xFF, 0x8C, 0xF0, 0x99),
-        Color.FromArgb(0xFF, 0xFF, 0xBA, 0x59),
-        Color.FromArgb(0xFF, 0xF0, 0x8C, 0xCC),
-        Color.FromArgb(0xFF, 0xFF, 0x78, 0x78)
-    };
-
     private int _userId;
     private NativeEngine.TrackState _state;
     private bool _hasPose;
@@ -224,7 +208,9 @@ public sealed class FaceStatus : INotifyPropertyChanged
         ? $"{AgeSeconds / 60.0:0.0} min"
         : $"{AgeSeconds:0.0} s";
 
-    public SolidColorBrush Accent => new(Accents[Math.Abs(UserId) % Accents.Length]);
+    /// <summary>The engine's own palette, through a cached brush: the overlay, the head and
+    /// this panel colour a user from the same table.</summary>
+    public SolidColorBrush Accent => Accents.BrushOf(UserId);
 
     public void Update(in NativeEngine.Face iFace)
     {

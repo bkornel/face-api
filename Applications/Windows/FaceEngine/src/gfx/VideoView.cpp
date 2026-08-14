@@ -1,6 +1,7 @@
 #include "gfx/VideoView.h"
 
 #include "Model/FaceModel.h"
+#include "Model/Palette.h"
 #include "Model/PoseGeometry.h"
 #include "Model/ShapeMetrics.h"
 
@@ -15,21 +16,11 @@ namespace fe::gfx
 {
   namespace
   {
-    /// @brief Picked to stay apart from one another and from skin tones
-    constexpr D2D1_COLOR_F sAccents[] = {
-      { 0.30F, 0.78F, 1.00F, 1.0F }, // sky
-      { 0.55F, 0.94F, 0.60F, 1.0F }, // mint
-      { 1.00F, 0.73F, 0.35F, 1.0F }, // amber
-      { 0.94F, 0.55F, 0.80F, 1.0F }, // orchid
-      { 1.00F, 0.47F, 0.47F, 1.0F }  // coral
-    };
-
-    /// @brief The colours of the model's x, y and z axes, in that order
-    constexpr D2D1_COLOR_F sAxisColors[] = {
-      { 1.00F, 0.42F, 0.42F, 1.0F },
-      { 0.45F, 0.90F, 0.50F, 1.0F },
-      { 0.40F, 0.70F, 1.00F, 1.0F }
-    };
+    /// @brief The shared palette's colour, as Direct2D wants it
+    inline D2D1_COLOR_F ToColor(const face::palette::Rgb& iColor)
+    {
+      return { static_cast<float>(iColor.r), static_cast<float>(iColor.g), static_cast<float>(iColor.b), 1.0F };
+    }
 
     inline D2D1_COLOR_F WithAlpha(const D2D1_COLOR_F& iColor, float iAlpha)
     {
@@ -597,7 +588,7 @@ namespace fe::gfx
       mBrush->SetColor(D2D1::ColorF(0.0F, 0.0F, 0.0F, 0.45F * fade));
       mContext->DrawLine(origin, tip, mBrush.Get(), 3.5F, mRoundStroke.Get());
 
-      mBrush->SetColor(WithAlpha(sAxisColors[axis.index], fade));
+      mBrush->SetColor(WithAlpha(ToColor(face::palette::kAxes[axis.index]), fade));
       mContext->DrawLine(origin, tip, mBrush.Get(), 2.0F, mRoundStroke.Get());
       mContext->FillEllipse(D2D1::Ellipse(tip, 2.2F, 2.2F), mBrush.Get());
     }
@@ -680,9 +671,6 @@ namespace fe::gfx
 
   D2D1_COLOR_F VideoView::AccentOf(int iUserId)
   {
-    const std::size_t count = sizeof(sAccents) / sizeof(sAccents[0]);
-    const std::size_t index = static_cast<std::size_t>(iUserId < 0 ? -iUserId : iUserId) % count;
-
-    return sAccents[index];
+    return ToColor(face::palette::accent_of(iUserId));
   }
 }

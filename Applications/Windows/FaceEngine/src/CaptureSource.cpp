@@ -1,6 +1,6 @@
 #include "CaptureSource.h"
 
-#include <windows.h>
+#include "TextConversions.h"
 
 #include <chrono>
 
@@ -9,20 +9,6 @@ namespace fe
   namespace
   {
     using Clock = std::chrono::steady_clock;
-
-    std::string ToUtf8(const std::wstring& iText)
-    {
-      if (iText.empty()) return {};
-
-      const int size = WideCharToMultiByte(CP_UTF8, 0, iText.c_str(), static_cast<int>(iText.size()),
-                                           nullptr, 0, nullptr, nullptr);
-      if (size <= 0) return {};
-
-      std::string result(static_cast<std::size_t>(size), '\0');
-      WideCharToMultiByte(CP_UTF8, 0, iText.c_str(), static_cast<int>(iText.size()),
-                          result.data(), size, nullptr, nullptr);
-      return result;
-    }
   }
 
   CaptureSource::CaptureSource(FrameSink iSink) :
@@ -109,9 +95,6 @@ namespace fe
     mKind.store(Kind::None, std::memory_order_release);
     mWidth.store(0, std::memory_order_release);
     mHeight.store(0, std::memory_order_release);
-
-    std::lock_guard<std::mutex> rateLock(mRateMutex);
-    mMeasuredFps = 0.0;
   }
 
   void CaptureSource::StopThread()
@@ -130,8 +113,6 @@ namespace fe
                             : Clock::duration::zero();
 
     auto next = Clock::now();
-    auto windowStart = Clock::now();
-    int windowFrames = 0;
 
     cv::Mat frame;
 
@@ -169,35 +150,17 @@ namespace fe
 
       if (mSink) mSink(frame);
 
-      ++windowFrames;
-      const auto now = Clock::now();
-      const auto windowMs = std::chrono::duration<double, std::milli>(now - windowStart).count();
-
-      if (windowMs >= 500.0)
-      {
-        std::lock_guard<std::mutex> lock(mRateMutex);
-        mMeasuredFps = windowFrames * 1000.0 / windowMs;
-        windowFrames = 0;
-        windowStart = now;
-      }
-
       if (interval > Clock::duration::zero())
       {
         next += interval;
 
         // A decode that fell behind sets the schedule from now, rather than replaying the
         // backlog at full speed the moment it catches up
-        if (next < now) next = now;
+        if (next < Clock::now()) next = Clock::now();
         else std::this_thread::sleep_until(next);
       }
     }
 
     mRunning.store(false, std::memory_order_release);
-  }
-
-  double CaptureSource::GetMeasuredFps() const
-  {
-    std::lock_guard<std::mutex> lock(mRateMutex);
-    return mMeasuredFps;
   }
 }

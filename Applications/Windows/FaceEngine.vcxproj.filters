@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{c2f7a1b8-4e63-49d5-8a02-6b91d3c5e7f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\gfx">
+      <UniqueIdentifier>{7d4b9e21-a586-4c30-b1f7-93e0c8a2d615}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="FaceEngine\src\Api.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="FaceEngine\src\CameraEnumerator.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="FaceEngine\src\CaptureSource.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="FaceEngine\src\Engine.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="FaceEngine\src\gfx\GraphicsDevice.cpp">
+      <Filter>src\gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="FaceEngine\src\gfx\HeadView.cpp">
+      <Filter>src\gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="FaceEngine\src\gfx\VideoView.cpp">
+      <Filter>src\gfx</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="FaceEngine\FaceEngine.h" />
+    <ClInclude Include="FaceEngine\src\CameraEnumerator.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="FaceEngine\src\CaptureSource.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="FaceEngine\src\Engine.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="FaceEngine\src\TextConversions.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="FaceEngine\src\gfx\GraphicsDevice.h">
+      <Filter>src\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="FaceEngine\src\gfx\HeadView.h">
+      <Filter>src\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="FaceEngine\src\gfx\VideoView.h">
+      <Filter>src\gfx</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\.clang-format" />
+  </ItemGroup>
+</Project>

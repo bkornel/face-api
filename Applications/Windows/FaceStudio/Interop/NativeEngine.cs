@@ -180,6 +180,12 @@ public static class NativeEngine
     [DllImport(Library, CallingConvention = CallingConvention.StdCall)]
     public static extern void FeEngine_GetStructSizes(out int oSnapshotSize, out int oFaceSize);
 
+    [DllImport(Library, CallingConvention = CallingConvention.StdCall)]
+    public static extern int FeEngine_GetAccentCount();
+
+    [DllImport(Library, CallingConvention = CallingConvention.StdCall)]
+    public static extern void FeEngine_GetAccentColor(int iIndex, out double oR, out double oG, out double oB);
+
     [DllImport(Library, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
     public static extern Status FeEngine_Create(string iWorkingDirectory, out IntPtr oEngine);
 

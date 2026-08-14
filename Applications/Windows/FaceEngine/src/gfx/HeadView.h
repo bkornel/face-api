@@ -7,6 +7,7 @@
 #include "ViewFrame.h"
 
 #include <cstdint>
+#include <string>
 #include <vector>
 
 namespace fe::gfx
@@ -20,7 +21,8 @@ namespace fe::gfx
   class HeadView
   {
   public:
-    explicit HeadView(GraphicsDevice& ioDevice);
+    /// @param iModelPath The authored head, normally <models>/head/ict_neutral_head.obj
+    HeadView(GraphicsDevice& ioDevice, std::string iModelPath);
 
     HeadView(const HeadView& iOther) = delete;
 
@@ -92,6 +94,8 @@ namespace fe::gfx
     static void ComputeAccent(int iUserId, float oAccent[4]);
 
     GraphicsDevice& mDevice;
+
+    std::string mModelPath;
 
     ComPtr<IDXGISwapChain1> mSwapChain;
 
