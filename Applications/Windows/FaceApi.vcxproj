@@ -43,6 +43,7 @@
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Imaging\Projection.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Imaging\Procrustes.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Settings.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\DnnOptions.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Messages\ImageMessage.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Messages\RoiMessage.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Messages\UserEntriesMessage.cpp" />
@@ -97,6 +98,7 @@
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Imaging\Projection.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Imaging\Procrustes.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Settings.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\DnnOptions.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\ImageMessage.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\RoiMessage.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\UserEntriesMessage.h" />

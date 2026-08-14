@@ -128,6 +128,9 @@
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Settings.cpp">
       <Filter>Framework</Filter>
     </ClCompile>
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\DnnOptions.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Messages\ImageMessage.cpp">
       <Filter>Messages</Filter>
     </ClCompile>
@@ -278,6 +281,9 @@
       <Filter>Framework\Imaging</Filter>
     </ClInclude>
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Settings.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\DnnOptions.h">
       <Filter>Framework</Filter>
     </ClInclude>
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\ImageMessage.h">

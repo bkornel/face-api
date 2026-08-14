@@ -1,4 +1,5 @@
 #include "Framework/Settings.h"
+#include "Framework/DnnOptions.h"
 #include "Framework/ErrorCode.h"
 #include "Modules/ShapeModel/TddfaDispatcher.h"
 
@@ -39,6 +40,10 @@ namespace face
     try
     {
       mNet = cv::dnn::readNetFromONNX(path + "mb1_120x120.onnx");
+
+      const fw::DnnOptions dnn = fw::get_dnn_options(iSettings);
+      mNet.setPreferableBackend(dnn.backend);
+      mNet.setPreferableTarget(dnn.target);
     }
     catch (const cv::Exception& iException)
     {
@@ -172,36 +177,79 @@ namespace face
     return crop;
   }
 
-  bool TddfaDispatcher::Fit(const TrackedFace& iTrack, const cv::Mat& iFrameBGR, ShapeDescriptor& oShape)
+  TddfaDispatcher::FitContext TddfaDispatcher::Crop(const TrackedFace& iTrack, const cv::Mat& iFrameBGR) const
   {
+    FitContext context;
+
+    const auto it = mStates.find(iTrack.trackId);
+    if (it == mStates.end()) return context;
+
+    const TrackState& state = it->second;
+
+    // A fresh detection re-anchors the crop; otherwise it follows the previous landmarks
+    const bool fromShape = state.hasShape && iTrack.status != TrackStatus::Detected;
+    context.roi = fromShape ? RoiFromShape(state.lastShape) : RoiFromBbox(iTrack.faceRect);
+
+    if (context.roi.width < 1.0 || context.roi.height < 1.0) return context;
+
+    cv::resize(CropRoi(iFrameBGR, context.roi), context.input, { cInputSize, cInputSize });
+
+    context.valid = !context.input.empty();
+
+    return context;
+  }
+
+  std::vector<std::vector<double>> TddfaDispatcher::Infer(const std::vector<FitContext>& iContexts)
+  {
+    std::vector<std::vector<double>> params(iContexts.size());
+
+    // One face at a time. The network cannot be batched: its Gemm layer carries the shapes
+    // of a single sample, and handing blobFromImages a second one fails to allocate at all -
+    // which took every frame with two faces down with it. What the frame does get is one
+    // lock for all of the faces rather than one each, with the cropping and the decoding
+    // outside it.
+    std::lock_guard<std::mutex> lock(mNetMutex);
+
+    for (std::size_t i = 0U; i < iContexts.size(); ++i)
+    {
+      if (!iContexts[i].valid) continue;
+
+      // (x - 127.5) / 128, BGR, NCHW
+      const cv::Mat blob =
+        cv::dnn::blobFromImage(iContexts[i].input, 1.0 / 128.0, {}, cv::Scalar(127.5, 127.5, 127.5), false);
+
+      mNet.setInput(blob);
+
+      // forward() hands out a view into the network, hence the copy below
+      const cv::Mat out = mNet.forward();
+
+      if (out.total() < static_cast<std::size_t>(cParams)) continue;
+
+      const float* row = out.ptr<float>();
+
+      std::vector<double>& param = params[i];
+      param.resize(cParams);
+
+      for (int p = 0; p < cParams; ++p)
+        param[p] = row[p] * mParamStd[p] + mParamMean[p];
+    }
+
+    return params;
+  }
+
+  bool TddfaDispatcher::Decode(const TrackedFace& iTrack, const FitContext& iContext,
+                               const std::vector<double>& iParams, const cv::Size& iFrameSize,
+                               ShapeDescriptor& oShape)
+  {
+    if (!iContext.valid || iParams.size() < static_cast<std::size_t>(cParams)) return false;
+
     auto it = mStates.find(iTrack.trackId);
     if (it == mStates.end()) return false;
 
     TrackState& state = it->second;
 
-    // A fresh detection re-anchors the crop; otherwise it follows the previous landmarks
-    const bool fromShape = state.hasShape && iTrack.status != TrackStatus::Detected;
-    const cv::Rect2d roi = fromShape ? RoiFromShape(state.lastShape) : RoiFromBbox(iTrack.faceRect);
-
-    if (roi.width < 1.0 || roi.height < 1.0) return false;
-
-    cv::Mat input;
-    cv::resize(CropRoi(iFrameBGR, roi), input, { cInputSize, cInputSize });
-
-    // (x - 127.5) / 128, BGR, NCHW
-    const cv::Mat blob = cv::dnn::blobFromImage(input, 1.0 / 128.0, {}, cv::Scalar(127.5, 127.5, 127.5), false);
-
-    std::vector<double> param(cParams);
-    {
-      // forward() is not reentrant and hands out a view into the network, hence the copy
-      std::lock_guard<std::mutex> lock(mNetMutex);
-
-      mNet.setInput(blob);
-      const cv::Mat out = mNet.forward();
-
-      for (int i = 0; i < cParams; ++i)
-        param[i] = out.ptr<float>()[i] * mParamStd[i] + mParamMean[i];
-    }
+    const cv::Rect2d& roi = iContext.roi;
+    const std::vector<double>& param = iParams;
 
     // verts = u + w_shp * alpha_shp + w_exp * alpha_exp, laid out x,y,z per landmark
     std::vector<cv::Point2d> shape68(cLandmarks);
@@ -329,7 +377,7 @@ namespace face
 
     // Clipped rather than rejected: this fitter keeps a turned face, and a turned face may
     // legitimately reach past the frame
-    const cv::Rect fittedRect = cv::Rect(minPt, maxPt) & cv::Rect(0, 0, iFrameBGR.cols, iFrameBGR.rows);
+    const cv::Rect fittedRect = cv::Rect(minPt, maxPt) & cv::Rect(0, 0, iFrameSize.width, iFrameSize.height);
     if (fittedRect.area() <= 0)
     {
       state.hasShape = false;

@@ -45,12 +45,27 @@ namespace face
     // Not vector<bool>: its packed bits would let neighbouring writes collide
     std::vector<uint8_t> fitted(tracks.size(), 0U);
 
+    const std::shared_ptr<fw::Executor> executor =
+      mParallelUsers ? fw::get_thread_pool_executor() : nullptr;
+
+    // Cutting the faces out and decoding what came back are per-face work, so they fan out.
+    // The network itself cannot be shared - it takes one sample at a time - so it runs in
+    // between, once for every face, holding its lock for the frame rather than per face.
+    std::vector<TddfaDispatcher::FitContext> contexts(tracks.size());
+
+    fw::parallel_for(
+      tracks.size(),
+      [&](std::size_t i) { contexts[i] = mDispatcher.Crop(tracks[i], frameBGR); },
+      executor);
+
+    const std::vector<std::vector<double>> params = mDispatcher.Infer(contexts);
+
     fw::parallel_for(
       tracks.size(),
       [&](std::size_t i) {
-        fitted[i] = mDispatcher.Fit(tracks[i], frameBGR, shapes[i]) ? 1U : 0U;
+        fitted[i] = mDispatcher.Decode(tracks[i], contexts[i], params[i], frameBGR.size(), shapes[i]) ? 1U : 0U;
       },
-      mParallelUsers ? fw::get_thread_pool_executor() : nullptr);
+      executor);
 
     ShapeMessage::ShapeVector fittedShapes;
     fittedShapes.reserve(shapes.size());

@@ -1,5 +1,6 @@
 #include "Framework/Imaging/Geometry.h"
 #include "Framework/Settings.h"
+#include "Framework/DnnOptions.h"
 #include "Framework/ErrorCode.h"
 #include "Modules/FaceDetection/FaceDetection.h"
 
@@ -52,10 +53,13 @@ namespace face
     // Relative to the working directory, like every path a settings file carries
     const std::string modelPath = GetWorkingDirectory() + mModelFile;
 
+    const fw::DnnOptions dnn = fw::get_dnn_options(iSettings);
+
     try
     {
       // The input size is set for real once a frame arrives and its size is known
-      mDetector = cv::FaceDetectorYN::create(modelPath, "", { 320, 320 }, mScoreThreshold, mNmsThreshold, mTopK);
+      mDetector = cv::FaceDetectorYN::create(modelPath, "", { 320, 320 }, mScoreThreshold, mNmsThreshold,
+                                             mTopK, dnn.backend, dnn.target);
     }
     catch (const cv::Exception& iException)
     {

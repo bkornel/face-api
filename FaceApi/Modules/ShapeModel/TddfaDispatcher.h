@@ -35,7 +35,27 @@ namespace face
 
     void BeginFrame(const std::vector<TrackedFace>& iTracks);
 
-    bool Fit(const TrackedFace& iTrack, const cv::Mat& iFrameBGR, ShapeDescriptor& oShape);
+    /// @brief What one face needs between the crop and the decode. The crop of every face is
+    /// prepared first, then all of them go through the network in one call, then each is
+    /// decoded - which is why the three steps are separate.
+    struct FitContext
+    {
+      cv::Rect2d roi;
+      cv::Mat input;
+      bool valid = false;
+    };
+
+    /// @brief Cuts the face out of the frame and scales it to what the network takes. Reads
+    /// only this track's state, so faces may be prepared concurrently.
+    FitContext Crop(const TrackedFace& iTrack, const cv::Mat& iFrameBGR) const;
+
+    /// @brief Runs every prepared crop through the network in one forward pass.
+    /// @return One row of parameters per crop, empty when nothing could be run
+    std::vector<std::vector<double>> Infer(const std::vector<FitContext>& iContexts);
+
+    /// @brief Turns one row of parameters into a shape. Touches only this track's state.
+    bool Decode(const TrackedFace& iTrack, const FitContext& iContext, const std::vector<double>& iParams,
+                const cv::Size& iFrameSize, ShapeDescriptor& oShape);
 
     void Clear();
 
@@ -70,6 +90,8 @@ namespace face
 
     cv::Mat CropRoi(const cv::Mat& iFrameBGR, const cv::Rect2d& iRoi) const;
 
+    /// @brief Guards the network. Inference happens once per frame now rather than once per
+    /// face, so this is no longer what several faces queue up on.
     std::mutex mNetMutex;
     cv::dnn::Net mNet;
 

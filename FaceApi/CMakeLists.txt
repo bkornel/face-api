@@ -90,6 +90,7 @@ set(SOURCES;
   Framework/Imaging/Statistics.cpp;
   Framework/Text.cpp;
   Framework/Settings.cpp;
+  Framework/DnnOptions.cpp;
   Framework/Imaging/VideoWriter.cpp;
   Messages/ImageMessage.cpp;
   Messages/RoiMessage.cpp;
