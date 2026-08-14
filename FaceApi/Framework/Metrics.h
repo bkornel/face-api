@@ -14,6 +14,11 @@
 
 namespace fw
 {
+  /// @brief The iRatio quantile of ioSamples, in [0, 1]. Reorders ioSamples in place -
+  /// nth_element puts only the element that is asked for into its sorted position, which is
+  /// all a quantile needs.
+  double percentile_of(std::vector<double>& ioSamples, double iRatio);
+
   /// @brief Events per second, measured over a sliding window rather than from the gap
   /// between the last two events.
   ///

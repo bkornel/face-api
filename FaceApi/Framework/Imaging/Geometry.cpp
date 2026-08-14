@@ -37,7 +37,7 @@ namespace fw
     // A flat shape carries no depth to fade by
     if (range < 1e-6) return weights;
 
-    const double floor = (std::max)(0.0, (std::min)(1.0, iFar));
+    const double floor = std::clamp(iFar, 0.0, 1.0);
 
     for (std::size_t i = 0U; i < iShape3D.size(); ++i)
     {
@@ -56,7 +56,7 @@ namespace fw
     const double bottom = iRect.y + iRect.height;
 
     const double shorter = (std::min)(std::abs(iRect.width), std::abs(iRect.height));
-    const double arm = (std::max)(1.0, shorter * (std::max)(0.02, (std::min)(0.45, iArmRatio)));
+    const double arm = (std::max)(1.0, shorter * std::clamp(iArmRatio, 0.02, 0.45));
 
     return { {
       { { cv::Point2d(left, top + arm), cv::Point2d(left, top), cv::Point2d(left + arm, top) } },

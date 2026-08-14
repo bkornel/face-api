@@ -27,16 +27,10 @@ namespace fw
     }
   }
 
+  // Computed per call: it is a handful of trigonometric operations, and the cache this used
+  // to keep was unsynchronized global state shared by whoever asked with whatever size.
   cv::Mat get_camera_matrix(const cv::Size& iSize)
   {
-    static cv::Size sImageSize(0, 0);
-    static cv::Mat sCameraMatrix;
-
-    if (sImageSize == iSize && !sCameraMatrix.empty())
-      return sCameraMatrix;
-
-    sImageSize = iSize;
-
     const double dfov = fw::deg_to_rad(70.0);
     const double d = std::sqrt(iSize.width * iSize.width + iSize.height * iSize.height);
     const double fd = (d / 2.0) / std::tan(dfov / 2.0);
@@ -49,8 +43,6 @@ namespace fw
 
     const cv::Point2d center((iSize.width - 1.0) * 0.5, (iSize.height - 1.0) * 0.5);
 
-    sCameraMatrix = cv::Mat_<double>({ 3, 3 }, { fx, 0.0, center.x, 0.0, fy, center.y, 0.0, 0.0, 1.0 });
-
-    return sCameraMatrix;
+    return cv::Mat_<double>({ 3, 3 }, { fx, 0.0, center.x, 0.0, fy, center.y, 0.0, 0.0, 1.0 });
   }
 }

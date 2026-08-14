@@ -5,6 +5,18 @@
 
 namespace fw
 {
+  double percentile_of(std::vector<double>& ioSamples, double iRatio)
+  {
+    if (ioSamples.empty()) return 0.0;
+
+    const double clamped = std::clamp(iRatio, 0.0, 1.0);
+    const std::size_t index = static_cast<std::size_t>(clamped * (ioSamples.size() - 1U) + 0.5);
+
+    std::nth_element(ioSamples.begin(), ioSamples.begin() + static_cast<std::ptrdiff_t>(index), ioSamples.end());
+
+    return ioSamples[index];
+  }
+
   RateCounter::RateCounter(int64_t iWindowMs) :
     mWindowMs(iWindowMs > 0LL ? iWindowMs : 1000LL)
   {
@@ -85,16 +97,7 @@ namespace fw
 
   double SampleStatistics::GetPercentile(double iPercentile) const
   {
-    if (mSamples.empty()) return 0.0;
-
     mSorted.assign(mSamples.begin(), mSamples.end());
-
-    const double clamped = (std::max)(0.0, (std::min)(1.0, iPercentile));
-    const std::size_t index = static_cast<std::size_t>(clamped * (mSorted.size() - 1U) + 0.5);
-
-    // Only the element asked for has to be in its place, the rest may stay unordered
-    std::nth_element(mSorted.begin(), mSorted.begin() + static_cast<std::ptrdiff_t>(index), mSorted.end());
-
-    return mSorted[index];
+    return percentile_of(mSorted, iPercentile);
   }
 }

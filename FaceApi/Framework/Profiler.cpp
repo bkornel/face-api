@@ -1,29 +1,16 @@
 #include "Framework/Profiler.h"
 
+#include "Framework/Metrics.h"
+
 #include <cstdint>
 #include <easyloggingpp/easyloggingpp.h>
 
 #include <algorithm>
 #include <fstream>
-#include <functional>
 #include <iomanip>
 #include <numeric>
 #include <sstream>
 #include <vector>
-
-namespace
-{
-  // iSorted must be sorted ascending
-  double percentile(const std::vector<double>& iSorted, double iRatio)
-  {
-    if (iSorted.empty()) return 0.0;
-
-    const std::size_t last = iSorted.size() - 1U;
-    const std::size_t index = static_cast<std::size_t>((iRatio * last) + 0.5);
-
-    return iSorted[(std::min)(index, last)];
-  }
-}
 
 namespace fw
 {
@@ -39,8 +26,6 @@ namespace fw
     ProfilerDatabase::GetInstance().Push(mName, mStopwatch.GetElapsedTimeMilliSec());
   }
 
-  std::recursive_mutex ProfilerDatabase::sMutex;
-
   const std::size_t ProfilerDatabase::sMaxSamplesPerName = 20000U;
 
   ProfilerDatabase& ProfilerDatabase::GetInstance()
@@ -52,18 +37,15 @@ namespace fw
   void ProfilerDatabase::setCurrentFrameId(uint32_t iCurrentFrameId)
   {
     // Set from the app thread, read by Push() from the graph thread
-    std::lock_guard<std::recursive_mutex> lock(sMutex);
+    std::lock_guard<std::mutex> lock(mMutex);
     mCurrentFrameId = iCurrentFrameId;
   }
 
   void ProfilerDatabase::Push(const std::string& iName, double iMilliseconds)
   {
-    std::lock_guard<std::recursive_mutex> lock(sMutex);
-    const std::size_t nameHash = std::hash<std::string>{}(iName);
-    if (mNames.empty() || mNames.find(nameHash) == mNames.end())
-      mNames[nameHash] = iName;
+    std::lock_guard<std::mutex> lock(mMutex);
 
-    auto& samples = mMeasurements[nameHash];
+    auto& samples = mMeasurements[iName];
     samples.emplace_back(mCurrentFrameId, iMilliseconds);
 
     // Keep the most recent window only, the oldest samples fall out.
@@ -82,16 +64,11 @@ namespace fw
       // Aggregates first, the per-frame samples below are for plotting
       outFile << FormatStatistics() << std::endl;
 
-      std::lock_guard<std::recursive_mutex> lock(sMutex);
+      std::lock_guard<std::mutex> lock(mMutex);
 
-      for (const auto& m : mMeasurements)
+      for (const auto& [name, data] : mMeasurements)
       {
-        const std::size_t hash = m.first;
-        const auto& data = m.second;
-
-        auto itName = mNames.find(hash);
-        if (itName != mNames.end())
-          outFile << itName->second << std::endl;
+        outFile << name << std::endl;
 
         outFile << "frame_id:" << "\t";
         for (const auto& d : data)
@@ -114,31 +91,32 @@ namespace fw
 
   std::map<std::string, ProfilerDatabase::Statistics> ProfilerDatabase::GetStatistics() const
   {
-    std::lock_guard<std::recursive_mutex> lock(sMutex);
+    std::lock_guard<std::mutex> lock(mMutex);
     std::map<std::string, Statistics> result;
 
-    for (const auto& m : mMeasurements)
+    for (const auto& [name, data] : mMeasurements)
     {
-      auto itName = mNames.find(m.first);
-      if (itName == mNames.end() || m.second.empty()) continue;
+      if (data.empty()) continue;
 
       std::vector<double> samples;
-      samples.reserve(m.second.size());
-      for (const auto& d : m.second)
+      samples.reserve(data.size());
+      for (const auto& d : data)
         samples.emplace_back(d.second);
 
-      std::sort(samples.begin(), samples.end());
+      const auto minmax = std::minmax_element(samples.begin(), samples.end());
 
       Statistics stats;
       stats.count = samples.size();
-      stats.min = samples.front();
-      stats.max = samples.back();
-      stats.median = percentile(samples, 0.50);
-      stats.p95 = percentile(samples, 0.95);
+      stats.min = *minmax.first;
+      stats.max = *minmax.second;
       stats.total = std::accumulate(samples.begin(), samples.end(), 0.0);
       stats.mean = stats.total / static_cast<double>(stats.count);
 
-      result[itName->second] = stats;
+      // percentile_of reorders the samples, so it comes after everything read in order
+      stats.median = percentile_of(samples, 0.50);
+      stats.p95 = percentile_of(samples, 0.95);
+
+      result[name] = stats;
     }
 
     return result;
@@ -200,20 +178,13 @@ namespace fw
 
   std::map<std::string, ProfilerDatabase::Measurement> ProfilerDatabase::GetLastMeasurement() const
   {
-    std::lock_guard<std::recursive_mutex> lock(sMutex);
+    std::lock_guard<std::mutex> lock(mMutex);
     std::map<std::string, Measurement> lastMeasurement;
 
-    for (const auto& m : mMeasurements)
+    for (const auto& [name, data] : mMeasurements)
     {
-      const std::size_t hash = m.first;
-
-      auto itName = mNames.find(hash);
-      if (itName != mNames.end())
-      {
-        const auto& data = m.second;
-        if (!data.empty())
-          lastMeasurement[itName->second] = data.back();
-      }
+      if (!data.empty())
+        lastMeasurement[name] = data.back();
     }
 
     return lastMeasurement;

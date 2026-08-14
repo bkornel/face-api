@@ -9,8 +9,8 @@
 
 namespace fw
 {
-  typedef std::vector<cv::Point2d> VectorPt2D;
-  typedef std::vector<cv::Point3d> VectorPt3D;
+  using VectorPt2D = std::vector<cv::Point2d>;
+  using VectorPt3D = std::vector<cv::Point3d>;
 
   // Ratio of the intersection to the smaller of the two rectangles, 0 if either is empty
   float overlap_ratio(const cv::Rect& iR1, const cv::Rect& iR2);
@@ -30,13 +30,6 @@ namespace fw
   ///
   /// @param iArmRatio Length of an arm as a fraction of the shorter side, clamped sensibly
   std::array<std::array<cv::Point2d, 3>, 4> corner_brackets(const cv::Rect2d& iRect, double iArmRatio = 0.18);
-
-  template <typename _Tp>
-  inline bool equals(const cv::Rect_<_Tp>& iA, const cv::Rect_<_Tp>& iB)
-  {
-    return equals(iA.x, iB.x) && equals(iA.y, iB.y) &&
-           equals(iA.width, iB.width) && equals(iA.height, iB.height);
-  }
 
   // Scales around the centre. Returns iRect unchanged if the result would be empty.
   template <typename _Tp>

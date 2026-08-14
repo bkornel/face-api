@@ -6,12 +6,13 @@
 
 #include <easyloggingpp/easyloggingpp.h>
 
+#include <algorithm>
+#include <array>
 #include <memory>
 #include <functional>
 #include <tuple>
 #include <type_traits>
 #include <utility>
-#include <vector>
 
 namespace fw
 {
@@ -35,10 +36,7 @@ namespace fw
     using OutputPort = fw::FutureShared<ReturnT>;
     using InputPorts = std::tuple<fw::FutureShared<ArgumentT>...>;
 
-    Port()
-    {
-      mIsInputSet.resize(sizeof...(ArgumentT), false);
-    }
+    Port() = default;
 
     virtual ~Port() = default;
 
@@ -107,19 +105,9 @@ namespace fw
       return mIsInputSet.size();
     }
 
-    inline std::size_t GetInputPortCount() const
-    {
-      return mIsInputSet.size();
-    }
-
     inline std::size_t GetConnectedInputPortCount() const
     {
-      std::size_t count = 0U;
-
-      for (std::size_t i = 0U; i < mIsInputSet.size(); ++i)
-        if (mIsInputSet[i]) count++;
-
-      return count;
+      return static_cast<std::size_t>(std::count(mIsInputSet.begin(), mIsInputSet.end(), true));
     }
 
     inline bool IsAllInputPortSet() const
@@ -185,7 +173,7 @@ namespace fw
     {
       if (GetConnectedInputPortCount() == 0U)
       {
-        LOG(ERROR) << "None of the " << GetInputPortCount() << " input ports is connected, the module would never run.";
+        LOG(ERROR) << "None of the " << GetInputCount() << " input ports is connected, the module would never run.";
         return fw::ErrorCode::BadState;
       }
 
@@ -217,6 +205,6 @@ namespace fw
     std::function<void()> mTrigger = nullptr;
     OutputPort mOutputPort = nullptr;
     InputPorts mInputPorts;
-    std::vector<bool> mIsInputSet;
+    std::array<bool, sizeof...(ArgumentT)> mIsInputSet{};
   };
 } // namespace fw

@@ -74,8 +74,6 @@ namespace fw
     void setCurrentFrameId(uint32_t iCurrentFrameId);
 
   private:
-    static std::recursive_mutex sMutex;
-
     static const std::size_t sMaxSamplesPerName;
 
     ProfilerDatabase() = default;
@@ -84,8 +82,12 @@ namespace fw
 
     ProfilerDatabase& operator=(const ProfilerDatabase& iOther) = delete;
 
+    mutable std::mutex mMutex;
+
     uint32_t mCurrentFrameId = 0U;
-    std::map<std::size_t, std::string> mNames;
-    std::map<std::size_t, std::deque<Measurement>> mMeasurements;
+
+    // Keyed by the stage name itself. It used to be two maps keyed by the name's hash,
+    // where a collision silently merged the timings of two stages.
+    std::map<std::string, std::deque<Measurement>> mMeasurements;
   };
 }
