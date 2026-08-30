@@ -1,8 +1,9 @@
+#include "Framework/Settings.h"
+#include "Framework/ErrorCode.h"
 #include "Modules/UserHistory/UserHistory.h"
 
 #include "Framework/Profiler.h"
-#include "Framework/UtilOCV.h"
-#include "Framework/UtilString.h"
+#include "Framework/Text.h"
 
 #include <easyloggingpp/easyloggingpp.h>
 #include <iomanip>
@@ -14,7 +15,7 @@ namespace face
     if (!iSettings.empty())
     {
       std::string value;
-      if (fw::ocv::get_value(iSettings, "removeFreqMs", value))
+      if (fw::get_value(iSettings, "removeFreqMs", value))
         mRemoveFreqMs = fw::str::convert_to_number<int>(value);
     }
 
@@ -23,67 +24,55 @@ namespace face
     return fw::ErrorCode::OK;
   }
 
-  UserEntriesMessage::Shared UserHistory::Main(ActiveUsersMessage::Shared iActiveUsers)
+  std::shared_ptr<UserEntriesMessage> UserHistory::Main(std::shared_ptr<UserSnapshotMessage> iActiveUsers)
   {
+    DrainCommands();
+
     if (!iActiveUsers || iActiveUsers->IsEmpty()) return nullptr;
 
-    const long long currentTime = iActiveUsers->GetTimestamp();
-    if (mRemoveSW.GetElapsedTimeMilliSec(false) > mRemoveFreqMs)
+    const fw::Timestamp currentTime = iActiveUsers->GetTimestamp();
+    if (mRemoveSW.GetElapsedTimeMilliSec(false) > static_cast<double>(mRemoveFreqMs))
     {
       RemoveOldEntries(currentTime);
       mRemoveSW.Reset();
     }
 
-    const auto& activeUsers = iActiveUsers->GetActiveUsers();
+    const auto& activeUsers = iActiveUsers->GetUsers();
 
     for (auto& user : activeUsers)
     {
       // Push only the current entries
-      const long long lastUpdateTs = user->GetLastUpdateTs();
+      const fw::Timestamp lastUpdateTs = user->GetLastUpdateTs();
       if (lastUpdateTs == currentTime)
       {
-        UserData::Shared userData = std::dynamic_pointer_cast<UserData>(user);
-        if (userData != nullptr)
-        {
-          mEntryMap[user->GetUserId()].emplace_back(lastUpdateTs, userData);
-        }
+        mEntryMap[user->GetUserId()].emplace_back(lastUpdateTs, std::make_shared<UserData>(*user));
       }
     }
 
     return std::make_shared<UserEntriesMessage>(mEntryMap, iActiveUsers->GetFrameId(), currentTime);
   }
 
-  void UserHistory::RemoveOldEntries(long long iTimestamp)
+  void UserHistory::RemoveOldEntries(fw::Timestamp iTimestamp)
   {
-    const long long diff = iTimestamp - mRemoveFreqMs;
+    const fw::Timestamp cutoff = iTimestamp - std::chrono::milliseconds(mRemoveFreqMs);
 
-    if (diff > 0LL)
+    for (auto& h : mEntryMap)
     {
-      for (auto& h : mEntryMap)
-      {
-        auto& entries = h.second;
-        const std::size_t sizeBefore = entries.size();
+      auto& entries = h.second;
 
-        entries.erase(std::remove_if(entries.begin(), entries.end(), [&](const Entry& obj)
-        {
-          return obj.first < diff;
-        }),
-          entries.end()
-          );
-
-        const std::size_t count = sizeBefore - entries.size();
-        if (count > 0U)
-        {
-          LOG(INFO) << "Number of entries deleted from User(" << h.first << "): " <<
-            count << " (" << cvRound((count * sizeof(UserData)) / 1024.0) << " KB).";
-        }
-      }
-
-      fw::remove_if(mEntryMap, [&](const EntryMap::value_type& obj)
-      {
-        return obj.second.empty();
+      const std::size_t count = std::erase_if(entries, [&](const Entry& obj) {
+        return obj.first < cutoff;
       });
+
+      if (count > 0U)
+      {
+        LOG(INFO) << "Number of entries deleted from User(" << h.first << "): " << count << " (" << cvRound((count * sizeof(UserData)) / 1024.0) << " KB).";
+      }
     }
+
+    std::erase_if(mEntryMap, [&](const EntryMap::value_type& obj) {
+      return obj.second.empty();
+    });
   }
 
   void UserHistory::Clear()

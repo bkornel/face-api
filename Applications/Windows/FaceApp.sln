@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27703.2026
@@ -15,30 +15,27 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Testing", "Testing", "{0B45
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FaceApi", "FaceApi.vcxproj", "{3416DE23-C794-4DD7-B3CA-5BFAF7649D6D}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FaceApiTests", "FaceApiTests.vcxproj", "{7C1F3A52-9D4E-4B8A-B7E1-64C2A3F0D9B1}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3416DE23-C794-4DD7-B3CA-5BFAF7649D6D} = {3416DE23-C794-4DD7-B3CA-5BFAF7649D6D}
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "configurations", "configurations", "{BDC96046-5D30-404C-8352-AE31EBD6A175}"
 	ProjectSection(SolutionItems) = preProject
 		..\..\Testing\configurations\log.cfg = ..\..\Testing\configurations\log.cfg
-		..\..\Testing\configurations\settings.json = ..\..\Testing\configurations\settings.json
+		FaceApp\Configurations\settings.json = FaceApp\Configurations\settings.json
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "facedetector", "facedetector", "{E550A3B6-9A2D-4F7A-9F60-4D9DF7AAA71E}"
 	ProjectSection(SolutionItems) = preProject
-		..\..\Testing\configurations\facedetector\haarcascade_frontalface_alt.xml = ..\..\Testing\configurations\facedetector\haarcascade_frontalface_alt.xml
-		..\..\Testing\configurations\facedetector\haarcascade_frontalface_alt2.xml = ..\..\Testing\configurations\facedetector\haarcascade_frontalface_alt2.xml
-		..\..\Testing\configurations\facedetector\haarcascade_frontalface_alt_tree.xml = ..\..\Testing\configurations\facedetector\haarcascade_frontalface_alt_tree.xml
-		..\..\Testing\configurations\facedetector\haarcascade_frontalface_default.xml = ..\..\Testing\configurations\facedetector\haarcascade_frontalface_default.xml
-		..\..\Testing\configurations\facedetector\lbpcascade_frontalface.xml = ..\..\Testing\configurations\facedetector\lbpcascade_frontalface.xml
+		..\..\Testing\configurations\facedetector\face_detection_yunet_2023mar.onnx = ..\..\Testing\configurations\facedetector\face_detection_yunet_2023mar.onnx
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "output", "output", "{3BED97B8-C243-47DE-A294-42D344875740}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "shapemodel", "shapemodel", "{28D41620-672C-4DA0-B48E-420CA82406ED}"
 	ProjectSection(SolutionItems) = preProject
-		..\..\Testing\configurations\shapemodel\face.con = ..\..\Testing\configurations\shapemodel\face.con
-		..\..\Testing\configurations\shapemodel\face.tracker = ..\..\Testing\configurations\shapemodel\face.tracker
-		..\..\Testing\configurations\shapemodel\face.tri = ..\..\Testing\configurations\shapemodel\face.tri
-		..\..\Testing\configurations\shapemodel\face2.tracker = ..\..\Testing\configurations\shapemodel\face2.tracker
-		..\..\Testing\configurations\shapemodel\face3d.obj = ..\..\Testing\configurations\shapemodel\face3d.obj
+		..\..\Testing\configurations\shapemodel\3ddfa\README.md = ..\..\Testing\configurations\shapemodel\3ddfa\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BuildEvents", "BuildEvents", "{92DEF603-2A75-4EE7-B65C-BF8014C1B1C2}"
@@ -61,6 +58,10 @@ Global
 		{3416DE23-C794-4DD7-B3CA-5BFAF7649D6D}.Debug|x64.Build.0 = Debug|x64
 		{3416DE23-C794-4DD7-B3CA-5BFAF7649D6D}.Release|x64.ActiveCfg = Release|x64
 		{3416DE23-C794-4DD7-B3CA-5BFAF7649D6D}.Release|x64.Build.0 = Release|x64
+		{7C1F3A52-9D4E-4B8A-B7E1-64C2A3F0D9B1}.Debug|x64.ActiveCfg = Debug|x64
+		{7C1F3A52-9D4E-4B8A-B7E1-64C2A3F0D9B1}.Debug|x64.Build.0 = Debug|x64
+		{7C1F3A52-9D4E-4B8A-B7E1-64C2A3F0D9B1}.Release|x64.ActiveCfg = Release|x64
+		{7C1F3A52-9D4E-4B8A-B7E1-64C2A3F0D9B1}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

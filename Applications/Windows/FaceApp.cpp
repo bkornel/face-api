@@ -1,10 +1,16 @@
 ﻿#include "FaceApp.h"
-#include "FaceApi.h"
-
-#include "Common/Configuration.h"
-#include "Framework/UtilString.h"
 
 #include <opencv2/imgcodecs.hpp>
+
+#include "Framework/ErrorCode.h"
+#include "Configuration.h"
+#include "FaceApi.h"
+#include "Framework/Text.h"
+
+namespace
+{
+  constexpr const char* cWindowName = "Face";
+}
 
 void FaceApp::initialize(Application& self)
 {
@@ -12,15 +18,17 @@ void FaceApp::initialize(Application& self)
 
   Poco::Util::Application::initialize(self);
 
-  // add your own initialization code here
+  // This application's own working directory, not the one Face Studio uses: the two
+  // configure the graph differently, and the models they share are reached from here by the
+  // relative paths in settings.json
   Poco::Path path(commandPath());
   path = path.makeDirectory();
   path = path.popDirectory();
-  path = path.pushDirectory("configurations");
+  path = path.pushDirectory("faceapp");
 
   const std::string& workingDirectory = path.toString();
-  face::FaceApi::GetInstance().SetWorkingDirectory(workingDirectory);
-  face::FaceApi::GetInstance().Initialize(sSettingsNode);
+  mFaceApi.SetWorkingDirectory(workingDirectory);
+  mFaceApi.Initialize(sSettingsNode);
 
   LOG(INFO) << name() << " starting up.";
   LOG(INFO) << name() << " working directory: " << workingDirectory;
@@ -30,7 +38,7 @@ void FaceApp::uninitialize()
 {
   // add your own uninitialization code here
   LOG(INFO) << name() << " shutting down.";
-  face::FaceApi::GetInstance().DeInitialize();
+  mFaceApi.DeInitialize();
   Poco::Util::Application::uninitialize();
 }
 
@@ -44,7 +52,7 @@ int FaceApp::main(const std::vector<std::string>& args)
     return Poco::Util::Application::EXIT_USAGE;
   }
 
-  if (!face::FaceApi::GetInstance().IsInitialized())
+  if (!mFaceApi.IsInitialized())
   {
     LOG(ERROR) << name() << " is not initialized correctly.";
     return Poco::Util::Application::EXIT_USAGE;
@@ -68,14 +76,14 @@ int FaceApp::main(const std::vector<std::string>& args)
 
   printKeys();
 
-  const auto& outputParams = face::Configuration::GetInstance().GetOutput();
-  const auto& outputDir = face::Configuration::GetInstance().GetDirectories().output;
+  const auto& outputParams = mFaceApi.GetConfiguration().GetOutput();
+  const auto& outputDir = mFaceApi.GetConfiguration().GetDirectories().output;
   mSaveVideo = outputParams.video;
   mVideoWriter.Create(outputDir, "sample", outputParams.videoFourCC, outputParams.videoFPS);
 
   while (capture.isOpened())
   {
-    if (!face::FaceApi::GetInstance().IsRunning())
+    if (!mFaceApi.IsRunning())
     {
       break;
     }
@@ -87,9 +95,9 @@ int FaceApp::main(const std::vector<std::string>& args)
       break;
     }
 
-    face::FaceApi::GetInstance().PushCameraFrame(mFrame);
+    mFaceApi.PushCameraFrame(mFrame);
 
-    if (face::FaceApi::GetInstance().GetResultImage(mResultFrame) == fw::ErrorCode::OK)
+    if (mFaceApi.GetResultImage(mResultFrame) == fw::ErrorCode::OK)
     {
       showResults();
 
@@ -97,6 +105,10 @@ int FaceApp::main(const std::vector<std::string>& args)
       {
         mVideoWriter.Write(mResultFrame);
       }
+    }
+    else
+    {
+      handleKey(cv::waitKey(1));
     }
   }
 
@@ -107,35 +119,46 @@ void FaceApp::showResults()
 {
   CV_DbgAssert(!mResultFrame.empty());
 
-  cv::imshow(FW_PLUGIN_NAME, mResultFrame);
-  const int keyPressed = cv::waitKey(1);
+  cv::imshow(cWindowName, mResultFrame);
+  handleKey(cv::waitKey(1));
+}
 
+void FaceApp::handleKey(int keyPressed)
+{
   if (keyPressed == 27)
   {
     LOG(INFO) << "Exiting from the application";
-    face::FaceApi::GetInstance().StopThread();
+    mFaceApi.StopThread();
   }
   else if (keyPressed == 's')
   {
-    const std::string& name = "result_frame_" + std::to_string(face::FaceApi::GetInstance().GetLastFrameId()) + ".png";
-    const std::string& path = face::Configuration::GetInstance().GetDirectories().output + name;
+    // handleKey() also runs when no frame came out of the pipeline.
+    if (mResultFrame.empty())
+    {
+      LOG(WARNING) << "There is no result frame to save yet.";
+      return;
+    }
+
+    const std::string& name =
+      "result_frame_" + std::to_string(mFaceApi.GetLastFrameId()) + ".png";
+    const std::string& path = mFaceApi.GetConfiguration().GetDirectories().output + name;
     cv::imwrite(path, mResultFrame);
     LOG(INFO) << "Saving frame to: " << path;
   }
   else if (keyPressed == 'c')
   {
     LOG(INFO) << "Clearing users";
-    face::FaceApi::GetInstance().Clear();
+    mFaceApi.Clear();
   }
   else if (keyPressed == 'v')
   {
     LOG(INFO) << "Setting verbose mode ON/OFF";
-    face::FaceApi::GetInstance().OnOffVerbose();
+    mFaceApi.OnOffVerbose();
   }
   else if (keyPressed == 'd')
   {
     LOG(INFO) << "Forcing face detection";
-    face::FaceApi::GetInstance().SetRunFaceDetector();
+    mFaceApi.SetRunFaceDetector();
   }
   else if (keyPressed == 'o')
   {
@@ -148,14 +171,14 @@ void FaceApp::printProperties(const std::vector<std::string>& args)
 {
   LOG(INFO) << "Command line: ";
   std::ostringstream ostr;
-  for (const auto & it : argv())
+  for (const auto& it : argv())
   {
     ostr << it << ' ';
   }
   LOG(INFO) << ostr.str();
 
   LOG(INFO) << "Arguments to main(): ";
-  for (const auto & arg : args)
+  for (const auto& arg : args)
   {
     LOG(INFO) << arg;
   }
@@ -182,7 +205,7 @@ void FaceApp::printProperties(const std::string& base)
   }
   else
   {
-    for (auto & key : keys)
+    for (auto& key : keys)
     {
       std::string fullKey = base;
       if (!fullKey.empty())

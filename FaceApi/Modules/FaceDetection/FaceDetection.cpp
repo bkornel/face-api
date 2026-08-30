@@ -1,18 +1,16 @@
+#include "Framework/Imaging/Geometry.h"
+#include "Framework/Settings.h"
+#include "Framework/DnnOptions.h"
+#include "Framework/ErrorCode.h"
 #include "Modules/FaceDetection/FaceDetection.h"
 
-#include "Common/Configuration.h"
 #include "Framework/Profiler.h"
-#include "Framework/UtilOCV.h"
-#include "Framework/UtilString.h"
-#include "Messages/CommandMessage.h"
-#include "Messages/ImageSizeChangedMessage.h"
+#include "Framework/Text.h"
 
 #include <easyloggingpp/easyloggingpp.h>
 #include <opencv2/imgproc/imgproc.hpp>
 
 #include <algorithm>
-
-//#define CROP_FACE_RECT
 
 namespace face
 {
@@ -24,47 +22,54 @@ namespace face
     {
       std::string value;
 
-      if (fw::ocv::get_value(iSettings, "fileName", value))
-        mCascadeFile = value;
+      if (fw::get_value(iSettings, "fileName", value))
+        mModelFile = value;
 
-      if (fw::ocv::get_value(iSettings, "imageScale", value))
+      if (fw::get_value(iSettings, "imageScale", value))
       {
-        mImageScaleFactor = fw::str::convert_to_number<float>(value);
-        mImageScaleFactor = (std::max)((std::min)(mImageScaleFactor, 1.0F), 0.2F);
+        mImageScaleFactor = std::clamp(fw::str::convert_to_number<float>(value), 0.2F, 1.0F);
         mImageScaleFactorInv = (1.0F / mImageScaleFactor);
       }
 
-      if (fw::ocv::get_value(iSettings, "detectionSec", value))
+      if (fw::get_value(iSettings, "detectionSec", value))
         mDetectionSec = fw::str::convert_to_number<float>(value);
 
-      if (fw::ocv::get_value(iSettings, "detectionOverlap", value))
-        mDetectionOverlap = fw::str::convert_to_number<float>(value);
+      if (fw::get_value(iSettings, "scoreThreshold", value))
+        mScoreThreshold = fw::str::convert_to_number<float>(value);
 
-      const cv::FileNode& dmsNode = iSettings["detectMultiScale"];
-      if (!dmsNode.empty())
-      {
-        if (fw::ocv::get_value(dmsNode, "scaleFactor", value))
-          mScaleFactor = fw::str::convert_to_number<float>(value);
+      if (fw::get_value(iSettings, "nmsThreshold", value))
+        mNmsThreshold = fw::str::convert_to_number<float>(value);
 
-        if (fw::ocv::get_value(dmsNode, "minNeighbors", value))
-          mMinNeighbors = fw::str::convert_to_number<int>(value);
+      if (fw::get_value(iSettings, "topK", value))
+        mTopK = fw::str::convert_to_number<int>(value);
 
-        if (fw::ocv::get_value(dmsNode, "minSize", value))
-          mMinSizeFactor = fw::str::convert_to_number<float>(value);
+      if (fw::get_value(iSettings, "minSize", value))
+        mMinSizeFactor = fw::str::convert_to_number<float>(value);
 
-        if (fw::ocv::get_value(dmsNode, "maxSize", value))
-          mMaxSizeFactor = fw::str::convert_to_number<float>(value);
-
-        if (fw::ocv::get_value(dmsNode, "flags", value))
-          mFlags = fw::str::convert_to_number<int>(value);
-      }
+      if (fw::get_value(iSettings, "maxSize", value))
+        mMaxSizeFactor = fw::str::convert_to_number<float>(value);
     }
 
-    const auto& cascadePath = Configuration::GetInstance().GetDirectories().faceDetector + mCascadeFile;
+    // Relative to the working directory, like every path a settings file carries
+    const std::string modelPath = GetWorkingDirectory() + mModelFile;
 
-    if (!mCascadeClassifier.load(cascadePath))
+    const fw::DnnOptions dnn = fw::get_dnn_options(iSettings);
+
+    try
     {
-      LOG(ERROR) << "Could not load cascade classifier: " << cascadePath;
+      // The input size is set for real once a frame arrives and its size is known
+      mDetector = cv::FaceDetectorYN::create(modelPath, "", { 320, 320 }, mScoreThreshold, mNmsThreshold,
+                                             mTopK, dnn.backend, dnn.target);
+    }
+    catch (const cv::Exception& iException)
+    {
+      LOG(ERROR) << "Could not load the face detector from " << modelPath << ": " << iException.what();
+      return fw::ErrorCode::NotFound;
+    }
+
+    if (!mDetector)
+    {
+      LOG(ERROR) << "Could not create the face detector from " << modelPath;
       return fw::ErrorCode::NotFound;
     }
 
@@ -73,50 +78,40 @@ namespace face
     return fw::ErrorCode::OK;
   }
 
-  void FaceDetection::OnCommand(fw::Message::Shared iMessage)
+  void FaceDetection::ForceDetection()
   {
-    Module::OnCommand(iMessage);
+    if (mForceRun) return;
 
-    CommandMessage::Shared command = std::dynamic_pointer_cast<CommandMessage>(iMessage);
-    if (command)
-    {
-      if (command->GetType() == CommandMessage::Type::RunFaceDetection && !mForceRun)
-      {
-        mForceRun = true;
-        mDetectionSW.Reset();
+    mForceRun = true;
+    mDetectionSW.Reset();
 
-        LOG(DEBUG) << "Force to run face detector.";
-      }
-
-      return;
-    }
-
-    ImageSizeChangedMessage::Shared imageSizeChanged = std::dynamic_pointer_cast<ImageSizeChangedMessage>(iMessage);
-    if (imageSizeChanged)
-    {
-      if (mMinSizeFactor > 0.0F && mMinSizeFactor < 1.0F)
-      {
-        const int minSide = (std::min)(imageSizeChanged->GetWidth(), imageSizeChanged->GetHeight());
-        mMinSize = { cvRound(minSide * mMinSizeFactor), cvRound(minSide * mMinSizeFactor) };
-        LOG(DEBUG) << "Minimum face size of the detector: " << mMinSize;
-      }
-
-      if (mMaxSizeFactor > 0.0F && mMaxSizeFactor < 1.0F)
-      {
-        const int maxSide = (std::min)(imageSizeChanged->GetWidth(), imageSizeChanged->GetHeight());
-        mMaxSize = { cvRound(maxSide * mMaxSizeFactor), cvRound(maxSide * mMaxSizeFactor) };
-        LOG(DEBUG) << "Maximum face size of the detector: " << mMaxSize;
-      }
-
-      mForceRun = true;
-      mDetectionSW.Reset();
-
-      return;
-    }
+    LOG(DEBUG) << "Force to run face detector.";
   }
 
-  RoiMessage::Shared FaceDetection::Main(ImageMessage::Shared iImage)
+  void FaceDetection::OnImageSizeChanged(const cv::Size& iSize)
   {
+    const int shorterSide = (std::min)(iSize.width, iSize.height);
+
+    if (mMinSizeFactor > 0.0F && mMinSizeFactor < 1.0F)
+    {
+      mMinSize = { cvRound(shorterSide * mMinSizeFactor), cvRound(shorterSide * mMinSizeFactor) };
+      LOG(DEBUG) << "Minimum face size of the detector: " << mMinSize;
+    }
+
+    if (mMaxSizeFactor > 0.0F && mMaxSizeFactor < 1.0F)
+    {
+      mMaxSize = { cvRound(shorterSide * mMaxSizeFactor), cvRound(shorterSide * mMaxSizeFactor) };
+      LOG(DEBUG) << "Maximum face size of the detector: " << mMaxSize;
+    }
+
+    mForceRun = true;
+    mDetectionSW.Reset();
+  }
+
+  std::shared_ptr<RoiMessage> FaceDetection::Main(std::shared_ptr<ImageMessage> iImage)
+  {
+    DrainCommands();
+
     CV_DbgAssert(mDetectionSW.IsRunning());
 
     if (!iImage || iImage->IsEmpty() || !RunDetectection())
@@ -126,57 +121,69 @@ namespace face
 
     FACE_PROFILER(1_Detect_Faces);
 
-    const cv::Mat& image = iImage->GetFrameGray();
-    cv::Mat resizedImage;
+    // The detector wants colour, and it wants to be told the exact size it will be given
+    const cv::Mat image = (mImageScaleFactor < 1.0F)
+                            ? iImage->GetResizedBGR(mImageScaleFactor)
+                            : iImage->GetFrameBGR();
 
-    // Resizing the image
-    if (mImageScaleFactor < 1.0F)
+    if (image.size() != mDetectorSize)
     {
-      cv::resize(image, resizedImage, {}, mImageScaleFactor, mImageScaleFactor);
-      cv::equalizeHist(resizedImage, resizedImage);
-    }
-    else
-    {
-      cv::equalizeHist(image, resizedImage);
+      mDetector->setInputSize(image.size());
+      mDetectorSize = image.size();
     }
 
-    // Object detection
+    // Rows of [x, y, w, h, five landmarks, score]; the detector runs its own suppression
+    cv::Mat detections;
+    mDetector->detect(image, detections);
+
+    LOG(DEBUG) << "Number of detections: " << detections.rows;
+
+    if (detections.empty())
+    {
+      return nullptr;
+    }
+
+    // Every rectangle leaves this module clipped to the frame. Scaling a corner and a side
+    // back up from the downscaled copy independently can put the far edge past it.
+    const cv::Rect screenRect(0, 0, iImage->GetWidth(), iImage->GetHeight());
+
     std::vector<cv::Rect> faceROIs;
-    mCascadeClassifier.detectMultiScale(resizedImage, faceROIs, mScaleFactor, mMinNeighbors, mFlags, mMinSize, mMaxSize);
+    faceROIs.reserve(detections.rows);
 
-    RemoveMultipleDetections(faceROIs);
-    LOG(DEBUG) << "Number of detections: " << faceROIs.size();
+    for (int i = 0; i < detections.rows; ++i)
+    {
+      const float* row = detections.ptr<float>(i);
+
+      cv::Rect rect(
+        cvRound(row[0] * mImageScaleFactorInv),
+        cvRound(row[1] * mImageScaleFactorInv),
+        cvRound(row[2] * mImageScaleFactorInv),
+        cvRound(row[3] * mImageScaleFactorInv)
+      );
+
+      rect &= screenRect;
+
+      // A detection that survives the clip with no area left is not a face to report
+      if (rect.area() <= 0) continue;
+
+      // The size range the tracker also holds faces to, applied here so a face outside it
+      // never starts a track in the first place
+      if (!mMinSize.empty() && (rect.width < mMinSize.width || rect.height < mMinSize.height)) continue;
+      if (!mMaxSize.empty() && (rect.width > mMaxSize.width || rect.height > mMaxSize.height)) continue;
+
+      faceROIs.emplace_back(rect);
+    }
 
     if (faceROIs.empty())
     {
       return nullptr;
     }
 
-    // Rescaling the images and sending the event about the hits
-    std::vector<cv::Rect> scaledFaceROIs;
-    for (auto& r : faceROIs)
+    // The detector returns its rows by descending score; the tracker takes the first ones
+    // when it has fewer slots than there are faces, so put the biggest first
+    if (faceROIs.size() > 1)
     {
-      const cv::Rect rect(
-        cvRound(r.x * mImageScaleFactorInv),
-        cvRound(r.y * mImageScaleFactorInv),
-        cvRound(r.width * mImageScaleFactorInv),
-        cvRound(r.height * mImageScaleFactorInv)
-      );
-
-#ifdef CROP_FACE_RECT
-      cv::Rect r2 = rect;
-      r2 += cv::Point(cvRound(rect.width * 0.1F), 0.0F);
-      r2 -= cv::Size(cvRound(rect.width * 0.2F), 0.0F);
-      scaledFaceROIs.emplace_back(r2);
-#else
-      scaledFaceROIs.emplace_back(rect);
-#endif
-    }
-
-    if (scaledFaceROIs.size() > 1)
-    {
-      std::sort(scaledFaceROIs.begin(), scaledFaceROIs.end(), [](const cv::Rect& lhs, const cv::Rect& rhs)
-      {
+      std::sort(faceROIs.begin(), faceROIs.end(), [](const cv::Rect& lhs, const cv::Rect& rhs) {
         return lhs.area() > rhs.area();
       });
     }
@@ -185,25 +192,7 @@ namespace face
     mForceRun = false;
     mDetectionSW.Reset();
 
-    return std::make_shared<RoiMessage>(scaledFaceROIs, mMinSize, mMaxSize, iImage->GetFrameId(), iImage->GetTimestamp());
-  }
-
-  void FaceDetection::RemoveMultipleDetections(std::vector<cv::Rect>& ioDetections)
-  {
-    for (auto fr1 = ioDetections.begin(); fr1 != ioDetections.end(); ++fr1)
-    {
-      for (auto fr2 = std::next(fr1); fr2 != ioDetections.end();)
-      {
-        if (fw::ocv::overlap_ratio(*fr1, *fr2) > mDetectionOverlap)
-        {
-          fr2 = ioDetections.erase(fr2);
-        }
-        else
-        {
-          fr2++;
-        }
-      }
-    }
+    return std::make_shared<RoiMessage>(faceROIs, mMinSize, mMaxSize, iImage->GetFrameId(), iImage->GetTimestamp());
   }
 
   bool FaceDetection::RunDetectection() const

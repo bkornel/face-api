@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -19,106 +19,117 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\CLM.cc" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\FCheck.cc" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\IO.cc" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\Patch.cc" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\PAW.cc" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\PDM.cc" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\3rdparty\easyloggingpp\easyloggingpp.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Profiler.cpp" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Util.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Metrics.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Stopwatch.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Thread.cpp" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Common\Configuration.cpp" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Common\PoseUtil.cpp" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Common\ShapeUtil.cpp" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\FlowGraph.cpp" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\VideoWriter.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\TimeExtensions.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Configuration.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Model\PoseGeometry.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Model\FaceModel.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Model\ShapeMetrics.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Model\HeadMesh.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Graph\FlowGraph.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Imaging\VideoWriter.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\FaceApi.cpp" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Exception.cpp" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Message.cpp" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Module.cpp" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\UtilOCV.cpp" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\UtilString.cpp" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Messages\ActiveUsersMessage.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Messaging\Message.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Graph\Module.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Text.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Imaging\Geometry.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Imaging\Transform.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Imaging\Statistics.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Imaging\Drawing.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Imaging\Projection.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Imaging\Procrustes.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Settings.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\DnnOptions.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Messages\ImageMessage.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Messages\RoiMessage.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Messages\UserEntriesMessage.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\FaceDetection\FaceDetection.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\FaceTracker\FaceTracker.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ImageQueue\ImageQueue.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserHistory\UserHistory.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserManager\UserManager.cpp" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\HeadPose\PoseEstimationDispatcher.cpp" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\ShapeModel\ClmWrapper.cpp" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\ShapeModel\ShapeModel.cpp" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\ShapeModel\ShapeModelDispatcher.cpp" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\ShapeNorm\ShapeNormDispatcher.cpp" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\UserProcessor.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\HeadPose\HeadPoseModule.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\HeadPose\PoseEstimationDispatcher.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\ShapeModelModule.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\TddfaDispatcher.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeNorm\ShapeNormDispatcher.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeNorm\ShapeNormModule.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Parallel.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\Framework\Graph\ModuleGraph.cpp" />
     <ClCompile Include="$(ProjectDir)..\..\FaceApi\Modules\Visualizer\Visualizer.cpp" />
-    <ClCompile Include="$(ProjectDir)..\..\FaceApi\User\User.cpp" />
-    <ClCompile Include="..\..\FaceApi\Messages\CommandMessage.cpp" />
-    <ClCompile Include="..\..\FaceApi\Messages\ImageArrivedMessage.cpp" />
-    <ClCompile Include="..\..\FaceApi\Messages\ImageSizeChangedMessage.cpp" />
-    <ClCompile Include="..\..\FaceApi\Modules\FirstModule\FirstModule.cpp" />
-    <ClCompile Include="..\..\FaceApi\Modules\LastModule\LastModule.cpp" />
-    <ClCompile Include="..\..\FaceApi\Modules\ModuleConnector.cpp" />
-    <ClCompile Include="..\..\FaceApi\Modules\ModuleFactory.cpp" />
-    <ClCompile Include="..\..\FaceApi\Modules\ModuleGraph.cpp" />
+    <ClCompile Include="$(ProjectDir)..\..\FaceApi\User\UserData.cpp" />
+    <ClCompile Include="..\..\FaceApi\Framework\Graph\ModuleConnector.cpp" />
+    <ClCompile Include="..\..\FaceApi\Modules\FacePipeline.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\CLM.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\FCheck.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\IO.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\Patch.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\PAW.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\3rdparty\clm\PDM.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\3rdparty\easyloggingpp\easyloggingpp.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Profiler.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Util.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Event.hpp" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\MessageQueue.hpp" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Metrics.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Messaging\Event.hpp" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Messaging\MessageQueue.hpp" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Stopwatch.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Thread.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Common\Configuration.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Common\PoseUtil.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Common\ShapeUtil.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\FlowGraph.hpp" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Functional.hpp" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\VideoWriter.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\ErrorCode.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\MathExtensions.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\TimeExtensions.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Configuration.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Model\Palette.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Model\PoseGeometry.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Model\FaceModel.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Model\ShapeMetrics.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Model\HeadMesh.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Graph\FlowGraph.hpp" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Graph\IPortConnector.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Imaging\VideoWriter.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\FaceApi.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Exception.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Message.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Module.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\UtilOCV.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\UtilString.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\ActiveUsersMessage.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\FaceResult.h" />
+    <ClInclude Include="..\..\FaceApi\Modules\FacePipeline.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Messaging\Message.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Graph\Module.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Text.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Imaging\Geometry.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Imaging\Transform.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Imaging\Statistics.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Imaging\Drawing.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Imaging\Projection.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Imaging\Procrustes.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Settings.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\DnnOptions.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\ImageMessage.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\RoiMessage.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\UserEntriesMessage.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\UserSnapshotMessage.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\FaceTrackMessage.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\ShapeMessage.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\PoseMessage.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Messages\NormShapeMessage.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\FaceTracker\FaceTracker.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\User\TrackedFace.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\FaceDetection\FaceDetection.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ImageQueue\ImageQueue.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\UserHistory\UserHistory.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\UserManager\UserManager.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\HeadPose\PoseEstimationDispatcher.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\ShapeModel\ClmWrapper.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\ShapeModel\ShapeModel.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\ShapeModel\ShapeModelDispatcher.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\ShapeNorm\ShapeNormDispatcher.h" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\UserProcessor\UserProcessor.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\HeadPose\HeadPoseModule.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\HeadPose\PoseEstimationDispatcher.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\ShapeModelModule.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeModel\TddfaDispatcher.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\OneEuroFilter.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeNorm\ShapeNormDispatcher.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\ShapeNorm\ShapeNormModule.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Parallel.h" />
+    <ClInclude Include="$(ProjectDir)..\..\FaceApi\Framework\Graph\ModuleGraph.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\Modules\Visualizer\Visualizer.h" />
     <ClInclude Include="$(ProjectDir)..\..\FaceApi\User\User.h" />
-    <ClInclude Include="..\..\FaceApi\Framework\Port.hpp" />
-    <ClInclude Include="..\..\FaceApi\Messages\CommandMessage.h" />
-    <ClInclude Include="..\..\FaceApi\Messages\ImageArrivedMessage.h" />
-    <ClInclude Include="..\..\FaceApi\Modules\FirstModule\FirstModule.h" />
-    <ClInclude Include="..\..\FaceApi\Modules\LastModule\LastModule.h" />
-    <ClInclude Include="..\..\FaceApi\Modules\ModuleConnector.h" />
-    <ClInclude Include="..\..\FaceApi\Modules\ModuleFactory.h" />
-    <ClInclude Include="..\..\FaceApi\Modules\ModuleGraph.h" />
+    <ClInclude Include="..\..\FaceApi\Framework\Graph\Port.hpp" />
+    <ClInclude Include="..\..\FaceApi\Framework\Graph\ModuleConnector.h" />
     <ClInclude Include="..\..\FaceApi\User\UserData.hpp" />
-    <ClInclude Include="$(ProjectDir)..\..\FaceApi\User\UserDispatcher.hpp" />
-    <ClInclude Include="..\..\FaceApi\Messages\ImageSizeChangedMessage.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\.clang-format" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{3416DE23-C794-4DD7-B3CA-5BFAF7649D6D}</ProjectGuid>
@@ -130,26 +141,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -190,8 +201,9 @@
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NOMINMAX;WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
@@ -203,10 +215,11 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;ELPP_THREAD_SAFE;ELPP_FORCE_USE_STD_THREAD;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NOMINMAX;WIN32;ELPP_THREAD_SAFE;ELPP_FORCE_USE_STD_THREAD;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\FaceApi;$(ProjectDir)..\..\FaceApi\3rdparty;$(ProjectDir)..\..\..\3rdParty\opencv-4.1.1\windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\FaceApi;$(ProjectDir)..\..\FaceApi\3rdparty;$(ProjectDir)..\..\..\3rdParty\opencv-4.14.0\windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
@@ -226,12 +239,13 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NOMINMAX;WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
@@ -244,13 +258,14 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;ELPP_THREAD_SAFE;ELPP_FORCE_USE_STD_THREAD;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NOMINMAX;WIN32;ELPP_THREAD_SAFE;ELPP_FORCE_USE_STD_THREAD;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\FaceApi;$(ProjectDir)..\..\FaceApi\3rdparty;$(ProjectDir)..\..\..\3rdParty\opencv-4.1.1\windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\FaceApi;$(ProjectDir)..\..\FaceApi\3rdparty;$(ProjectDir)..\..\..\3rdParty\opencv-4.14.0\windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>

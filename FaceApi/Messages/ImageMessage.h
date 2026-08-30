@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Framework/Message.h"
+#include "Framework/Messaging/Message.h"
 
+#include <cstdint>
 #include <opencv2/core/core.hpp>
 
 #include <map>
@@ -9,11 +10,9 @@
 
 namespace face
 {
-  class ImageMessage :
-    public fw::Message
+  class ImageMessage : public fw::Message
   {
   public:
-    FW_DEFINE_SMART_POINTERS(ImageMessage);
 
     struct QueueData
     {
@@ -22,7 +21,9 @@ namespace face
       int bound = 0;
     };
 
-    ImageMessage(const cv::Mat& iImage, unsigned iFrameId, long long iTimestamp);
+    ImageMessage(const cv::Mat& iImage, uint32_t iFrameId, fw::Timestamp iTimestamp);
+
+    ImageMessage(cv::Mat&& iImage, uint32_t iFrameId, fw::Timestamp iTimestamp);
 
     ~ImageMessage() override = default;
 
@@ -38,11 +39,11 @@ namespace face
       return mFrames.first;
     }
 
-    const cv::Mat& GetFrameGray();
+    cv::Mat GetFrameGray();
 
-    const cv::Mat& GetResizedBGR(float iScaleFactor);
+    cv::Mat GetResizedBGR(float iScaleFactor);
 
-    const cv::Mat& GetResizedGray(float iScaleFactor);
+    cv::Mat GetResizedGray(float iScaleFactor);
 
     inline int GetWidth() const
     {
@@ -72,17 +73,17 @@ namespace face
     }
 
   private:
-    using ImagePair = std::pair<cv::Mat, cv::Mat>; // BGR - Gray
+    using ImagePair = std::pair<cv::Mat, cv::Mat>;  // BGR - Gray
     using ResizedImages = std::map<int, ImagePair>; // Key: width of the image (aspect ratio is fixed)
 
-    static std::recursive_mutex sMutex;
+    mutable std::recursive_mutex mMutex;
 
     ImagePair mFrames;
     ResizedImages mResizedFrames;
     QueueData mQueueData;
   };
 
-  inline std::ostream& operator<< (std::ostream& ioStream, const ImageMessage& iMessage)
+  inline std::ostream& operator<<(std::ostream& ioStream, const ImageMessage& iMessage)
   {
     const fw::Message& base(iMessage);
     ioStream << base << ", [Derived] Width: " << iMessage.GetWidth() << ", Height: " << iMessage.GetHeight();

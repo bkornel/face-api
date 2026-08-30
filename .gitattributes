@@ -1,0 +1,27 @@
+# Normalize text files to LF in the repository and check them out with the platform's
+# native endings, so the working tree no longer depends on each developer's core.autocrlf.
+* text=auto
+
+# Windows-only tooling, keep CRLF everywhere
+*.sln      text eol=crlf
+*.vcxproj  text eol=crlf
+*.filters  text eol=crlf
+*.user     text eol=crlf
+*.props    text eol=crlf
+*.bat      text eol=crlf
+*.cmd      text eol=crlf
+
+# Shell scripts break with CRLF, keep LF everywhere
+*.sh       text eol=lf
+gradlew    text eol=lf
+
+# Binary assets: no conversion, no textual diff
+*.png binary
+*.jpg binary
+*.jar binary
+*.avi binary
+*.lib binary
+*.dll binary
+*.pdb binary
+*.so  binary
+*.a   binary

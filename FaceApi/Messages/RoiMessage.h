@@ -1,18 +1,17 @@
 #pragma once
 
-#include "Framework/Message.h"
+#include "Framework/Messaging/Message.h"
 
+#include <cstdint>
 #include <opencv2/core/core.hpp>
 
 namespace face
 {
-  class RoiMessage :
-    public fw::Message
+  class RoiMessage : public fw::Message
   {
   public:
-    FW_DEFINE_SMART_POINTERS(RoiMessage);
 
-    RoiMessage(const std::vector<cv::Rect>& iROIs, const cv::Size& iMinRoiSize, const cv::Size& iMaxRoiSize, unsigned iFrameId, long long iTimestamp);
+    RoiMessage(const std::vector<cv::Rect>& iROIs, const cv::Size& iMinRoiSize, const cv::Size& iMaxRoiSize, uint32_t iFrameId, fw::Timestamp iTimestamp);
 
     virtual ~RoiMessage() = default;
 
@@ -49,12 +48,10 @@ namespace face
     cv::Size mMaxRoiSize;
   };
 
-  inline std::ostream& operator<< (std::ostream& ioStream, const RoiMessage& iMessage)
+  inline std::ostream& operator<<(std::ostream& ioStream, const RoiMessage& iMessage)
   {
     const fw::Message& base(iMessage);
-    ioStream << base << ", [Derived] Number of ROIs: " << iMessage.GetSize() <<
-      ", min ROI size: " << iMessage.GetMinRoiSize() <<
-      ", max ROI size: " << iMessage.GetMaxRoiSize();
+    ioStream << base << ", [Derived] Number of ROIs: " << iMessage.GetSize() << ", min ROI size: " << iMessage.GetMinRoiSize() << ", max ROI size: " << iMessage.GetMaxRoiSize();
     return ioStream;
   }
 }

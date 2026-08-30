@@ -1,20 +1,20 @@
 #pragma once
 
-#include "Framework/Message.h"
+#include "Framework/Messaging/Message.h"
 #include "User/User.h"
+#include <cstdint>
+#include <memory>
 
 namespace face
 {
-  class UserEntriesMessage :
-    public fw::Message
+  class UserEntriesMessage : public fw::Message
   {
   public:
-    FW_DEFINE_SMART_POINTERS(UserEntriesMessage);
 
-    using Entry = std::pair<long long, UserData::Shared>;
+    using Entry = std::pair<fw::Timestamp, std::shared_ptr<UserData>>;
     using EntryMap = std::map<int, std::vector<Entry>>;
 
-    UserEntriesMessage(const EntryMap& iEntryMap, unsigned iFrameId, long long iTimestamp);
+    UserEntriesMessage(const EntryMap& iEntryMap, uint32_t iFrameId, fw::Timestamp iTimestamp);
 
     virtual ~UserEntriesMessage() = default;
 
@@ -43,11 +43,10 @@ namespace face
     EntryMap mEntryMap;
   };
 
-  inline std::ostream& operator<< (std::ostream& ioStream, const UserEntriesMessage& iMessage)
+  inline std::ostream& operator<<(std::ostream& ioStream, const UserEntriesMessage& iMessage)
   {
     const fw::Message& base(iMessage);
-    ioStream << base << ", [Derived] Number of users: " << iMessage.GetSize() <<
-      ", numer of entries: " << iMessage.GetNumberOfEntries();
+    ioStream << base << ", [Derived] Number of users: " << iMessage.GetSize() << ", numer of entries: " << iMessage.GetNumberOfEntries();
     return ioStream;
   }
 }

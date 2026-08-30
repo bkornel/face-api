@@ -1,56 +1,68 @@
 #pragma once
 
-#include "Common/ShapeUtil.h"
+#include "Framework/TimeExtensions.h"
+#include "User/TrackedFace.h"
 #include "User/UserData.hpp"
 
-#include <clm/CLM.h>
 #include <opencv2/core/core.hpp>
-#include <map>
 
 namespace face
 {
-  class UserDispatcher;
-
-  class User :
-    public UserData
+  /// @brief One user of one finished frame: the tracker's view of the face and the results
+  /// computed for it, composed into a single record. Built once by the user manager and
+  /// read-only afterwards - nothing in the pipeline writes to a User.
+  class User : public UserData
   {
   public:
-    FW_DEFINE_SMART_POINTERS(User);
 
-    enum class Status
+    using Status = TrackStatus;
+
+    User(const TrackedFace& iTrack, const UserData& iData) :
+      UserData(iData),
+      mTrack(iTrack)
     {
-      Detected = 0,
-      ToBeTracked,
-      Tracked,
-      Inactive
-    };
+    }
 
-    User(const cv::Rect& iFaceRect, int iUserId, long long iTimestamp);
+    User(const User& iOther) = default;
 
     virtual ~User() = default;
 
-    bool AcceptDispatcher(UserDispatcher& ioDispatcher);
+    inline bool IsActive() const
+    {
+      return mTrack.status != TrackStatus::Inactive;
+    }
 
-    inline bool IsActive() const { return mStatus != Status::Inactive; }
-    inline bool IsDetected() const { return mStatus == Status::Detected; }
+    inline bool IsDetected() const
+    {
+      return mTrack.status == TrackStatus::Detected;
+    }
 
-    inline int GetUserId() const { return mUserId; }
-    inline long long GetCreationTs() const { return mCreationTs; }
-    inline long long GetLastUpdateTs() const { return mLastUpdateTs; }
-    inline long long GetLastDetectionTs() const { return mLastDetectionTs; }
+    inline int GetUserId() const
+    {
+      return mTrack.trackId;
+    }
 
-    inline void SetLastUpdateTs(long long iTimestamp) { mLastUpdateTs = iTimestamp; }
+    inline TrackStatus GetStatus() const
+    {
+      return mTrack.status;
+    }
 
-    void SetDetectionData(const cv::Rect& iFaceRect, long long iTimestamp);
-    void SetStatus(Status iStatus);
+    inline fw::Timestamp GetCreationTs() const
+    {
+      return mTrack.creationTs;
+    }
+
+    inline fw::Timestamp GetLastUpdateTs() const
+    {
+      return mTrack.lastUpdateTs;
+    }
+
+    inline fw::Timestamp GetLastDetectionTs() const
+    {
+      return mTrack.lastDetectionTs;
+    }
 
   private:
-    const int mUserId = 0;
-    const long long mCreationTs = 0;
-
-    long long mLastUpdateTs = 0;
-    long long mLastDetectionTs = 0;
-
-    Status mStatus = Status::Detected;
+    TrackedFace mTrack;
   };
 }

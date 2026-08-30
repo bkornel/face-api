@@ -1,279 +1,83 @@
 #include "Modules/UserManager/UserManager.h"
-#include "Messages/CommandMessage.h"
 
-#include "Framework/Profiler.h"
-#include "Framework/UtilOCV.h"
-#include "Framework/UtilString.h"
-
-#include <easyloggingpp/easyloggingpp.h>
-#include <iomanip>
+#include <map>
 
 namespace face
 {
-  fw::ErrorCode UserManager::InitializeInternal(const cv::FileNode& iSettings)
+  namespace
   {
-    if (!iSettings.empty())
+    // Takes a pointer on purpose: a reference and a ?: fallback would materialize a
+    // temporary copy, and the map would point into it after it is gone
+    template <typename DescriptorT>
+    std::map<int, const DescriptorT*> ById(const std::vector<DescriptorT>* iDescriptors)
     {
-      std::string value;
+      std::map<int, const DescriptorT*> byId;
 
-      if (fw::ocv::get_value(iSettings, "maxUsers", value))
-        mMaxUsers = fw::str::convert_to_number<int>(value);
-
-      if (fw::ocv::get_value(iSettings, "userOverlap", value))
-        mUserOverlap = fw::str::convert_to_number<float>(value);
-
-      if (fw::ocv::get_value(iSettings, "userAwaySec", value))
-        mUserAwaySec = fw::str::convert_to_number<float>(value);
-
-      if (fw::ocv::get_value(iSettings, "templateScale", value))
+      if (iDescriptors)
       {
-        mTemplateScale = fw::str::convert_to_number<float>(value);
-        mTemplateScale = (std::max)((std::min)(mTemplateScale, 1.0F), 0.2F);
-        mTemplateScaleInv = (1.0F / mTemplateScale);
-      }
-    }
-
-    mRemoveSW.Start();
-
-    return fw::ErrorCode::OK;
-  }
-
-  void UserManager::Clear()
-  {
-    for (const auto& user : mUsers)
-      user->SetStatus(User::Status::Inactive);
-
-    RemoveInactiveUsers(true);
-    mRemoveSW.Reset();
-
-    mMinFaceSize = mMaxFaceSize = { 0, 0 };
-  }
-
-  ActiveUsersMessage::Shared UserManager::Main(ImageMessage::Shared iImage, RoiMessage::Shared iDetections)
-  {
-    if (!iImage || iImage->IsEmpty()) return nullptr;
-
-    FACE_PROFILER(User_Manager);
-
-    const unsigned frameId = iImage->GetFrameId();
-    mTimestamp = iImage->GetTimestamp();
-
-    // Active users to inactive and set is-detected to false
-    PreprocessUsers();
-
-    // Merge users and detections and create new users
-    ProcessDetections(iDetections);
-
-    // Track users by their faces
-    TrackUsers(iImage);
-
-    // Remove old user history entries and inactive users
-    PostprocessUsers();
-
-    if (GetMaxUsers() != GetActiveUserSize())
-    {
-      sCommand.Raise(std::make_shared<CommandMessage>(CommandMessage::Type::RunFaceDetection, frameId, mTimestamp));
-    }
-
-    return GetActiveUserSize() > 0 ? std::make_shared<ActiveUsersMessage>(mUsers, frameId, mTimestamp) : nullptr;
-  }
-
-  void UserManager::PreprocessUsers()
-  {
-    for (const auto& user : mUsers)
-    {
-      const auto& facerect = user->GetFaceRect();
-
-      const bool inactivate =
-        // Must be active
-        user->IsActive() && (
-          // Minimal resolution
-        (!mMinFaceSize.empty() && ((facerect.width < mMinFaceSize.width) || (facerect.height < mMinFaceSize.height))) ||
-          // Maximal resolution
-          (!mMaxFaceSize.empty() && ((facerect.width > mMaxFaceSize.width) || (facerect.height > mMaxFaceSize.height))) ||
-          // Detected a long time ago
-          ((mTimestamp - user->GetLastDetectionTs()) > mUserAwaySec * 1000.0F)
-          );
-
-      if (inactivate)
-        user->SetStatus(User::Status::Inactive);
-
-      // Set the status to-be-tracked after detection and before tracking
-      if (user->IsDetected())
-        user->SetStatus(User::Status::ToBeTracked);
-    }
-  }
-
-  void UserManager::ProcessDetections(RoiMessage::Shared iDetections)
-  {
-    if (!iDetections || iDetections->IsEmpty()) return;
-
-    static int sLastUserID = 0;
-
-    std::vector<cv::Rect> faceROIs = iDetections->GetROIs();
-    mMinFaceSize = iDetections->GetMinRoiSize();
-    mMaxFaceSize = iDetections->GetMaxRoiSize();
-
-    // Checking the overlap between detector's rectangles and users
-    MergeDetectionsAndUsers(faceROIs);
-
-    // Add new users
-    for (const auto& r : faceROIs)
-    {
-      if (GetActiveUserSize() >= mMaxUsers) break;
-
-      mUsers.emplace_back(std::make_shared<User>(r, sLastUserID, mTimestamp));
-      LOG(INFO) << "New user has been recognized, Welcome User(" << sLastUserID << ")!";
-      sLastUserID++;
-    }
-  }
-
-  void UserManager::TrackUsers(ImageMessage::Shared iImage)
-  {
-    FACE_PROFILER(Track_Users);
-
-    for (const auto& user : mUsers)
-    {
-      if (!user->IsActive())
-        continue;
-
-      if (!user->IsDetected())
-      {
-        cv::Rect newFaceRect;
-        if (!MatchTemplate(iImage, user, newFaceRect))
-        {
-          user->SetStatus(User::Status::Inactive);
-          continue;
-        }
-
-        user->SetFaceRect(newFaceRect);
+        for (const auto& descriptor : *iDescriptors)
+          byId.emplace(descriptor.trackId, &descriptor);
       }
 
-      const cv::Mat& frameGray = iImage->GetFrameGray();
-      user->SetFaceTemplate(frameGray(user->GetFaceRect()));
-      user->SetLastUpdateTs(iImage->GetTimestamp());
+      return byId;
     }
   }
 
-  void UserManager::PostprocessUsers()
+  std::shared_ptr<UserSnapshotMessage> UserManager::Main(std::shared_ptr<FaceTrackMessage> iTracks,
+                                                         std::shared_ptr<ShapeMessage> iShapes,
+                                                         std::shared_ptr<PoseMessage> iPoses,
+                                                         std::shared_ptr<NormShapeMessage> iNormShapes)
   {
-    if (mRemoveSW.GetElapsedTimeSec(false) > mUserAwaySec)
-    {
-      RemoveInactiveUsers();
-      mRemoveSW.Reset();
-    }
-  }
+    DrainCommands();
 
-  void UserManager::MergeDetectionsAndUsers(std::vector<cv::Rect>& ioFaceROIs)
-  {
-    for (auto& user : mUsers)
-    {
-      const cv::Rect& userFR = user->GetFaceRect();
+    if (!iTracks || iTracks->IsEmpty()) return nullptr;
 
-      for (auto fr = ioFaceROIs.begin(); fr != ioFaceROIs.end();)
+    const auto shapeById = ById(iShapes ? &iShapes->GetShapes() : nullptr);
+    const auto poseById = ById(iPoses ? &iPoses->GetPoses() : nullptr);
+    const auto normById = ById(iNormShapes ? &iNormShapes->GetShapes() : nullptr);
+
+    UserSnapshotMessage::UserVector users;
+    users.reserve(iTracks->GetSize());
+
+    for (const auto& track : iTracks->GetTracks())
+    {
+      TrackedFace face = track;
+      UserData data;
+
+      data.SetFaceRect(track.faceRect);
+
+      if (auto it = shapeById.find(track.trackId); it != shapeById.end())
       {
-        if (fw::ocv::overlap_ratio(userFR, *fr) > mUserOverlap)
-        {
-          // An active user is detected
-          if (user->IsActive())
-          {
-            // This also sets the status to detected
-            user->SetDetectionData(*fr, mTimestamp);
-          }
-          // An inactive user is detected
-          else
-          {
-            if (GetActiveUserSize() >= mMaxUsers) continue;
+        data.SetShape2D(it->second->shape2D);
 
-            // This also sets the status to detected
-            user->SetDetectionData(*fr, mTimestamp);
-          }
+        // A pure function of the shape this record already holds, so it is read here rather
+        // than by a module of its own: there is nothing to schedule and nothing to share
+        data.SetExpression(measure_expression(it->second->shape2D));
 
-          fr = ioFaceROIs.erase(fr);
-        }
-        else
-        {
-          fr++;
-        }
+        // The shape's bounding box frames the face tighter than the tracker's rectangle
+        data.SetFaceRect(it->second->faceRect);
+        face.faceRect = it->second->faceRect;
       }
-    }
-  }
 
-  bool UserManager::MatchTemplate(ImageMessage::Shared iImage, User::Shared ioUser, cv::Rect& oFaceRect)
-  {
-    CV_DbgAssert(mTemplateScale > 0.0F && mTemplateScale <= 1.0F);
-
-    oFaceRect = {};
-
-    const cv::Mat& frame = iImage->GetResizedGray(mTemplateScale);
-    cv::Mat faceTpl = ioUser->GetFaceTemplate();
-
-    if (std::abs(mTemplateScale - 1.0F) > std::numeric_limits<float>::epsilon())
-      cv::resize(faceTpl, faceTpl, {}, mTemplateScale, mTemplateScale);
-
-    if ((faceTpl.cols > frame.cols) || (faceTpl.rows > frame.rows))
-      return false;
-
-    cv::Mat result(frame.cols - faceTpl.cols + 1, frame.rows - faceTpl.rows + 1, CV_32FC1);
-    cv::matchTemplate(frame, faceTpl, result, cv::TM_CCOEFF_NORMED);
-
-    double maxVal = 0.0;
-    cv::Point maxLoc;
-    cv::minMaxLoc(result, nullptr, &maxVal, nullptr, &maxLoc);
-
-    oFaceRect = {
-      cvRound(maxLoc.x * mTemplateScaleInv),
-      cvRound(maxLoc.y * mTemplateScaleInv),
-      cvRound(faceTpl.cols * mTemplateScaleInv),
-      cvRound(faceTpl.rows * mTemplateScaleInv)
-    };
-
-    const cv::Rect screenRect(0, 0, iImage->GetWidth(), iImage->GetHeight());
-    oFaceRect = oFaceRect & screenRect;
-
-    return oFaceRect.area() > 0;
-  }
-
-  void UserManager::RemoveInactiveUsers(bool iForceToDelete)
-  {
-    if (mUsers.empty()) return;
-
-    std::vector<int> userIDs;
-    for (const auto& user : mUsers)
-    {
-      if (!user->IsActive())
+      if (auto it = poseById.find(track.trackId); it != poseById.end())
       {
-        const long long diff = std::llabs(fw::get_current_time() - user->GetLastUpdateTs());
-        if (iForceToDelete || (diff > mUserAwaySec * 1000.0F))
-          userIDs.emplace_back(user->GetUserId());
+        const PoseDescriptor& pose = *it->second;
+
+        data.SetPose(pose.rpy, pose.position3D);
+        data.SetCameraMatrix(pose.cameraMatrix);
+        data.SetExtrinsics(pose.extrinsics, pose.rvec, pose.tvec);
+        data.SetShape3D(pose.shape3D);
+        data.SetFaceBox(pose.faceBox);
       }
-    }
 
-    for (auto& uid : userIDs)
-    {
-      auto itIU = std::find_if(mUsers.begin(), mUsers.end(), [&](const User::Shared& obj)
+      if (auto it = normById.find(track.trackId); it != normById.end())
       {
-        return obj->GetUserId() == uid;
-      });
-
-      if (itIU != mUsers.end())
-      {
-        LOG(INFO) << "User(" << uid << ") has been deleted completely.";
-        mUsers.erase(itIU);
+        data.SetNormShapes(it->second->normShape2D, it->second->normShape3D);
       }
-    }
-  }
 
-  std::size_t UserManager::GetActiveUserSize() const
-  {
-    std::size_t size = 0U;
-
-    for (const auto& user : mUsers)
-    {
-      if (user->IsActive())
-        size++;
+      users.emplace_back(std::make_shared<const User>(face, data));
     }
 
-    return size;
+    return std::make_shared<UserSnapshotMessage>(std::move(users), iTracks->GetFrameId(), iTracks->GetTimestamp());
   }
 }

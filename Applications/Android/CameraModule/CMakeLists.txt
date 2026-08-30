@@ -7,13 +7,17 @@ cmake_minimum_required(VERSION 3.6.0)
 set(TARGET_NAME FaceNative)
 set(TARGET_NAME_FACE_API FaceApi)
 
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 message("Building native shared library")
 message("- Output directory of ${TARGET_NAME}: '${CMAKE_BINARY_DIR}'")
 
 # Setting some paths to 3rdparties and to the application logic
 set(DEPENDECIES_DIR "${CMAKE_SOURCE_DIR}/../../../../3rdparty")
 set(FACE_API_DIR    "${CMAKE_SOURCE_DIR}/../../../${TARGET_NAME_FACE_API}")
-set(OpenCV_DIR      "${DEPENDECIES_DIR}/opencv-4.1.1/android/src/sdk/native/jni")
+set(OPENCV_VERSION  "opencv-4.14.0" CACHE STRING "OpenCV directory name under 3rdparty")
+set(OpenCV_DIR      "${DEPENDECIES_DIR}/${OPENCV_VERSION}/android/native/jni")
 
 # Finding 3rparty libraries
 find_package(OpenCV REQUIRED)

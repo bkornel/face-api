@@ -1,60 +1,74 @@
 #pragma once
 
-#include "Framework/Module.h"
+#include "Framework/ErrorCode.h"
+#include "Framework/Graph/Module.h"
 #include "Framework/Stopwatch.h"
-#include "Framework/Port.hpp"
+#include "Framework/Graph/Port.hpp"
 #include "Messages/ImageMessage.h"
 #include "Messages/RoiMessage.h"
 
+#include <memory>
 #include <opencv2/core/core.hpp>
-#include <opencv2/objdetect/objdetect.hpp>
+#include <opencv2/objdetect/face.hpp>
 
 #include <string>
 
 namespace face
 {
-  class FaceDetection :
-    public fw::Module,
-    public fw::Port<RoiMessage::Shared(ImageMessage::Shared)>
+  /// @brief Finds the faces on the frame with YuNet, a small convolutional detector that
+  /// keeps working when the head is turned well away from the camera, where the cascade it
+  /// replaced used to lose the face entirely.
+  ///
+  /// It does not run on every frame: the tracker follows the faces in between and asks for a
+  /// detection when it wants one, which is what the runFaceDetection signal is for.
+  class FaceDetection : public fw::Module,
+                        public fw::Port<std::shared_ptr<RoiMessage>(std::shared_ptr<ImageMessage>)>
   {
   public:
-    FW_DEFINE_SMART_POINTERS(FaceDetection);
 
     FaceDetection() = default;
 
     virtual ~FaceDetection() = default;
 
-    RoiMessage::Shared Main(ImageMessage::Shared iImage) override;
+    /// @brief Runs the detector at its next opportunity. Wired to the pipeline's signals by
+    /// whoever builds the graph; must arrive as a posted command, like all module state.
+    void ForceDetection();
+
+    /// @brief The size range and the detector both follow the frame. Same contract as
+    /// ForceDetection(): wired at creation, applied on the graph thread.
+    void OnImageSizeChanged(const cv::Size& iSize);
+
+    std::shared_ptr<RoiMessage> Main(std::shared_ptr<ImageMessage> iImage) override;
 
   protected:
     const static float sForceDetectionSec;
 
     fw::ErrorCode InitializeInternal(const cv::FileNode& iSettings) override;
 
-    void OnCommand(fw::Message::Shared iMessage) override;
-
-    void RemoveMultipleDetections(std::vector<cv::Rect>& ioDetections);
-
     bool RunDetectection() const;
 
-    cv::CascadeClassifier mCascadeClassifier;   ///< The OpenCV cascade classifier
+    cv::Ptr<cv::FaceDetectorYN> mDetector;
     fw::Stopwatch mDetectionSW;
 
-    // General parameters
-    std::string mCascadeFile = "haarcascade_frontalface_alt2.xml";
+    // General parameters. The model file is relative to the working directory.
+    std::string mModelFile = "facedetector/face_detection_yunet_2023mar.onnx";
     float mImageScaleFactor = 1.0F;
     float mImageScaleFactorInv = 1.0F;
-    float mDetectionOverlap = 0.2F;
     float mDetectionSec = 10.0F;
     bool mForceRun = false;
 
-    // Parameter of detectMultiScale(...)
+    // Parameters of the detector
+    float mScoreThreshold = 0.7F;
+    float mNmsThreshold = 0.3F;
+    int mTopK = 50;
+
+    // The size range a face has to fall into, as a fraction of the shorter side
     cv::Size mMinSize;
     cv::Size mMaxSize;
-    float mScaleFactor = 1.1F;
-    int mMinNeighbors = 3;
-    float mMinSizeFactor = 0.05f;
+    float mMinSizeFactor = 0.05F;
     float mMaxSizeFactor = 1.0F;
-    int mFlags = 0;
+
+    // What the detector was last configured for; it needs the exact frame size
+    cv::Size mDetectorSize;
   };
 }

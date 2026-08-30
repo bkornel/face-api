@@ -3,78 +3,59 @@
     "general": {
       "output": {
         "verbose": "FALSE",
-        "video": "FALSE",
-        "videoFourCC": "XVID",
-        "videoFPS": "25"
+        "video": "FALSE"
       },
       "directories": {
-        "faceDetector": "facedetector/",
-        "shapeModel": "shapemodel/",
         "output": "output/"
       }
     },
     "modules": {
-      "firstModule": {
-        "port": []
-      },
       "imageQueue": {
-        "port": [ "firstModule:1" ],
+        "port": [],
         "bound": "10",
-        "samplingFPS": "30.0",
-        "thresholdMS": "100"
+        "samplingFPS": "60.0",
+        "thresholdMS": "0",
+        "dropOldest": "FALSE"
       },
       "faceDetection": {
         "port": [ "imageQueue:1" ],
-        "detectionSec": "10.0",
-        "detectionOverlap": "0.2",
-        "detectMultiScale": {
-          "flags": "0",
-          "maxSize": "1.0",
-          "minNeighbors": "3",
-          "minSize": "0.05",
-          "scaleFactor": "1.1"
-        },
-        "fileName": "haarcascade_frontalface_alt2.xml",
-        "imageScale": "1.0"
+        "detectionSec": "1.0",
+        "fileName": "facedetector/face_detection_yunet_2023mar.onnx",
+        "imageScale": "1.0",
+        "maxSize": "1.0",
+        "minSize": "0.05",
+        "nmsThreshold": "0.3",
+        "scoreThreshold": "0.7",
+        "topK": "50"
       },
-      "userManager": {
+      "faceTracker": {
         "port": [ "imageQueue:1", "faceDetection:2" ],
-        "maxUsers": "1",
-        "userAwaySec": "15.0",
-        "userOverlap": "0.2",
+        "maxTracks": "2",
+        "trackAwaySec": "15.0",
+        "trackOverlap": "0.2",
         "templateScale": "0.3"
       },
-      "userProcessor": {
-        "port": [ "imageQueue:1", "userManager:2" ],
-        "headPose": {
-          "estimateReprojection": "FALSE",
-          "faceBoxOffset": "5.0"
-        },
-        "shapeModel": {
-          "clamp": "3.0",
-          "conFile": "face.con",
-          "failureCheck": "FALSE",
-          "fTol": "0.01",
-          "nIter": "5",
-          "trackerFile": "face.tracker",
-          "triFile": "face.tri",
-          "winDetection": "11,9,7",
-          "winTracking": "7"
-        },
-        "shapeNorm": {
-          "maxCount": "1000",
-          "epsilon": "1e-6"
-        }
+      "shapeModel": {
+        "port": [ "imageQueue:1", "faceTracker:2" ],
+        "modelDir": "shapemodel/3ddfa/",
+        "smoothing": "TRUE",
+        "parallelUsers": "TRUE"
       },
-      "userHistory": {
-        "port": [ "userProcessor:1" ],
-        "removeFreqMs": "10000"
+      "headPose": {
+        "port": [ "shapeModel:1" ],
+        "poseFromShapeModel": "TRUE",
+        "estimateReprojection": "FALSE",
+        "faceBoxOffset": "5.0",
+        "parallelUsers": "TRUE"
       },
-      "visualizer": {
-        "port": [ "imageQueue:1", "userManager:2" ]
+      "shapeNorm": {
+        "port": [ "shapeModel:1", "headPose:2" ],
+        "maxCount": "1000",
+        "epsilon": "1e-6",
+        "parallelUsers": "TRUE"
       },
-      "lastModule": {
-        "port": [ "visualizer:1" ]
+      "userManager": {
+        "port": [ "faceTracker:1", "shapeModel:2", "headPose:3", "shapeNorm:4" ]
       }
     }
   }

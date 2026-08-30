@@ -1,9 +1,11 @@
 #pragma once
 
-#include "Framework/Util.h"
+#include "Framework/ErrorCode.h"
 
-#include <memory>
-#include <future>
+#include <atomic>
+#include <chrono>
+#include <cstdint>
+#include <thread>
 
 namespace fw
 {
@@ -22,26 +24,24 @@ namespace fw
 
     ErrorCode StopThread();
 
-    void ThreadSleep(long long iMilliseconds);
+    void ThreadSleep(int64_t iMilliseconds);
 
     bool IsRunning() const;
 
-    inline bool GetThreadStopSignal() const
-    {
-      return mStopThread;
-    }
+    bool GetThreadStopSignal() const;
 
-    inline void StopSignalThread()
-    {
-      mStopThread = true;
-    }
+    void StopSignalThread();
 
   protected:
     virtual ErrorCode Run();
 
   private:
-    std::future<ErrorCode> mThread;
-    volatile bool mStopThread = false;
-    volatile bool mFirstRun = true;
+    // std::jthread carries the stop token and joins in its own destructor, which is what the
+    // stop flag plus the future and its wait() were doing by hand.
+    std::jthread mThread;
+
+    // jthread cannot say whether the thread function has returned, only whether a thread
+    // object is attached, and Run() may finish on its own without a stop being requested
+    std::atomic<bool> mRunning{ false };
   };
 }

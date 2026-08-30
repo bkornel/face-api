@@ -1,67 +1,37 @@
 #pragma once
 
-#include "Framework/Module.h"
-#include "Framework/Port.hpp"
-#include "Framework/Stopwatch.h"
+#include "Framework/Graph/Module.h"
+#include "Framework/Graph/Port.hpp"
 
-#include "Messages/ImageMessage.h"
-#include "Messages/RoiMessage.h"
-#include "Messages/ActiveUsersMessage.h"
+#include "Messages/FaceTrackMessage.h"
+#include "Messages/NormShapeMessage.h"
+#include "Messages/PoseMessage.h"
+#include "Messages/ShapeMessage.h"
+#include "Messages/UserSnapshotMessage.h"
 
-#include "User/User.h"
+#include <memory>
 
 namespace face
 {
-  class UserManager :
-    public fw::Module,
-    public fw::Port<ActiveUsersMessage::Shared(ImageMessage::Shared, RoiMessage::Shared)>
+  /// @brief Composes the final users: one record per track, joined by track id with whatever
+  /// the estimator modules produced for it. Only the tracks are required - the other inputs
+  /// are optional ports, so a graph that skips the pose or the normalization simply leaves
+  /// those fields empty. It is the only place a User is ever built.
+  class UserManager : public fw::Module,
+                      public fw::Port<std::shared_ptr<UserSnapshotMessage>(std::shared_ptr<FaceTrackMessage>,
+                                                                           std::shared_ptr<ShapeMessage>,
+                                                                           std::shared_ptr<PoseMessage>,
+                                                                           std::shared_ptr<NormShapeMessage>)>
   {
   public:
-    FW_DEFINE_SMART_POINTERS(UserManager);
 
     UserManager() = default;
 
     virtual ~UserManager() = default;
 
-    ActiveUsersMessage::Shared Main(ImageMessage::Shared iImage, RoiMessage::Shared iDetections) override;
-
-    void Clear() override;
-
-    std::size_t GetActiveUserSize() const;
-
-    inline int GetMaxUsers() const
-    {
-      return mMaxUsers;
-    }
-
-  private:
-    fw::ErrorCode InitializeInternal(const cv::FileNode& iSettings) override;
-
-    void PreprocessUsers();
-
-    void ProcessDetections(RoiMessage::Shared iDetections);
-
-    void TrackUsers(ImageMessage::Shared iImage);
-
-    void PostprocessUsers();
-
-    void MergeDetectionsAndUsers(std::vector<cv::Rect>& ioFaceROIs);
-
-    bool MatchTemplate(ImageMessage::Shared iImage, User::Shared ioUser, cv::Rect& oFaceRect);
-
-    void RemoveInactiveUsers(bool forceToDelete = false);
-
-    std::vector<User::Shared> mUsers;   ///< The vector storing all users
-    fw::Stopwatch mRemoveSW;
-    long long mTimestamp = 0;
-
-    cv::Size mMinFaceSize;
-    cv::Size mMaxFaceSize;
-
-    int mMaxUsers = 1;
-    float mUserOverlap = 0.2F;
-    float mUserAwaySec = 15.0F;
-    float mTemplateScale = 1.0f;
-    float mTemplateScaleInv = 1.0f;
+    std::shared_ptr<UserSnapshotMessage> Main(std::shared_ptr<FaceTrackMessage> iTracks,
+                                              std::shared_ptr<ShapeMessage> iShapes,
+                                              std::shared_ptr<PoseMessage> iPoses,
+                                              std::shared_ptr<NormShapeMessage> iNormShapes) override;
   };
 }

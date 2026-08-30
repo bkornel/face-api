@@ -1,0 +1,127 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="FaceStudio.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid x:Name="RootGrid">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="48" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- The title bar is the application's own, so the source and the transport live in
+             it rather than in a toolbar underneath. The middle column is the drag region;
+             everything either side of it stays clickable. -->
+        <Grid x:Name="TitleBarGrid" Grid.Row="0" Padding="16,0,140,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                <Border Width="18" Height="18" CornerRadius="5"
+                        Background="{ThemeResource AccentBrush}" />
+                <TextBlock Text="Face Studio"
+                           FontFamily="{StaticResource TextFontFamily}"
+                           FontSize="13" FontWeight="SemiBold"
+                           Foreground="{ThemeResource TextPrimaryBrush}"
+                           VerticalAlignment="Center" />
+            </StackPanel>
+
+            <Grid x:Name="DragRegion" Grid.Column="1" Background="Transparent" />
+
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                <Border Style="{StaticResource PillStyle}">
+                    <StackPanel Orientation="Horizontal" Spacing="7">
+                        <Ellipse x:Name="RunIndicator" Width="7" Height="7"
+                                 Fill="{ThemeResource TextTertiaryBrush}" VerticalAlignment="Center" />
+                        <TextBlock x:Name="SourceText" Text="No source" Style="{StaticResource PillTextStyle}" />
+                    </StackPanel>
+                </Border>
+
+                <Button x:Name="PauseButton" Click="OnPauseClicked"
+                        Background="Transparent" BorderThickness="0" Padding="8,6"
+                        ToolTipService.ToolTip="Pause or resume (Space)">
+                    <FontIcon x:Name="PauseIcon" FontSize="13" Glyph="&#xE769;" />
+                </Button>
+
+                <Button Click="OnSnapshotClicked"
+                        Background="Transparent" BorderThickness="0" Padding="8,6"
+                        ToolTipService.ToolTip="Save the view as a picture (Ctrl+S)">
+                    <FontIcon FontSize="13" Glyph="&#xE722;" />
+                </Button>
+
+                <Button x:Name="RecordButton" Click="OnRecordClicked"
+                        Background="Transparent" BorderThickness="0" Padding="8,6"
+                        ToolTipService.ToolTip="Record the view to a video file">
+                    <FontIcon x:Name="RecordIcon" FontSize="13" Glyph="&#xE7C8;" />
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <NavigationView x:Name="Navigation" Grid.Row="1"
+                        PaneDisplayMode="Left"
+                        OpenPaneLength="196"
+                        IsBackButtonVisible="Collapsed"
+                        IsPaneToggleButtonVisible="False"
+                        IsSettingsVisible="False"
+                        SelectionChanged="OnNavigationSelectionChanged">
+            <NavigationView.MenuItems>
+                <NavigationViewItem Content="Live" Tag="live" IsSelected="True">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE714;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Statistics" Tag="statistics">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE9D2;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Pipeline" Tag="settings">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE713;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+            </NavigationView.MenuItems>
+
+            <Frame x:Name="ContentFrame" />
+        </NavigationView>
+
+        <!-- One line at the bottom for whatever the engine last had to say. It is not an
+             error banner: most of what shows up here is confirmation. -->
+        <Border x:Name="StatusBar" Grid.Row="2"
+                Visibility="Collapsed"
+                Background="{ThemeResource CardBackgroundBrush}"
+                BorderBrush="{ThemeResource SeparatorBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="20,10,20,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <FontIcon x:Name="StatusIcon" Grid.Column="0" FontSize="13" Glyph="&#xE946;"
+                          Foreground="{ThemeResource TextSecondaryBrush}"
+                          VerticalAlignment="Center" Margin="0,0,10,0" />
+
+                <TextBlock x:Name="StatusText" Grid.Column="1"
+                           Style="{StaticResource BodyStyle}"
+                           TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"
+                           VerticalAlignment="Center" />
+
+                <Button Grid.Column="2" Click="OnDismissStatusClicked"
+                        Background="Transparent" BorderThickness="0" Padding="6,2">
+                    <FontIcon FontSize="11" Glyph="&#xE711;" />
+                </Button>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

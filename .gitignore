@@ -4,6 +4,10 @@ Applications/Android/obj/
 Applications/Windows/Bin/Debug/
 Applications/Windows/Bin/Release/
 Applications/Windows/Bin/x64/
+
+# Intermediates of the .NET application; its binaries go to Bin like everything else
+Applications/Windows/FaceStudio/obj/
+Applications/Windows/FaceStudio/bin/
 *.db
 *.db-shm
 *.db-wal
@@ -14,3 +18,9 @@ Applications/Windows/Bin/x64/
 *.opendb
 *.avi
 .vs
+
+# The test clips are tracked, output videos written by the app are not
+!Testing/media/*.avi
+
+# Log files written next to wherever the app runs
+myeasylog.log

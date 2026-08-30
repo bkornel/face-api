@@ -1,28 +1,29 @@
 #pragma once
 
-#include "Framework/Module.h"
-#include "Framework/Port.hpp"
+#include "Framework/ErrorCode.h"
+#include "Framework/Graph/Module.h"
+#include "Framework/Graph/Port.hpp"
 #include "Framework/Stopwatch.h"
 #include "User/User.h"
-#include "Messages/ActiveUsersMessage.h"
+#include "Messages/UserSnapshotMessage.h"
 #include "Messages/UserEntriesMessage.h"
 
+#include <cstdint>
 #include <map>
+#include <memory>
 
 namespace face
 {
-  class UserHistory :
-    public fw::Module,
-    public fw::Port<UserEntriesMessage::Shared(ActiveUsersMessage::Shared)>
+  class UserHistory : public fw::Module,
+                      public fw::Port<std::shared_ptr<UserEntriesMessage>(std::shared_ptr<UserSnapshotMessage>)>
   {
   public:
-    FW_DEFINE_SMART_POINTERS(UserHistory);
 
     UserHistory() = default;
 
     virtual ~UserHistory() = default;
 
-    UserEntriesMessage::Shared Main(ActiveUsersMessage::Shared iActiveUsers) override;
+    std::shared_ptr<UserEntriesMessage> Main(std::shared_ptr<UserSnapshotMessage> iActiveUsers) override;
 
     void Clear() override;
 
@@ -32,10 +33,10 @@ namespace face
 
     fw::ErrorCode InitializeInternal(const cv::FileNode& iSettings) override;
 
-    void RemoveOldEntries(long long iTimestamp);
+    void RemoveOldEntries(fw::Timestamp iTimestamp);
 
     EntryMap mEntryMap;
     fw::Stopwatch mRemoveSW;
-    long long mRemoveFreqMs = 10000LL;
+    int64_t mRemoveFreqMs = 10000LL;
   };
 }
